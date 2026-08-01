@@ -28,6 +28,13 @@ const GLOBAL_POINTER = {
   y: 0,
 };
 
+const POINTER_TARGET = {
+  x: 0,
+  y: 0,
+};
+
+let PAGE_VISIBLE = true;
+
 type PaletteColor = readonly [
   number,
   number,
@@ -115,12 +122,12 @@ function GlobalPointerTracker() {
     function handlePointerMove(
       event: PointerEvent,
     ) {
-      GLOBAL_POINTER.x =
+      POINTER_TARGET.x =
         (event.clientX / window.innerWidth) *
           2 -
         1;
 
-      GLOBAL_POINTER.y =
+      POINTER_TARGET.y =
         -(
           (event.clientY /
             window.innerHeight) *
@@ -130,8 +137,14 @@ function GlobalPointerTracker() {
     }
 
     function handlePointerLeave() {
-      GLOBAL_POINTER.x = 0;
-      GLOBAL_POINTER.y = 0;
+      POINTER_TARGET.x = 0;
+      POINTER_TARGET.y = 0;
+    }
+
+    function handleVisibilityChange() {
+      PAGE_VISIBLE =
+        document.visibilityState ===
+        "visible";
     }
 
     window.addEventListener(
@@ -147,6 +160,11 @@ function GlobalPointerTracker() {
       handlePointerLeave,
     );
 
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange,
+    );
+
     return () => {
       window.removeEventListener(
         "pointermove",
@@ -157,8 +175,35 @@ function GlobalPointerTracker() {
         "mouseleave",
         handlePointerLeave,
       );
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange,
+      );
     };
   }, []);
+
+  useFrame((_, delta) => {
+    if (!PAGE_VISIBLE) {
+      return;
+    }
+
+    GLOBAL_POINTER.x =
+      THREE.MathUtils.damp(
+        GLOBAL_POINTER.x,
+        POINTER_TARGET.x,
+        11,
+        delta,
+      );
+
+    GLOBAL_POINTER.y =
+      THREE.MathUtils.damp(
+        GLOBAL_POINTER.y,
+        POINTER_TARGET.y,
+        11,
+        delta,
+      );
+  });
 
   return null;
 }
@@ -470,21 +515,50 @@ function createInitialColors(
   return colors;
 }
 
+
+function createParticleProgress(
+  count: number,
+) {
+  const progress =
+    new Float32Array(count);
+
+  const denominator =
+    Math.max(count - 1, 1);
+
+  for (
+    let index = 0;
+    index < count;
+    index += 1
+  ) {
+    progress[index] =
+      index / denominator;
+  }
+
+  return progress;
+}
+
+function paletteVector(
+  paletteIndex: number,
+  colorIndex: number,
+) {
+  const color =
+    SHAPE_PALETTES[paletteIndex][
+      colorIndex
+    ];
+
+  return new THREE.Vector3(
+    color[0],
+    color[1],
+    color[2],
+  );
+}
+
 function ParticleUniverse() {
   const pointsRef =
     useRef<THREE.Points | null>(
       null,
     );
 
-  /*
-    Значения прогресса:
-
-    0 — Cell
-    1 — DNA
-    2 — Wave
-    3 — Vortex
-    4 — Galaxy
-  */
   const smoothProgressRef =
     useRef(0);
 
@@ -493,19 +567,15 @@ function ParticleUniverse() {
       createCellShape(
         PARTICLE_COUNT,
       ),
-
       createDnaShape(
         PARTICLE_COUNT,
       ),
-
       createWaveShape(
         PARTICLE_COUNT,
       ),
-
       createVortexShape(
         PARTICLE_COUNT,
       ),
-
       createGalaxyShape(
         PARTICLE_COUNT,
       ),
@@ -513,9 +583,9 @@ function ParticleUniverse() {
     [],
   );
 
-  const colors = useMemo(
+  const particleProgress = useMemo(
     () =>
-      createInitialColors(
+      createParticleProgress(
         PARTICLE_COUNT,
       ),
     [],
@@ -525,151 +595,421 @@ function ParticleUniverse() {
     const nextGeometry =
       new THREE.BufferGeometry();
 
-    nextGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(
-        new Float32Array(
-          shapes[0],
-        ),
-        3,
-      ),
-    );
+    const attributes = [
+      ["position", shapes[0], 3],
+      ["aShape1", shapes[1], 3],
+      ["aShape2", shapes[2], 3],
+      ["aShape3", shapes[3], 3],
+      ["aShape4", shapes[4], 3],
+      [
+        "aParticleProgress",
+        particleProgress,
+        1,
+      ],
+    ] as const;
 
-    nextGeometry.setAttribute(
-      "color",
-      new THREE.BufferAttribute(
-        colors,
-        3,
-      ),
-    );
+    for (
+      const [
+        name,
+        array,
+        itemSize,
+      ] of attributes
+    ) {
+      const attribute =
+        new THREE.BufferAttribute(
+          array,
+          itemSize,
+        );
+
+      attribute.setUsage(
+        THREE.StaticDrawUsage,
+      );
+
+      nextGeometry.setAttribute(
+        name,
+        attribute,
+      );
+    }
+
+    nextGeometry.computeBoundingSphere();
 
     return nextGeometry;
-  }, [colors, shapes]);
+  }, [particleProgress, shapes]);
 
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        vertexColors: true,
+  const material = useMemo(() => {
+    const uniforms: Record<
+      string,
+      THREE.IUniform
+    > = {
+      uTime: {
+        value: 0,
+      },
+      uPointSize: {
+        value: 3.3,
+      },
+      uOpacity: {
+        value: 0.96,
+      },
+      uProgress: {
+        value: 0,
+      },
+      uPointerY: {
+        value: 0,
+      },
+    };
 
-        blending:
-          THREE.AdditiveBlending,
+    for (
+      let paletteIndex = 0;
+      paletteIndex < 5;
+      paletteIndex += 1
+    ) {
+      uniforms[
+        `uPalette${paletteIndex}A`
+      ] = {
+        value: paletteVector(
+          paletteIndex,
+          0,
+        ),
+      };
 
-        uniforms: {
-          uTime: {
-            value: 0,
-          },
+      uniforms[
+        `uPalette${paletteIndex}B`
+      ] = {
+        value: paletteVector(
+          paletteIndex,
+          1,
+        ),
+      };
 
-          uPointSize: {
-            value: 3.3,
-          },
+      uniforms[
+        `uPalette${paletteIndex}C`
+      ] = {
+        value: paletteVector(
+          paletteIndex,
+          2,
+        ),
+      };
+    }
 
-          uOpacity: {
-            value: 0.96,
-          },
-        },
+    return new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending:
+        THREE.AdditiveBlending,
+      toneMapped: false,
+      uniforms,
 
-        vertexShader: `
-          uniform float uTime;
-          uniform float uPointSize;
+      vertexShader: `
+        uniform float uTime;
+        uniform float uPointSize;
+        uniform float uProgress;
+        uniform float uPointerY;
 
-          varying vec3 vColor;
+        uniform vec3 uPalette0A;
+        uniform vec3 uPalette0B;
+        uniform vec3 uPalette0C;
+        uniform vec3 uPalette1A;
+        uniform vec3 uPalette1B;
+        uniform vec3 uPalette1C;
+        uniform vec3 uPalette2A;
+        uniform vec3 uPalette2B;
+        uniform vec3 uPalette2C;
+        uniform vec3 uPalette3A;
+        uniform vec3 uPalette3B;
+        uniform vec3 uPalette3C;
+        uniform vec3 uPalette4A;
+        uniform vec3 uPalette4B;
+        uniform vec3 uPalette4C;
 
-          void main() {
-            vColor = color;
+        attribute vec3 aShape1;
+        attribute vec3 aShape2;
+        attribute vec3 aShape3;
+        attribute vec3 aShape4;
+        attribute float aParticleProgress;
 
-            vec3 animatedPosition =
-              position;
+        varying vec3 vColor;
 
-            float pulse =
-              sin(
-                uTime * 1.4 +
-                position.x * 1.7 +
-                position.y * 1.2
-              ) * 0.022;
-
-            float secondaryPulse =
-              cos(
-                uTime * 0.8 +
-                position.z * 2.0
-              ) * 0.012;
-
-            animatedPosition +=
-              normalize(
-                position + 0.0001
-              ) *
-              (
-                pulse +
-                secondaryPulse
-              );
-
-            vec4 modelPosition =
-              modelMatrix *
-              vec4(
-                animatedPosition,
-                1.0
-              );
-
-            vec4 viewPosition =
-              viewMatrix *
-              modelPosition;
-
-            gl_Position =
-              projectionMatrix *
-              viewPosition;
-
-            gl_PointSize =
-              uPointSize *
-              (8.5 / -viewPosition.z);
+        vec3 getShape(float index) {
+          if (index < 0.5) {
+            return position;
           }
-        `,
 
-        fragmentShader: `
-          uniform float uOpacity;
-
-          varying vec3 vColor;
-
-          void main() {
-            float distanceToCenter =
-              distance(
-                gl_PointCoord,
-                vec2(0.5)
-              );
-
-            float glow =
-              1.0 -
-              smoothstep(
-                0.0,
-                0.5,
-                distanceToCenter
-              );
-
-            float core =
-              1.0 -
-              smoothstep(
-                0.0,
-                0.12,
-                distanceToCenter
-              );
-
-            vec3 finalColor =
-              vColor *
-              (
-                glow * 1.8 +
-                core * 3.3
-              );
-
-            gl_FragColor =
-              vec4(
-                finalColor,
-                glow * uOpacity
-              );
+          if (index < 1.5) {
+            return aShape1;
           }
-        `,
-      }),
-    [],
-  );
+
+          if (index < 2.5) {
+            return aShape2;
+          }
+
+          if (index < 3.5) {
+            return aShape3;
+          }
+
+          return aShape4;
+        }
+
+        vec3 getPaletteA(float index) {
+          if (index < 0.5) {
+            return uPalette0A;
+          }
+
+          if (index < 1.5) {
+            return uPalette1A;
+          }
+
+          if (index < 2.5) {
+            return uPalette2A;
+          }
+
+          if (index < 3.5) {
+            return uPalette3A;
+          }
+
+          return uPalette4A;
+        }
+
+        vec3 getPaletteB(float index) {
+          if (index < 0.5) {
+            return uPalette0B;
+          }
+
+          if (index < 1.5) {
+            return uPalette1B;
+          }
+
+          if (index < 2.5) {
+            return uPalette2B;
+          }
+
+          if (index < 3.5) {
+            return uPalette3B;
+          }
+
+          return uPalette4B;
+        }
+
+        vec3 getPaletteC(float index) {
+          if (index < 0.5) {
+            return uPalette0C;
+          }
+
+          if (index < 1.5) {
+            return uPalette1C;
+          }
+
+          if (index < 2.5) {
+            return uPalette2C;
+          }
+
+          if (index < 3.5) {
+            return uPalette3C;
+          }
+
+          return uPalette4C;
+        }
+
+        void main() {
+          float startIndex =
+            floor(uProgress);
+
+          float endIndex =
+            min(
+              startIndex + 1.0,
+              4.0
+            );
+
+          float localProgress =
+            uProgress - startIndex;
+
+          float easedProgress =
+            localProgress *
+            localProgress *
+            (
+              3.0 -
+              2.0 * localProgress
+            );
+
+          vec3 morphedPosition =
+            mix(
+              getShape(startIndex),
+              getShape(endIndex),
+              easedProgress
+            );
+
+          float pulse =
+            sin(
+              uTime * 1.4 +
+              morphedPosition.x * 1.7 +
+              morphedPosition.y * 1.2
+            ) * 0.022;
+
+          float secondaryPulse =
+            cos(
+              uTime * 0.8 +
+              morphedPosition.z * 2.0
+            ) * 0.012;
+
+          vec3 animatedPosition =
+            morphedPosition +
+            normalize(
+              morphedPosition +
+              vec3(0.0001)
+            ) *
+            (
+              pulse +
+              secondaryPulse
+            );
+
+          float lightWave =
+            0.5 +
+            sin(
+              aParticleProgress * 34.0 +
+              uTime * 0.75 +
+              morphedPosition.x * 0.8 +
+              morphedPosition.y * 0.45
+            ) * 0.5;
+
+          float accentStrength =
+            pow(
+              lightWave,
+              7.0
+            );
+
+          vec3 firstBase =
+            mix(
+              getPaletteA(startIndex),
+              getPaletteB(startIndex),
+              lightWave
+            );
+
+          vec3 secondBase =
+            mix(
+              getPaletteA(endIndex),
+              getPaletteB(endIndex),
+              lightWave
+            );
+
+          vec3 baseColor =
+            mix(
+              firstBase,
+              secondBase,
+              easedProgress
+            );
+
+          vec3 accentColor =
+            mix(
+              getPaletteC(startIndex),
+              getPaletteC(endIndex),
+              easedProgress
+            );
+
+          vec3 finalParticleColor =
+            mix(
+              baseColor,
+              accentColor,
+              accentStrength
+            );
+
+          float temperatureShift =
+            uPointerY * 0.12;
+
+          finalParticleColor.r =
+            clamp(
+              finalParticleColor.r -
+                temperatureShift,
+              0.0,
+              1.7
+            );
+
+          finalParticleColor.b =
+            clamp(
+              finalParticleColor.b +
+                temperatureShift,
+              0.0,
+              1.7
+            );
+
+          float brightness =
+            0.82 +
+            lightWave * 0.55 +
+            accentStrength * 0.75;
+
+          vColor =
+            finalParticleColor *
+            brightness;
+
+          vec4 modelPosition =
+            modelMatrix *
+            vec4(
+              animatedPosition,
+              1.0
+            );
+
+          vec4 viewPosition =
+            viewMatrix *
+            modelPosition;
+
+          gl_Position =
+            projectionMatrix *
+            viewPosition;
+
+          gl_PointSize =
+            uPointSize *
+            (
+              8.5 /
+              max(
+                -viewPosition.z,
+                0.1
+              )
+            );
+        }
+      `,
+
+      fragmentShader: `
+        uniform float uOpacity;
+
+        varying vec3 vColor;
+
+        void main() {
+          float distanceToCenter =
+            distance(
+              gl_PointCoord,
+              vec2(0.5)
+            );
+
+          float glow =
+            1.0 -
+            smoothstep(
+              0.0,
+              0.5,
+              distanceToCenter
+            );
+
+          float core =
+            1.0 -
+            smoothstep(
+              0.0,
+              0.12,
+              distanceToCenter
+            );
+
+          vec3 finalColor =
+            vColor *
+            (
+              glow * 1.8 +
+              core * 3.3
+            );
+
+          gl_FragColor =
+            vec4(
+              finalColor,
+              glow * uOpacity
+            );
+        }
+      `,
+    });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -678,7 +1018,11 @@ function ParticleUniverse() {
     };
   }, [geometry, material]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
+    if (!PAGE_VISIBLE) {
+      return;
+    }
+
     const points =
       pointsRef.current;
 
@@ -689,331 +1033,73 @@ function ParticleUniverse() {
     const time =
       state.clock.elapsedTime;
 
-    material.uniforms.uTime.value =
-      time;
-
-    /*
-      Положение курсора по горизонтали:
-
-      -1.0 — Cell
-      -0.5 — DNA
-       0.0 — Wave
-       0.5 — Vortex
-       1.0 — Galaxy
-    */
     const targetProgress =
       THREE.MathUtils.clamp(
-        (GLOBAL_POINTER.x + 1) /
-          2,
+        (GLOBAL_POINTER.x + 1) / 2,
         0,
         1,
       ) *
       (shapes.length - 1);
 
     smoothProgressRef.current =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         smoothProgressRef.current,
         targetProgress,
-        0.075,
+        5.1,
+        delta,
       );
 
-    const progress =
+    material.uniforms.uTime.value =
+      time;
+
+    material.uniforms.uProgress.value =
       smoothProgressRef.current;
 
-    const startShapeIndex =
-      Math.floor(progress);
+    material.uniforms.uPointerY.value =
+      GLOBAL_POINTER.y;
 
-    const endShapeIndex = Math.min(
-      startShapeIndex + 1,
-      shapes.length - 1,
-    );
-
-    const localProgress =
-      progress - startShapeIndex;
-
-    /*
-      Smoothstep для мягкого морфинга.
-    */
-    const easedProgress =
-      localProgress *
-      localProgress *
-      (3 - 2 * localProgress);
-
-    const positionAttribute =
-      geometry.getAttribute(
-        "position",
-      ) as THREE.BufferAttribute;
-
-    const currentPositions =
-      positionAttribute.array as Float32Array;
-
-    const firstShape =
-      shapes[startShapeIndex];
-
-    const secondShape =
-      shapes[endShapeIndex];
-
-    for (
-      let index = 0;
-      index <
-      currentPositions.length;
-      index += 1
-    ) {
-      currentPositions[index] =
-        THREE.MathUtils.lerp(
-          firstShape[index],
-          secondShape[index],
-          easedProgress,
-        );
-    }
-
-    positionAttribute.needsUpdate =
-      true;
-
-    /*
-      Цвет также плавно переходит
-      между палитрами каждой формы.
-    */
-    const colorAttribute =
-      geometry.getAttribute(
-        "color",
-      ) as THREE.BufferAttribute;
-
-    const currentColors =
-      colorAttribute.array as Float32Array;
-
-    const firstPalette =
-      SHAPE_PALETTES[
-        startShapeIndex
-      ];
-
-    const secondPalette =
-      SHAPE_PALETTES[
-        endShapeIndex
-      ];
-
-    /*
-      Курсор вверх делает палитру
-      холоднее, вниз — теплее.
-    */
-    const temperatureShift =
-      GLOBAL_POINTER.y * 0.12;
-
-    for (
-      let offset = 0;
-      offset < currentColors.length;
-      offset += 3
-    ) {
-      const particleIndex =
-        offset / 3;
-
-      const particleProgress =
-        particleIndex /
-        Math.max(
-          PARTICLE_COUNT - 1,
-          1,
-        );
-
-      /*
-        Световая волна проходит
-        через весь объект.
-      */
-      const lightWave =
-        0.5 +
-        Math.sin(
-          particleProgress * 34 +
-            time * 0.75 +
-            currentPositions[offset] *
-              0.8 +
-            currentPositions[
-              offset + 1
-            ] *
-              0.45,
-        ) *
-          0.5;
-
-      /*
-        Некоторые частицы получают
-        яркий третий акцентный цвет.
-      */
-      const accentStrength =
-        Math.pow(lightWave, 7);
-
-      const firstRed =
-        THREE.MathUtils.lerp(
-          firstPalette[0][0],
-          firstPalette[1][0],
-          lightWave,
-        );
-
-      const firstGreen =
-        THREE.MathUtils.lerp(
-          firstPalette[0][1],
-          firstPalette[1][1],
-          lightWave,
-        );
-
-      const firstBlue =
-        THREE.MathUtils.lerp(
-          firstPalette[0][2],
-          firstPalette[1][2],
-          lightWave,
-        );
-
-      const secondRed =
-        THREE.MathUtils.lerp(
-          secondPalette[0][0],
-          secondPalette[1][0],
-          lightWave,
-        );
-
-      const secondGreen =
-        THREE.MathUtils.lerp(
-          secondPalette[0][1],
-          secondPalette[1][1],
-          lightWave,
-        );
-
-      const secondBlue =
-        THREE.MathUtils.lerp(
-          secondPalette[0][2],
-          secondPalette[1][2],
-          lightWave,
-        );
-
-      let red =
-        THREE.MathUtils.lerp(
-          firstRed,
-          secondRed,
-          easedProgress,
-        );
-
-      let green =
-        THREE.MathUtils.lerp(
-          firstGreen,
-          secondGreen,
-          easedProgress,
-        );
-
-      let blue =
-        THREE.MathUtils.lerp(
-          firstBlue,
-          secondBlue,
-          easedProgress,
-        );
-
-      const accentRed =
-        THREE.MathUtils.lerp(
-          firstPalette[2][0],
-          secondPalette[2][0],
-          easedProgress,
-        );
-
-      const accentGreen =
-        THREE.MathUtils.lerp(
-          firstPalette[2][1],
-          secondPalette[2][1],
-          easedProgress,
-        );
-
-      const accentBlue =
-        THREE.MathUtils.lerp(
-          firstPalette[2][2],
-          secondPalette[2][2],
-          easedProgress,
-        );
-
-      red =
-        THREE.MathUtils.lerp(
-          red,
-          accentRed,
-          accentStrength,
-        );
-
-      green =
-        THREE.MathUtils.lerp(
-          green,
-          accentGreen,
-          accentStrength,
-        );
-
-      blue =
-        THREE.MathUtils.lerp(
-          blue,
-          accentBlue,
-          accentStrength,
-        );
-
-      red = THREE.MathUtils.clamp(
-        red - temperatureShift,
-        0,
-        1.7,
-      );
-
-      blue = THREE.MathUtils.clamp(
-        blue + temperatureShift,
-        0,
-        1.7,
-      );
-
-      const brightness =
-        0.82 +
-        lightWave * 0.55 +
-        accentStrength * 0.75;
-
-      currentColors[offset] =
-        red * brightness;
-
-      currentColors[offset + 1] =
-        green * brightness;
-
-      currentColors[offset + 2] =
-        blue * brightness;
-    }
-
-    colorAttribute.needsUpdate =
-      true;
-
-    /*
-      Поворот и параллакс.
-    */
     points.rotation.x =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.rotation.x,
         GLOBAL_POINTER.y * 0.28,
-        0.04,
+        2.45,
+        delta,
       );
 
     points.rotation.y =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.rotation.y,
         GLOBAL_POINTER.x * 0.2 +
           time * 0.012,
-        0.035,
+        2.15,
+        delta,
       );
 
     points.rotation.z =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.rotation.z,
         GLOBAL_POINTER.x *
           GLOBAL_POINTER.y *
           0.1,
-        0.035,
+        2.15,
+        delta,
       );
 
     points.position.x =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.position.x,
         1.2 +
           GLOBAL_POINTER.x * 0.4,
-        0.04,
+        2.45,
+        delta,
       );
 
     points.position.y =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.position.y,
         GLOBAL_POINTER.y * 0.25,
-        0.04,
+        2.45,
+        delta,
       );
 
     const targetScale =
@@ -1024,10 +1110,11 @@ function ParticleUniverse() {
         0.055;
 
     const nextScale =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.scale.x,
         targetScale,
-        0.04,
+        2.45,
+        delta,
       );
 
     points.scale.setScalar(
@@ -1040,6 +1127,7 @@ function ParticleUniverse() {
       ref={pointsRef}
       geometry={geometry}
       material={material}
+      frustumCulled={false}
     />
   );
 }
@@ -1134,7 +1222,11 @@ function StarField() {
     };
   }, [geometry]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
+    if (!PAGE_VISIBLE) {
+      return;
+    }
+
     const points =
       pointsRef.current;
 
@@ -1151,17 +1243,19 @@ function StarField() {
       GLOBAL_POINTER.y * 0.025;
 
     points.position.x =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.position.x,
         GLOBAL_POINTER.x * -0.22,
-        0.025,
+        1.52,
+        delta,
       );
 
     points.position.y =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         points.position.y,
         GLOBAL_POINTER.y * -0.14,
-        0.025,
+        1.52,
+        delta,
       );
   });
 
@@ -1185,102 +1279,32 @@ function StarField() {
   );
 }
 
-function MouseLight() {
-  const lightRef =
-    useRef<THREE.PointLight | null>(
-      null,
-    );
-
-  useFrame(() => {
-    const light =
-      lightRef.current;
-
-    if (!light) {
-      return;
-    }
-
-    light.position.x =
-      THREE.MathUtils.lerp(
-        light.position.x,
-        GLOBAL_POINTER.x * 5,
-        0.06,
-      );
-
-    light.position.y =
-      THREE.MathUtils.lerp(
-        light.position.y,
-        GLOBAL_POINTER.y * 3,
-        0.06,
-      );
-
-    light.intensity =
-      THREE.MathUtils.lerp(
-        light.intensity,
-        17 +
-          Math.abs(
-            GLOBAL_POINTER.x,
-          ) *
-            5,
-        0.04,
-      );
-
-    const normalizedProgress =
-      THREE.MathUtils.clamp(
-        (GLOBAL_POINTER.x + 1) /
-          2,
-        0,
-        1,
-      );
-
-    const paletteIndex =
-      Math.round(
-        normalizedProgress *
-          (SHAPE_PALETTES.length - 1),
-      );
-
-    const targetColor =
-      SHAPE_PALETTES[
-        paletteIndex
-      ][0];
-
-    light.color.setRGB(
-      targetColor[0],
-      targetColor[1],
-      targetColor[2],
-    );
-  });
-
-  return (
-    <pointLight
-      ref={lightRef}
-      color="#7DD3FC"
-      intensity={18}
-      distance={9}
-      position={[0, 0, 3]}
-    />
-  );
-}
-
 function CameraRig() {
   const { camera } = useThree();
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
+    if (!PAGE_VISIBLE) {
+      return;
+    }
+
     camera.position.x =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         camera.position.x,
         GLOBAL_POINTER.x * 0.48,
-        0.03,
+        1.83,
+        delta,
       );
 
     camera.position.y =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         camera.position.y,
         GLOBAL_POINTER.y * 0.34,
-        0.03,
+        1.83,
+        delta,
       );
 
     camera.position.z =
-      THREE.MathUtils.lerp(
+      THREE.MathUtils.damp(
         camera.position.z,
         8.7 -
           Math.abs(
@@ -1292,7 +1316,8 @@ function CameraRig() {
               0.2,
           ) *
             0.08,
-        0.03,
+        1.83,
+        delta,
       );
 
     camera.lookAt(
@@ -1307,7 +1332,10 @@ function CameraRig() {
 
 function PostProcessing() {
   return (
-    <EffectComposer multisampling={0}>
+    <EffectComposer
+      multisampling={0}
+      enableNormalPass={false}
+    >
       <Bloom
         intensity={2.8}
         luminanceThreshold={0.08}
@@ -1346,6 +1374,13 @@ export default function CancerScene() {
           alpha: true,
           powerPreference:
             "high-performance",
+          stencil: false,
+          depth: true,
+        }}
+        performance={{
+          min: 0.5,
+          max: 1,
+          debounce: 200,
         }}
       >
         <GlobalPointerTracker />
@@ -1364,13 +1399,8 @@ export default function CancerScene() {
           ]}
         />
 
-        <ambientLight
-          intensity={0.08}
-        />
-
         <StarField />
         <ParticleUniverse />
-        <MouseLight />
         <CameraRig />
         <PostProcessing />
       </Canvas>

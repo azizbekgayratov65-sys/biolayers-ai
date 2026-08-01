@@ -627,7 +627,7 @@ export default function Home() {
           </motion.div>
 
           {/* Founder */}
-          <div className="grid items-start gap-14 lg:grid-cols-[520px_minmax(0,1fr)] lg:gap-20">
+          <div className="grid items-start gap-20 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:gap-28">
             <motion.div
               initial={{
                 opacity: 0,
@@ -645,160 +645,160 @@ export default function Home() {
                 duration: 1,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="relative mx-auto w-full max-w-[520px] pt-[350px]"
+              className="relative mx-auto flex w-full max-w-[620px] flex-col gap-10"
             >
-              <div className="absolute left-1/2 top-0 z-30 w-[min(96vw,680px)] -translate-x-1/2">
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: -25,
+                  scale: 0.96,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                }}
+                viewport={{
+                  once: true,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="relative overflow-hidden rounded-[40px] border border-amber-300/20 bg-[#120b04]/75 px-6 pb-8 pt-7 shadow-[0_30px_110px_rgba(245,158,11,.16)] backdrop-blur-2xl sm:px-8"
+              >
                 <motion.div
-                  initial={{
-                    opacity: 0,
-                    y: -25,
-                    scale: 0.94,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                  }}
-                  viewport={{
-                    once: true,
+                  animate={{
+                    rotate: 360,
                   }}
                   transition={{
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1],
+                    duration: 22,
+                    repeat: Infinity,
+                    ease: "linear",
                   }}
-                  className="relative overflow-hidden rounded-[40px] border border-amber-300/20 bg-[#120b04]/75 px-4 pb-14 pt-7 shadow-[0_30px_110px_rgba(245,158,11,.16)] backdrop-blur-2xl sm:px-5"
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-amber-300/[0.08]"
+                />
+
+                <motion.div
+                  animate={{
+                    scale: [0.75, 1.3],
+                    opacity: [0.35, 0],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/25"
+                />
+
+                <p className="relative mb-9 text-center font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-amber-300/70">
+                  Academic and athletic identity
+                </p>
+
+                <div className="relative grid grid-cols-1 place-items-center gap-9 sm:grid-cols-3 sm:gap-6">
+                  <FounderLogo
+                    src="/school-logo.png"
+                    alt="Specialized School of Young Chemists and Biologists"
+                    label="Abu Ali ibn Sina School"
+                    index={0}
+                    size="large"
+                  />
+
+                  <FounderLogo
+                    src="/taekwondo-logo.png"
+                    alt="International Taekwon-do Federation"
+                    label="International Taekwon-do"
+                    index={1}
+                    size="medium"
+                  />
+
+                  <FounderLogo
+                    src="/kickboxing-logo.png"
+                    alt="WAKO Uzbekistan"
+                    label="WAKO Uzbekistan"
+                    index={2}
+                    size="medium"
+                  />
+                </div>
+              </motion.div>
+
+              <div className="relative">
+                <motion.div
+                  animate={{
+                    rotate: 360,
+                  }}
+                  transition={{
+                    duration: 16,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="pointer-events-none absolute -inset-8 rounded-[52px]"
+                  style={{
+                    background:
+                      "conic-gradient(from 0deg, transparent, rgba(251,191,36,.55), transparent, rgba(239,68,68,.42), transparent, rgba(52,211,153,.35), transparent)",
+                    filter: "blur(30px)",
+                  }}
+                />
+
+                <motion.div
+                  whileHover={{
+                    y: -8,
+                    rotateY: 2,
+                    rotateX: -2,
+                  }}
+                  className="relative overflow-hidden rounded-[40px] border border-amber-300/20 bg-[#120b04]/80 p-3 shadow-[0_45px_150px_rgba(245,158,11,.2)] backdrop-blur-2xl"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    perspective: 1000,
+                  }}
                 >
-                  <motion.div
-                    animate={{
-                      rotate: 360,
-                    }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-amber-300/[0.08]"
-                  />
-
-                  <motion.div
-                    animate={{
-                      scale: [0.75, 1.3],
-                      opacity: [0.35, 0],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeOut",
-                    }}
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/25"
-                  />
-
-                  <p className="relative mb-7 text-center font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-amber-300/65">
-                    Academic and athletic identity
-                  </p>
-
-                  <div className="relative flex items-end justify-center gap-2 sm:gap-5">
-                    <FounderLogo
-                      src="/school-logo.png"
-                      alt="Specialized School of Young Chemists and Biologists"
-                      label="Abu Ali ibn Sina School"
-                      index={0}
-                      size="large"
+                  <div className="relative overflow-hidden rounded-[30px] bg-zinc-950">
+                    <img
+                      src="/founder.png"
+                      alt="Azizbek Gayratov, founder of BioLayers AI"
+                      width={900}
+                      height={1125}
+                      loading="eager"
+                      className="block h-auto w-full object-cover"
                     />
 
-                    <FounderLogo
-                      src="/taekwondo-logo.png"
-                      alt="International Taekwon-do Federation"
-                      label="International Taekwon-do"
-                      index={1}
-                      size="medium"
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#090502] via-[#090502]/10 to-amber-200/[0.03]" />
+
+                    <motion.div
+                      animate={{
+                        y: ["-24%", "118%"],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="pointer-events-none absolute left-0 top-0 h-24 w-full bg-gradient-to-b from-transparent via-amber-100/20 to-transparent blur-xl"
                     />
 
-                    <FounderLogo
-                      src="/kickboxing-logo.png"
-                      alt="WAKO Uzbekistan"
-                      label="WAKO Uzbekistan"
-                      index={2}
-                      size="medium"
-                    />
+                    <CornerMarks />
+
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300">
+                        Founder · Creator · Designer · Developer
+                      </p>
+
+                      <h3 className="mt-2 text-3xl font-bold tracking-tight text-white">
+                        Azizbek Gayratov
+                      </h3>
+
+                      <p className="mt-2 text-sm font-semibold text-zinc-100">
+                        AI-Driven Computational Oncology
+                      </p>
+
+                      <p className="mt-1 text-sm text-amber-200">
+                        and Precision Medicine
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               </div>
-
-              <motion.div
-                animate={{
-                  rotate: 360,
-                }}
-                transition={{
-                  duration: 16,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="pointer-events-none absolute -inset-8 top-[330px] rounded-[52px]"
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, transparent, rgba(251,191,36,.55), transparent, rgba(239,68,68,.42), transparent, rgba(52,211,153,.35), transparent)",
-                  filter: "blur(30px)",
-                }}
-              />
-
-              <motion.div
-                whileHover={{
-                  y: -8,
-                  rotateY: 2,
-                  rotateX: -2,
-                }}
-                className="relative overflow-hidden rounded-[40px] border border-amber-300/20 bg-[#120b04]/80 p-3 shadow-[0_45px_150px_rgba(245,158,11,.2)] backdrop-blur-2xl"
-                style={{
-                  transformStyle: "preserve-3d",
-                  perspective: 1000,
-                }}
-              >
-                <div className="relative overflow-hidden rounded-[30px] bg-zinc-950">
-                  <img
-                    src="/founder.png"
-                    alt="Azizbek Gayratov, founder of BioLayers AI"
-                    width={900}
-                    height={1125}
-                    loading="eager"
-                    className="block h-auto w-full object-cover"
-                  />
-
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#090502] via-[#090502]/10 to-amber-200/[0.03]" />
-
-                  <motion.div
-                    animate={{
-                      y: ["-24%", "118%"],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="pointer-events-none absolute left-0 top-0 h-24 w-full bg-gradient-to-b from-transparent via-amber-100/20 to-transparent blur-xl"
-                  />
-
-                  <CornerMarks />
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300">
-                      Founder · Creator · Designer · Developer
-                    </p>
-
-                    <h3 className="mt-2 text-3xl font-bold tracking-tight text-white">
-                      Azizbek Gayratov
-                    </h3>
-
-                    <p className="mt-2 text-sm font-semibold text-zinc-100">
-                      AI-Driven Computational Oncology
-                    </p>
-
-                    <p className="mt-1 text-sm text-amber-200">
-                      and Precision Medicine
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
             </motion.div>
 
             <motion.div
@@ -1413,7 +1413,7 @@ function FounderLogo({
         rotateY: 0,
         rotateZ: 0,
       }}
-      className="group relative"
+      className="group relative flex w-full flex-col items-center pb-12"
       style={{
         transformStyle: "preserve-3d",
         perspective: 900,
@@ -1461,8 +1461,8 @@ function FounderLogo({
       <div
         className={`relative flex items-center justify-center overflow-hidden rounded-[30px] border border-amber-200/30 bg-white p-2 shadow-[0_22px_75px_rgba(245,158,11,.25)] sm:p-3 ${
           size === "large"
-            ? "h-[110px] w-[110px] sm:h-[176px] sm:w-[176px]"
-            : "h-[96px] w-[96px] sm:h-[152px] sm:w-[152px]"
+            ? "h-[130px] w-[130px] sm:h-[150px] sm:w-[150px] xl:h-[164px] xl:w-[164px]"
+            : "h-[120px] w-[120px] sm:h-[138px] sm:w-[138px] xl:h-[150px] xl:w-[150px]"
         }`}
       >
         <img
