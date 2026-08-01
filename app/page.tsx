@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -755,7 +755,7 @@ export default function Home() {
                 >
                   <div className="relative overflow-hidden rounded-[30px] bg-zinc-950">
                     <img
-                      src="/founder.png"
+                      src="/founder-2026.png"
                       alt="Azizbek Gayratov, founder of BioLayers AI"
                       width={900}
                       height={1125}
