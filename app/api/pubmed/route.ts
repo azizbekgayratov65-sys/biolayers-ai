@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type PubMedSearchResponse = {
   esearchresult?: {
+    count?: string;
     idlist?: string[];
   };
 };
@@ -11,7 +15,6 @@ type PubMedAuthor = {
 };
 
 type PubMedArticleSummary = {
-  uid?: string;
   title?: string;
   fulljournalname?: string;
   source?: string;
@@ -34,47 +37,39 @@ type PubMedSummaryResponse = {
   };
 };
 
-export type PubMedPaper = {
-  pmid: string;
-  title: string;
-  journal: string;
-  year: string;
-  authors: string[];
-  doi: string | null;
-  pubmedUrl: string;
-};
-
 const NCBI_BASE_URL =
   "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
 
-const MAX_RESULTS = 5;
-
-function getYear(
+function yearOf(
   pubdate?: string,
   sortpubdate?: string,
 ): string {
-  const source = sortpubdate || pubdate || "";
-  const match = source.match(/\b(19|20)\d{2}\b/);
+  const match = (
+    sortpubdate ||
+    pubdate ||
+    ""
+  ).match(/\b(19|20)\d{2}\b/);
 
   return match?.[0] ?? "Unknown year";
 }
 
-function getDoi(
+function doiOf(
   articleIds?: PubMedArticleSummary["articleids"],
 ): string | null {
   if (!Array.isArray(articleIds)) {
     return null;
   }
 
-  const doiEntry = articleIds.find(
-    (item) =>
-      item.idtype?.toLowerCase() === "doi",
+  return (
+    articleIds.find(
+      (item) =>
+        item.idtype?.toLowerCase() ===
+        "doi",
+    )?.value?.trim() || null
   );
-
-  return doiEntry?.value?.trim() || null;
 }
 
-function buildNcbiParams(
+function paramsOf(
   values: Record<string, string>,
 ): URLSearchParams {
   const params = new URLSearchParams({
@@ -99,31 +94,32 @@ function buildNcbiParams(
   return params;
 }
 
+function intParam(
+  value: string | null,
+  fallback: number,
+): number {
+  const parsed = Number.parseInt(
+    value ?? "",
+    10,
+  );
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : fallback;
+}
+
 export async function GET(request: Request) {
   try {
-    const requestUrl = new URL(request.url);
-    const rawQuery =
-      requestUrl.searchParams.get("q");
-
-    if (!rawQuery) {
-      return NextResponse.json(
-        {
-          error:
-            "Missing search query. Use /api/pubmed?q=CXCL12.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    const query = rawQuery.trim();
+    const url = new URL(request.url);
+    const query =
+      url.searchParams.get("q")?.trim() ??
+      "";
 
     if (query.length < 2) {
       return NextResponse.json(
         {
           error:
-            "The PubMed search query is too short.",
+            "Enter at least 2 characters.",
         },
         {
           status: 400,
@@ -131,11 +127,40 @@ export async function GET(request: Request) {
       );
     }
 
-    if (query.length > 200) {
+    const page = Math.max(
+      0,
+      intParam(
+        url.searchParams.get("page"),
+        0,
+      ),
+    );
+
+    const pageSize = Math.min(
+      50,
+      Math.max(
+        1,
+        intParam(
+          url.searchParams.get(
+            "pageSize",
+          ),
+          20,
+        ),
+      ),
+    );
+
+    const sort =
+      url.searchParams.get("sort") ===
+      "date"
+        ? "pub_date"
+        : "relevance";
+
+    const retstart = page * pageSize;
+
+    if (retstart > 9_999) {
       return NextResponse.json(
         {
           error:
-            "The PubMed search query is too long.",
+            "The PubMed ESearch retrieval window has been reached. Refine the query or use a date filter.",
         },
         {
           status: 400,
@@ -143,34 +168,26 @@ export async function GET(request: Request) {
       );
     }
 
-    /*
-      Search the selected biological entity in titles
-      and abstracts, while prioritizing oncology content.
-    */
-    const pubmedTerm =
+    const term =
       `("${query}"[Title/Abstract]) AND ` +
-      `(cancer[Title/Abstract] OR ` +
-      `tumor[Title/Abstract] OR ` +
-      `oncology[Title/Abstract] OR ` +
-      `neoplasm[Title/Abstract])`;
-
-    const searchParams = buildNcbiParams({
-      db: "pubmed",
-      term: pubmedTerm,
-      retmode: "json",
-      retmax: String(MAX_RESULTS),
-      sort: "relevance",
-    });
+      `(cancer[Title/Abstract] OR tumor[Title/Abstract] OR oncology[Title/Abstract] OR neoplasm[Title/Abstract])`;
 
     const searchResponse = await fetch(
-      `${NCBI_BASE_URL}/esearch.fcgi?${searchParams.toString()}`,
+      `${NCBI_BASE_URL}/esearch.fcgi?${paramsOf(
+        {
+          db: "pubmed",
+          term,
+          retmode: "json",
+          retstart: String(retstart),
+          retmax: String(pageSize),
+          sort,
+        },
+      ).toString()}`,
       {
         headers: {
           Accept: "application/json",
         },
-        next: {
-          revalidate: 3600,
-        },
+        cache: "no-store",
       },
     );
 
@@ -180,116 +197,127 @@ export async function GET(request: Request) {
       );
     }
 
-    const searchData =
+    const search =
       (await searchResponse.json()) as PubMedSearchResponse;
 
     const pmids =
-      searchData.esearchresult?.idlist ?? [];
+      search.esearchresult?.idlist ?? [];
+
+    const total =
+      Number.parseInt(
+        search.esearchresult?.count ??
+          "0",
+        10,
+      ) || 0;
 
     if (pmids.length === 0) {
       return NextResponse.json({
         query,
-        total: 0,
+        total,
+        page,
+        pageSize,
+        loaded: 0,
+        hasMore: false,
+        sort:
+          sort === "pub_date"
+            ? "date"
+            : "relevance",
         papers: [],
       });
     }
 
-    const summaryParams = buildNcbiParams({
-      db: "pubmed",
-      id: pmids.join(","),
-      retmode: "json",
-    });
-
     const summaryResponse = await fetch(
-      `${NCBI_BASE_URL}/esummary.fcgi?${summaryParams.toString()}`,
+      `${NCBI_BASE_URL}/esummary.fcgi?${paramsOf(
+        {
+          db: "pubmed",
+          id: pmids.join(","),
+          retmode: "json",
+        },
+      ).toString()}`,
       {
         headers: {
           Accept: "application/json",
         },
-        next: {
-          revalidate: 3600,
-        },
+        cache: "no-store",
       },
     );
 
     if (!summaryResponse.ok) {
       throw new Error(
-        `PubMed summary request failed with status ${summaryResponse.status}.`,
+        `PubMed summary failed with status ${summaryResponse.status}.`,
       );
     }
 
-    const summaryData =
+    const summary =
       (await summaryResponse.json()) as PubMedSummaryResponse;
 
-    const result = summaryData.result;
+    const papers = [];
 
-    const papers: PubMedPaper[] = pmids
-      .map((pmid) => {
-        const record = result?.[pmid];
+    for (const pmid of pmids) {
+      const record =
+        summary.result?.[pmid];
 
-        if (
-          !record ||
-          Array.isArray(record)
-        ) {
-          return null;
+      if (
+        !record ||
+        Array.isArray(record)
+      ) {
+        continue;
+      }
+
+      const authors: string[] = [];
+
+      if (Array.isArray(record.authors)) {
+        for (const author of record.authors) {
+          const name =
+            author.name?.trim();
+
+          if (name) {
+            authors.push(name);
+          }
+
+          if (authors.length >= 6) {
+            break;
+          }
         }
+      }
 
-        const title =
+      papers.push({
+        pmid,
+        title:
           record.title?.trim() ||
-          "Untitled PubMed article";
-
-        const journal =
+          "Untitled PubMed article",
+        journal:
           record.fulljournalname?.trim() ||
           record.source?.trim() ||
-          "Unknown journal";
-
-        const authors = Array.isArray(
-          record.authors,
-        )
-          ? record.authors
-              .map((author) =>
-                author.name?.trim(),
-              )
-              .filter(
-                (
-                  name,
-                ): name is string =>
-                  Boolean(name),
-              )
-              .slice(0, 4)
-          : [];
-
-        return {
-          pmid,
-          title,
-          journal,
-          year: getYear(
-            record.pubdate,
-            record.sortpubdate,
-          ),
-          authors,
-          doi: getDoi(record.articleids),
-          pubmedUrl: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
-        };
-      })
-      .filter(
-        (
-          paper,
-        ): paper is PubMedPaper =>
-          paper !== null,
-      );
+          "Unknown journal",
+        year: yearOf(
+          record.pubdate,
+          record.sortpubdate,
+        ),
+        authors,
+        doi: doiOf(record.articleids),
+        pubmedUrl: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+      });
+    }
 
     return NextResponse.json({
       query,
-      total: papers.length,
+      total,
+      page,
+      pageSize,
+      loaded: papers.length,
+      hasMore:
+        retstart + pmids.length <
+          total &&
+        retstart + pmids.length <
+          10_000,
+      sort:
+        sort === "pub_date"
+          ? "date"
+          : "relevance",
       papers,
     });
   } catch (error) {
-    console.error(
-      "PubMed API route error:",
-      error,
-    );
-
     return NextResponse.json(
       {
         error:
