@@ -16,23 +16,32 @@ import PortalTransition from "./PortalTransition";
 const EXAMPLE_TEXT =
   "Cancer-associated fibroblasts promote prostate cancer bone metastasis through CXCL12 signaling and remodeling of the tumor microenvironment.";
 
-const TRANSITION_DURATION = 4550;
+const TRANSITION_DURATION = 3900;
 
 export default function HeroContent() {
   const router = useRouter();
 
-  const [text, setText] = useState("");
-  const [error, setError] = useState("");
-  const [transitioning, setTransitioning] =
-    useState(false);
+  const [text, setText] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [
+    transitioning,
+    setTransitioning,
+  ] = useState(false);
 
   const transitionTimerRef =
-    useRef<number | null>(null);
+    useRef<number | null>(
+      null,
+    );
 
   useEffect(() => {
     return () => {
       if (
-        transitionTimerRef.current !== null
+        transitionTimerRef.current !==
+        null
       ) {
         window.clearTimeout(
           transitionTimerRef.current,
@@ -41,27 +50,37 @@ export default function HeroContent() {
     };
   }, []);
 
-  const goToWorkspace = useCallback(() => {
-    if (transitioning) {
-      return;
-    }
+  const goToWorkspace =
+    useCallback(() => {
+      if (transitioning) {
+        return;
+      }
 
-    setError("");
-    setTransitioning(true);
+      setError("");
+      setTransitioning(true);
 
-    if (
-      transitionTimerRef.current !== null
-    ) {
-      window.clearTimeout(
-        transitionTimerRef.current,
-      );
-    }
+      if (
+        transitionTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          transitionTimerRef.current,
+        );
+      }
 
-    transitionTimerRef.current =
-      window.setTimeout(() => {
-        router.push("/explore");
-      }, TRANSITION_DURATION);
-  }, [router, transitioning]);
+      transitionTimerRef.current =
+        window.setTimeout(
+          () => {
+            router.push(
+              "/explore",
+            );
+          },
+          TRANSITION_DURATION,
+        );
+    }, [
+      router,
+      transitioning,
+    ]);
 
   function openWorkspace(
     event: FormEvent<HTMLFormElement>,
@@ -72,9 +91,13 @@ export default function HeroContent() {
       return;
     }
 
-    const preparedText = text.trim();
+    const preparedText =
+      text.trim();
 
-    if (preparedText.length < 20) {
+    if (
+      preparedText.length <
+      20
+    ) {
       setError(
         "Paste a research paragraph containing at least 20 characters.",
       );
@@ -103,13 +126,37 @@ export default function HeroContent() {
       return;
     }
 
-    setText(EXAMPLE_TEXT);
+    setText(
+      EXAMPLE_TEXT,
+    );
     setError("");
   }
 
   return (
     <>
-      <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-[1500px] items-center px-6 pb-12 pt-28 sm:px-10 lg:px-16">
+      <motion.div
+        animate={{
+          scale: transitioning
+            ? 0.975
+            : 1,
+          opacity: transitioning
+            ? 0.72
+            : 1,
+          filter: transitioning
+            ? "blur(1.5px)"
+            : "blur(0px)",
+        }}
+        transition={{
+          duration: 0.5,
+          ease: [
+            0.16,
+            1,
+            0.3,
+            1,
+          ],
+        }}
+        className="relative z-20 mx-auto flex min-h-screen w-full max-w-[1500px] items-center px-6 pb-12 pt-28 sm:px-10 lg:px-16"
+      >
         <div className="w-full max-w-[680px] lg:-translate-x-6 xl:-translate-x-12">
           <motion.div
             initial={{
@@ -122,13 +169,17 @@ export default function HeroContent() {
             }}
             transition={{
               duration: 0.8,
-              ease: [0.16, 1, 0.3, 1],
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-2 backdrop-blur-xl"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300 opacity-70" />
-
               <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-300" />
             </span>
 
@@ -149,7 +200,12 @@ export default function HeroContent() {
             transition={{
               delay: 0.1,
               duration: 0.9,
-              ease: [0.16, 1, 0.3, 1],
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="max-w-[650px] text-5xl font-semibold leading-[0.95] tracking-[-0.055em] text-white sm:text-6xl lg:text-[78px] xl:text-[84px]"
           >
@@ -172,7 +228,12 @@ export default function HeroContent() {
             transition={{
               delay: 0.22,
               duration: 0.8,
-              ease: [0.16, 1, 0.3, 1],
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="mt-8 max-w-[590px] text-base leading-8 text-slate-300 sm:text-lg"
           >
@@ -183,7 +244,9 @@ export default function HeroContent() {
           </motion.p>
 
           <motion.form
-            onSubmit={openWorkspace}
+            onSubmit={
+              openWorkspace
+            }
             initial={{
               opacity: 0,
               y: 28,
@@ -195,23 +258,33 @@ export default function HeroContent() {
             transition={{
               delay: 0.34,
               duration: 0.9,
-              ease: [0.16, 1, 0.3, 1],
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="mt-10 w-full max-w-[590px] lg:-translate-x-2 xl:-translate-x-5"
           >
             <div
               className={`overflow-hidden rounded-[28px] border bg-slate-950/55 shadow-[0_30px_100px_rgba(3,105,161,0.18)] backdrop-blur-2xl transition ${
                 transitioning
-                  ? "border-cyan-300/20 opacity-60"
+                  ? "border-cyan-300/30 shadow-[0_0_70px_rgba(34,211,238,.18)]"
                   : "border-white/10"
               }`}
             >
               <textarea
                 value={text}
-                disabled={transitioning}
-                onChange={(event) => {
+                disabled={
+                  transitioning
+                }
+                onChange={(
+                  event,
+                ) => {
                   setText(
-                    event.target.value,
+                    event.target
+                      .value,
                   );
 
                   setError("");
@@ -223,8 +296,12 @@ export default function HeroContent() {
               <div className="flex flex-col gap-3 border-t border-white/10 bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
-                  onClick={useExample}
-                  disabled={transitioning}
+                  onClick={
+                    useExample
+                  }
+                  disabled={
+                    transitioning
+                  }
                   className="rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Use an example
@@ -232,18 +309,42 @@ export default function HeroContent() {
 
                 <motion.button
                   type="submit"
-                  disabled={transitioning}
+                  disabled={
+                    transitioning
+                  }
                   whileHover={{
-                    scale: transitioning
-                      ? 1
-                      : 1.025,
+                    scale:
+                      transitioning
+                        ? 1
+                        : 1.025,
                   }}
                   whileTap={{
-                    scale: transitioning
-                      ? 1
-                      : 0.97,
+                    scale:
+                      transitioning
+                        ? 1
+                        : 0.97,
                   }}
-                  className="group relative overflow-hidden rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-[0_15px_40px_rgba(255,255,255,0.12)] disabled:cursor-not-allowed disabled:opacity-70"
+                  animate={{
+                    boxShadow:
+                      transitioning
+                        ? [
+                            "0 15px 40px rgba(255,255,255,.12)",
+                            "0 0 54px rgba(103,232,249,.34)",
+                            "0 15px 40px rgba(255,255,255,.12)",
+                          ]
+                        : "0 15px 40px rgba(255,255,255,.12)",
+                  }}
+                  transition={{
+                    duration:
+                      transitioning
+                        ? 0.9
+                        : 0.25,
+                    repeat:
+                      transitioning
+                        ? Infinity
+                        : 0,
+                  }}
+                  className="group relative overflow-hidden rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-80"
                 >
                   {transitioning && (
                     <motion.span
@@ -254,17 +355,18 @@ export default function HeroContent() {
                         ],
                       }}
                       transition={{
-                        duration: 1.2,
-                        repeat: Infinity,
+                        duration: 0.8,
+                        repeat:
+                          Infinity,
                         ease: "linear",
                       }}
-                      className="pointer-events-none absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent blur-md"
+                      className="pointer-events-none absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-cyan-200/65 to-transparent blur-md"
                     />
                   )}
 
                   <span className="relative">
                     {transitioning
-                      ? "Transforming biology..."
+                      ? "Opening workspace..."
                       : "Explore biology"}
 
                     {!transitioning && (
@@ -307,7 +409,6 @@ export default function HeroContent() {
               >
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300 opacity-60" />
-
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-300" />
                 </span>
 
@@ -336,10 +437,12 @@ export default function HeroContent() {
             <span>PubMed</span>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       <PortalTransition
-        active={transitioning}
+        active={
+          transitioning
+        }
       />
     </>
   );
