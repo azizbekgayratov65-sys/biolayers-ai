@@ -2,32 +2,49 @@
 
 import Navbar from "./components/Navbar";
 
-import AboutSection from "./components/sections/AboutSection";
-import CapabilitiesSection from "./components/sections/CapabilitiesSection";
 import HeroSection from "./components/sections/HeroSection";
-import HomeScrollCinematic from "./components/sections/HomeScrollCinematic";
+import CapabilitiesSection from "./components/sections/CapabilitiesSection";
+import AboutSection from "./components/sections/AboutSection";
 
-import PlanetScene from "./components/planet/PlanetScene";
+import BioJourney from "./components/journey/BioJourney";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#01030a] text-white">
+    <main
+      className="
+        relative
+        min-h-screen
+        bg-[#020105]
+      "
+      style={{
+        overflowX: "clip",
+      }}
+    >
       <Navbar />
 
-      <HomeScrollCinematic
-        hero={
-          <HeroSection />
-        }
-        capabilities={
-          <CapabilitiesSection />
-        }
-        team={
-          <PlanetScene />
-        }
-        about={
-          <AboutSection />
-        }
-      />
+      {/* ================================================= */}
+      {/* 01 — HERO                                        */}
+      {/* ================================================= */}
+
+      <HeroSection />
+
+      {/* ================================================= */}
+      {/* 02 — CAPABILITIES                                */}
+      {/* ================================================= */}
+
+      <CapabilitiesSection />
+
+      {/* ================================================= */}
+      {/* 03 — ONE CONTINUOUS BIO JOURNEY                  */}
+      {/* ================================================= */}
+
+      <BioJourney />
+
+      {/* ================================================= */}
+      {/* 04 — ABOUT                                       */}
+      {/* ================================================= */}
+
+      <AboutSection />
     </main>
   );
 }

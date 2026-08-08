@@ -15,10 +15,17 @@ import {
   useRef,
 } from "react";
 
+/* ====================================================== */
+/* TYPES                                                  */
+/* ====================================================== */
+
 type HomeScrollCinematicProps = {
   hero: ReactNode;
   capabilities: ReactNode;
   team: ReactNode;
+  globalToMolecular: ReactNode;
+  dataStorm: ReactNode;
+  dnaSingularity: ReactNode;
   about: ReactNode;
 };
 
@@ -30,6 +37,10 @@ type CinematicStageProps = {
   children: ReactNode;
   tone: StageTone;
 };
+
+/* ====================================================== */
+/* STANDARD CINEMATIC STAGE                               */
+/* ====================================================== */
 
 function CinematicStage({
   children,
@@ -47,32 +58,27 @@ function CinematicStage({
     scrollYProgress,
   } = useScroll({
     target: ref,
+
     offset: [
       "start end",
       "end start",
     ],
   });
 
-  /*
-   * Main reveal.
-   *
-   * Restrained cinematic motion.
-   */
-
   const opacity =
     useTransform(
       scrollYProgress,
       [
         0,
-        0.12,
-        0.86,
+        0.1,
+        0.9,
         1,
       ],
       [
-        0.2,
+        0.35,
         1,
         1,
-        0.18,
+        0.35,
       ],
     );
 
@@ -86,10 +92,10 @@ function CinematicStage({
         1,
       ],
       [
-        0.975,
+        0.985,
         1,
         1,
-        0.975,
+        0.985,
       ],
     );
 
@@ -103,10 +109,10 @@ function CinematicStage({
         1,
       ],
       [
-        42,
+        28,
         0,
         0,
-        -42,
+        -28,
       ],
     );
 
@@ -115,15 +121,15 @@ function CinematicStage({
       scrollYProgress,
       [
         0,
-        0.13,
-        0.87,
+        0.12,
+        0.88,
         1,
       ],
       [
-        8,
+        5,
         0,
         0,
-        8,
+        5,
       ],
     );
 
@@ -133,10 +139,6 @@ function CinematicStage({
       (value) =>
         `blur(${value}px)`,
     );
-
-  /*
-   * Transition glow.
-   */
 
   const glowOpacity =
     useTransform(
@@ -150,9 +152,9 @@ function CinematicStage({
       ],
       [
         0,
-        0.12,
-        0.24,
         0.1,
+        0.2,
+        0.08,
         0,
       ],
     );
@@ -167,36 +169,27 @@ function CinematicStage({
         0.95,
       ],
       [
-        0.55,
+        0.7,
         1,
         1,
-        0.55,
+        0.7,
       ],
     );
-
-  /*
-   * Reference palette.
-   *
-   * black
-   * deep violet
-   * soft magenta
-   * restrained electric blue
-   */
 
   const palette =
     tone === "violet"
       ? {
           primary:
-            "rgba(82,32,160,.16)",
+            "rgba(82,32,160,.14)",
 
           secondary:
-            "rgba(168,38,235,.10)",
+            "rgba(168,38,235,.08)",
 
           blue:
-            "rgba(64,85,255,.065)",
+            "rgba(64,85,255,.05)",
 
           line:
-            "rgba(165,125,255,.28)",
+            "rgba(165,125,255,.22)",
 
           particleA:
             "#8B6CFF",
@@ -209,16 +202,16 @@ function CinematicStage({
         }
       : {
           primary:
-            "rgba(102,72,170,.09)",
+            "rgba(102,72,170,.08)",
 
           secondary:
-            "rgba(188,130,240,.06)",
+            "rgba(188,130,240,.05)",
 
           blue:
-            "rgba(255,255,255,.025)",
+            "rgba(255,255,255,.02)",
 
           line:
-            "rgba(222,211,255,.18)",
+            "rgba(222,211,255,.16)",
 
           particleA:
             "#C4B5FD",
@@ -233,12 +226,13 @@ function CinematicStage({
   return (
     <div
       ref={ref}
-      className="relative"
+      className="
+        relative
+        isolate
+      "
     >
       {!reduceMotion && (
         <>
-          {/* Local violet bloom */}
-
           <motion.div
             aria-hidden="true"
             style={{
@@ -264,16 +258,16 @@ function CinematicStage({
               left-1/2
               top-0
               z-[8]
-              h-[42vw]
-              w-[42vw]
+              h-[36vw]
+              w-[36vw]
+              min-h-[340px]
+              min-w-[340px]
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              blur-[145px]
+              blur-[125px]
             "
           />
-
-          {/* Fine transition beam */}
 
           <motion.div
             aria-hidden="true"
@@ -296,16 +290,14 @@ function CinematicStage({
             className="
               pointer-events-none
               absolute
-              left-[12%]
+              left-[14%]
               top-0
               z-[9]
               h-px
-              w-[76%]
+              w-[72%]
               origin-center
             "
           />
-
-          {/* Sparse transition sparks */}
 
           <motion.div
             aria-hidden="true"
@@ -319,12 +311,12 @@ function CinematicStage({
               inset-x-0
               top-0
               z-[9]
-              h-24
+              h-16
               overflow-hidden
             "
           >
             {Array.from({
-              length: 8,
+              length: 6,
             }).map(
               (
                 _,
@@ -336,46 +328,47 @@ function CinematicStage({
                   }
                   animate={{
                     y: [
-                      -12,
-                      75,
+                      -8,
+                      48,
                     ],
 
                     x: [
                       0,
+
                       particleIndex %
                           2 ===
                         0
-                        ? 18
-                        : -18,
+                        ? 12
+                        : -12,
                     ],
 
                     opacity: [
                       0,
-                      0.42,
+                      0.35,
                       0,
                     ],
 
                     scale: [
-                      0.45,
+                      0.5,
                       0.9,
-                      0.45,
+                      0.5,
                     ],
                   }}
                   transition={{
                     duration:
-                      2.5 +
+                      2.4 +
                       (
                         particleIndex %
                         3
                       ) *
-                        0.35,
+                        0.3,
 
                     repeat:
                       Infinity,
 
                     delay:
                       particleIndex *
-                      0.14,
+                      0.16,
 
                     ease:
                       "easeOut",
@@ -389,13 +382,13 @@ function CinematicStage({
                   "
                   style={{
                     left: `${
-                      12 +
+                      15 +
                       (
                         (
                           particleIndex *
-                          19
+                          17
                         ) %
-                        76
+                        70
                       )
                     }%`,
 
@@ -420,8 +413,6 @@ function CinematicStage({
         </>
       )}
 
-      {/* Actual section */}
-
       <motion.div
         style={
           reduceMotion
@@ -444,37 +435,9 @@ function CinematicStage({
   );
 }
 
-/*
- * Planet receives its own wrapper.
- *
- * No external:
- * - glow
- * - particles
- * - opacity animation
- * - blur
- * - scaling
- * - color wash
- *
- * PlanetScene controls itself.
- */
-
-function PlanetStage({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className="
-        relative
-        isolate
-        bg-[#020105]
-      "
-    >
-      {children}
-    </div>
-  );
-}
+/* ====================================================== */
+/* HERO EXIT                                              */
+/* ====================================================== */
 
 function HeroExit({
   children,
@@ -500,22 +463,18 @@ function HeroExit({
     ],
   });
 
-  /*
-   * Hero cinematic exit.
-   */
-
   const scale =
     useTransform(
       scrollYProgress,
       [
         0,
-        0.66,
+        0.68,
         1,
       ],
       [
         1,
-        0.98,
-        0.92,
+        0.985,
+        0.94,
       ],
     );
 
@@ -524,13 +483,13 @@ function HeroExit({
       scrollYProgress,
       [
         0,
-        0.76,
+        0.78,
         1,
       ],
       [
         1,
         1,
-        0.1,
+        0.15,
       ],
     );
 
@@ -543,7 +502,7 @@ function HeroExit({
       ],
       [
         0,
-        -82,
+        -55,
       ],
     );
 
@@ -552,13 +511,13 @@ function HeroExit({
       scrollYProgress,
       [
         0,
-        0.75,
+        0.78,
         1,
       ],
       [
         0,
         0,
-        11,
+        8,
       ],
     );
 
@@ -569,40 +528,13 @@ function HeroExit({
         `blur(${value}px)`,
     );
 
-  const ringScale =
-    useTransform(
-      scrollYProgress,
-      [
-        0.62,
-        0.84,
-        1,
-      ],
-      [
-        0.25,
-        1,
-        2.4,
-      ],
-    );
-
-  const ringOpacity =
-    useTransform(
-      scrollYProgress,
-      [
-        0.6,
-        0.82,
-        1,
-      ],
-      [
-        0,
-        0.28,
-        0,
-      ],
-    );
-
   return (
     <div
       ref={ref}
-      className="relative"
+      className="
+        relative
+        isolate
+      "
     >
       <motion.div
         style={
@@ -622,90 +554,338 @@ function HeroExit({
       >
         {children}
       </motion.div>
-
-      {!reduceMotion && (
-        <>
-          {/* Main portal ring */}
-
-          <motion.div
-            aria-hidden="true"
-            style={{
-              scale:
-                ringScale,
-
-              opacity:
-                ringOpacity,
-            }}
-            className="
-              pointer-events-none
-              absolute
-              bottom-0
-              left-1/2
-              z-[18]
-              h-[22vmin]
-              w-[22vmin]
-              -translate-x-1/2
-              translate-y-1/2
-              rounded-full
-              border
-              border-violet-400/25
-              shadow-[0_0_32px_rgba(112,76,255,.22),0_0_76px_rgba(131,42,205,.14)]
-            "
-          />
-
-          {/* Secondary soft portal ring */}
-
-          <motion.div
-            aria-hidden="true"
-            style={{
-              scale:
-                ringScale,
-
-              opacity:
-                ringOpacity,
-            }}
-            className="
-              pointer-events-none
-              absolute
-              bottom-0
-              left-1/2
-              z-[17]
-              h-[32vmin]
-              w-[32vmin]
-              -translate-x-1/2
-              translate-y-1/2
-              rounded-full
-              border
-              border-fuchsia-400/[0.07]
-              shadow-[0_0_65px_rgba(165,40,255,.10)]
-            "
-          />
-        </>
-      )}
     </div>
   );
 }
+
+/* ====================================================== */
+/* PLANET STAGE                                           */
+/* ====================================================== */
+
+function PlanetStage({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="
+        relative
+        isolate
+        z-20
+        bg-[#020105]
+      "
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* PLANET → MOLECULAR BRIDGE                              */
+/* ====================================================== */
+
+function PlanetMolecularBridge({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="
+        relative
+        isolate
+        z-30
+        -mt-[18vh]
+        bg-[#020105]
+      "
+    >
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          top-0
+          z-[2]
+          h-[22vh]
+          bg-gradient-to-b
+          from-transparent
+          via-[#020105]/60
+          to-[#020105]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[4vh]
+          z-[10]
+          h-px
+          w-[68vw]
+          -translate-x-1/2
+          bg-gradient-to-r
+          from-transparent
+          via-violet-300/22
+          to-transparent
+          shadow-[0_0_24px_rgba(139,92,246,.22)]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[4vh]
+          z-[1]
+          h-[26vw]
+          w-[52vw]
+          min-h-[260px]
+          min-w-[420px]
+          -translate-x-1/2
+          -translate-y-1/2
+          rounded-full
+          bg-violet-700/[0.055]
+          blur-[125px]
+        "
+      />
+
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* DATA STORM STAGE                                       */
+/* ====================================================== */
+
+function DataStormStage({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="
+        relative
+        isolate
+        z-40
+        -mt-[6vh]
+        overflow-hidden
+        bg-[#020105]
+      "
+    >
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-0
+          z-[20]
+          h-px
+          w-[68vw]
+          -translate-x-1/2
+          bg-gradient-to-r
+          from-transparent
+          via-violet-400/30
+          to-transparent
+          shadow-[0_0_20px_rgba(139,92,246,.2)]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-0
+          z-[1]
+          h-[28vw]
+          w-[50vw]
+          min-h-[260px]
+          min-w-[420px]
+          -translate-x-1/2
+          -translate-y-1/2
+          rounded-full
+          bg-violet-700/[0.065]
+          blur-[130px]
+        "
+      />
+
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* DNA BRIDGE                                             */
+/* ====================================================== */
+
+function DNASingularityStage({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="
+        relative
+        isolate
+        z-50
+        -mt-[12vh]
+        overflow-hidden
+        bg-[#020105]
+      "
+    >
+      {/* DATA → DNA SEAM */}
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[2vh]
+          z-[20]
+          h-px
+          w-[62vw]
+          -translate-x-1/2
+          bg-gradient-to-r
+          from-transparent
+          via-fuchsia-300/24
+          to-transparent
+          shadow-[0_0_20px_rgba(217,70,239,.16)]
+        "
+      />
+
+      {/* DNA ENTRY BLOOM */}
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-0
+          z-[1]
+          h-[30vw]
+          w-[48vw]
+          min-h-[280px]
+          min-w-[420px]
+          -translate-x-1/2
+          -translate-y-[58%]
+          rounded-full
+          bg-fuchsia-700/[0.045]
+          blur-[130px]
+        "
+      />
+
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* ABOUT BRIDGE                                           */
+/* ====================================================== */
+
+function AboutBridge({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="
+        relative
+        isolate
+        z-[60]
+        -mt-[14vh]
+        bg-[#020105]
+      "
+    >
+      {/* FINAL LIGHT SEAM */}
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-0
+          z-[12]
+          h-px
+          w-[60vw]
+          -translate-x-1/2
+          bg-gradient-to-r
+          from-transparent
+          via-violet-200/24
+          to-transparent
+        "
+      />
+
+      {/* ABOUT REVEAL BLOOM */}
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-0
+          z-[1]
+          h-[28vw]
+          w-[46vw]
+          min-h-[250px]
+          min-w-[400px]
+          -translate-x-1/2
+          -translate-y-[60%]
+          rounded-full
+          bg-violet-600/[0.035]
+          blur-[120px]
+        "
+      />
+
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* MAIN                                                   */
+/* ====================================================== */
 
 export default function HomeScrollCinematic({
   hero,
   capabilities,
   team,
+  globalToMolecular,
+  dataStorm,
+  dnaSingularity,
   about,
 }: HomeScrollCinematicProps) {
   return (
     <div
       className="
         relative
+        overflow-x-hidden
         bg-[#020105]
       "
     >
-      {/* HERO */}
+      {/* 01 — HERO */}
 
       <HeroExit>
         {hero}
       </HeroExit>
 
-      {/* CAPABILITIES */}
+      {/* 02 — CAPABILITIES */}
 
       <CinematicStage
         tone="violet"
@@ -713,19 +893,39 @@ export default function HomeScrollCinematic({
         {capabilities}
       </CinematicStage>
 
-      {/* PLANET / TEAM */}
+      {/* 03 — PLANET */}
 
       <PlanetStage>
         {team}
       </PlanetStage>
 
-      {/* ABOUT */}
+      {/* 04 — PLANET → MOLECULAR */}
 
-      <CinematicStage
-        tone="white"
-      >
-        {about}
-      </CinematicStage>
+      <PlanetMolecularBridge>
+        {globalToMolecular}
+      </PlanetMolecularBridge>
+
+      {/* 05 — DATA UNIVERSE */}
+
+      <DataStormStage>
+        {dataStorm}
+      </DataStormStage>
+
+      {/* 06 — DNA SINGULARITY */}
+
+      <DNASingularityStage>
+        {dnaSingularity}
+      </DNASingularityStage>
+
+      {/* 07 — ABOUT */}
+
+      <AboutBridge>
+        <CinematicStage
+          tone="white"
+        >
+          {about}
+        </CinematicStage>
+      </AboutBridge>
     </div>
   );
 }

@@ -20,6 +20,10 @@ import {
   feature,
 } from "topojson-client";
 
+import {
+  useCountryFocus,
+} from "./CountryFocus";
+
 type CountryBordersProps = {
   radius?: number;
   reduced?: boolean;
@@ -62,6 +66,10 @@ type CountryInfo = {
   area: number;
 };
 
+/* ====================================================== */
+/* HELPERS                                                */
+/* ====================================================== */
+
 function normalizeId(
   value:
     | string
@@ -75,11 +83,10 @@ function normalizeId(
     return "";
   }
 
-  return String(value)
-    .padStart(
-      3,
-      "0",
-    );
+  return String(value).padStart(
+    3,
+    "0",
+  );
 }
 
 function latLonToVector3(
@@ -137,13 +144,19 @@ function ringToPoints(
   );
 }
 
+/* ====================================================== */
+/* COUNTRY BORDER                                         */
+/* ====================================================== */
+
 function CountryLine({
   points,
   active,
+  focused,
   uzbekistan,
 }: {
   points: THREE.Vector3[];
   active: boolean;
+  focused: boolean;
   uzbekistan: boolean;
 }) {
   const line =
@@ -157,21 +170,25 @@ function CountryLine({
       const material =
         new THREE.LineBasicMaterial({
           color:
-            uzbekistan
-              ? "#D8B4FE"
-              : active
-                ? "#F0ABFC"
-                : "#8B7CC7",
+            focused
+              ? "#F5D0FE"
+              : uzbekistan
+                ? "#D8B4FE"
+                : active
+                  ? "#F0ABFC"
+                  : "#75679B",
 
           transparent:
             true,
 
           opacity:
-            uzbekistan
-              ? 0.95
-              : active
-                ? 1
-                : 0.47,
+            focused
+              ? 1
+              : uzbekistan
+                ? 0.92
+                : active
+                  ? 1
+                  : 0.42,
 
           depthWrite:
             false,
@@ -180,6 +197,7 @@ function CountryLine({
             true,
 
           blending:
+            focused ||
             uzbekistan ||
             active
               ? THREE.AdditiveBlending
@@ -195,6 +213,7 @@ function CountryLine({
       );
     }, [
       active,
+      focused,
       points,
       uzbekistan,
     ]);
@@ -224,19 +243,193 @@ function CountryLine({
   return (
     <primitive
       object={line}
+      raycast={() => {}}
     />
   );
 }
 
-function LocalFlag({
+/* ====================================================== */
+/* COUNTRY SURFACE                                        */
+/* ====================================================== */
+
+function CountrySurface({
+  ring,
+  radius,
+  active,
+  focused,
+  uzbekistan,
+}: {
+  ring: number[][];
+  radius: number;
+  active: boolean;
+  focused: boolean;
+  uzbekistan: boolean;
+}) {
+  const geometry =
+    useMemo(() => {
+      if (
+        ring.length <
+        3
+      ) {
+        return null;
+      }
+
+      const contour =
+        ring.map(
+          (
+            [
+              longitude,
+              latitude,
+            ],
+          ) =>
+            new THREE.Vector2(
+              longitude,
+              latitude,
+            ),
+        );
+
+      const triangles =
+        THREE.ShapeUtils
+          .triangulateShape(
+            contour,
+            [],
+          );
+
+      const positions:
+        number[] = [];
+
+      triangles.forEach(
+        (triangle) => {
+          triangle.forEach(
+            (index) => {
+              const coordinate =
+                ring[index];
+
+              if (!coordinate) {
+                return;
+              }
+
+              const [
+                longitude,
+                latitude,
+              ] =
+                coordinate;
+
+              const point =
+                latLonToVector3(
+                  latitude,
+                  longitude,
+                  radius,
+                );
+
+              positions.push(
+                point.x,
+                point.y,
+                point.z,
+              );
+            },
+          );
+        },
+      );
+
+      if (
+        positions.length ===
+        0
+      ) {
+        return null;
+      }
+
+      const bufferGeometry =
+        new THREE.BufferGeometry();
+
+      bufferGeometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(
+          positions,
+          3,
+        ),
+      );
+
+      bufferGeometry
+        .computeVertexNormals();
+
+      return bufferGeometry;
+    }, [
+      ring,
+      radius,
+    ]);
+
+  useEffect(() => {
+    return () => {
+      geometry?.dispose();
+    };
+  }, [geometry]);
+
+  if (
+    !geometry ||
+    (
+      !active &&
+      !focused &&
+      !uzbekistan
+    )
+  ) {
+    return null;
+  }
+
+  return (
+    <mesh
+      geometry={geometry}
+      renderOrder={3}
+      raycast={() => {}}
+    >
+      <meshBasicMaterial
+        color={
+          focused
+            ? "#D946EF"
+            : uzbekistan
+              ? "#8B5CF6"
+              : "#C026D3"
+        }
+        transparent
+        opacity={
+          focused
+            ? 0.24
+            : uzbekistan
+              ? 0.12
+              : 0.16
+        }
+        side={
+          THREE.DoubleSide
+        }
+        blending={
+          THREE.AdditiveBlending
+        }
+        depthWrite={false}
+        depthTest
+        toneMapped={false}
+        polygonOffset
+        polygonOffsetFactor={-3}
+        polygonOffsetUnits={-3}
+      />
+    </mesh>
+  );
+}
+
+/* ====================================================== */
+/* FLAG                                                   */
+/* ====================================================== */
+
+function SurfaceFlag({
   country,
   radius,
   permanent,
+  focused,
   reduced,
 }: {
   country: CountryInfo;
   radius: number;
   permanent: boolean;
+  focused: boolean;
   reduced: boolean;
 }) {
   const rootRef =
@@ -252,9 +445,10 @@ function LocalFlag({
   const [
     texture,
     setTexture,
-  ] = useState<
-    THREE.Texture | null
-  >(null);
+  ] =
+    useState<THREE.Texture | null>(
+      null,
+    );
 
   const position =
     useMemo(
@@ -312,6 +506,7 @@ function LocalFlag({
       (loadedTexture) => {
         if (disposed) {
           loadedTexture.dispose();
+
           return;
         }
 
@@ -345,15 +540,20 @@ function LocalFlag({
     );
 
     return () => {
-      disposed = true;
+      disposed =
+        true;
     };
-  }, [flagUrl]);
+  }, [
+    flagUrl,
+  ]);
 
   useEffect(() => {
     return () => {
       texture?.dispose();
     };
-  }, [texture]);
+  }, [
+    texture,
+  ]);
 
   useFrame(
     (
@@ -378,7 +578,9 @@ function LocalFlag({
 
       const targetScale =
         texture
-          ? 1
+          ? focused
+            ? 1.22
+            : 1
           : 0.01;
 
       root.scale.x =
@@ -417,15 +619,16 @@ function LocalFlag({
 
       if (
         permanent &&
+        !focused &&
         !reduced &&
         texture
       ) {
         const pulse =
           1 +
           Math.sin(
-            time * 2.1,
+            time * 1.9,
           ) *
-            0.045;
+            0.025;
 
         root.scale.multiplyScalar(
           pulse,
@@ -436,18 +639,22 @@ function LocalFlag({
 
   const flagWidth =
     country.area >
-    2_000_000
-      ? 0.30
+    4_000_000
+      ? 0.21
       : country.area >
-          500_000
-        ? 0.25
+          1_000_000
+        ? 0.175
         : country.area >
-            100_000
-          ? 0.21
-          : 0.17;
+            300_000
+          ? 0.145
+          : country.area >
+              80_000
+            ? 0.12
+            : 0.095;
 
   const flagHeight =
-    flagWidth * 0.67;
+    flagWidth *
+    0.67;
 
   return (
     <group
@@ -460,8 +667,10 @@ function LocalFlag({
         position={[
           0,
           0,
-          0.006,
+          0.002,
         ]}
+        renderOrder={6}
+        raycast={() => {}}
       >
         <planeGeometry
           args={[
@@ -484,22 +693,31 @@ function LocalFlag({
           depthWrite={false}
           depthTest
           toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-5}
+          polygonOffsetUnits={-5}
         />
       </mesh>
     </group>
   );
 }
 
+/* ====================================================== */
+/* COUNTRY HIT AREA                                       */
+/* ====================================================== */
+
 function CountryHitArea({
   country,
   radius,
   onEnter,
   onLeave,
+  onClick,
 }: {
   country: CountryInfo;
   radius: number;
   onEnter: () => void;
   onLeave: () => void;
+  onClick: () => void;
 }) {
   const position =
     useMemo(
@@ -516,24 +734,33 @@ function CountryHitArea({
       ],
     );
 
+  /*
+   * Bigger than visual country center.
+   *
+   * Important:
+   * these hit spheres live outside
+   * the invisible drag sphere.
+   */
+
   const hitRadius =
     country.area >
     4_000_000
-      ? 0.28
+      ? 0.30
       : country.area >
           1_000_000
-        ? 0.23
+        ? 0.245
         : country.area >
             300_000
-          ? 0.19
+          ? 0.20
           : country.area >
               80_000
-            ? 0.15
+            ? 0.155
             : 0.115;
 
   return (
     <mesh
       position={position}
+      renderOrder={20}
       onPointerEnter={(
         event,
       ) => {
@@ -548,6 +775,23 @@ function CountryHitArea({
 
         onLeave();
       }}
+      onPointerDown={(
+        event,
+      ) => {
+        /*
+         * Prevent drag sphere
+         * from starting a drag.
+         */
+
+        event.stopPropagation();
+      }}
+      onClick={(
+        event,
+      ) => {
+        event.stopPropagation();
+
+        onClick();
+      }}
     >
       <sphereGeometry
         args={[
@@ -561,11 +805,16 @@ function CountryHitArea({
         transparent
         opacity={0}
         depthWrite={false}
+        depthTest={false}
         colorWrite={false}
       />
     </mesh>
   );
 }
+
+/* ====================================================== */
+/* UZBEKISTAN PULSE                                       */
+/* ====================================================== */
 
 function UzbekistanPulse({
   radius,
@@ -636,7 +885,8 @@ function UzbekistanPulse({
       ) {
         const cycle =
           (
-            time * 0.36
+            time *
+            0.32
           ) %
           1;
 
@@ -645,7 +895,7 @@ function UzbekistanPulse({
           .setScalar(
             1 +
               cycle *
-                1.55,
+                1.45,
           );
 
         const material =
@@ -653,8 +903,11 @@ function UzbekistanPulse({
             .material as THREE.MeshBasicMaterial;
 
         material.opacity =
-          0.30 *
-          (1 - cycle);
+          0.20 *
+          (
+            1 -
+            cycle
+          );
       }
 
       if (
@@ -662,7 +915,8 @@ function UzbekistanPulse({
       ) {
         const cycle =
           (
-            time * 0.36 +
+            time *
+              0.32 +
             0.5
           ) %
           1;
@@ -672,7 +926,7 @@ function UzbekistanPulse({
           .setScalar(
             1 +
               cycle *
-                1.55,
+                1.45,
           );
 
         const material =
@@ -680,8 +934,11 @@ function UzbekistanPulse({
             .material as THREE.MeshBasicMaterial;
 
         material.opacity =
-          0.22 *
-          (1 - cycle);
+          0.14 *
+          (
+            1 -
+            cycle
+          );
       }
     },
   );
@@ -696,13 +953,14 @@ function UzbekistanPulse({
         position={[
           0,
           0,
-          0.01,
+          0.003,
         ]}
+        raycast={() => {}}
       >
         <ringGeometry
           args={[
-            0.050,
-            0.061,
+            0.038,
+            0.047,
             48,
           ]}
         />
@@ -710,7 +968,7 @@ function UzbekistanPulse({
         <meshBasicMaterial
           color="#D8B4FE"
           transparent
-          opacity={0.30}
+          opacity={0.20}
           side={
             THREE.DoubleSide
           }
@@ -727,13 +985,14 @@ function UzbekistanPulse({
         position={[
           0,
           0,
-          0.009,
+          0.002,
         ]}
+        raycast={() => {}}
       >
         <ringGeometry
           args={[
-            0.050,
-            0.061,
+            0.038,
+            0.047,
             48,
           ]}
         />
@@ -741,7 +1000,7 @@ function UzbekistanPulse({
         <meshBasicMaterial
           color="#6366F1"
           transparent
-          opacity={0.22}
+          opacity={0.14}
           side={
             THREE.DoubleSide
           }
@@ -756,6 +1015,10 @@ function UzbekistanPulse({
   );
 }
 
+/* ====================================================== */
+/* MAIN                                                   */
+/* ====================================================== */
+
 export default function CountryBorders({
   radius = 2.305,
   reduced = false,
@@ -763,9 +1026,20 @@ export default function CountryBorders({
   const [
     hoveredId,
     setHoveredId,
-  ] = useState<
-    string | null
-  >(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const {
+    focusedCountry,
+    focusCountry,
+  } =
+    useCountryFocus();
+
+  /* ==================================================== */
+  /* COUNTRY METADATA                                     */
+  /* ==================================================== */
 
   const countryInfoMap =
     useMemo(() => {
@@ -778,7 +1052,9 @@ export default function CountryBorders({
       (
         countriesData as CountryDatasetItem[]
       ).forEach(
-        (country) => {
+        (
+          country,
+        ) => {
           if (
             !country.ccn3 ||
             !country.cca2 ||
@@ -828,6 +1104,10 @@ export default function CountryBorders({
       return map;
     }, []);
 
+  /* ==================================================== */
+  /* ATLAS                                                */
+  /* ==================================================== */
+
   const countries =
     useMemo(() => {
       const topology =
@@ -849,8 +1129,13 @@ export default function CountryBorders({
             GeoFeature[];
         };
 
-      return collection.features;
+      return collection
+        .features;
     }, []);
+
+  /* ==================================================== */
+  /* UZBEKISTAN                                           */
+  /* ==================================================== */
 
   const uzbekistan =
     useMemo(() => {
@@ -870,6 +1155,10 @@ export default function CountryBorders({
       countryInfoMap,
     ]);
 
+  /* ==================================================== */
+  /* RENDER                                               */
+  /* ==================================================== */
+
   return (
     <group>
       {countries.map(
@@ -880,7 +1169,9 @@ export default function CountryBorders({
           const geometry =
             country.geometry;
 
-          if (!geometry) {
+          if (
+            !geometry
+          ) {
             return null;
           }
 
@@ -897,6 +1188,13 @@ export default function CountryBorders({
           const active =
             hoveredId ===
             id;
+
+          const isFocused =
+            Boolean(
+              info &&
+              focusedCountry?.code ===
+                info.code,
+            );
 
           const isUzbekistan =
             info?.code ===
@@ -923,41 +1221,78 @@ export default function CountryBorders({
                 (
                   polygon,
                   polygonIndex,
-                ) =>
-                  polygon.map(
-                    (
-                      ring,
-                      ringIndex,
-                    ) => {
-                      if (
-                        !ring ||
-                        ring.length <
-                          2
-                      ) {
-                        return null;
-                      }
+                ) => {
+                  const outerRing =
+                    polygon[0];
 
-                      return (
-                        <CountryLine
-                          key={
-                            `${id}-${polygonIndex}-${ringIndex}`
+                  return (
+                    <group
+                      key={
+                        `${id}-${polygonIndex}`
+                      }
+                    >
+                      {outerRing && (
+                        <CountrySurface
+                          ring={
+                            outerRing
                           }
-                          points={
-                            ringToPoints(
-                              ring,
-                              radius,
-                            )
+                          radius={
+                            radius +
+                            0.004
                           }
                           active={
                             active
+                          }
+                          focused={
+                            isFocused
                           }
                           uzbekistan={
                             isUzbekistan
                           }
                         />
-                      );
-                    },
-                  ),
+                      )}
+
+                      {polygon.map(
+                        (
+                          ring,
+                          ringIndex,
+                        ) => {
+                          if (
+                            !ring ||
+                            ring.length <
+                              2
+                          ) {
+                            return null;
+                          }
+
+                          return (
+                            <CountryLine
+                              key={
+                                `${id}-${polygonIndex}-${ringIndex}`
+                              }
+                              points={
+                                ringToPoints(
+                                  ring,
+                                  radius +
+                                    0.006,
+                                )
+                              }
+                              active={
+                                active
+                              }
+                              focused={
+                                isFocused
+                              }
+                              uzbekistan={
+                                isUzbekistan
+                              }
+                            />
+                          );
+                        },
+                      )}
+                    </group>
+                  );
+                },
               )}
 
               {info && (
@@ -965,42 +1300,96 @@ export default function CountryBorders({
                   country={
                     info
                   }
+
+                  /*
+                   * IMPORTANT FIX:
+                   *
+                   * Was +0.028.
+                   *
+                   * Now the interaction
+                   * layer is clearly
+                   * outside the planet.
+                   */
+
                   radius={
                     radius +
-                    0.075
+                    0.055
                   }
                   onEnter={() => {
                     setHoveredId(
                       id,
                     );
 
-                    document.body.style.cursor =
-                      "pointer";
+                    if (
+                      typeof document !==
+                      "undefined"
+                    ) {
+                      document.body.style.cursor =
+                        "pointer";
+                    }
                   }}
                   onLeave={() => {
                     setHoveredId(
                       null,
                     );
 
-                    document.body.style.cursor =
-                      "grab";
+                    if (
+                      typeof document !==
+                      "undefined"
+                    ) {
+                      document.body.style.cursor =
+                        focusedCountry
+                          ? "default"
+                          : "grab";
+                    }
+                  }}
+                  onClick={() => {
+                    /*
+                     * Select country.
+                     */
+
+                    console.log(
+                      "[CountryFocus] CLICK:",
+                      info.name,
+                      info.code,
+                    );
+
+                    focusCountry({
+                      code:
+                        info.code,
+
+                      name:
+                        info.name,
+
+                      latitude:
+                        info.latitude,
+
+                      longitude:
+                        info.longitude,
+                    });
                   }}
                 />
               )}
 
               {info &&
-                active &&
+                (
+                  active ||
+                  isFocused
+                ) &&
                 !isUzbekistan && (
-                  <LocalFlag
+                  <SurfaceFlag
                     country={
                       info
                     }
                     radius={
                       radius +
-                      0.09
+                      0.010
                     }
                     permanent={
                       false
+                    }
+                    focused={
+                      isFocused
                     }
                     reduced={
                       reduced
@@ -1012,26 +1401,34 @@ export default function CountryBorders({
         },
       )}
 
+      {/* Uzbekistan permanent pulse */}
+
       <UzbekistanPulse
         radius={
           radius +
-          0.035
+          0.008
         }
         reduced={
           reduced
         }
       />
 
+      {/* Uzbekistan permanent flag */}
+
       {uzbekistan && (
-        <LocalFlag
+        <SurfaceFlag
           country={
             uzbekistan
           }
           radius={
             radius +
-            0.095
+            0.011
           }
           permanent
+          focused={
+            focusedCountry?.code ===
+            "UZ"
+          }
           reduced={
             reduced
           }

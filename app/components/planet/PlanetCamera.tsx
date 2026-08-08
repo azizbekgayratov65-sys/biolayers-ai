@@ -1,15 +1,25 @@
 "use client";
 
 import {
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+
+import {
   useFrame,
   useThree,
 } from "@react-three/fiber";
 
-import * as THREE from "three";
-
 import type {
   MotionValue,
 } from "framer-motion";
+
+import * as THREE from "three";
+
+import {
+  useCountryFocus,
+} from "./CountryFocus";
 
 type PlanetCameraProps = {
   progress: MotionValue<number>;
@@ -22,191 +32,387 @@ export default function PlanetCamera({
 }: PlanetCameraProps) {
   const {
     camera,
-    pointer,
-  } = useThree();
+  } =
+    useThree();
+
+  const {
+    focusedCountry,
+    clearFocus,
+  } =
+    useCountryFocus();
+
+  /* ==================================================== */
+  /* BASE CAMERA                                          */
+  /* ==================================================== */
+
+  const baseLookTarget =
+    useMemo(
+      () =>
+        new THREE.Vector3(
+          0,
+          0,
+          0,
+        ),
+      [],
+    );
+
+  const targetPositionRef =
+    useRef(
+      new THREE.Vector3(
+        0,
+        0.8,
+        9.4,
+      ),
+    );
+
+  const currentLookTargetRef =
+    useRef(
+      new THREE.Vector3(
+        0,
+        0,
+        0,
+      ),
+    );
+
+  const targetLookRef =
+    useRef(
+      new THREE.Vector3(
+        0,
+        0,
+        0,
+      ),
+    );
+
+  const focusAmountRef =
+    useRef(0);
+
+  const cinematicDriftRef =
+    useRef(
+      new THREE.Vector3(),
+    );
+
+  /* ==================================================== */
+  /* ESC                                                  */
+  /* ==================================================== */
+
+  useEffect(() => {
+    const handleKeyDown =
+      (
+        event:
+          KeyboardEvent,
+      ) => {
+        if (
+          event.key ===
+          "Escape"
+        ) {
+          clearFocus();
+        }
+      };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+    };
+  }, [
+    clearFocus,
+  ]);
+
+  /* ==================================================== */
+  /* CAMERA LOOP                                          */
+  /* ==================================================== */
 
   useFrame(
     (
       state,
       delta,
     ) => {
-      const p =
-        reduced
-          ? 0.45
-          : progress.get();
+      const scroll =
+        progress.get();
 
-      const time =
-        state.clock.elapsedTime;
+      /* ================================================= */
+      /* NORMAL SCROLL CAMERA                              */
+      /* ================================================= */
+
+      const scrollProgress =
+        THREE.MathUtils.smoothstep(
+          scroll,
+          0.08,
+          0.78,
+        );
+
+      const normalZ =
+        THREE.MathUtils.lerp(
+          9.4,
+          7.25,
+          scrollProgress,
+        );
+
+      const normalY =
+        THREE.MathUtils.lerp(
+          0.8,
+          0.32,
+          scrollProgress,
+        );
+
+      const normalX =
+        0;
+
+      /* ================================================= */
+      /* CINEMATIC DRIFT                                   */
+      /* ================================================= */
+
+      if (
+        !reduced &&
+        !focusedCountry
+      ) {
+        const time =
+          state.clock
+            .elapsedTime;
+
+        cinematicDriftRef
+          .current
+          .set(
+            Math.sin(
+              time * 0.18,
+            ) *
+              0.045,
+
+            Math.sin(
+              time * 0.13,
+            ) *
+              0.03,
+
+            0,
+          );
+      } else {
+        cinematicDriftRef
+          .current
+          .set(
+            0,
+            0,
+            0,
+          );
+      }
+
+      /* ================================================= */
+      /* FOCUS AMOUNT                                      */
+      /* ================================================= */
+
+      const targetFocus =
+        focusedCountry
+          ? 1
+          : 0;
+
+      focusAmountRef.current =
+        THREE.MathUtils.damp(
+          focusAmountRef.current,
+          targetFocus,
+          reduced
+            ? 20
+            : 3.8,
+          delta,
+        );
+
+      /* ================================================= */
+      /* COUNTRY FOCUS CAMERA                              */
+      /* ================================================= */
 
       /*
-        Scene reveal.
-        Starts wide and cinematic.
-      */
+       * Important:
+       *
+       * Earth itself rotates the selected
+       * country toward +Z/front.
+       *
+       * Camera therefore only needs to move
+       * toward the center.
+       */
 
-      const reveal =
-        THREE.MathUtils.clamp(
-          p / 0.28,
+      const focusPosition =
+        new THREE.Vector3(
           0,
-          1,
+          0.18,
+          5.35,
         );
 
       /*
-        Core dive starts late
-        and stays smooth.
-      */
+       * Blend between normal camera
+       * and focus camera.
+       */
 
-      const exit =
-        THREE.MathUtils.clamp(
-          (
-            p - 0.72
-          ) /
-            0.28,
-          0,
-          1,
+      targetPositionRef
+        .current
+        .set(
+          normalX,
+          normalY,
+          normalZ,
         );
 
-      const easedExit =
-        exit *
-        exit *
-        (
-          3 -
-          2 * exit
+      targetPositionRef
+        .current
+        .add(
+          cinematicDriftRef
+            .current,
         );
 
-      /*
-        Slow orbital movement.
-      */
+      targetPositionRef
+        .current
+        .lerp(
+          focusPosition,
+          focusAmountRef
+            .current,
+        );
 
-      const orbitAngle =
-        -0.46 +
-        p * 0.88 +
-        Math.sin(
-          time * 0.055,
-        ) *
-          0.045;
-
-      const radius =
-        9.6 -
-        reveal * 1.25 -
-        easedExit * 2.5;
+      /* ================================================= */
+      /* LOOK TARGET                                       */
+      /* ================================================= */
 
       /*
-        Gentle mouse parallax.
-      */
+       * During focus look slightly above
+       * center so selected country sits
+       * closer to visual center instead
+       * of underneath the title.
+       */
 
-      const pointerX =
-        reduced
-          ? 0
-          : pointer.x * 0.22;
+      targetLookRef
+        .current
+        .copy(
+          baseLookTarget,
+        );
 
-      const pointerY =
-        reduced
-          ? 0
-          : pointer.y * 0.16;
+      if (
+        focusedCountry
+      ) {
+        targetLookRef
+          .current
+          .set(
+            0,
+            0.22,
+            0,
+          );
+      }
 
-      const targetX =
-        Math.sin(
-          orbitAngle,
-        ) *
-          1.15 +
-        pointerX;
+      currentLookTargetRef
+        .current.x =
+        THREE.MathUtils.damp(
+          currentLookTargetRef
+            .current.x,
+          targetLookRef
+            .current.x,
+          5,
+          delta,
+        );
 
-      const targetY =
-        0.72 +
-        Math.cos(
-          orbitAngle * 0.68,
-        ) *
-          0.48 +
-        pointerY -
-        easedExit * 0.5;
+      currentLookTargetRef
+        .current.y =
+        THREE.MathUtils.damp(
+          currentLookTargetRef
+            .current.y,
+          targetLookRef
+            .current.y,
+          5,
+          delta,
+        );
 
-      const targetZ =
-        radius;
+      currentLookTargetRef
+        .current.z =
+        THREE.MathUtils.damp(
+          currentLookTargetRef
+            .current.z,
+          targetLookRef
+            .current.z,
+          5,
+          delta,
+        );
+
+      /* ================================================= */
+      /* APPLY POSITION                                    */
+      /* ================================================= */
+
+      const damping =
+        focusedCountry
+          ? 4.6
+          : 5.4;
 
       camera.position.x =
         THREE.MathUtils.damp(
           camera.position.x,
-          targetX,
-          2.6,
+          targetPositionRef
+            .current.x,
+          damping,
           delta,
         );
 
       camera.position.y =
         THREE.MathUtils.damp(
           camera.position.y,
-          targetY,
-          2.6,
+          targetPositionRef
+            .current.y,
+          damping,
           delta,
         );
 
       camera.position.z =
         THREE.MathUtils.damp(
           camera.position.z,
-          targetZ,
-          3.0,
+          targetPositionRef
+            .current.z,
+          damping,
           delta,
         );
-
-      /*
-        Look point slowly shifts
-        toward the core.
-      */
-
-      const lookX =
-        pointerX * 0.15;
-
-      const lookY =
-        -easedExit * 0.18 +
-        pointerY * 0.08;
-
-      const lookZ =
-        -easedExit * 0.55;
 
       camera.lookAt(
-        lookX,
-        lookY,
-        lookZ,
+        currentLookTargetRef
+          .current,
       );
 
-      /*
-        Very subtle cinematic roll.
-      */
-
-      camera.rotation.z =
-        THREE.MathUtils.damp(
-          camera.rotation.z,
-          Math.sin(
-            time * 0.045,
-          ) *
-            0.006 +
-          pointer.x *
-            -0.004,
-          2.4,
-          delta,
-        );
-
-      /*
-        FOV expansion during core dive.
-        Kept restrained.
-      */
+      /* ================================================= */
+      /* FOV                                               */
+      /* ================================================= */
 
       if (
         camera instanceof
         THREE.PerspectiveCamera
       ) {
+        const normalFov =
+          THREE.MathUtils.lerp(
+            47,
+            44,
+            scrollProgress,
+          );
+
+        /*
+         * Narrower FOV during focus
+         * gives more cinematic compression.
+         */
+
+        const focusFov =
+          32;
+
         const targetFov =
-          47 +
-          easedExit * 5.5;
+          THREE.MathUtils.lerp(
+            normalFov,
+            focusFov,
+            focusAmountRef
+              .current,
+          );
 
         camera.fov =
           THREE.MathUtils.damp(
             camera.fov,
             targetFov,
-            3.2,
+            4.8,
             delta,
           );
 
-        camera.updateProjectionMatrix();
+        camera
+          .updateProjectionMatrix();
       }
     },
   );
