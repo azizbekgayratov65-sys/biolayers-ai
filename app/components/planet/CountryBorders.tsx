@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useEffect,
@@ -258,12 +258,18 @@ function CountrySurface({
   active,
   focused,
   uzbekistan,
+  onEnter,
+  onLeave,
+  onClick,
 }: {
   ring: number[][];
   radius: number;
   active: boolean;
   focused: boolean;
   uzbekistan: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
+  onClick: () => void;
 }) {
   const geometry =
     useMemo(() => {
@@ -365,53 +371,101 @@ function CountrySurface({
     };
   }, [geometry]);
 
-  if (
-    !geometry ||
-    (
-      !active &&
-      !focused &&
-      !uzbekistan
-    )
-  ) {
+  if (!geometry) {
     return null;
   }
 
   return (
-    <mesh
-      geometry={geometry}
-      renderOrder={3}
-      raycast={() => {}}
-    >
-      <meshBasicMaterial
-        color={
-          focused
-            ? "#D946EF"
-            : uzbekistan
-              ? "#8B5CF6"
-              : "#C026D3"
-        }
-        transparent
-        opacity={
-          focused
-            ? 0.24
-            : uzbekistan
-              ? 0.12
-              : 0.16
-        }
-        side={
-          THREE.DoubleSide
-        }
-        blending={
-          THREE.AdditiveBlending
-        }
-        depthWrite={false}
-        depthTest
-        toneMapped={false}
-        polygonOffset
-        polygonOffsetFactor={-3}
-        polygonOffsetUnits={-3}
-      />
-    </mesh>
+    <group>
+      {/*
+       * REAL COUNTRY-SHAPE HIT SURFACE
+       *
+       * This mesh is always present and follows the
+       * actual polygon instead of relying only on a
+       * small sphere at the country's centroid.
+       */}
+      <mesh
+        geometry={geometry}
+        renderOrder={25}
+        onPointerEnter={(
+          event,
+        ) => {
+          event.stopPropagation();
+          onEnter();
+        }}
+        onPointerMove={(
+          event,
+        ) => {
+          event.stopPropagation();
+          onEnter();
+        }}
+        onPointerLeave={(
+          event,
+        ) => {
+          event.stopPropagation();
+          onLeave();
+        }}
+        onClick={(
+          event,
+        ) => {
+          event.stopPropagation();
+          onClick();
+        }}
+      >
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          side={
+            THREE.DoubleSide
+          }
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
+      </mesh>
+
+      {(
+        active ||
+        focused ||
+        uzbekistan
+      ) && (
+        <mesh
+          geometry={geometry}
+          renderOrder={4}
+          raycast={() => {}}
+        >
+          <meshBasicMaterial
+            color={
+              focused
+                ? "#D946EF"
+                : uzbekistan
+                  ? "#8B5CF6"
+                  : "#C026D3"
+            }
+            transparent
+            opacity={
+              focused
+                ? 0.24
+                : uzbekistan
+                  ? 0.12
+                  : 0.16
+            }
+            side={
+              THREE.DoubleSide
+            }
+            blending={
+              THREE.AdditiveBlending
+            }
+            depthWrite={false}
+            depthTest
+            toneMapped={false}
+            polygonOffset
+            polygonOffsetFactor={-3}
+            polygonOffsetUnits={-3}
+          />
+        </mesh>
+      )}
+    </group>
   );
 }
 
@@ -425,12 +479,14 @@ function SurfaceFlag({
   permanent,
   focused,
   reduced,
+  visible,
 }: {
   country: CountryInfo;
   radius: number;
   permanent: boolean;
   focused: boolean;
   reduced: boolean;
+  visible: boolean;
 }) {
   const rootRef =
     useRef<THREE.Group | null>(
@@ -577,11 +633,12 @@ function SurfaceFlag({
         state.clock.elapsedTime;
 
       const targetScale =
-        texture
+        texture &&
+        visible
           ? focused
-            ? 1.22
+            ? 1.28
             : 1
-          : 0.01;
+          : 0.001;
 
       root.scale.x =
         THREE.MathUtils.damp(
@@ -610,7 +667,8 @@ function SurfaceFlag({
       material.opacity =
         THREE.MathUtils.damp(
           material.opacity,
-          texture
+          texture &&
+          visible
             ? 1
             : 0,
           12,
@@ -669,7 +727,7 @@ function SurfaceFlag({
           0,
           0.002,
         ]}
-        renderOrder={6}
+        renderOrder={60}
         raycast={() => {}}
       >
         <planeGeometry
@@ -691,7 +749,7 @@ function SurfaceFlag({
             THREE.DoubleSide
           }
           depthWrite={false}
-          depthTest
+          depthTest={false}
           toneMapped={false}
           polygonOffset
           polygonOffsetFactor={-5}
@@ -1238,7 +1296,7 @@ export default function CountryBorders({
                           }
                           radius={
                             radius +
-                            0.004
+                            0.018
                           }
                           active={
                             active
@@ -1249,6 +1307,53 @@ export default function CountryBorders({
                           uzbekistan={
                             isUzbekistan
                           }
+                          onEnter={() => {
+                            setHoveredId(
+                              id,
+                            );
+
+                            if (
+                              typeof document !==
+                              "undefined"
+                            ) {
+                              document.body.style.cursor =
+                                "pointer";
+                            }
+                          }}
+                          onLeave={() => {
+                            setHoveredId(
+                              null,
+                            );
+
+                            if (
+                              typeof document !==
+                              "undefined"
+                            ) {
+                              document.body.style.cursor =
+                                focusedCountry
+                                  ? "default"
+                                  : "grab";
+                            }
+                          }}
+                          onClick={() => {
+                            if (!info) {
+                              return;
+                            }
+
+                            focusCountry({
+                              code:
+                                info.code,
+
+                              name:
+                                info.name,
+
+                              latitude:
+                                info.latitude,
+
+                              longitude:
+                                info.longitude,
+                            });
+                          }}
                         />
                       )}
 
@@ -1313,7 +1418,7 @@ export default function CountryBorders({
 
                   radius={
                     radius +
-                    0.055
+                    0.028
                   }
                   onEnter={() => {
                     setHoveredId(
@@ -1372,10 +1477,6 @@ export default function CountryBorders({
               )}
 
               {info &&
-                (
-                  active ||
-                  isFocused
-                ) &&
                 !isUzbekistan && (
                   <SurfaceFlag
                     country={
@@ -1383,7 +1484,7 @@ export default function CountryBorders({
                     }
                     radius={
                       radius +
-                      0.010
+                      0.075
                     }
                     permanent={
                       false
@@ -1393,6 +1494,10 @@ export default function CountryBorders({
                     }
                     reduced={
                       reduced
+                    }
+                    visible={
+                      active ||
+                      isFocused
                     }
                   />
                 )}
@@ -1422,7 +1527,7 @@ export default function CountryBorders({
           }
           radius={
             radius +
-            0.011
+            0.075
           }
           permanent
           focused={
@@ -1432,6 +1537,7 @@ export default function CountryBorders({
           reduced={
             reduced
           }
+          visible
         />
       )}
     </group>

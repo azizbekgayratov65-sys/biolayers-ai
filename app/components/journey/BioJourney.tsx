@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   Canvas,
@@ -8,7 +8,6 @@ import {
 
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -16,6 +15,7 @@ import {
 } from "framer-motion";
 
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -167,6 +167,155 @@ function JourneyEarth({
   } =
     useCountryFocus();
 
+  /*
+   * Robust globe dragging:
+   * listen on the actual canvas at DOM capture level so country hit areas
+   * cannot block drag initiation.
+   */
+  useEffect(() => {
+    const handlePointerDown = (
+      event: PointerEvent,
+    ) => {
+      if (
+        event.button !== 0 ||
+        progress.get() >= 0.34 ||
+        focusedCountry
+      ) {
+        return;
+      }
+
+      draggingRef.current = true;
+
+      pointerRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+
+      velocityRef.current = {
+        x: 0,
+        y: 0,
+      };
+
+      document.body.style.cursor =
+        "grabbing";
+    };
+
+    const handlePointerMove = (
+      event: PointerEvent,
+    ) => {
+      if (
+        !draggingRef.current ||
+        progress.get() >= 0.34 ||
+        focusedCountry
+      ) {
+        return;
+      }
+
+      const deltaX =
+        event.clientX -
+        pointerRef.current.x;
+
+      const deltaY =
+        event.clientY -
+        pointerRef.current.y;
+
+      pointerRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+
+      rotationRef.current.y +=
+        deltaX * 0.006;
+
+      rotationRef.current.x +=
+        deltaY * 0.005;
+
+      rotationRef.current.x =
+        THREE.MathUtils.clamp(
+          rotationRef.current.x,
+          -1.15,
+          1.15,
+        );
+
+      velocityRef.current.x =
+        THREE.MathUtils.clamp(
+          deltaX * 0.055,
+          -2,
+          2,
+        );
+
+      velocityRef.current.y =
+        THREE.MathUtils.clamp(
+          deltaY * 0.05,
+          -1.5,
+          1.5,
+        );
+    };
+
+    const handlePointerUp = () => {
+      if (!draggingRef.current) {
+        return;
+      }
+
+      draggingRef.current = false;
+      document.body.style.cursor =
+        "default";
+    };
+
+    window.addEventListener(
+      "pointerdown",
+      handlePointerDown,
+      true,
+    );
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      true,
+    );
+
+    window.addEventListener(
+      "pointerup",
+      handlePointerUp,
+      true,
+    );
+
+    window.addEventListener(
+      "pointercancel",
+      handlePointerUp,
+      true,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointerdown",
+        handlePointerDown,
+        true,
+      );
+
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove,
+        true,
+      );
+
+      window.removeEventListener(
+        "pointerup",
+        handlePointerUp,
+        true,
+      );
+
+      window.removeEventListener(
+        "pointercancel",
+        handlePointerUp,
+        true,
+      );
+    };
+  }, [
+    focusedCountry,
+    progress,
+  ]);
+
   useFrame(
     (
       _state,
@@ -302,13 +451,9 @@ function JourneyEarth({
               delta,
             );
 
-          if (
-            !reduced &&
-            p < 0.215
-          ) {
+          if (p < 0.34) {
             rotationRef.current.y +=
-              delta *
-              0.026;
+              delta * 0.055;
           }
         }
 
@@ -365,8 +510,8 @@ function JourneyEarth({
           event,
         ) => {
           if (
-            progress.get() >
-            0.215
+            progress.get() >=
+            0.34
           ) {
             return;
           }
@@ -401,8 +546,8 @@ function JourneyEarth({
         ) => {
           if (
             !draggingRef.current ||
-            progress.get() >
-              0.215
+            progress.get() >=
+              0.34
           ) {
             return;
           }
@@ -3878,10 +4023,7 @@ export default function BioJourney() {
       null,
     );
 
-  const reduced =
-    Boolean(
-      useReducedMotion(),
-    );
+  const reduced = false;
 
   const {
     scrollYProgress,

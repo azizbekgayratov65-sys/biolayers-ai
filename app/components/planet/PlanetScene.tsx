@@ -7,7 +7,6 @@ import {
 
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -674,10 +673,7 @@ export default function PlanetScene() {
       null,
     );
 
-  const reduced =
-    Boolean(
-      useReducedMotion(),
-    );
+  const reduced = false;
 
   const {
     scrollYProgress,
