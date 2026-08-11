@@ -75,12 +75,11 @@ const edgeTypes = {
     BiologicalEdge,
 };
 
-const miniMapColors: Record<
-  EntityType,
-  string
-> = {
+const miniMapColors: Record<EntityType, string> = {
   cell: "#2dd4bf",
   protein: "#a78bfa",
+  gene: "#22d3ee",
+  drug: "#f472b6",
   pathway: "#fbbf24",
   process: "#60a5fa",
   disease: "#fb7185",

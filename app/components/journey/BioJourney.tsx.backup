@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   Canvas,
@@ -15,7 +15,6 @@ import {
 } from "framer-motion";
 
 import {
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -45,22 +44,10 @@ type JourneyProps = {
   reduced: boolean;
 };
 
-type BiologicalLayer =
-  | "cell"
-  | "ligand"
-  | "receptor"
-  | "gene"
-  | "protein"
-  | "pathway"
-  | "process"
-  | "phenotype"
-  | "disease"
-  | "evidence";
-
 type GraphNode = {
   id: string;
   label: string;
-  kind: BiologicalLayer;
+  kind: "gene" | "pathway" | "cancer" | "evidence";
   x: number;
   y: number;
   size: number;
@@ -76,13 +63,13 @@ type GraphEdge = {
 /* ====================================================== */
 
 /*
-  0.00 - 0.24   Planetary scale / life in layers
+  0.00 - 0.24   Earth
   0.22 - 0.34   Atmospheric entry
-  0.30 - 0.46   Cellular layer
-  0.40 - 0.62   Molecular signaling layer
-  0.54 - 0.72   Gene / protein universe
+  0.30 - 0.46   8.2 billion lives
+  0.40 - 0.62   Molecular tunnel
+  0.54 - 0.72   Gene universe
   0.66 - 0.84   DNA formation
-  0.78 - 0.96   Biological layer map
+  0.78 - 0.96   Cancer knowledge graph
   0.93 - 1.00   Collapse into About
 */
 
@@ -178,155 +165,6 @@ function JourneyEarth({
     focusedCountry,
   } =
     useCountryFocus();
-
-  /*
-   * Robust globe dragging:
-   * listen on the actual canvas at DOM capture level so country hit areas
-   * cannot block drag initiation.
-   */
-  useEffect(() => {
-    const handlePointerDown = (
-      event: PointerEvent,
-    ) => {
-      if (
-        event.button !== 0 ||
-        progress.get() >= 0.34 ||
-        focusedCountry
-      ) {
-        return;
-      }
-
-      draggingRef.current = true;
-
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-
-      velocityRef.current = {
-        x: 0,
-        y: 0,
-      };
-
-      document.body.style.cursor =
-        "grabbing";
-    };
-
-    const handlePointerMove = (
-      event: PointerEvent,
-    ) => {
-      if (
-        !draggingRef.current ||
-        progress.get() >= 0.34 ||
-        focusedCountry
-      ) {
-        return;
-      }
-
-      const deltaX =
-        event.clientX -
-        pointerRef.current.x;
-
-      const deltaY =
-        event.clientY -
-        pointerRef.current.y;
-
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-
-      rotationRef.current.y +=
-        deltaX * 0.006;
-
-      rotationRef.current.x +=
-        deltaY * 0.005;
-
-      rotationRef.current.x =
-        THREE.MathUtils.clamp(
-          rotationRef.current.x,
-          -1.15,
-          1.15,
-        );
-
-      velocityRef.current.x =
-        THREE.MathUtils.clamp(
-          deltaX * 0.055,
-          -2,
-          2,
-        );
-
-      velocityRef.current.y =
-        THREE.MathUtils.clamp(
-          deltaY * 0.05,
-          -1.5,
-          1.5,
-        );
-    };
-
-    const handlePointerUp = () => {
-      if (!draggingRef.current) {
-        return;
-      }
-
-      draggingRef.current = false;
-      document.body.style.cursor =
-        "default";
-    };
-
-    window.addEventListener(
-      "pointerdown",
-      handlePointerDown,
-      true,
-    );
-
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove,
-      true,
-    );
-
-    window.addEventListener(
-      "pointerup",
-      handlePointerUp,
-      true,
-    );
-
-    window.addEventListener(
-      "pointercancel",
-      handlePointerUp,
-      true,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "pointerdown",
-        handlePointerDown,
-        true,
-      );
-
-      window.removeEventListener(
-        "pointermove",
-        handlePointerMove,
-        true,
-      );
-
-      window.removeEventListener(
-        "pointerup",
-        handlePointerUp,
-        true,
-      );
-
-      window.removeEventListener(
-        "pointercancel",
-        handlePointerUp,
-        true,
-      );
-    };
-  }, [
-    focusedCountry,
-    progress,
-  ]);
 
   useFrame(
     (
@@ -463,9 +301,13 @@ function JourneyEarth({
               delta,
             );
 
-          if (p < 0.34) {
+          if (
+            !reduced &&
+            p < 0.215
+          ) {
             rotationRef.current.y +=
-              delta * 0.055;
+              delta *
+              0.026;
           }
         }
 
@@ -522,8 +364,8 @@ function JourneyEarth({
           event,
         ) => {
           if (
-            progress.get() >=
-            0.34
+            progress.get() >
+            0.215
           ) {
             return;
           }
@@ -558,8 +400,8 @@ function JourneyEarth({
         ) => {
           if (
             !draggingRef.current ||
-            progress.get() >=
-              0.34
+            progress.get() >
+              0.215
           ) {
             return;
           }
@@ -2023,135 +1865,358 @@ function JourneyCopy({
 }: {
   progress: MotionValue<number>;
 }) {
-  const earthOpacity = useTransform(
-    progress,
-    [0.01, 0.045, 0.19, 0.235],
-    [0, 1, 1, 0],
-  );
+  const earthOpacity =
+    useTransform(
+      progress,
+      [
+        0.01,
+        0.045,
+        0.19,
+        0.235,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
 
-  const transitionOpacity = useTransform(
-    progress,
-    [0.205, 0.245, 0.315, 0.355],
-    [0, 1, 1, 0],
-  );
+  const transitionOpacity =
+    useTransform(
+      progress,
+      [
+        0.205,
+        0.245,
+        0.315,
+        0.355,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
 
-  const cellularOpacity = useTransform(
-    progress,
-    [0.305, 0.35, 0.425, 0.47],
-    [0, 1, 1, 0],
-  );
+  const livesOpacity =
+    useTransform(
+      progress,
+      [
+        0.305,
+        0.35,
+        0.425,
+        0.47,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
 
-  const molecularOpacity = useTransform(
-    progress,
-    [0.46, 0.515, 0.635, 0.69],
-    [0, 1, 1, 0],
-  );
+  const biologyOpacity =
+    useTransform(
+      progress,
+      [
+        0.46,
+        0.515,
+        0.635,
+        0.69,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
 
-  const genomicOpacity = useTransform(
-    progress,
-    [0.655, 0.705, 0.805, 0.855],
-    [0, 1, 1, 0],
-  );
+  const dnaOpacity =
+    useTransform(
+      progress,
+      [
+        0.655,
+        0.705,
+        0.805,
+        0.855,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
 
   return (
     <>
-      {/* PLANETARY SCALE */}
       <motion.div
-        style={{ opacity: earthOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[8vh] z-20 mx-auto max-w-5xl px-6 text-center"
+        style={{
+          opacity:
+            earthOpacity,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          top-[8vh]
+          z-20
+          mx-auto
+          max-w-5xl
+          px-6
+          text-center
+        "
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-violet-200/60">
-          From organism to mechanism
+        <p
+          className="
+            text-[9px]
+            font-black
+            uppercase
+            tracking-[0.4em]
+            text-violet-200/60
+          "
+        >
+          BioLayers Planetary Network
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[76px]">
-          Life exists
-          <span className="block bg-gradient-to-r from-violet-400 via-white to-fuchsia-300 bg-clip-text text-transparent">
-            in layers.
+        <h2
+          className="
+            mt-4
+            text-4xl
+            font-black
+            tracking-[-0.06em]
+            text-white
+            sm:text-6xl
+            lg:text-[76px]
+          "
+        >
+          One system.
+
+          <span
+            className="
+              block
+              bg-gradient-to-r
+              from-violet-400
+              via-white
+              to-fuchsia-300
+              bg-clip-text
+              text-transparent
+            "
+          >
+            Global intelligence.
           </span>
         </h2>
 
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-300/65">
-          Move from the scale of a living organism into the cellular and molecular systems that shape disease.
+        <p
+          className="
+            mx-auto
+            mt-4
+            max-w-xl
+            text-sm
+            leading-7
+            text-slate-300/65
+          "
+        >
+          Drag the planet. Click a country.
+          Explore a shared research network.
         </p>
       </motion.div>
 
-      {/* TRANSITION */}
       <motion.div
-        style={{ opacity: transitionOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
+        style={{
+          opacity:
+            transitionOpacity,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          bottom-[10vh]
+          z-20
+          px-6
+          text-center
+        "
       >
-        <p className="text-[8px] font-black uppercase tracking-[0.44em] text-cyan-200/50">
-          Scale transition
+        <p
+          className="
+            text-[8px]
+            font-black
+            uppercase
+            tracking-[0.44em]
+            text-cyan-200/50
+          "
+        >
+          Scale transition initiated
         </p>
 
-        <h3 className="mt-3 text-2xl font-black tracking-[-0.05em] text-white sm:text-4xl">
-          Leave the surface.
-          <span className="block text-cyan-100/80">Enter the biology.</span>
+        <h3
+          className="
+            mt-3
+            text-2xl
+            font-black
+            tracking-[-0.05em]
+            text-white
+            sm:text-4xl
+          "
+        >
+          Leave the planet.
+          Enter the biology.
         </h3>
       </motion.div>
 
-      {/* CELLULAR LAYER */}
       <motion.div
-        style={{ opacity: cellularOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[15vh] z-20 px-6 text-center"
+        style={{
+          opacity:
+            livesOpacity,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          top-[15vh]
+          z-20
+          px-6
+          text-center
+        "
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.44em] text-cyan-200/50">
-          Layer 01 / Cellular
+        <p
+          className="
+            text-[9px]
+            font-black
+            uppercase
+            tracking-[0.44em]
+            text-cyan-200/50
+          "
+        >
+          From planetary scale
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[72px]">
-          Cancer begins
-          <span className="block bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">
-            inside living systems.
+        <h2
+          className="
+            mt-4
+            text-4xl
+            font-black
+            tracking-[-0.06em]
+            text-white
+            sm:text-6xl
+            lg:text-[76px]
+          "
+        >
+          8.2 billion lives.
+        </h2>
+      </motion.div>
+
+      <motion.div
+        style={{
+          opacity:
+            biologyOpacity,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          top-[17vh]
+          z-20
+          px-6
+          text-center
+        "
+      >
+        <p
+          className="
+            text-[9px]
+            font-black
+            uppercase
+            tracking-[0.42em]
+            text-violet-300/60
+          "
+        >
+          Molecular Intelligence Layer
+        </p>
+
+        <h2
+          className="
+            mt-4
+            text-4xl
+            font-black
+            tracking-[-0.06em]
+            text-white
+            sm:text-6xl
+            lg:text-[72px]
+          "
+        >
+          Biology is not static.
+
+          <span
+            className="
+              block
+              bg-gradient-to-r
+              from-violet-400
+              via-white
+              to-cyan-300
+              bg-clip-text
+              text-transparent
+            "
+          >
+            It is a data universe.
           </span>
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/65">
-          Tumor cells, fibroblasts, immune cells and their microenvironment interact as one dynamic biological layer.
+        <p
+          className="
+            mx-auto
+            mt-5
+            max-w-xl
+            text-sm
+            leading-7
+            text-slate-300/70
+          "
+        >
+          Genes, pathways, evidence and biological
+          signals move through one computational space.
         </p>
       </motion.div>
 
-      {/* MOLECULAR / PATHWAY LAYER */}
       <motion.div
-        style={{ opacity: molecularOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[17vh] z-20 px-6 text-center"
+        style={{
+          opacity:
+            dnaOpacity,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          bottom-[10vh]
+          z-20
+          px-6
+          text-center
+        "
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.42em] text-violet-300/60">
-          Layer 02 / Molecular signaling
+        <p
+          className="
+            text-[8px]
+            font-black
+            uppercase
+            tracking-[0.44em]
+            text-fuchsia-200/50
+          "
+        >
+          From signal to structure
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[72px]">
-          Cells communicate
-          <span className="block bg-gradient-to-r from-violet-400 via-white to-cyan-300 bg-clip-text text-transparent">
-            through molecular networks.
-          </span>
-        </h2>
-
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/70">
-          Ligands, receptors, proteins and signaling pathways transmit biological information across the tumor system.
-        </p>
-      </motion.div>
-
-      {/* GENOMIC / PROTEIN LAYER */}
-      <motion.div
-        style={{ opacity: genomicOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
-      >
-        <p className="text-[8px] font-black uppercase tracking-[0.44em] text-fuchsia-200/50">
-          Layer 03 / Genes & proteins
-        </p>
-
-        <h3 className="mt-3 text-2xl font-black tracking-[-0.045em] text-white sm:text-4xl">
-          Molecular changes become
-          <span className="block bg-gradient-to-r from-fuchsia-300 via-white to-cyan-300 bg-clip-text text-transparent">
-            biological behavior.
-          </span>
+        <h3
+          className="
+            mt-3
+            text-2xl
+            font-black
+            tracking-[-0.045em]
+            text-white
+            sm:text-4xl
+          "
+        >
+          Decode the layers of life.
         </h3>
-
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-300/60">
-          Genes and proteins feed into pathways, processes and ultimately the phenotypes we recognize as disease.
-        </p>
       </motion.div>
     </>
   );
@@ -2871,29 +2936,109 @@ function DNAToGraphBridge({
 /* ====================================================== */
 
 const GRAPH_NODES: GraphNode[] = [
-  { id: "caf", label: "CAF", kind: "cell", x: 10, y: 48, size: 1.1 },
-  { id: "tgfb", label: "TGF-β", kind: "ligand", x: 24, y: 38, size: 1 },
-  { id: "tgfbr", label: "TGFBR", kind: "receptor", x: 37, y: 48, size: 1 },
-  { id: "smad", label: "SMAD2/3", kind: "protein", x: 50, y: 38, size: 1.05 },
-  { id: "pathway", label: "TGF-β pathway", kind: "pathway", x: 61, y: 54, size: 1.18 },
-  { id: "emt", label: "EMT", kind: "process", x: 73, y: 39, size: 1.05 },
-  { id: "invasion", label: "Invasion", kind: "phenotype", x: 84, y: 52, size: 1.12 },
-  { id: "metastasis", label: "Metastasis", kind: "disease", x: 93, y: 35, size: 1.3 },
-  { id: "evidence", label: "Evidence", kind: "evidence", x: 50, y: 17, size: 1 },
+  {
+    id: "tp53",
+    label: "TP53",
+    kind: "gene",
+    x: 20,
+    y: 28,
+    size: 1,
+  },
+  {
+    id: "pten",
+    label: "PTEN",
+    kind: "gene",
+    x: 22,
+    y: 68,
+    size: 1,
+  },
+  {
+    id: "egfr",
+    label: "EGFR",
+    kind: "gene",
+    x: 78,
+    y: 26,
+    size: 1,
+  },
+  {
+    id: "kras",
+    label: "KRAS",
+    kind: "gene",
+    x: 80,
+    y: 67,
+    size: 1,
+  },
+  {
+    id: "pi3k",
+    label: "PI3K / AKT",
+    kind: "pathway",
+    x: 38,
+    y: 46,
+    size: 1.2,
+  },
+  {
+    id: "mapk",
+    label: "MAPK",
+    kind: "pathway",
+    x: 62,
+    y: 46,
+    size: 1.1,
+  },
+  {
+    id: "cancer",
+    label: "Tumor State",
+    kind: "cancer",
+    x: 50,
+    y: 58,
+    size: 1.55,
+  },
+  {
+    id: "evidence",
+    label: "Evidence",
+    kind: "evidence",
+    x: 50,
+    y: 18,
+    size: 1.05,
+  },
 ];
 
 const GRAPH_EDGES: GraphEdge[] = [
-  { from: "caf", to: "tgfb" },
-  { from: "tgfb", to: "tgfbr" },
-  { from: "tgfbr", to: "smad" },
-  { from: "smad", to: "pathway" },
-  { from: "pathway", to: "emt" },
-  { from: "emt", to: "invasion" },
-  { from: "invasion", to: "metastasis" },
-  { from: "evidence", to: "tgfb" },
-  { from: "evidence", to: "smad" },
-  { from: "evidence", to: "emt" },
-  { from: "evidence", to: "metastasis" },
+  {
+    from: "tp53",
+    to: "cancer",
+  },
+  {
+    from: "pten",
+    to: "pi3k",
+  },
+  {
+    from: "pi3k",
+    to: "cancer",
+  },
+  {
+    from: "egfr",
+    to: "mapk",
+  },
+  {
+    from: "kras",
+    to: "mapk",
+  },
+  {
+    from: "mapk",
+    to: "cancer",
+  },
+  {
+    from: "evidence",
+    to: "tp53",
+  },
+  {
+    from: "evidence",
+    to: "egfr",
+  },
+  {
+    from: "evidence",
+    to: "cancer",
+  },
 ];
 
 const GRAPH_INFO: Record<
@@ -2904,86 +3049,63 @@ const GRAPH_INFO: Record<
     detail: string;
   }
 > = {
-  caf: {
-    title: "Cancer-associated fibroblast",
-    subtitle: "Cellular layer",
+  tp53: {
+    title: "TP53",
+    subtitle: "Tumor suppressor",
     detail:
-      "A stromal cell population within the tumor microenvironment capable of influencing cancer behavior through signaling, extracellular-matrix remodeling and secreted factors.",
+      "A central genomic checkpoint connected to DNA damage response, apoptosis and tumor-state control.",
   },
-  tgfb: {
-    title: "TGF-β",
-    subtitle: "Ligand layer",
+
+  pten: {
+    title: "PTEN",
+    subtitle: "Tumor suppressor",
     detail:
-      "A secreted signaling molecule that can regulate stromal behavior, cellular plasticity and tumor-associated transcriptional programs.",
+      "A negative regulator of PI3K–AKT signaling that helps constrain growth and survival signaling.",
   },
-  tgfbr: {
-    title: "TGFBR",
-    subtitle: "Receptor layer",
+
+  egfr: {
+    title: "EGFR",
+    subtitle: "Receptor signaling",
     detail:
-      "The TGF-β receptor complex translates extracellular signaling into intracellular molecular activity.",
+      "A membrane receptor that can propagate growth signals into MAPK and other downstream pathways.",
   },
-  smad: {
-    title: "SMAD2 / SMAD3",
-    subtitle: "Protein layer",
+
+  kras: {
+    title: "KRAS",
+    subtitle: "Oncogenic signaling",
     detail:
-      "Intracellular signaling mediators that participate in canonical TGF-β signaling and downstream transcriptional regulation.",
+      "A signaling switch that can drive persistent proliferative activity when dysregulated.",
   },
-  pathway: {
-    title: "TGF-β signaling",
-    subtitle: "Pathway layer",
+
+  pi3k: {
+    title: "PI3K / AKT",
+    subtitle: "Survival pathway",
     detail:
-      "A signaling pathway connecting extracellular cues with transcriptional and cellular responses.",
+      "A pathway layer linking upstream signals to cellular growth, metabolism and survival.",
   },
-  emt: {
-    title: "EMT",
-    subtitle: "Biological process layer",
+
+  mapk: {
+    title: "MAPK",
+    subtitle: "Growth pathway",
     detail:
-      "An epithelial–mesenchymal transition-associated program involving changes in adhesion, plasticity, migration and cellular state.",
+      "A signaling cascade connecting receptor activity to transcriptional and proliferative programs.",
   },
-  invasion: {
-    title: "Tumor invasion",
-    subtitle: "Phenotype layer",
+
+  cancer: {
+    title: "Tumor State",
+    subtitle: "Integrated phenotype",
     detail:
-      "A phenotype in which malignant cells acquire the ability to move through and penetrate surrounding tissue environments.",
+      "The emergent biological state produced by interacting genomic, signaling and environmental layers.",
   },
-  metastasis: {
-    title: "Metastatic progression",
-    subtitle: "Disease layer",
-    detail:
-      "A high-level disease process emerging from interacting molecular, cellular, stromal and environmental mechanisms.",
-  },
+
   evidence: {
-    title: "Scientific evidence",
-    subtitle: "Evidence layer",
+    title: "Evidence",
+    subtitle: "Scientific literature",
     detail:
-      "The literature layer that anchors mechanistic relationships to supporting publications and scientific context.",
+      "Research evidence anchors biological relationships so every connection can be traced back to a source layer.",
   },
 };
 
-function getNodeKindClasses(kind: BiologicalLayer) {
-  switch (kind) {
-    case "cell":
-      return "border-cyan-200/35 bg-cyan-400/[0.10] text-cyan-50 shadow-[0_0_38px_rgba(34,211,238,.20)]";
-    case "ligand":
-    case "receptor":
-      return "border-sky-200/30 bg-sky-400/[0.08] text-sky-100 shadow-[0_0_32px_rgba(56,189,248,.16)]";
-    case "gene":
-    case "protein":
-      return "border-violet-200/30 bg-violet-400/[0.08] text-violet-100 shadow-[0_0_32px_rgba(139,92,246,.18)]";
-    case "pathway":
-      return "border-purple-200/35 bg-purple-400/[0.09] text-purple-100 shadow-[0_0_36px_rgba(168,85,247,.18)]";
-    case "process":
-      return "border-fuchsia-200/35 bg-fuchsia-400/[0.09] text-fuchsia-100 shadow-[0_0_36px_rgba(217,70,239,.18)]";
-    case "phenotype":
-      return "border-rose-200/35 bg-rose-400/[0.09] text-rose-100 shadow-[0_0_36px_rgba(244,63,94,.18)]";
-    case "disease":
-      return "border-pink-200/40 bg-pink-400/[0.11] text-white shadow-[0_0_48px_rgba(236,72,153,.24)]";
-    case "evidence":
-      return "border-white/25 bg-white/[0.08] text-white shadow-[0_0_34px_rgba(255,255,255,.12),0_0_55px_rgba(34,211,238,.12)]";
-    default:
-      return "border-white/15 bg-white/[0.05] text-slate-100";
-  }
-}
 
 function KnowledgeGraph({
   progress,
@@ -3137,7 +3259,7 @@ function KnowledgeGraph({
             text-cyan-200/50
           "
         >
-          Biological Layer Map
+          Cancer Knowledge Graph
         </p>
 
         <h3
@@ -3150,7 +3272,7 @@ function KnowledgeGraph({
             sm:text-5xl
           "
         >
-          See cancer across every layer.
+          Connect the evidence.
         </h3>
 
         <p
@@ -3163,8 +3285,8 @@ function KnowledgeGraph({
             text-slate-300/65
           "
         >
-          Move from cell to molecule, pathway, process and disease.
-          Every layer remains connected to evidence.
+          Trace a relationship.
+          Lock a node. Follow the biology.
         </p>
       </div>
 
@@ -3440,7 +3562,18 @@ function KnowledgeGraph({
                     backdrop-blur-xl
                     transition-all
                     duration-300
-                    ${getNodeKindClasses(node.kind)}
+                    ${
+                      node.kind ===
+                      "cancer"
+                        ? "border-fuchsia-200/35 bg-fuchsia-400/[0.10] text-white shadow-[0_0_48px_rgba(217,70,239,.24)]"
+                        : node.kind ===
+                            "pathway"
+                          ? "border-violet-200/30 bg-violet-400/[0.08] text-violet-100 shadow-[0_0_32px_rgba(139,92,246,.18)]"
+                          : node.kind ===
+                              "evidence"
+                            ? "border-cyan-200/30 bg-cyan-300/[0.08] text-cyan-100 shadow-[0_0_32px_rgba(34,211,238,.16)]"
+                            : "border-white/15 bg-white/[0.05] text-slate-100"
+                    }
 
                     ${
                       isSelected ||

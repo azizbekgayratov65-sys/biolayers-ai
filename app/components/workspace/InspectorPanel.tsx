@@ -40,6 +40,8 @@ type InspectorPanelProps = {
 const entityColorClass: Record<EntityType, string> = {
   cell: "bg-teal-400",
   protein: "bg-violet-400",
+  gene: "bg-cyan-400",
+  drug: "bg-fuchsia-400",
   pathway: "bg-amber-400",
   process: "bg-blue-400",
   disease: "bg-rose-400",

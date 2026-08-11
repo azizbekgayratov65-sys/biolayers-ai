@@ -12,55 +12,65 @@ import {
   useState,
 } from "react";
 
-const CYCLE_SECONDS = 15;
+/* =========================================================
+   CONFIG
+   ========================================================= */
+
+const CYCLE_SECONDS = 20;
 const STAGE_COUNT = 5;
+
+/* =========================================================
+   STAGES
+   ========================================================= */
 
 const stages = [
   {
-    key: "papers",
+    key: "paper",
     index: "01",
-    eyebrow: "Source",
-    title: "From papers",
+    eyebrow: "Literature",
+    title: "Read the paper",
     description:
-      "Start with dense oncology literature and turn static text into a structured biological system.",
+      "Start with oncology literature containing biological observations, experimental findings, and mechanistic claims.",
   },
   {
-    key: "mechanisms",
+    key: "entities",
     index: "02",
     eyebrow: "Extraction",
-    title: "Extract mechanisms",
+    title: "Identify the biology",
     description:
-      "Identify cells, genes, proteins, pathways and the relationships that connect them.",
+      "Extract cells, genes, proteins, pathways, biological processes, and disease-relevant entities from the research text.",
   },
   {
-    key: "biology",
+    key: "mechanism",
     index: "03",
-    eyebrow: "Structure",
-    title: "Map biology",
+    eyebrow: "Reconstruction",
+    title: "Reconstruct mechanisms",
     description:
-      "Resolve biological entities into an interpretable mechanistic map rather than a flat summary.",
+      "Connect biological entities through directional relationships to reveal the mechanistic chain described by the research.",
   },
   {
     key: "evidence",
     index: "04",
-    eyebrow: "Validation",
-    title: "Connect evidence",
+    eyebrow: "Evidence",
+    title: "Trace every claim",
     description:
-      "Link mechanisms to supporting literature, confidence signals and research context.",
+      "Keep mechanistic relationships connected to their supporting literature, context, and evidence rather than separating conclusions from sources.",
   },
   {
-    key: "system",
+    key: "map",
     index: "05",
-    eyebrow: "Knowledge graph",
-    title: "Reveal the system",
+    eyebrow: "Research map",
+    title: "Explore the system",
     description:
-      "Explore the complete network as a living research workspace for computational oncology.",
+      "Move through the reconstructed mechanism as an interactive research map built for computational oncology.",
   },
 ] as const;
 
-function clampStageIndex(
-  value: number,
-) {
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function clampStageIndex(value: number) {
   if (!Number.isFinite(value)) {
     return 0;
   }
@@ -74,9 +84,7 @@ function clampStageIndex(
   );
 }
 
-function clampProgress(
-  value: number,
-) {
+function clampProgress(value: number) {
   if (!Number.isFinite(value)) {
     return 0;
   }
@@ -87,19 +95,22 @@ function clampProgress(
   );
 }
 
+/* =========================================================
+   HERO STAGE NARRATIVE
+   ========================================================= */
+
 export default function HeroStageNarrative() {
-  const reduceMotion =
-    useReducedMotion();
+  const reduceMotion = Boolean(useReducedMotion());
 
-  const [
-    stageIndex,
-    setStageIndex,
-  ] = useState(0);
+  const [stageIndex, setStageIndex] =
+    useState(0);
 
-  const [
-    progress,
-    setProgress,
-  ] = useState(0);
+  const [progress, setProgress] =
+    useState(0);
+
+  /* =======================================================
+     TIMELINE
+     ======================================================= */
 
   useEffect(() => {
     if (reduceMotion) {
@@ -108,71 +119,75 @@ export default function HeroStageNarrative() {
       return;
     }
 
-    let frame = 0;
-    const startedAt =
-      performance.now();
+    const startedAt = performance.now();
 
-    const update = (
-      now: number,
-    ) => {
-      const elapsed =
-        (now - startedAt) /
-        1000;
+    let animationFrame = 0;
+    let lastUpdate = 0;
 
-      const normalizedRaw =
-        (elapsed %
-          CYCLE_SECONDS) /
-        CYCLE_SECONDS;
+    /*
+      We intentionally avoid updating React state on every
+      browser frame.
 
-      const normalized =
-        Number.isFinite(
-          normalizedRaw,
-        )
-          ? normalizedRaw
-          : 0;
+      ~20 updates / second is more than enough for the tiny
+      progress indicator while keeping the Hero lighter.
+    */
 
-      const stageFloat =
-        normalized *
-        STAGE_COUNT;
+    const UPDATE_INTERVAL = 50;
 
-      const nextIndex =
-        clampStageIndex(
-          stageFloat,
+    const update = (now: number) => {
+      if (now - lastUpdate >= UPDATE_INTERVAL) {
+        lastUpdate = now;
+
+        const elapsed =
+          (now - startedAt) / 1000;
+
+        const normalizedRaw =
+          (elapsed % CYCLE_SECONDS) /
+          CYCLE_SECONDS;
+
+        const normalized =
+          Number.isFinite(normalizedRaw)
+            ? normalizedRaw
+            : 0;
+
+        const stageFloat =
+          normalized * STAGE_COUNT;
+
+        const nextIndex =
+          clampStageIndex(stageFloat);
+
+        const nextProgress =
+          clampProgress(
+            stageFloat -
+              Math.floor(stageFloat),
+          );
+
+        setStageIndex((current) =>
+          current === nextIndex
+            ? current
+            : nextIndex,
         );
 
-      const nextProgress =
-        clampProgress(
-          stageFloat -
-            Math.floor(
-              stageFloat,
-            ),
-        );
+        setProgress(nextProgress);
+      }
 
-      setStageIndex(
-        nextIndex,
-      );
-
-      setProgress(
-        nextProgress,
-      );
-
-      frame =
-        requestAnimationFrame(
-          update,
-        );
+      animationFrame =
+        requestAnimationFrame(update);
     };
 
-    frame =
-      requestAnimationFrame(
-        update,
-      );
+    animationFrame =
+      requestAnimationFrame(update);
 
     return () => {
       cancelAnimationFrame(
-        frame,
+        animationFrame,
       );
     };
   }, [reduceMotion]);
+
+  /* =======================================================
+     SAFE VALUES
+     ======================================================= */
 
   const safeStageIndex =
     useMemo(
@@ -193,39 +208,159 @@ export default function HeroStageNarrative() {
     );
 
   const activeStage =
-    stages[
-      safeStageIndex
-    ] ?? stages[0];
+    stages[safeStageIndex] ??
+    stages[0];
+
+  /* =======================================================
+     RENDER
+     ======================================================= */
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[7]">
-      <div className="absolute bottom-10 right-6 w-[min(390px,calc(100vw-3rem))] sm:right-10 lg:bottom-12 lg:right-14 xl:right-20">
-        <div className="rounded-[26px] border border-white/[0.08] bg-[#050814]/38 p-4 shadow-[0_24px_80px_rgba(0,0,0,.22)] backdrop-blur-xl sm:p-5">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-cyan-300/80">
-              BioLayers sequence
-            </p>
+    <div
+      className="
+        pointer-events-none
+        absolute
+        inset-0
+        z-[7]
+      "
+    >
+      <div
+        className="
+          absolute
+          bottom-8
+          right-6
+          w-[min(400px,calc(100vw-3rem))]
+          sm:right-10
+          lg:bottom-12
+          lg:right-14
+          xl:right-20
+        "
+      >
+        <div
+          className="
+            relative
+            overflow-hidden
+            rounded-[26px]
+            border
+            border-white/[0.08]
+            bg-[#050814]/40
+            p-4
+            shadow-[0_24px_80px_rgba(0,0,0,.22)]
+            backdrop-blur-xl
+            sm:p-5
+          "
+        >
+          {/* =============================================== */}
+          {/* SUBTLE TOP GLOW                                */}
+          {/* =============================================== */}
 
-            <span className="font-mono text-[9px] text-slate-600">
-              {activeStage.index}
-              /05
+          <div
+            aria-hidden="true"
+            className="
+              absolute
+              inset-x-12
+              top-0
+              h-px
+              bg-gradient-to-r
+              from-transparent
+              via-cyan-300/30
+              to-transparent
+            "
+          />
+
+          {/* =============================================== */}
+          {/* HEADER                                         */}
+          {/* =============================================== */}
+
+          <div
+            className="
+              relative
+              flex
+              items-center
+              justify-between
+              gap-4
+            "
+          >
+            <div
+              className="
+                flex
+                items-center
+                gap-2.5
+              "
+            >
+              <span
+                className="
+                  relative
+                  flex
+                  h-1.5
+                  w-1.5
+                "
+              >
+                <span
+                  className="
+                    absolute
+                    inline-flex
+                    h-full
+                    w-full
+                    animate-ping
+                    rounded-full
+                    bg-cyan-300
+                    opacity-40
+                  "
+                />
+
+                <span
+                  className="
+                    relative
+                    inline-flex
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                    bg-cyan-300
+                  "
+                />
+              </span>
+
+              <p
+                className="
+                  text-[9px]
+                  font-bold
+                  uppercase
+                  tracking-[0.22em]
+                  text-cyan-300/70
+                "
+              >
+                Mechanism reconstruction
+              </p>
+            </div>
+
+            <span
+              className="
+                font-mono
+                text-[9px]
+                text-slate-600
+              "
+            >
+              {activeStage.index}/05
             </span>
           </div>
 
-          <div className="mt-4 min-h-[116px]">
+          {/* =============================================== */}
+          {/* ACTIVE STAGE                                   */}
+          {/* =============================================== */}
+
+          <div className="relative mt-4 min-h-[120px]">
             <AnimatePresence mode="wait">
               <motion.div
-                key={
-                  activeStage.key
-                }
+                key={activeStage.key}
                 initial={
                   reduceMotion
                     ? false
                     : {
                         opacity: 0,
-                        y: 12,
+                        y: 10,
                         filter:
-                          "blur(8px)",
+                          "blur(6px)",
                       }
                 }
                 animate={{
@@ -239,13 +374,16 @@ export default function HeroStageNarrative() {
                     ? undefined
                     : {
                         opacity: 0,
-                        y: -10,
+                        y: -8,
                         filter:
-                          "blur(8px)",
+                          "blur(6px)",
                       }
                 }
                 transition={{
-                  duration: 0.5,
+                  duration:
+                    reduceMotion
+                      ? 0
+                      : 0.45,
                   ease: [
                     0.16,
                     1,
@@ -254,33 +392,68 @@ export default function HeroStageNarrative() {
                   ],
                 }}
               >
-                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300/80">
-                  {
-                    activeStage.eyebrow
-                  }
+                {/* EYEBROW */}
+
+                <p
+                  className="
+                    text-[9px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.2em]
+                    text-violet-300/75
+                  "
+                >
+                  {activeStage.eyebrow}
                 </p>
 
-                <h2 className="mt-2 text-xl font-semibold tracking-[-0.035em] text-white sm:text-2xl">
-                  {
-                    activeStage.title
-                  }
+                {/* TITLE */}
+
+                <h2
+                  className="
+                    mt-2
+                    text-xl
+                    font-semibold
+                    tracking-[-0.035em]
+                    text-white
+                    sm:text-2xl
+                  "
+                >
+                  {activeStage.title}
                 </h2>
 
-                <p className="mt-3 text-xs leading-6 text-slate-400 sm:text-[13px]">
-                  {
-                    activeStage.description
-                  }
+                {/* DESCRIPTION */}
+
+                <p
+                  className="
+                    mt-3
+                    max-w-[340px]
+                    text-xs
+                    leading-6
+                    text-slate-400
+                    sm:text-[13px]
+                  "
+                >
+                  {activeStage.description}
                 </p>
               </motion.div>
             </AnimatePresence>
           </div>
 
-          <div className="mt-4 grid grid-cols-5 gap-1.5">
+          {/* =============================================== */}
+          {/* PROGRESS                                       */}
+          {/* =============================================== */}
+
+          <div
+            className="
+              relative
+              mt-4
+              grid
+              grid-cols-5
+              gap-1.5
+            "
+          >
             {stages.map(
-              (
-                stage,
-                index,
-              ) => {
+              (stage, index) => {
                 const isActive =
                   index ===
                   safeStageIndex;
@@ -291,23 +464,37 @@ export default function HeroStageNarrative() {
 
                 return (
                   <div
-                    key={
-                      stage.key
-                    }
-                    className="relative h-[3px] overflow-hidden rounded-full bg-white/[0.06]"
+                    key={stage.key}
+                    className="
+                      relative
+                      h-[3px]
+                      overflow-hidden
+                      rounded-full
+                      bg-white/[0.06]
+                    "
                   >
                     <motion.div
-                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300"
+                      className="
+                        absolute
+                        inset-y-0
+                        left-0
+                        rounded-full
+                        bg-gradient-to-r
+                        from-cyan-300
+                        via-violet-300
+                        to-fuchsia-300
+                      "
                       animate={{
                         width: isPast
                           ? "100%"
                           : isActive
                             ? `${Math.max(
-                                4,
+                                2,
                                 safeProgress *
                                   100,
                               )}%`
                             : "0%",
+
                         opacity:
                           isPast ||
                           isActive
@@ -315,7 +502,7 @@ export default function HeroStageNarrative() {
                             : 0,
                       }}
                       transition={{
-                        duration: 0.12,
+                        duration: 0.06,
                         ease: "linear",
                       }}
                     />
@@ -325,13 +512,52 @@ export default function HeroStageNarrative() {
             )}
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
-            <p className="text-[8px] uppercase tracking-[0.16em] text-slate-600">
-              Papers
+          {/* =============================================== */}
+          {/* PIPELINE LABELS                                */}
+          {/* =============================================== */}
+
+          <div
+            className="
+              relative
+              mt-3
+              flex
+              items-center
+              justify-between
+            "
+          >
+            <p
+              className="
+                text-[8px]
+                uppercase
+                tracking-[0.16em]
+                text-slate-600
+              "
+            >
+              Paper
             </p>
 
-            <p className="text-[8px] uppercase tracking-[0.16em] text-slate-600">
-              System
+            <div
+              className="
+                flex
+                items-center
+                gap-1.5
+                text-slate-700
+              "
+            >
+              <span>·</span>
+              <span>·</span>
+              <span>·</span>
+            </div>
+
+            <p
+              className="
+                text-[8px]
+                uppercase
+                tracking-[0.16em]
+                text-slate-600
+              "
+            >
+              Research map
             </p>
           </div>
         </div>

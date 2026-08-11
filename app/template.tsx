@@ -1,6 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type {
+  ReactNode,
+} from "react";
+
 import PageTransition from "./components/PageTransition";
 
 export default function Template({
@@ -8,5 +11,11 @@ export default function Template({
 }: {
   children: ReactNode;
 }) {
-  return <PageTransition>{children}</PageTransition>;
+  return (
+    <>
+      <PageTransition>
+        {children}
+      </PageTransition>
+    </>
+  );
 }

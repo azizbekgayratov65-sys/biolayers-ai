@@ -54,6 +54,22 @@ export const entityVisualTheme: Record<
     glow: "rgba(251,113,133,.36)",
     label: "Disease state",
   },
+  gene: {
+    accent: "#34d399",
+    accentSoft: "rgba(52,211,153,.18)",
+    secondary: "#22d3ee",
+    border: "rgba(110,231,183,.42)",
+    glow: "rgba(52,211,153,.36)",
+    label: "Gene",
+  },
+  drug: {
+    accent: "#f59e0b",
+    accentSoft: "rgba(245,158,11,.18)",
+    secondary: "#fb7185",
+    border: "rgba(252,211,77,.42)",
+    glow: "rgba(245,158,11,.36)",
+    label: "Drug / therapy",
+  },
 };
 
 function getSemanticVisual(
@@ -69,7 +85,9 @@ function getSemanticVisual(
   | "protein"
   | "pathway"
   | "process"
-  | "disease" {
+  | "disease"
+  | "gene"
+  | "drug" {
   const normalized =
     label.toLowerCase();
 
@@ -122,10 +140,16 @@ export default function BiologicalArtwork({
   active: boolean;
 }) {
   const theme = entityVisualTheme[type];
-  const visual = getSemanticVisual(
+  const semanticVisual = getSemanticVisual(
     label,
     type,
   );
+  const visual =
+    semanticVisual === "gene"
+      ? "protein"
+      : semanticVisual === "drug"
+        ? "pathway"
+        : semanticVisual;
 
   return (
     <div className="relative h-[118px] overflow-hidden rounded-[22px] border border-white/[0.09] bg-[#02040a]">

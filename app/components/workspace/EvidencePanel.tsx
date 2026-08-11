@@ -56,6 +56,8 @@ const entityColorClass: Record<
   pathway: "bg-amber-400",
   process: "bg-blue-400",
   disease: "bg-rose-400",
+  gene: "bg-cyan-400",
+  drug: "bg-emerald-400",
 };
 
 function confidencePercent(
@@ -185,8 +187,7 @@ export default function EvidencePanel({
                         <span
                           className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                             entityColorClass[
-                              connection
-                                .type
+                              connection.type
                             ]
                           }`}
                         />
@@ -265,6 +266,7 @@ export default function EvidencePanel({
                   <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">
                     AI extraction confidence
                   </p>
+
                   <p className="mt-1 text-[10px] text-slate-500">
                     Explicit support in the analyzed text
                   </p>

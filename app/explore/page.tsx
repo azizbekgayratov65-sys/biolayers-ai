@@ -60,6 +60,13 @@ import useCellOntology, {
   type CellOntologyTerm,
 } from "../hooks/useCellOntology";
 import BiologicalArtwork from "../components/workspace/BiologicalArtwork";
+import ConnectBiologyPanel, {
+  type BiologicalPathResult,
+} from "../components/workspace/ConnectBiologyPanel";
+import EvidenceLensPanel, {
+  type EvidenceLensMode,
+} from "../components/workspace/EvidenceLensPanel";
+import HypothesisBuilderPanel from "../components/workspace/HypothesisBuilderPanel";
 
 import {
   deleteBioLayersProject,
@@ -234,16 +241,13 @@ function getEvidenceProfile(
 }
 
 const nodeClassNames: Record<EntityType, string> = {
-  cell:
-    "border-teal-300/45 bg-[linear-gradient(145deg,rgba(20,184,166,.22),rgba(4,12,24,.96))] text-teal-50 shadow-[0_18px_55px_rgba(20,184,166,.14)]",
-  protein:
-    "border-violet-300/45 bg-[linear-gradient(145deg,rgba(139,92,246,.23),rgba(4,12,24,.96))] text-violet-50 shadow-[0_18px_55px_rgba(139,92,246,.16)]",
-  pathway:
-    "border-amber-300/45 bg-[linear-gradient(145deg,rgba(245,158,11,.2),rgba(4,12,24,.96))] text-amber-50 shadow-[0_18px_55px_rgba(245,158,11,.13)]",
-  process:
-    "border-blue-300/45 bg-[linear-gradient(145deg,rgba(59,130,246,.22),rgba(4,12,24,.96))] text-blue-50 shadow-[0_18px_55px_rgba(59,130,246,.15)]",
-  disease:
-    "border-rose-300/45 bg-[linear-gradient(145deg,rgba(244,63,94,.22),rgba(4,12,24,.96))] text-rose-50 shadow-[0_18px_55px_rgba(244,63,94,.15)]",
+  cell: "bg-teal-400",
+  protein: "bg-violet-400",
+  gene: "bg-cyan-400",
+  drug: "bg-fuchsia-400",
+  pathway: "bg-amber-400",
+  process: "bg-blue-400",
+  disease: "bg-rose-400",
 };
 
 
@@ -447,6 +451,21 @@ export default function ExplorePage() {
   const [copilotMessages, setCopilotMessages] =
     useState<CopilotMessage[]>([]);
 
+  const [connectBiologyOpen, setConnectBiologyOpen] =
+    useState(false);
+
+  const [activeMechanisticPath, setActiveMechanisticPath] =
+    useState<BiologicalPathResult | null>(null);
+
+  const [evidenceLensOpen, setEvidenceLensOpen] =
+    useState(false);
+
+  const [evidenceLensMode, setEvidenceLensMode] =
+    useState<EvidenceLensMode>("all");
+
+  const [hypothesisBuilderOpen, setHypothesisBuilderOpen] =
+    useState(false);
+
 
 
   const [selectedPaper, setSelectedPaper] =
@@ -468,6 +487,8 @@ export default function ExplorePage() {
       pathway: true,
       process: true,
       disease: true,
+      gene: true,
+drug: true,
     });
 
   useEffect(() => {
@@ -717,19 +738,55 @@ export default function ExplorePage() {
     return relatedIds;
   }, [hoveredId, visibleEdges]);
 
+  const mechanisticPathNodeIds = useMemo(
+    () =>
+      new Set(
+        activeMechanisticPath?.nodes.map(
+          (item) => item.nodeId,
+        ) ?? [],
+      ),
+    [activeMechanisticPath],
+  );
+
+  const mechanisticPathEdgeIds = useMemo(
+    () =>
+      new Set(
+        activeMechanisticPath?.edges.map(
+          (item) => item.edgeId,
+        ) ?? [],
+      ),
+    [activeMechanisticPath],
+  );
+
   const displayNodes = useMemo(() => {
     return visibleNodes.map((node) => {
       const isRelated =
         !hoveredId ||
         connectedNodeIds.has(node.id);
 
+      const pathActive =
+        mechanisticPathNodeIds.size > 0;
+
+      const onMechanisticPath =
+        mechanisticPathNodeIds.has(node.id);
+
       return {
         ...node,
         style: {
           ...node.style,
-          opacity: isRelated ? 1 : 0.22,
+          opacity: pathActive
+            ? onMechanisticPath
+              ? 1
+              : 0.1
+            : isRelated
+              ? 1
+              : 0.22,
+          filter:
+            pathActive && onMechanisticPath
+              ? "drop-shadow(0 0 16px rgba(214,255,75,.22))"
+              : undefined,
           transition:
-            "opacity 180ms ease",
+            "opacity 180ms ease, filter 180ms ease",
         },
       };
     });
@@ -737,6 +794,7 @@ export default function ExplorePage() {
     visibleNodes,
     hoveredId,
     connectedNodeIds,
+    mechanisticPathNodeIds,
     cinematicFocus,
     narrativeOpen,
     demoMode,
@@ -777,7 +835,38 @@ export default function ExplorePage() {
     selectedLabel: selectedNode?.data.label,
   });
 
+  function getEdgeEvidenceLevel(
+    edge: Edge<ResearchEdgeData>,
+  ): Exclude<EvidenceLensMode, "all"> {
+    const confidence =
+      typeof edge.data?.confidence === "number"
+        ? edge.data.confidence
+        : 0.55;
+
+    const evidenceCount =
+      typeof edge.data?.evidenceCount === "number"
+        ? edge.data.evidenceCount
+        : 0;
+
+    if (confidence >= 0.85 || evidenceCount >= 4) {
+      return "established";
+    }
+
+    if (confidence >= 0.7 || evidenceCount >= 2) {
+      return "supported";
+    }
+
+    if (confidence >= 0.5 || evidenceCount >= 1) {
+      return "emerging";
+    }
+
+    return "hypothesis";
+  }
+
   const displayEdges = useMemo(() => {
+    const pathActive =
+      mechanisticPathEdgeIds.size > 0;
+
     return visibleEdges.map((edge) => {
       const isConnected =
         hoveredId === edge.source ||
@@ -786,14 +875,28 @@ export default function ExplorePage() {
       const isSelected =
         selectedEdgeId === edge.id;
 
-      const shouldDim =
-        (Boolean(hoveredId) &&
-          !isConnected) ||
-        (Boolean(selectedEdgeId) &&
-          !isSelected);
+      const onMechanisticPath =
+        mechanisticPathEdgeIds.has(edge.id);
+
+      const evidenceLevel =
+        getEdgeEvidenceLevel(edge);
+
+      const passesEvidenceLens =
+        evidenceLensMode === "all" ||
+        evidenceLevel === evidenceLensMode;
+
+      const shouldDim = pathActive
+        ? !onMechanisticPath
+        : !passesEvidenceLens ||
+          (Boolean(hoveredId) &&
+            !isConnected) ||
+          (Boolean(selectedEdgeId) &&
+            !isSelected);
 
       const highlighted =
-        isConnected || isSelected;
+        onMechanisticPath ||
+        isConnected ||
+        isSelected;
 
       return {
         ...edge,
@@ -807,33 +910,55 @@ export default function ExplorePage() {
             pubMedPapers.length,
         },
 
-        animated: false,
+        animated:
+          onMechanisticPath ||
+          (evidenceLensMode !== "all" &&
+            passesEvidenceLens),
 
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: highlighted
-            ? "#67e8f9"
-            : "#64748b",
+          color: onMechanisticPath
+            ? "#d6ff4b"
+            : highlighted
+              ? "#67e8f9"
+              : "#64748b",
         },
 
         style: {
-          stroke: highlighted
-            ? "#67e8f9"
-            : "#64748b",
-          strokeWidth: isSelected
-            ? 4.2
-            : isConnected
-              ? 3.4
-              : 2.2,
-          opacity: shouldDim ? 0.1 : 1,
+          stroke: onMechanisticPath
+            ? "#d6ff4b"
+            : highlighted
+              ? "#67e8f9"
+              : "#64748b",
+          strokeWidth: onMechanisticPath
+            ? 4.4
+            : isSelected
+              ? 4.2
+              : isConnected
+                ? 3.4
+                : 2.2,
+          opacity: shouldDim
+            ? evidenceLensMode !== "all" &&
+              !passesEvidenceLens
+              ? 0.025
+              : 0.08
+            : 1,
           cursor: "pointer",
+          filter: onMechanisticPath
+            ? "drop-shadow(0 0 7px rgba(214,255,75,.55))"
+            : undefined,
         },
 
         labelStyle: {
-          fill: highlighted
-            ? "#a5f3fc"
-            : "#94a3b8",
-          fontSize: isSelected ? 13 : 12,
+          fill: onMechanisticPath
+            ? "#eaff9f"
+            : highlighted
+              ? "#a5f3fc"
+              : "#94a3b8",
+          fontSize:
+            onMechanisticPath || isSelected
+              ? 13
+              : 12,
           fontWeight: 700,
         },
 
@@ -857,6 +982,8 @@ export default function ExplorePage() {
     hoveredId,
     selectedEdgeId,
     pubMedPapers.length,
+    mechanisticPathEdgeIds,
+    evidenceLensMode,
   ]);
 
   const selectedEdge = edges.find(
@@ -1185,6 +1312,101 @@ export default function ExplorePage() {
     };
   }, []);
 
+
+  async function focusMechanisticPath(
+    result: BiologicalPathResult,
+  ) {
+    setActiveMechanisticPath(result);
+    setConnectBiologyOpen(false);
+    setWorkspaceView("graph");
+    setSelectedEdgeId(null);
+    setHoveredId(null);
+    setCinematicFocus(false);
+    setNarrativeOpen(false);
+    setNarrativePlaying(false);
+
+    const pathNodes = result.nodes
+      .map((item) =>
+        nodes.find(
+          (node) => node.id === item.nodeId,
+        ),
+      )
+      .filter(
+        (
+          node,
+        ): node is EntityNodeType =>
+          Boolean(node),
+      );
+
+    if (pathNodes.length === 0) {
+      return;
+    }
+
+    setSelectedId(pathNodes[0].id);
+
+    if (!flowInstance) {
+      return;
+    }
+
+    const centers = pathNodes.map((node) => ({
+      x:
+        node.position.x +
+        (node.measured?.width ?? 220) / 2,
+      y:
+        node.position.y +
+        (node.measured?.height ?? 100) / 2,
+    }));
+
+    const minX = Math.min(
+      ...centers.map((item) => item.x),
+    );
+    const maxX = Math.max(
+      ...centers.map((item) => item.x),
+    );
+    const minY = Math.min(
+      ...centers.map((item) => item.y),
+    );
+    const maxY = Math.max(
+      ...centers.map((item) => item.y),
+    );
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    const span = Math.max(
+      maxX - minX,
+      maxY - minY,
+    );
+
+    const zoom =
+      span < 320
+        ? 1.25
+        : span < 650
+          ? 0.95
+          : span < 1000
+            ? 0.72
+            : 0.55;
+
+    await flowInstance.setCenter(
+      centerX,
+      centerY,
+      {
+        zoom,
+        duration: 950,
+      },
+    );
+  }
+
+  async function clearMechanisticPath() {
+    setActiveMechanisticPath(null);
+
+    await flowInstance?.fitView({
+      padding: 0.22,
+      minZoom: 0.38,
+      maxZoom: 1.12,
+      duration: 700,
+    });
+  }
 
   async function focusNode(nodeId: string) {
     const targetNode = nodes.find(
@@ -2342,6 +2564,9 @@ ${edgeXml}
       if (event.key === "Escape") {
         setSelectedPaper(null);
         setCopilotOpen(false);
+        setConnectBiologyOpen(false);
+        setEvidenceLensOpen(false);
+        setHypothesisBuilderOpen(false);
         setSelectedEdgeId(null);
 
         if (narrativeOpen) {
@@ -2517,37 +2742,117 @@ ${edgeXml}
               className="pointer-events-none absolute left-[20%] top-[18%] z-[1] h-80 w-80 rounded-full bg-cyan-400/20 blur-[130px]"
             />
 
-            <GraphWorkspaceControls
-              demoMode={demoMode}
-              narrativeStepCount={narrativeSteps.length}
-              layoutDirection={layoutDirection}
-              toggleDemoMode={toggleDemoMode}
-              startNarrative={startNarrative}
-              changeLayout={changeLayout}
-              resetView={resetView}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              searchError={searchError}
-              setSearchError={setSearchError}
-              exportError={exportError}
-              findEntity={findEntity}
-            />
+            {workspaceView === "graph" && !demoMode && (
+              <div
+                data-export-ignore="true"
+                className="absolute left-5 top-24 z-[42] flex flex-col items-start gap-2"
+              >
+                <div className="flex flex-col gap-1 rounded-[16px] border border-white/[0.07] bg-[#071018]/88 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,.34)] backdrop-blur-2xl">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConnectBiologyOpen(true)
+                    }
+                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#d6ff4b] transition hover:border-[#d6ff4b]/20 hover:bg-[#d6ff4b]/[0.055]"
+                    title="Trace a mechanistic path between two entities"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#d6ff4b] shadow-[0_0_9px_rgba(214,255,75,.7)]" />
+                    Connect
+                  </button>
 
-            <DemoModeOverlay
-              demoMode={demoMode}
-              demoScene={demoScene}
-              activateDemoScene={activateDemoScene}
-            />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEvidenceLensOpen(true)
+                    }
+                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#ff9c73] transition hover:border-[#ff8b5e]/20 hover:bg-[#ff8b5e]/[0.055]"
+                    title="Filter the graph by evidence strength"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff8b5e] shadow-[0_0_9px_rgba(255,139,94,.65)]" />
+                    Evidence
+                  </button>
 
-            <FocusExpandControls
-              demoMode={demoMode}
-              cinematicFocus={cinematicFocus}
-              hasSelectedNode={Boolean(selectedNode)}
-              expandingGraph={expandingGraph}
-              enterCinematicFocus={enterCinematicFocus}
-              exitCinematicFocus={exitCinematicFocus}
-              expandSelectedEntity={expandSelectedEntity}
-            />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHypothesisBuilderOpen(true)
+                    }
+                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#e8d9b5] transition hover:border-[#e8d9b5]/20 hover:bg-[#e8d9b5]/[0.055]"
+                    title="Turn graph context into a testable hypothesis"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#e8d9b5]" />
+                    Hypothesis
+                  </button>
+
+                  {activeMechanisticPath && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void clearMechanisticPath();
+                      }}
+                      className="w-[132px] rounded-[10px] px-3 py-2 text-left font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-slate-500 transition hover:bg-white/[0.04] hover:text-white"
+                    >
+                      Clear path
+                    </button>
+                  )}
+                </div>
+
+                {(evidenceLensMode !== "all" ||
+                  activeMechanisticPath) && (
+                  <div className="pointer-events-none flex max-w-[180px] flex-col gap-1 rounded-[10px] border border-white/[0.055] bg-[#050b10]/78 px-3 py-2 backdrop-blur-xl">
+                    {activeMechanisticPath && (
+                      <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-[#9bad74]">
+                        Path · {activeMechanisticPath.nodes.length} entities
+                      </span>
+                    )}
+
+                    {evidenceLensMode !== "all" && (
+                      <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-[#c88369]">
+                        Lens · {evidenceLensMode}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {workspaceView === "graph" && (
+              <GraphWorkspaceControls
+                demoMode={demoMode}
+                narrativeStepCount={narrativeSteps.length}
+                layoutDirection={layoutDirection}
+                toggleDemoMode={toggleDemoMode}
+                startNarrative={startNarrative}
+                changeLayout={changeLayout}
+                resetView={resetView}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                searchError={searchError}
+                setSearchError={setSearchError}
+                exportError={exportError}
+                findEntity={findEntity}
+              />
+            )}
+
+            {workspaceView === "graph" && (
+              <DemoModeOverlay
+                demoMode={demoMode}
+                demoScene={demoScene}
+                activateDemoScene={activateDemoScene}
+              />
+            )}
+
+            {workspaceView === "graph" && (
+              <FocusExpandControls
+                demoMode={demoMode}
+                cinematicFocus={cinematicFocus}
+                hasSelectedNode={Boolean(selectedNode)}
+                expandingGraph={expandingGraph}
+                enterCinematicFocus={enterCinematicFocus}
+                exitCinematicFocus={exitCinematicFocus}
+                expandSelectedEntity={expandSelectedEntity}
+              />
+            )}
 
             <AnimatePresence mode="wait">
               {workspaceView !== "graph" && (
@@ -2823,7 +3128,7 @@ ${edgeXml}
             />
 
             <AnimatePresence>
-              {cinematicFocus && (
+              {workspaceView === "graph" && cinematicFocus && (
                 <motion.div
                   initial={{
                     opacity: 0,
@@ -2839,32 +3144,77 @@ ${edgeXml}
               )}
             </AnimatePresence>
 
-            <WorkspaceCanvas
-              nodes={displayNodes}
-              edges={displayEdges}
-              onInit={setFlowInstance}
-              onNodesChange={onNodesChange}
-              onSelectNode={(nodeId) => {
-                setSelectedEdgeId(null);
-                setSelectedId(nodeId);
-                setHoveredId(null);
-              }}
-              onSelectEdge={(edgeId) => {
-                setHoveredId(null);
-                setSelectedEdgeId(edgeId);
-              }}
-              onPaneClick={() => {
-                setHoveredId(null);
-                setSelectedEdgeId(null);
-              }}
-              onNodeEnter={(nodeId) => {
-                setHoveredId(nodeId);
-                setSelectedId(nodeId);
-              }}
-              onNodeLeave={() =>
-                setHoveredId(null)
-              }
-            />
+            {workspaceView === "graph" && (
+              <WorkspaceCanvas
+                nodes={displayNodes}
+                edges={displayEdges}
+                onInit={setFlowInstance}
+                onNodesChange={onNodesChange}
+                onSelectNode={(nodeId) => {
+                  setSelectedEdgeId(null);
+                  setSelectedId(nodeId);
+                  setHoveredId(null);
+                }}
+                onSelectEdge={(edgeId) => {
+                  setHoveredId(null);
+                  setSelectedEdgeId(edgeId);
+                }}
+                onPaneClick={() => {
+                  setHoveredId(null);
+                  setSelectedEdgeId(null);
+                }}
+                onNodeEnter={(nodeId) => {
+                  setHoveredId(nodeId);
+                  setSelectedId(nodeId);
+                }}
+                onNodeLeave={() =>
+                  setHoveredId(null)
+                }
+              />
+            )}
+
+            {workspaceView === "graph" && (
+              <ConnectBiologyPanel
+                nodes={nodes}
+                edges={edges}
+                open={connectBiologyOpen}
+                onClose={() =>
+                  setConnectBiologyOpen(false)
+                }
+                onFocusPath={(result) => {
+                  void focusMechanisticPath(result);
+                }}
+              />
+            )}
+
+            {workspaceView === "graph" && (
+              <EvidenceLensPanel
+                edges={edges}
+                open={evidenceLensOpen}
+                mode={evidenceLensMode}
+                onClose={() =>
+                  setEvidenceLensOpen(false)
+                }
+                onChangeMode={(mode) => {
+                  setEvidenceLensMode(mode);
+                  setEvidenceLensOpen(false);
+                  setActiveMechanisticPath(null);
+                }}
+              />
+            )}
+
+            {workspaceView === "graph" && (
+              <HypothesisBuilderPanel
+                nodes={nodes}
+                edges={edges}
+                selectedEntity={selectedEntity}
+                activePath={activeMechanisticPath}
+                open={hypothesisBuilderOpen}
+                onClose={() =>
+                  setHypothesisBuilderOpen(false)
+                }
+              />
+            )}
           </section>
 
           <InspectorSidebar

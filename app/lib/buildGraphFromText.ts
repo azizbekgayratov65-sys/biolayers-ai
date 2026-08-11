@@ -2,10 +2,12 @@ import type { Edge, Node } from "@xyflow/react";
 
 export type EntityType =
   | "cell"
+  | "gene"
   | "protein"
   | "pathway"
   | "process"
-  | "disease";
+  | "disease"
+  | "drug";
 
 export type EntityData = {
   label: string;
