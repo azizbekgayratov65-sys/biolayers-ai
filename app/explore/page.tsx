@@ -180,8 +180,9 @@ function getEvidenceProfile(
   if (loading) {
     return {
       level: "Limited",
-      score: 18,
-      description: "Literature coverage is loading.",
+      score: 20,
+      description:
+        "Candidate literature is currently being retrieved from PubMed.",
       badgeClass:
         "border-slate-300/15 bg-slate-300/[0.05] text-slate-300",
       meterClass:
@@ -189,12 +190,12 @@ function getEvidenceProfile(
     };
   }
 
-  if (hasError || paperCount <= 0) {
+  if (hasError) {
     return {
       level: "No evidence",
       score: 8,
       description:
-        "No matching PubMed metadata is currently loaded.",
+        "PubMed retrieval failed. Evidence status has not been assessed.",
       badgeClass:
         "border-rose-300/15 bg-rose-300/[0.05] text-rose-200",
       meterClass:
@@ -202,41 +203,39 @@ function getEvidenceProfile(
     };
   }
 
-  if (paperCount === 1) {
+  if (paperCount <= 0) {
     return {
-      level: "Limited",
-      score: 34,
+      level: "No evidence",
+      score: 8,
       description:
-        "One relevant PubMed record is currently linked.",
+        "No candidate PubMed publications are currently loaded. This does not prove that the biological relationship lacks evidence.",
       badgeClass:
-        "border-amber-300/15 bg-amber-300/[0.06] text-amber-200",
+        "border-slate-300/15 bg-slate-300/[0.05] text-slate-300",
       meterClass:
-        "from-amber-400 via-amber-300 to-cyan-300",
-    };
-  }
-
-  if (paperCount <= 3) {
-    return {
-      level: "Moderate",
-      score: 68,
-      description:
-        "Several relevant PubMed records are currently linked.",
-      badgeClass:
-        "border-cyan-300/15 bg-cyan-300/[0.06] text-cyan-200",
-      meterClass:
-        "from-cyan-400 via-cyan-300 to-violet-300",
+        "from-slate-500 via-slate-400 to-cyan-300",
     };
   }
 
   return {
-    level: "Strong",
-    score: 92,
+    /*
+      Important:
+      PubMed retrieval volume must NOT be interpreted
+      as evidence strength.
+
+      We temporarily reuse the existing EvidenceLevel type
+      until we introduce a dedicated retrieval-status type.
+    */
+    level: "Limited",
+    score: 42,
     description:
-      "Four or more relevant PubMed records are currently linked.",
+      `${paperCount} candidate PubMed publication${
+        paperCount === 1 ? "" : "s"
+      } ${paperCount === 1 ? "is" : "are"} currently loaded. ` +
+      "These records have not yet been classified as supporting, contradicting, contextual, or unrelated evidence.",
     badgeClass:
-      "border-emerald-300/15 bg-emerald-300/[0.06] text-emerald-200",
+      "border-amber-300/15 bg-amber-300/[0.06] text-amber-200",
     meterClass:
-      "from-emerald-400 via-cyan-300 to-violet-300",
+      "from-amber-400 via-cyan-300 to-violet-300",
   };
 }
 
@@ -318,6 +317,55 @@ function convertApiGraphToFlowGraph(
     nodes,
     edges,
   };
+}
+
+
+function quotePubMedTerm(
+  value?: string | null,
+) {
+  if (!value) {
+    return "";
+  }
+
+  const cleaned = value
+    .trim()
+    .replace(/"/g, "");
+
+  if (!cleaned) {
+    return "";
+  }
+
+  return `"${cleaned}"`;
+}
+
+function buildEdgePubMedQuery({
+  source,
+  relation,
+  target,
+}: {
+  source?: string | null;
+  relation?: string | null;
+  target?: string | null;
+}) {
+  const sourceTerm = quotePubMedTerm(source);
+  const targetTerm = quotePubMedTerm(target);
+
+  const relationTerm = relation
+    ?.trim()
+    .replace(/[_-]+/g, " ")
+    .replace(/"/g, "");
+
+  if (!sourceTerm || !targetTerm) {
+    return "";
+  }
+
+  const baseQuery = `${sourceTerm} AND ${targetTerm}`;
+
+  if (!relationTerm || relationTerm === "connected to") {
+    return baseQuery;
+  }
+
+  return baseQuery;
 }
 
 export default function ExplorePage() {
@@ -804,6 +852,51 @@ drug: true,
     (node) => node.id === selectedId,
   );
 
+  const selectedEdge = edges.find(
+    (edge) => edge.id === selectedEdgeId,
+  );
+
+  const selectedEdgeSource = selectedEdge
+    ? nodes.find(
+        (node) =>
+          node.id === selectedEdge.source,
+      )
+    : undefined;
+
+  const selectedEdgeTarget = selectedEdge
+    ? nodes.find(
+        (node) =>
+          node.id === selectedEdge.target,
+      )
+    : undefined;
+
+  const selectedEdgeLabel =
+    selectedEdge &&
+    typeof selectedEdge.label === "string"
+      ? selectedEdge.label
+      : "connected to";
+
+  const edgePubMedQuery = useMemo(() => {
+    if (
+      !selectedEdge ||
+      !selectedEdgeSource ||
+      !selectedEdgeTarget
+    ) {
+      return "";
+    }
+
+    return buildEdgePubMedQuery({
+      source: selectedEdgeSource.data.label,
+      relation: selectedEdgeLabel,
+      target: selectedEdgeTarget.data.label,
+    });
+  }, [
+    selectedEdge,
+    selectedEdgeSource,
+    selectedEdgeTarget,
+    selectedEdgeLabel,
+  ]);
+
   const selectedEntity: ResearchEntityData =
     selectedNode
       ? selectedNode.data
@@ -833,7 +926,36 @@ drug: true,
     togglePaperComparison,
   } = usePubMed({
     selectedLabel: selectedNode?.data.label,
+    searchQuery: selectedEdgeId
+      ? edgePubMedQuery
+      : null,
   });
+
+  useEffect(() => {
+    if (!selectedEdgeId || pubMedLoading) {
+      return;
+    }
+
+    setEdges((current) =>
+      current.map((edge) => {
+        if (edge.id !== selectedEdgeId) {
+          return edge;
+        }
+
+        return {
+          ...edge,
+          data: {
+            ...(edge.data ?? {}),
+            evidenceCount: pubMedPapers.length,
+          },
+        };
+      }),
+    );
+  }, [
+    selectedEdgeId,
+    pubMedPapers.length,
+    pubMedLoading,
+  ]);
 
   function getEdgeEvidenceLevel(
     edge: Edge<ResearchEdgeData>,
@@ -841,22 +963,34 @@ drug: true,
     const confidence =
       typeof edge.data?.confidence === "number"
         ? edge.data.confidence
-        : 0.55;
+        : null;
 
     const evidenceCount =
       typeof edge.data?.evidenceCount === "number"
         ? edge.data.evidenceCount
-        : 0;
+        : typeof edge.data?.evidenceQuote === "string" &&
+            edge.data.evidenceQuote.trim().length > 0
+          ? 1
+          : 0;
 
-    if (confidence >= 0.85 || evidenceCount >= 4) {
+    if (
+      (confidence !== null && confidence >= 0.85) ||
+      evidenceCount >= 4
+    ) {
       return "established";
     }
 
-    if (confidence >= 0.7 || evidenceCount >= 2) {
+    if (
+      (confidence !== null && confidence >= 0.7) ||
+      evidenceCount >= 2
+    ) {
       return "supported";
     }
 
-    if (confidence >= 0.5 || evidenceCount >= 1) {
+    if (
+      (confidence !== null && confidence >= 0.5) ||
+      evidenceCount >= 1
+    ) {
       return "emerging";
     }
 
@@ -907,7 +1041,12 @@ drug: true,
             ? edge.data
             : {}),
           evidenceCount:
-            pubMedPapers.length,
+            typeof edge.data?.evidenceCount === "number"
+              ? edge.data.evidenceCount
+              : typeof edge.data?.evidenceQuote === "string" &&
+                  edge.data.evidenceQuote.trim().length > 0
+                ? 1
+                : 0,
         },
 
         animated:
@@ -981,34 +1120,9 @@ drug: true,
     visibleEdges,
     hoveredId,
     selectedEdgeId,
-    pubMedPapers.length,
     mechanisticPathEdgeIds,
     evidenceLensMode,
   ]);
-
-  const selectedEdge = edges.find(
-    (edge) => edge.id === selectedEdgeId,
-  );
-
-  const selectedEdgeSource = selectedEdge
-    ? nodes.find(
-        (node) =>
-          node.id === selectedEdge.source,
-      )
-    : undefined;
-
-  const selectedEdgeTarget = selectedEdge
-    ? nodes.find(
-        (node) =>
-          node.id === selectedEdge.target,
-      )
-    : undefined;
-
-  const selectedEdgeLabel =
-    selectedEdge &&
-    typeof selectedEdge.label === "string"
-      ? selectedEdge.label
-      : "connected to";
 
   const relatedConnections =
     useMemo<RelatedConnection[]>(() => {
@@ -3093,19 +3207,54 @@ ${edgeXml}
                       </section>
                     ) : (
                       <PubMedPanel
-                        pubMedTotal={pubMedTotal}
-                        pubMedPapers={pubMedPapers}
-                        pubMedSort={pubMedSort}
-                        setPubMedSort={setPubMedSort}
-                        comparedPapers={comparedPapers}
-                        pubMedLoading={pubMedLoading}
-                        pubMedError={pubMedError}
-                        pubMedHasMore={pubMedHasMore}
-                        pubMedLoadingMore={pubMedLoadingMore}
-                        togglePaperComparison={togglePaperComparison}
-                        loadMorePubMed={loadMorePubMed}
-                        openPaperInspector={openPaperInspector}
-                      />                    )}
+  pubMedTotal={pubMedTotal}
+  pubMedPapers={pubMedPapers}
+  pubMedSort={pubMedSort}
+  setPubMedSort={setPubMedSort}
+  comparedPapers={comparedPapers}
+  pubMedLoading={pubMedLoading}
+  pubMedError={pubMedError}
+  pubMedHasMore={pubMedHasMore}
+  pubMedLoadingMore={pubMedLoadingMore}
+  togglePaperComparison={togglePaperComparison}
+  loadMorePubMed={loadMorePubMed}
+  openPaperInspector={openPaperInspector}
+
+  mode={
+    selectedEdgeId
+      ? "relationship"
+      : "entity"
+  }
+
+  entityLabel={
+    selectedNode?.data.label ??
+    null
+  }
+
+  relationshipSource={
+    selectedEdgeSource?.data.label ??
+    null
+  }
+
+  relationshipTarget={
+    selectedEdgeTarget?.data.label ??
+    null
+  }
+
+  relationshipLabel={
+    selectedEdgeId
+      ? selectedEdgeLabel
+      : null
+  }
+
+  pubMedQuery={
+    selectedEdgeId
+      ? edgePubMedQuery
+      : selectedNode?.data.label ??
+        null
+  }
+sourceText={sourceText}
+/>                    )}
                   </div>
                 </motion.div>
               )}

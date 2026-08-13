@@ -47,8 +47,7 @@ function getRelationshipVisual(
   label = "",
 ): RelationshipVisual {
   const normalized =
-    `${relationType ?? ""} ${label}`
-      .toLowerCase();
+    `${relationType ?? ""} ${label}`.toLowerCase();
 
   /* =======================================================
      INHIBITION
@@ -201,70 +200,67 @@ function normalizeConfidence(
   );
 }
 
+/* =========================================================
+   LITERATURE / EVIDENCE STATUS
+
+   IMPORTANT:
+   evidenceCount currently represents retrieved candidate
+   literature. It must NOT automatically imply that a
+   biological relationship is established or supported.
+
+   True evidence classification will be added separately.
+   ========================================================= */
+
 type EvidenceLevel =
-  | "ESTABLISHED"
-  | "SUPPORTED"
-  | "EMERGING"
+  | "CANDIDATE"
+  | "EXTRACTED"
   | "HYPOTHESIS"
   | "UNMAPPED";
 
 function getEvidenceLevel(
   evidenceCount: number,
   confidence: number | null,
+  evidenceQuote: string,
 ): EvidenceLevel {
-  if (
-    evidenceCount <= 0 &&
-    confidence === null
-  ) {
-    return "UNMAPPED";
+  /*
+   * Direct evidence text attached to the extracted relation
+   * is different from PubMed retrieval volume.
+   */
+  if (evidenceQuote.length > 0) {
+    return "EXTRACTED";
   }
 
-  if (
-    (confidence !== null &&
-      confidence >= 85) ||
-    evidenceCount >= 4
-  ) {
-    return "ESTABLISHED";
+  /*
+   * PubMed records are candidates until their abstracts/full
+   * text are actually classified.
+   */
+  if (evidenceCount > 0) {
+    return "CANDIDATE";
   }
 
-  if (
-    (confidence !== null &&
-      confidence >= 70) ||
-    evidenceCount >= 2
-  ) {
-    return "SUPPORTED";
+  /*
+   * A model confidence without literature evidence should
+   * never be presented as literature support.
+   */
+  if (confidence !== null) {
+    return "HYPOTHESIS";
   }
 
-  if (
-    (confidence !== null &&
-      confidence >= 50) ||
-    evidenceCount >= 1
-  ) {
-    return "EMERGING";
-  }
-
-  return "HYPOTHESIS";
+  return "UNMAPPED";
 }
 
 function getEvidenceBadgeClass(
   level: EvidenceLevel,
 ) {
   switch (level) {
-    case "ESTABLISHED":
-      return `
-        border-emerald-300/15
-        bg-emerald-300/[0.07]
-        text-emerald-200/80
-      `;
-
-    case "SUPPORTED":
+    case "EXTRACTED":
       return `
         border-cyan-300/15
         bg-cyan-300/[0.06]
         text-cyan-200/80
       `;
 
-    case "EMERGING":
+    case "CANDIDATE":
       return `
         border-amber-300/15
         bg-amber-300/[0.06]
@@ -350,17 +346,18 @@ export default function BiologicalEdge({
       ? edgeData.evidenceCount
       : 0;
 
-  const evidenceLevel =
-    getEvidenceLevel(
-      evidenceCount,
-      confidence,
-    );
-
   const evidenceQuote =
     typeof edgeData.evidenceQuote ===
       "string"
       ? edgeData.evidenceQuote.trim()
       : "";
+
+  const evidenceLevel =
+    getEvidenceLevel(
+      evidenceCount,
+      confidence,
+      evidenceQuote,
+    );
 
   const directionality =
     edgeData.directionality ??
@@ -374,12 +371,18 @@ export default function BiologicalEdge({
     evidenceLevel ===
     "UNMAPPED";
 
+  const isCandidate =
+    evidenceLevel ===
+    "CANDIDATE";
+
   const mainOpacity =
     isUnmapped
       ? 0.35
       : isHypothesis
         ? 0.55
-        : 1;
+        : isCandidate
+          ? 0.78
+          : 1;
 
   /* =======================================================
      RENDER
@@ -441,7 +444,8 @@ export default function BiologicalEdge({
 
           strokeDasharray:
             isHypothesis ||
-            isUnmapped
+            isUnmapped ||
+            isCandidate
               ? "7 8"
               : undefined,
 
@@ -578,9 +582,7 @@ export default function BiologicalEdge({
                 index,
               ) => (
                 <circle
-                  key={
-                    delay
-                  }
+                  key={delay}
                   r={
                     active
                       ? 3.5
@@ -588,8 +590,8 @@ export default function BiologicalEdge({
                   }
                   fill={
                     index %
-                      2 ===
-                    0
+                        2 ===
+                      0
                       ? relationship.color
                       : relationship.secondary
                   }
@@ -767,7 +769,7 @@ export default function BiologicalEdge({
             </div>
 
             {/* ============================================= */}
-            {/* EVIDENCE                                     */}
+            {/* RETRIEVAL / EVIDENCE STATUS                   */}
             {/* ============================================= */}
 
             <div
@@ -812,7 +814,7 @@ export default function BiologicalEdge({
                     text-white/35
                   "
                 >
-                  {confidence}%
+                  AI {confidence}%
                 </span>
               )}
 
@@ -834,8 +836,8 @@ export default function BiologicalEdge({
                   {evidenceCount}{" "}
                   {evidenceCount ===
                   1
-                    ? "source"
-                    : "sources"}
+                    ? "paper"
+                    : "papers"}
                 </span>
               )}
             </div>
@@ -851,10 +853,10 @@ export default function BiologicalEdge({
                   text-[7px]
                   uppercase
                   tracking-[0.1em]
-                  text-emerald-200/35
+                  text-cyan-200/35
                 "
               >
-                Evidence quote linked
+                Source quote linked
               </div>
             )}
           </div>
