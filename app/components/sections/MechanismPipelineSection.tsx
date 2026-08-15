@@ -69,6 +69,9 @@ export default function MechanismPipelineSection() {
         relative
         isolate
         overflow-hidden
+        border-t
+        border-teal-100/[0.04]
+        bg-[#06111a]
         px-6
         py-28
         md:px-10
@@ -91,7 +94,7 @@ export default function MechanismPipelineSection() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-purple-500/[0.055]
+          bg-teal-400/[0.045]
           blur-[190px]
         "
       />
@@ -106,7 +109,7 @@ export default function MechanismPipelineSection() {
           h-[440px]
           w-[440px]
           rounded-full
-          bg-cyan-500/[0.04]
+          bg-sky-400/[0.035]
           blur-[150px]
         "
       />
@@ -121,7 +124,7 @@ export default function MechanismPipelineSection() {
           h-[520px]
           w-[520px]
           rounded-full
-          bg-fuchsia-500/[0.05]
+          bg-indigo-400/[0.028]
           blur-[160px]
         "
       />
@@ -146,7 +149,7 @@ export default function MechanismPipelineSection() {
               font-medium
               uppercase
               tracking-[0.3em]
-              text-cyan-300/70
+              text-teal-200/75
             "
           >
             From literature to mechanism
@@ -165,13 +168,13 @@ export default function MechanismPipelineSection() {
             "
           >
             From papers
-            <span className="text-white/35"> to </span>
+            <span className="text-slate-400/80"> to </span>
             <span
               className="
                 bg-gradient-to-r
-                from-cyan-300
-                via-purple-300
-                to-fuchsia-300
+                from-teal-200
+                via-cyan-300
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
@@ -186,7 +189,7 @@ export default function MechanismPipelineSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/50
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
@@ -216,7 +219,7 @@ export default function MechanismPipelineSection() {
               lg:block
             "
           >
-            <div className="absolute inset-0 bg-white/[0.07]" />
+            <div className="absolute inset-0 bg-teal-100/[0.06]" />
 
             <motion.div
               initial={{ x: "-100%" }}
@@ -236,7 +239,7 @@ export default function MechanismPipelineSection() {
                 w-[28%]
                 bg-gradient-to-r
                 from-transparent
-                via-cyan-300/70
+                via-teal-200/65
                 to-transparent
               "
             />
@@ -279,17 +282,17 @@ export default function MechanismPipelineSection() {
                     group
                     relative
                     overflow-hidden
-                    rounded-[28px]
+                    rounded-[24px]
                     border
-                    border-white/[0.08]
-                    bg-white/[0.022]
+                    border-teal-100/[0.075]
+                    bg-[#0a1b26]/48
                     p-7
-                    backdrop-blur-xl
+                    backdrop-blur-2xl
                     transition
                     duration-500
                     hover:-translate-y-1
-                    hover:border-white/[0.16]
-                    hover:bg-white/[0.04]
+                    hover:border-teal-100/[0.16]
+                    hover:bg-[#0d2430]/68
                     md:p-8
                   "
                 >
@@ -305,9 +308,9 @@ export default function MechanismPipelineSection() {
                       duration-500
                       group-hover:opacity-100
                       bg-gradient-to-br
-                      from-cyan-500/[0.07]
+                      from-teal-400/[0.055]
                       via-transparent
-                      to-fuchsia-500/[0.07]
+                      to-sky-400/[0.045]
                     "
                   />
 
@@ -321,7 +324,7 @@ export default function MechanismPipelineSection() {
                       text-xs
                       font-medium
                       tracking-[0.18em]
-                      text-white/18
+                      text-slate-500/65
                     "
                   >
                     {step.number}
@@ -339,11 +342,11 @@ export default function MechanismPipelineSection() {
                         justify-center
                         rounded-2xl
                         border
-                        border-white/[0.08]
-                        bg-white/[0.035]
+                        border-teal-100/[0.075]
+                        bg-teal-100/[0.035]
                       "
                     >
-                      <Icon className="h-5 w-5 text-white/65" />
+                      <Icon className="h-5 w-5 text-teal-50/75" />
                     </div>
 
                     {/* TITLE */}
@@ -368,7 +371,7 @@ export default function MechanismPipelineSection() {
                         min-h-[72px]
                         text-sm
                         leading-6
-                        text-white/42
+                        text-slate-400/90
                       "
                     >
                       {step.description}
@@ -383,13 +386,13 @@ export default function MechanismPipelineSection() {
                           className="
                             rounded-full
                             border
-                            border-white/[0.07]
-                            bg-white/[0.025]
+                            border-teal-100/[0.065]
+                            bg-teal-100/[0.025]
                             px-3
                             py-1.5
                             text-[11px]
                             font-medium
-                            text-white/38
+                            text-slate-400/80
                           "
                         >
                           {tag}
@@ -409,7 +412,7 @@ export default function MechanismPipelineSection() {
                           text-xs
                           uppercase
                           tracking-[0.16em]
-                          text-white/20
+                          text-slate-500/75
                           lg:hidden
                         "
                       >
@@ -448,12 +451,12 @@ export default function MechanismPipelineSection() {
             relative
             mt-20
             overflow-hidden
-            rounded-[34px]
+            rounded-[28px]
             border
-            border-white/[0.09]
-            bg-white/[0.025]
+            border-teal-100/[0.085]
+            bg-teal-100/[0.025]
             p-8
-            backdrop-blur-xl
+            backdrop-blur-2xl
             md:p-10
             lg:p-12
           "
@@ -469,7 +472,7 @@ export default function MechanismPipelineSection() {
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              bg-purple-500/[0.06]
+              bg-sky-400/[0.04]
               blur-[130px]
             "
           />
@@ -481,7 +484,7 @@ export default function MechanismPipelineSection() {
                 font-medium
                 uppercase
                 tracking-[0.28em]
-                text-white/30
+                text-slate-500/85
               "
             >
               Example mechanistic chain
@@ -499,7 +502,7 @@ export default function MechanismPipelineSection() {
               "
             >
               Not just connected entities.
-              <span className="text-white/40">
+              <span className="text-slate-400/85">
                 {" "}
                 Connected biological meaning.
               </span>
@@ -545,13 +548,13 @@ export default function MechanismPipelineSection() {
                     className="
                       rounded-2xl
                       border
-                      border-white/[0.08]
-                      bg-white/[0.035]
+                      border-teal-100/[0.075]
+                      bg-teal-100/[0.035]
                       px-4
                       py-3
                       text-sm
                       font-medium
-                      text-white/65
+                      text-teal-50/75
                     "
                   >
                     {node}
@@ -564,7 +567,7 @@ export default function MechanismPipelineSection() {
                         w-4
                         shrink-0
                         rotate-90
-                        text-white/20
+                        text-slate-500/75
                         lg:rotate-0
                       "
                     />
@@ -585,16 +588,16 @@ export default function MechanismPipelineSection() {
                 className="
                   rounded-2xl
                   border
-                  border-white/[0.07]
-                  bg-white/[0.02]
+                  border-teal-100/[0.065]
+                  bg-[#0a1b26]/42
                   p-5
                 "
               >
-                <div className="text-xs uppercase tracking-[0.18em] text-cyan-300/55">
+                <div className="text-xs uppercase tracking-[0.18em] text-teal-200/65">
                   Direction
                 </div>
 
-                <div className="mt-2 text-sm leading-6 text-white/45">
+                <div className="mt-2 text-sm leading-6 text-slate-400/90">
                   Relationships preserve biological directionality instead
                   of becoming generic undirected links.
                 </div>
@@ -604,16 +607,16 @@ export default function MechanismPipelineSection() {
                 className="
                   rounded-2xl
                   border
-                  border-white/[0.07]
-                  bg-white/[0.02]
+                  border-teal-100/[0.065]
+                  bg-[#0a1b26]/42
                   p-5
                 "
               >
-                <div className="text-xs uppercase tracking-[0.18em] text-purple-300/55">
+                <div className="text-xs uppercase tracking-[0.18em] text-sky-200/65">
                   Context
                 </div>
 
-                <div className="mt-2 text-sm leading-6 text-white/45">
+                <div className="mt-2 text-sm leading-6 text-slate-400/90">
                   Cancer type, experimental model and biological context can
                   remain attached to the mechanism.
                 </div>
@@ -623,16 +626,16 @@ export default function MechanismPipelineSection() {
                 className="
                   rounded-2xl
                   border
-                  border-white/[0.07]
-                  bg-white/[0.02]
+                  border-teal-100/[0.065]
+                  bg-[#0a1b26]/42
                   p-5
                 "
               >
-                <div className="text-xs uppercase tracking-[0.18em] text-fuchsia-300/55">
+                <div className="text-xs uppercase tracking-[0.18em] text-indigo-200/65">
                   Evidence
                 </div>
 
-                <div className="mt-2 text-sm leading-6 text-white/45">
+                <div className="mt-2 text-sm leading-6 text-slate-400/90">
                   Every important connection can link back to its paper,
                   evidence sentence and confidence.
                 </div>

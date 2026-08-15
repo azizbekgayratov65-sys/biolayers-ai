@@ -49,11 +49,11 @@ type Palette = readonly [
 ];
 
 const PALETTES: readonly Palette[] = [
-  ["#33E6FF", "#8B5CF6", "#FF4FA3"],
-  ["#6EE7FF", "#A78BFA", "#F8FAFC"],
-  ["#60A5FA", "#C084FC", "#F472B6"],
-  ["#22D3EE", "#8B5CF6", "#FB7185"],
-  ["#7DD3FC", "#FFFFFF", "#C084FC"],
+  ["#5EEAD4", "#67E8F9", "#A7F3D0"],
+  ["#99F6E4", "#7DD3FC", "#E2FDF8"],
+  ["#67E8F9", "#A5B4FC", "#C4B5FD"],
+  ["#2DD4BF", "#7DD3FC", "#F8FAFC"],
+  ["#99F6E4", "#E6FFFB", "#A5B4FC"],
 ];
 
 function random(
@@ -444,10 +444,10 @@ function ParticleMorph() {
           value: 0,
         },
         uPointSize: {
-          value: 3.8,
+          value: 3.55,
         },
         uOpacity: {
-          value: 0.98,
+          value: 0.92,
         },
       };
 
@@ -838,15 +838,15 @@ function StarField() {
 
       const cyan =
         new THREE.Color(
-          "#38BDF8",
+          "#67E8F9",
         );
       const violet =
         new THREE.Color(
-          "#A855F7",
+          "#5EEAD4",
         );
       const pink =
         new THREE.Color(
-          "#F472B6",
+          "#A5B4FC",
         );
 
       for (
@@ -1055,7 +1055,7 @@ function PortalCore() {
           ref={
             outerMaterialRef
           }
-          color="#7C3CFF"
+          color="#2DD4BF"
           transparent
           opacity={0.34}
           blending={
@@ -1080,7 +1080,7 @@ function PortalCore() {
           ref={
             innerMaterialRef
           }
-          color="#A5F3FC"
+          color="#99F6E4"
           transparent
           opacity={0.78}
           blending={
@@ -1109,7 +1109,7 @@ function PortalCore() {
         />
 
         <meshBasicMaterial
-          color="#F472B6"
+          color="#A5B4FC"
           transparent
           opacity={0.42}
           blending={
@@ -1185,7 +1185,7 @@ function GalaxyCore() {
         />
 
         <meshBasicMaterial
-          color="#A855F7"
+          color="#5EEAD4"
           transparent
           opacity={0.11}
           side={
@@ -1282,7 +1282,7 @@ function GalaxyCore() {
 
 function ShockwaveRing({
   delay = 0,
-  color = "#67E8F9",
+  color = "#5EEAD4",
 }: {
   delay?: number;
   color?: string;
@@ -1512,7 +1512,7 @@ function EnergyTrails() {
     >
       <lineBasicMaterial
         ref={materialRef}
-        color="#A5F3FC"
+        color="#99F6E4"
         transparent
         opacity={0}
         blending={
@@ -1857,18 +1857,18 @@ function PostFX() {
       enableNormalPass={false}
     >
       <Bloom
-        intensity={4.15}
-        luminanceThreshold={0.03}
+        intensity={3.35}
+        luminanceThreshold={0.06}
         luminanceSmoothing={0.9}
         mipmapBlur
       />
 
-      <Noise opacity={0.012} />
+      <Noise opacity={0.006} />
 
       <Vignette
         eskil={false}
-        offset={0.11}
-        darkness={0.93}
+        offset={0.16}
+        darkness={0.88}
       />
     </EffectComposer>
   );
@@ -1876,7 +1876,9 @@ function PostFX() {
 
 export default function HeroThreeScene() {
   return (
-    <div className="pointer-events-none absolute inset-0">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(45,212,191,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(125,211,252,.035),transparent_26%)]" />
+
       <Canvas
         camera={{
           position: [
@@ -1900,15 +1902,15 @@ export default function HeroThreeScene() {
       >
         <color
           attach="background"
-          args={["#01030B"]}
+          args={["#06111A"]}
         />
 
         <fog
           attach="fog"
           args={[
-            "#01030B",
+            "#06111A",
             9,
-            24,
+            25,
           ]}
         />
 
@@ -1917,7 +1919,7 @@ export default function HeroThreeScene() {
         <ShockwaveRing />
         <ShockwaveRing
           delay={0.06}
-          color="#C084FC"
+          color="#A5B4FC"
         />
         <ChromaticRings />
         <TransitionFlash />
@@ -1928,7 +1930,7 @@ export default function HeroThreeScene() {
         <PostFX />
       </Canvas>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(1,3,10,.02)_42%,rgba(1,3,10,.58)_80%,#01030a_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_48%,transparent_0%,rgba(6,17,26,.03)_42%,rgba(6,17,26,.52)_80%,#06111a_100%)]" />
     </div>
   );
 }

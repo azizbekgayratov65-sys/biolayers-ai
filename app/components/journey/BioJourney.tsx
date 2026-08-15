@@ -8,6 +8,7 @@ import {
 
 import {
   motion,
+  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -139,6 +140,1370 @@ function bell(
 
   return 0;
 }
+
+
+/* ====================================================== */
+/* GLOBAL RESEARCH LINKS                                  */
+/* ====================================================== */
+
+type ResearchHub = {
+  id: "uzbekistan" | "qatar" | "usa";
+  label: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  color: string;
+};
+
+const RESEARCH_HUBS: ResearchHub[] = [
+  {
+    id: "uzbekistan",
+    label: "UZBEKISTAN",
+    city: "TASHKENT",
+    latitude: 41.2995,
+    longitude: 69.2401,
+    color: "#5EEAD4",
+  },
+  {
+    id: "qatar",
+    label: "QATAR",
+    city: "DOHA",
+    latitude: 25.2854,
+    longitude: 51.5310,
+    color: "#A5F3FC",
+  },
+  {
+    id: "usa",
+    label: "USA",
+    city: "BALTIMORE",
+    latitude: 39.2904,
+    longitude: -76.6122,
+    color: "#7DD3FC",
+  },
+];
+
+const RESEARCH_ROUTES = [
+  ["uzbekistan", "qatar"],
+  ["qatar", "usa"],
+  ["uzbekistan", "usa"],
+] as const;
+
+function latLonToSphere(
+  latitude: number,
+  longitude: number,
+  radius: number,
+) {
+  const lat =
+    THREE.MathUtils.degToRad(latitude);
+  const lon =
+    THREE.MathUtils.degToRad(longitude);
+
+  return new THREE.Vector3(
+    radius *
+      Math.cos(lat) *
+      Math.sin(lon),
+    radius * Math.sin(lat),
+    radius *
+      Math.cos(lat) *
+      Math.cos(lon),
+  );
+}
+
+function createResearchArc(
+  start: THREE.Vector3,
+  end: THREE.Vector3,
+) {
+  const angle =
+    start.angleTo(end);
+
+  const midpointDirection =
+    start
+      .clone()
+      .normalize()
+      .add(end.clone().normalize())
+      .normalize();
+
+  const lift =
+    THREE.MathUtils.lerp(
+      0.42,
+      1.05,
+      THREE.MathUtils.clamp(
+        angle / Math.PI,
+        0,
+        1,
+      ),
+    );
+
+  const midpoint =
+    midpointDirection.multiplyScalar(
+      2.33 + lift,
+    );
+
+  return new THREE.QuadraticBezierCurve3(
+    start,
+    midpoint,
+    end,
+  );
+}
+
+
+
+function drawResearchFlag(
+  context: CanvasRenderingContext2D,
+  hubId: ResearchHub["id"],
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  context.save();
+
+  const radius = 8;
+
+  context.beginPath();
+  context.roundRect(
+    x,
+    y,
+    width,
+    height,
+    radius,
+  );
+
+  context.clip();
+
+  if (hubId === "uzbekistan") {
+    const stripe = height / 3;
+
+    context.fillStyle = "#1EB7E8";
+    context.fillRect(
+      x,
+      y,
+      width,
+      stripe,
+    );
+
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(
+      x,
+      y + stripe,
+      width,
+      stripe,
+    );
+
+    context.fillStyle = "#20B96B";
+    context.fillRect(
+      x,
+      y + stripe * 2,
+      width,
+      stripe,
+    );
+
+    context.fillStyle = "#D7263D";
+    context.fillRect(
+      x,
+      y + stripe - 3,
+      width,
+      3,
+    );
+    context.fillRect(
+      x,
+      y + stripe * 2,
+      width,
+      3,
+    );
+
+    context.fillStyle = "#FFFFFF";
+
+    context.beginPath();
+    context.arc(
+      x + width * 0.18,
+      y + height * 0.2,
+      height * 0.11,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+
+    context.fillStyle = "#1EB7E8";
+
+    context.beginPath();
+    context.arc(
+      x + width * 0.21,
+      y + height * 0.2,
+      height * 0.09,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+  } else if (hubId === "qatar") {
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(
+      x,
+      y,
+      width * 0.28,
+      height,
+    );
+
+    context.fillStyle = "#8A1538";
+    context.fillRect(
+      x + width * 0.28,
+      y,
+      width * 0.72,
+      height,
+    );
+
+    context.fillStyle = "#FFFFFF";
+
+    const teeth = 9;
+    const toothHeight =
+      height / teeth;
+
+    context.beginPath();
+    context.moveTo(
+      x + width * 0.28,
+      y,
+    );
+
+    for (
+      let i = 0;
+      i <= teeth;
+      i++
+    ) {
+      const yy =
+        y + i * toothHeight;
+
+      context.lineTo(
+        x + width * 0.39,
+        yy - toothHeight / 2,
+      );
+
+      context.lineTo(
+        x + width * 0.28,
+        yy,
+      );
+    }
+
+    context.lineTo(
+      x,
+      y + height,
+    );
+    context.lineTo(
+      x,
+      y,
+    );
+    context.closePath();
+    context.fill();
+  } else {
+    const stripeHeight =
+      height / 13;
+
+    for (
+      let i = 0;
+      i < 13;
+      i++
+    ) {
+      context.fillStyle =
+        i % 2 === 0
+          ? "#B22234"
+          : "#FFFFFF";
+
+      context.fillRect(
+        x,
+        y + i * stripeHeight,
+        width,
+        stripeHeight + 0.5,
+      );
+    }
+
+    context.fillStyle = "#3C3B6E";
+    context.fillRect(
+      x,
+      y,
+      width * 0.42,
+      stripeHeight * 7,
+    );
+
+    context.fillStyle =
+      "rgba(255,255,255,.92)";
+
+    for (
+      let row = 0;
+      row < 4;
+      row++
+    ) {
+      for (
+        let col = 0;
+        col < 5;
+        col++
+      ) {
+        context.beginPath();
+
+        context.arc(
+          x +
+            width * 0.05 +
+            col * width * 0.075,
+          y +
+            stripeHeight * 0.65 +
+            row * stripeHeight * 1.45,
+          1.35,
+          0,
+          Math.PI * 2,
+        );
+
+        context.fill();
+      }
+    }
+  }
+
+  context.restore();
+
+  context.strokeStyle =
+    "rgba(236,254,255,.28)";
+  context.lineWidth = 1.5;
+
+  context.beginPath();
+  context.roundRect(
+    x,
+    y,
+    width,
+    height,
+    radius,
+  );
+  context.stroke();
+}
+
+function ResearchHubLabel({
+  hub,
+  reduced,
+}: {
+  hub: ResearchHub;
+  reduced: boolean;
+}) {
+  const spriteRef =
+    useRef<THREE.Sprite | null>(
+      null,
+    );
+
+  const {
+    camera,
+  } =
+    useThree();
+
+  const [texture, setTexture] =
+    useState<THREE.CanvasTexture | null>(
+      null,
+    );
+
+  const position =
+    useMemo(
+      () =>
+        latLonToSphere(
+          hub.latitude,
+          hub.longitude,
+          2.58,
+        ),
+      [hub.latitude, hub.longitude],
+    );
+
+  const localNormal =
+    useMemo(
+      () =>
+        position
+          .clone()
+          .normalize(),
+      [position],
+    );
+
+  const worldNormal =
+    useRef(
+      new THREE.Vector3(),
+    );
+
+  const worldPosition =
+    useRef(
+      new THREE.Vector3(),
+    );
+
+  const cameraDirection =
+    useRef(
+      new THREE.Vector3(),
+    );
+
+  const parentQuaternion =
+    useRef(
+      new THREE.Quaternion(),
+    );
+
+  useEffect(() => {
+    if (
+      typeof document ===
+      "undefined"
+    ) {
+      return;
+    }
+
+    const canvas =
+      document.createElement(
+        "canvas",
+      );
+
+    canvas.width = 768;
+    canvas.height = 220;
+
+    const context =
+      canvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    context.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+
+    const gradient =
+      context.createLinearGradient(
+        0,
+        0,
+        canvas.width,
+        0,
+      );
+
+    gradient.addColorStop(
+      0,
+      "rgba(94,234,212,0)",
+    );
+
+    gradient.addColorStop(
+      0.22,
+      "rgba(94,234,212,0.12)",
+    );
+
+    gradient.addColorStop(
+      0.78,
+      "rgba(125,211,252,0.10)",
+    );
+
+    gradient.addColorStop(
+      1,
+      "rgba(125,211,252,0)",
+    );
+
+    context.fillStyle =
+      gradient;
+
+    context.fillRect(
+      60,
+      32,
+      canvas.width - 120,
+      156,
+    );
+
+    context.strokeStyle =
+      "rgba(153,246,228,0.22)";
+
+    context.lineWidth = 2;
+
+    context.beginPath();
+
+    context.moveTo(
+      120,
+      172,
+    );
+
+    context.lineTo(
+      canvas.width - 120,
+      172,
+    );
+
+    context.stroke();
+
+    drawResearchFlag(
+      context,
+      hub.id,
+      132,
+      68,
+      88,
+      54,
+    );
+
+    context.textAlign =
+      "left";
+
+    context.textBaseline =
+      "middle";
+
+    context.font =
+      "700 50px Arial";
+
+    context.fillStyle =
+      "#ECFEFF";
+
+    context.shadowColor =
+      hub.color;
+
+    context.shadowBlur = 22;
+
+    context.fillText(
+      hub.label,
+      246,
+      91,
+    );
+
+    context.shadowBlur = 0;
+
+    context.font =
+      "600 24px Arial";
+
+    context.fillStyle =
+      "rgba(165,243,252,0.72)";
+
+    context.fillText(
+      hub.city,
+      246,
+      139,
+    );
+
+    const nextTexture =
+      new THREE.CanvasTexture(
+        canvas,
+      );
+
+    nextTexture.colorSpace =
+      THREE.SRGBColorSpace;
+
+    nextTexture.needsUpdate =
+      true;
+
+    setTexture(
+      nextTexture,
+    );
+
+    return () => {
+      nextTexture.dispose();
+    };
+  }, [
+    hub.label,
+    hub.city,
+    hub.color,
+  ]);
+
+  useFrame(
+    (
+      _state,
+      delta,
+    ) => {
+      const sprite =
+        spriteRef.current;
+
+      if (
+        !sprite ||
+        !texture
+      ) {
+        return;
+      }
+
+      sprite.getWorldPosition(
+        worldPosition.current,
+      );
+
+      const parent =
+        sprite.parent;
+
+      if (parent) {
+        parent.getWorldQuaternion(
+          parentQuaternion.current,
+        );
+
+        worldNormal.current
+          .copy(localNormal)
+          .applyQuaternion(
+            parentQuaternion.current,
+          )
+          .normalize();
+      }
+
+      cameraDirection.current
+        .copy(camera.position)
+        .sub(worldPosition.current)
+        .normalize();
+
+      const facing =
+        worldNormal.current.dot(
+          cameraDirection.current,
+        );
+
+      const targetOpacity =
+        THREE.MathUtils.smoothstep(
+          facing,
+          -0.02,
+          0.22,
+        ) *
+        0.92;
+
+      const material =
+        sprite.material;
+
+      material.opacity =
+        reduced
+          ? targetOpacity
+          : THREE.MathUtils.damp(
+              material.opacity,
+              targetOpacity,
+              8,
+              delta,
+            );
+
+      sprite.visible =
+        material.opacity >
+        0.015;
+
+      const targetScale =
+        THREE.MathUtils.lerp(
+          0.88,
+          1,
+          THREE.MathUtils.clamp(
+            targetOpacity / 0.92,
+            0,
+            1,
+          ),
+        );
+
+      const currentX =
+        sprite.scale.x;
+
+      const nextX =
+        reduced
+          ? 1.12 * targetScale
+          : THREE.MathUtils.damp(
+              currentX,
+              1.12 * targetScale,
+              8,
+              delta,
+            );
+
+      sprite.scale.set(
+        nextX,
+        0.32 *
+          (nextX / 1.12),
+        1,
+      );
+    },
+  );
+
+  if (!texture) {
+    return null;
+  }
+
+  return (
+    <sprite
+      ref={spriteRef}
+      position={position}
+      scale={[
+        1.12,
+        0.32,
+        1,
+      ]}
+    >
+      <spriteMaterial
+        map={texture}
+        transparent
+        opacity={0}
+        depthTest
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </sprite>
+  );
+}
+
+function ResearchHubMarker({
+  hub,
+  reduced,
+}: {
+  hub: ResearchHub;
+  reduced: boolean;
+}) {
+  const groupRef =
+    useRef<THREE.Group | null>(null);
+
+  const {
+    camera,
+  } = useThree();
+
+  const visibilityRef =
+    useRef(1);
+
+  const worldPositionRef =
+    useRef(new THREE.Vector3());
+
+  const worldNormalRef =
+    useRef(new THREE.Vector3());
+
+  const cameraDirectionRef =
+    useRef(new THREE.Vector3());
+
+  const parentQuaternionRef =
+    useRef(new THREE.Quaternion());
+
+  const position =
+    useMemo(
+      () =>
+        latLonToSphere(
+          hub.latitude,
+          hub.longitude,
+          2.34,
+        ),
+      [hub.latitude, hub.longitude],
+    );
+
+  useFrame((state, delta) => {
+    const group =
+      groupRef.current;
+
+    if (!group) {
+      return;
+    }
+
+    group.getWorldPosition(
+      worldPositionRef.current,
+    );
+
+    const parent =
+      group.parent;
+
+    if (parent) {
+      parent.getWorldQuaternion(
+        parentQuaternionRef.current,
+      );
+
+      worldNormalRef.current
+        .copy(position)
+        .normalize()
+        .applyQuaternion(
+          parentQuaternionRef.current,
+        )
+        .normalize();
+    }
+
+    cameraDirectionRef.current
+      .copy(camera.position)
+      .sub(worldPositionRef.current)
+      .normalize();
+
+    const facing =
+      worldNormalRef.current.dot(
+        cameraDirectionRef.current,
+      );
+
+    const targetVisibility =
+      THREE.MathUtils.smoothstep(
+        facing,
+        -0.06,
+        0.16,
+      );
+
+    visibilityRef.current =
+      reduced
+        ? targetVisibility
+        : THREE.MathUtils.damp(
+            visibilityRef.current,
+            targetVisibility,
+            10,
+            delta,
+          );
+
+    group.visible =
+      visibilityRef.current >
+      0.015;
+
+    const pulse =
+      reduced
+        ? 1
+        : 1 +
+          Math.sin(
+            state.clock.elapsedTime *
+              2.3 +
+              hub.longitude *
+                0.02,
+          ) *
+            0.12;
+
+    group.scale.setScalar(
+      pulse *
+        THREE.MathUtils.lerp(
+          0.86,
+          1,
+          visibilityRef.current,
+        ),
+    );
+  });
+
+  return (
+    <group
+      ref={groupRef}
+      position={position}
+    >
+      <mesh>
+        <sphereGeometry
+          args={[0.045, 18, 18]}
+        />
+        <meshBasicMaterial
+          color={hub.color}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <mesh>
+        <sphereGeometry
+          args={[0.085, 16, 16]}
+        />
+        <meshBasicMaterial
+          color={hub.color}
+          transparent
+          opacity={0.16}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <mesh
+        rotation={[
+          Math.PI / 2,
+          0,
+          0,
+        ]}
+      >
+        <ringGeometry
+          args={[
+            0.09,
+            0.125,
+            36,
+          ]}
+        />
+        <meshBasicMaterial
+          color={hub.color}
+          transparent
+          opacity={0.32}
+          side={
+            THREE.DoubleSide
+          }
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <pointLight
+        color={hub.color}
+        intensity={0.32}
+        distance={0.75}
+        decay={2}
+      />
+    </group>
+  );
+}
+
+function ResearchRoute({
+  from,
+  to,
+  index,
+  reduced,
+  progress,
+}: {
+  from: ResearchHub;
+  to: ResearchHub;
+  index: number;
+  reduced: boolean;
+  progress: MotionValue<number>;
+}) {
+  const pulseOneRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const pulseTwoRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const pulseThreeRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const routeColor =
+    index === 0
+      ? "#5EEAD4"
+      : index === 1
+        ? "#A5F3FC"
+        : "#7DD3FC";
+
+  const {
+    curve,
+    lineGeometry,
+    glowGeometry,
+    lineObject,
+    glowLineObject,
+    pointCount,
+  } = useMemo(() => {
+    const startPoint =
+      latLonToSphere(
+        from.latitude,
+        from.longitude,
+        2.35,
+      );
+
+    const endPoint =
+      latLonToSphere(
+        to.latitude,
+        to.longitude,
+        2.35,
+      );
+
+    const nextCurve =
+      createResearchArc(
+        startPoint,
+        endPoint,
+      );
+
+    const points =
+      nextCurve.getPoints(110);
+
+    const nextLineGeometry =
+      new THREE.BufferGeometry()
+        .setFromPoints(points);
+
+    const nextGlowGeometry =
+      new THREE.BufferGeometry()
+        .setFromPoints(points);
+
+    nextLineGeometry.setDrawRange(
+      0,
+      0,
+    );
+
+    nextGlowGeometry.setDrawRange(
+      0,
+      0,
+    );
+
+    const nextLineMaterial =
+      new THREE.LineBasicMaterial({
+        color: routeColor,
+        transparent: true,
+        opacity:
+          index === 2
+            ? 0.34
+            : 0.78,
+        blending:
+          THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      });
+
+    const nextGlowMaterial =
+      new THREE.LineBasicMaterial({
+        color: routeColor,
+        transparent: true,
+        opacity:
+          index === 2
+            ? 0.1
+            : 0.18,
+        blending:
+          THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      });
+
+    const nextLineObject =
+      new THREE.Line(
+        nextLineGeometry,
+        nextLineMaterial,
+      );
+
+    const nextGlowLineObject =
+      new THREE.Line(
+        nextGlowGeometry,
+        nextGlowMaterial,
+      );
+
+    nextLineObject.frustumCulled =
+      false;
+
+    nextGlowLineObject.frustumCulled =
+      false;
+
+    return {
+      curve: nextCurve,
+      lineGeometry:
+        nextLineGeometry,
+      glowGeometry:
+        nextGlowGeometry,
+      lineObject:
+        nextLineObject,
+      glowLineObject:
+        nextGlowLineObject,
+      pointCount:
+        points.length,
+    };
+  }, [
+    from,
+    to,
+    index,
+    routeColor,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      lineGeometry.dispose();
+      glowGeometry.dispose();
+
+      const lineMaterial =
+        lineObject.material;
+
+      const glowMaterial =
+        glowLineObject.material;
+
+      if (
+        lineMaterial instanceof
+        THREE.Material
+      ) {
+        lineMaterial.dispose();
+      }
+
+      if (
+        glowMaterial instanceof
+        THREE.Material
+      ) {
+        glowMaterial.dispose();
+      }
+    };
+  }, [
+    lineGeometry,
+    glowGeometry,
+    lineObject,
+    glowLineObject,
+  ]);
+
+  useFrame((state) => {
+    const p =
+      progress.get();
+
+    const revealStart =
+      0.035 +
+      index * 0.035;
+
+    const revealEnd =
+      revealStart +
+      0.07;
+
+    const reveal =
+      range(
+        p,
+        revealStart,
+        revealEnd,
+      );
+
+    const visibleCount =
+      Math.max(
+        0,
+        Math.floor(
+          pointCount *
+            reveal,
+        ),
+      );
+
+    lineGeometry.setDrawRange(
+      0,
+      visibleCount,
+    );
+
+    glowGeometry.setDrawRange(
+      0,
+      visibleCount,
+    );
+
+    lineObject.visible =
+      reveal > 0.002;
+
+    glowLineObject.visible =
+      reveal > 0.002;
+
+    if (reduced) {
+      return;
+    }
+
+    const elapsed =
+      state.clock.elapsedTime;
+
+    const speed =
+      index === 2
+        ? 0.07
+        : 0.11;
+
+    const pulsePhase =
+      (
+        elapsed *
+          speed +
+        index *
+          0.23
+      ) %
+      1;
+
+    const pulsePhaseTwo =
+      (
+        pulsePhase +
+        0.34
+      ) %
+      1;
+
+    const pulsePhaseThree =
+      (
+        pulsePhase +
+        0.68
+      ) %
+      1;
+
+    const applyPulse = (
+      mesh:
+        | THREE.Mesh
+        | null,
+      phase: number,
+    ) => {
+      if (!mesh) {
+        return;
+      }
+
+      const visible =
+        reveal >
+          0.98 &&
+        phase <= reveal;
+
+      mesh.visible =
+        visible;
+
+      if (visible) {
+        mesh.position.copy(
+          curve.getPointAt(
+            phase,
+          ),
+        );
+      }
+    };
+
+    applyPulse(
+      pulseOneRef.current,
+      pulsePhase,
+    );
+
+    applyPulse(
+      pulseTwoRef.current,
+      pulsePhaseTwo,
+    );
+
+    applyPulse(
+      pulseThreeRef.current,
+      pulsePhaseThree,
+    );
+  });
+
+  return (
+    <group>
+      <primitive
+        object={glowLineObject}
+      />
+
+      <primitive
+        object={lineObject}
+      />
+
+      {!reduced && (
+        <>
+          <mesh
+            ref={pulseOneRef}
+            visible={false}
+          >
+            <sphereGeometry
+              args={[
+                0.038,
+                14,
+                14,
+              ]}
+            />
+
+            <meshBasicMaterial
+              color="#FFFFFF"
+              transparent
+              opacity={0.96}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+
+          <mesh
+            ref={pulseTwoRef}
+            visible={false}
+          >
+            <sphereGeometry
+              args={[
+                0.026,
+                12,
+                12,
+              ]}
+            />
+
+            <meshBasicMaterial
+              color={routeColor}
+              transparent
+              opacity={0.78}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+
+          <mesh
+            ref={pulseThreeRef}
+            visible={false}
+          >
+            <sphereGeometry
+              args={[
+                0.018,
+                10,
+                10,
+              ]}
+            />
+
+            <meshBasicMaterial
+              color={routeColor}
+              transparent
+              opacity={0.5}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        </>
+      )}
+    </group>
+  );
+}
+
+function GlobalResearchLinks({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const groupRef =
+    useRef<THREE.Group | null>(null);
+
+  const hubsById =
+    useMemo(
+      () =>
+        Object.fromEntries(
+          RESEARCH_HUBS.map(
+            (hub) => [
+              hub.id,
+              hub,
+            ],
+          ),
+        ) as Record<
+          ResearchHub["id"],
+          ResearchHub
+        >,
+      [],
+    );
+
+  useFrame((_state, delta) => {
+    const group =
+      groupRef.current;
+
+    if (!group) {
+      return;
+    }
+
+    const p = progress.get();
+
+    const targetOpacity =
+      bell(
+        p,
+        0.015,
+        0.045,
+        0.185,
+        0.235,
+      );
+
+    group.visible =
+      targetOpacity > 0.005;
+
+    group.children.forEach(
+      (child) => {
+        child.visible =
+          targetOpacity > 0.005;
+      },
+    );
+
+    group.scale.setScalar(
+      THREE.MathUtils.damp(
+        group.scale.x,
+        targetOpacity > 0.01
+          ? 1
+          : 0.96,
+        reduced ? 20 : 7,
+        delta,
+      ),
+    );
+  });
+
+  return (
+    <group ref={groupRef}>
+      {RESEARCH_HUBS.map(
+        (hub) => (
+          <group key={hub.id}>
+            <ResearchHubMarker
+              hub={hub}
+              reduced={reduced}
+            />
+
+            <ResearchHubLabel
+              hub={hub}
+              reduced={reduced}
+            />
+          </group>
+        ),
+      )}
+
+      {RESEARCH_ROUTES.map(
+        ([fromId, toId], index) => (
+          <ResearchRoute
+            key={`${fromId}-${toId}`}
+            from={hubsById[fromId]}
+            to={hubsById[toId]}
+            index={index}
+            reduced={reduced}
+            progress={progress}
+          />
+        ),
+      )}
+    </group>
+  );
+}
+
 
 /* ====================================================== */
 /* INTERACTIVE EARTH                                      */
@@ -322,6 +1687,14 @@ function JourneyEarth({
         handlePointerUp,
         true,
       );
+
+      if (
+        typeof document !==
+        "undefined"
+      ) {
+        document.body.style.cursor =
+          "default";
+      }
     };
   }, [
     focusedCountry,
@@ -667,9 +2040,1879 @@ function JourneyEarth({
       <Atmosphere
         reduced={true}
       />
+
+      <GlobalResearchLinks
+        progress={progress}
+        reduced={reduced}
+      />
     </group>
   );
 }
+
+
+/* ====================================================== */
+/* EARTH → TISSUE → CELL CINEMATIC                        */
+/* ====================================================== */
+
+function CinematicCellDive({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const groupRef =
+    useRef<THREE.Group | null>(
+      null,
+    );
+
+  const membraneRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const nucleusRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const tissueCells =
+    useMemo(
+      () =>
+        Array.from({
+          length: 13,
+        }).map(
+          (
+            _,
+            index,
+          ) => {
+            const angle =
+              (
+                index /
+                13
+              ) *
+              Math.PI *
+              2;
+
+            const radius =
+              index % 3 === 0
+                ? 2.9
+                : index % 2 === 0
+                  ? 2.35
+                  : 1.9;
+
+            return {
+              x:
+                Math.cos(angle) *
+                radius,
+              y:
+                Math.sin(angle) *
+                radius *
+                0.62,
+              z:
+                -0.6 -
+                (
+                  index %
+                  5
+                ) *
+                  0.22,
+              scale:
+                0.44 +
+                (
+                  index %
+                  4
+                ) *
+                  0.055,
+              color:
+                index % 3 === 0
+                  ? "#5EEAD4"
+                  : index % 3 === 1
+                    ? "#7DD3FC"
+                    : "#A5F3FC",
+            };
+          },
+        ),
+      [],
+    );
+
+  const organelles =
+    useMemo(
+      () =>
+        Array.from({
+          length: 18,
+        }).map(
+          (
+            _,
+            index,
+          ) => {
+            const angle =
+              index *
+              2.399963229728653;
+
+            const radius =
+              0.7 +
+              (
+                index %
+                5
+              ) *
+                0.11;
+
+            return {
+              x:
+                Math.cos(angle) *
+                radius,
+              y:
+                Math.sin(angle) *
+                radius *
+                0.72,
+              z:
+                -0.35 +
+                (
+                  index %
+                  6
+                ) *
+                  0.12,
+              size:
+                0.035 +
+                (
+                  index %
+                  3
+                ) *
+                  0.012,
+            };
+          },
+        ),
+      [],
+    );
+
+  useFrame(
+    (
+      state,
+      delta,
+    ) => {
+      const group =
+        groupRef.current;
+
+      if (!group) {
+        return;
+      }
+
+      const p =
+        progress.get();
+
+      const visibility =
+        bell(
+          p,
+          0.225,
+          0.27,
+          0.42,
+          0.49,
+        );
+
+      const tissueFormation =
+        range(
+          p,
+          0.225,
+          0.315,
+        );
+
+      const cellFocus =
+        range(
+          p,
+          0.29,
+          0.405,
+        );
+
+      const dive =
+        range(
+          p,
+          0.365,
+          0.49,
+        );
+
+      group.visible =
+        visibility >
+        0.004;
+
+      const targetScale =
+        THREE.MathUtils.lerp(
+          0.36,
+          1.08,
+          tissueFormation,
+        ) *
+        THREE.MathUtils.lerp(
+          1,
+          3.8,
+          dive,
+        );
+
+      group.scale.setScalar(
+        THREE.MathUtils.damp(
+          group.scale.x,
+          targetScale,
+          reduced
+            ? 20
+            : 6.5,
+          delta,
+        ),
+      );
+
+      group.position.z =
+        THREE.MathUtils.damp(
+          group.position.z,
+          THREE.MathUtils.lerp(
+            -5.7,
+            1.85,
+            dive,
+          ),
+          reduced
+            ? 20
+            : 6,
+          delta,
+        );
+
+      group.position.y =
+        THREE.MathUtils.damp(
+          group.position.y,
+          THREE.MathUtils.lerp(
+            -0.12,
+            0,
+            cellFocus,
+          ),
+          6,
+          delta,
+        );
+
+      if (!reduced) {
+        group.rotation.z =
+          Math.sin(
+            state.clock.elapsedTime *
+              0.17,
+          ) *
+          0.025;
+
+        group.rotation.y =
+          Math.sin(
+            state.clock.elapsedTime *
+              0.13,
+          ) *
+          0.05;
+      }
+
+      const membrane =
+        membraneRef.current;
+
+      if (
+        membrane &&
+        membrane.material instanceof
+          THREE.MeshBasicMaterial
+      ) {
+        membrane.material.opacity =
+          visibility *
+          THREE.MathUtils.lerp(
+            0.16,
+            0.42,
+            cellFocus,
+          );
+      }
+
+      const nucleus =
+        nucleusRef.current;
+
+      if (
+        nucleus &&
+        nucleus.material instanceof
+          THREE.MeshBasicMaterial
+      ) {
+        nucleus.material.opacity =
+          visibility *
+          THREE.MathUtils.lerp(
+            0.2,
+            0.82,
+            cellFocus,
+          );
+
+        if (!reduced) {
+          const pulse =
+            1 +
+            Math.sin(
+              state.clock.elapsedTime *
+                1.8,
+            ) *
+              0.04;
+
+          nucleus.scale.setScalar(
+            pulse,
+          );
+        }
+      }
+
+      group.children.forEach(
+        (
+          child,
+          index,
+        ) => {
+          if (
+            index <
+              tissueCells.length &&
+            child instanceof
+              THREE.Mesh &&
+            child.material instanceof
+              THREE.MeshBasicMaterial
+          ) {
+            const fade =
+              1 -
+              range(
+                p,
+                0.315,
+                0.405,
+              );
+
+            child.material.opacity =
+              visibility *
+              fade *
+              0.22;
+          }
+        },
+      );
+    },
+  );
+
+  return (
+    <group
+      ref={groupRef}
+      position={[
+        0,
+        -0.12,
+        -5.7,
+      ]}
+    >
+      {/* surrounding tissue cells */}
+
+      {tissueCells.map(
+        (
+          cell,
+          index,
+        ) => (
+          <mesh
+            key={`tissue-${index}`}
+            position={[
+              cell.x,
+              cell.y,
+              cell.z,
+            ]}
+            scale={cell.scale}
+          >
+            <sphereGeometry
+              args={[
+                1,
+                26,
+                26,
+              ]}
+            />
+
+            <meshBasicMaterial
+              color={
+                cell.color
+              }
+              transparent
+              opacity={0}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        ),
+      )}
+
+      {/* focused cell membrane */}
+
+      <mesh ref={membraneRef}>
+        <sphereGeometry
+          args={[
+            1.45,
+            48,
+            48,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#5EEAD4"
+          wireframe
+          transparent
+          opacity={0}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* membrane glow */}
+
+      <mesh>
+        <sphereGeometry
+          args={[
+            1.5,
+            40,
+            40,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#67E8F9"
+          transparent
+          opacity={0.045}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* nucleus */}
+
+      <mesh
+        ref={nucleusRef}
+        position={[
+          0.15,
+          0.05,
+          0.05,
+        ]}
+      >
+        <sphereGeometry
+          args={[
+            0.48,
+            36,
+            36,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#A5F3FC"
+          transparent
+          opacity={0}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* nuclear halo */}
+
+      <mesh
+        position={[
+          0.15,
+          0.05,
+          0.04,
+        ]}
+      >
+        <sphereGeometry
+          args={[
+            0.64,
+            26,
+            26,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#7DD3FC"
+          transparent
+          opacity={0.07}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* intracellular particles */}
+
+      {organelles.map(
+        (
+          organelle,
+          index,
+        ) => (
+          <mesh
+            key={`organelle-${index}`}
+            position={[
+              organelle.x,
+              organelle.y,
+              organelle.z,
+            ]}
+          >
+            <sphereGeometry
+              args={[
+                organelle.size,
+                10,
+                10,
+              ]}
+            />
+
+            <meshBasicMaterial
+              color={
+                index % 2 === 0
+                  ? "#99F6E4"
+                  : "#7DD3FC"
+              }
+              transparent
+              opacity={0.65}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        ),
+      )}
+
+      {/* nucleus-targeting rings */}
+
+      <mesh
+        rotation={[
+          1.18,
+          0.18,
+          0.1,
+        ]}
+      >
+        <torusGeometry
+          args={[
+            0.82,
+            0.012,
+            8,
+            90,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#5EEAD4"
+          transparent
+          opacity={0.24}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <mesh
+        rotation={[
+          0.32,
+          1.12,
+          0.42,
+        ]}
+      >
+        <torusGeometry
+          args={[
+            1.05,
+            0.008,
+            8,
+            100,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#7DD3FC"
+          transparent
+          opacity={0.16}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+
+
+/* ====================================================== */
+/* PAPER → KNOWLEDGE GRAPH                                */
+/* ====================================================== */
+
+const PAPER_GRAPH_ENTITIES = [
+  { label: "CAF", x: -1.75, y: 0.75, color: "#5EEAD4" },
+  { label: "TGF-β", x: -0.55, y: 1.28, color: "#A5F3FC" },
+  { label: "CXCL12", x: 0.72, y: 0.72, color: "#7DD3FC" },
+  { label: "CXCR4", x: 1.72, y: -0.08, color: "#99F6E4" },
+  { label: "Tumor cell", x: 0.45, y: -1.05, color: "#67E8F9" },
+  { label: "Bone niche", x: -1.2, y: -0.9, color: "#BAE6FD" },
+] as const;
+
+const PAPER_GRAPH_EDGES = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [4, 5],
+  [0, 5],
+] as const;
+
+function PaperKnowledgeGraphScene({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const groupRef =
+    useRef<THREE.Group | null>(null);
+
+  const paperRef =
+    useRef<THREE.Mesh | null>(null);
+
+  const nodeRefs =
+    useRef<Array<THREE.Mesh | null>>([]);
+
+  const edgeRefs =
+    useRef<Array<THREE.Mesh | null>>([]);
+
+  const edgeData =
+    useMemo(
+      () =>
+        PAPER_GRAPH_EDGES.map(
+          ([sourceIndex, targetIndex]) => {
+            const source =
+              PAPER_GRAPH_ENTITIES[sourceIndex];
+
+            const target =
+              PAPER_GRAPH_ENTITIES[targetIndex];
+
+            const start =
+              new THREE.Vector3(
+                source.x,
+                source.y,
+                0,
+              );
+
+            const end =
+              new THREE.Vector3(
+                target.x,
+                target.y,
+                0,
+              );
+
+            const midpoint =
+              start
+                .clone()
+                .add(end)
+                .multiplyScalar(0.5);
+
+            const length =
+              start.distanceTo(end);
+
+            const angle =
+              Math.atan2(
+                target.y - source.y,
+                target.x - source.x,
+              );
+
+            return {
+              midpoint,
+              length,
+              angle,
+            };
+          },
+        ),
+      [],
+    );
+
+  useFrame((state, delta) => {
+    const group =
+      groupRef.current;
+
+    if (!group) {
+      return;
+    }
+
+    const p =
+      progress.get();
+
+    const visibility =
+      bell(
+        p,
+        0.47,
+        0.505,
+        0.655,
+        0.705,
+      );
+
+    const extraction =
+      range(
+        p,
+        0.515,
+        0.605,
+      );
+
+    const graphFormation =
+      range(
+        p,
+        0.57,
+        0.665,
+      );
+
+    group.visible =
+      visibility > 0.004;
+
+    group.position.z =
+      THREE.MathUtils.damp(
+        group.position.z,
+        THREE.MathUtils.lerp(
+          -4.5,
+          -1.7,
+          graphFormation,
+        ),
+        reduced ? 20 : 6,
+        delta,
+      );
+
+    if (!reduced) {
+      group.rotation.y =
+        Math.sin(
+          state.clock.elapsedTime * 0.15,
+        ) * 0.035;
+    }
+
+    const paper =
+      paperRef.current;
+
+    if (
+      paper &&
+      paper.material instanceof
+        THREE.MeshBasicMaterial
+    ) {
+      paper.material.opacity =
+        visibility *
+        (1 - extraction) *
+        0.24;
+
+      paper.scale.setScalar(
+        THREE.MathUtils.lerp(
+          1,
+          0.86,
+          extraction,
+        ),
+      );
+    }
+
+    nodeRefs.current.forEach(
+      (node, index) => {
+        if (!node) return;
+
+        const entity =
+          PAPER_GRAPH_ENTITIES[index];
+
+        const localReveal =
+          range(
+            graphFormation,
+            index * 0.08,
+            Math.min(
+              1,
+              index * 0.08 + 0.34,
+            ),
+          );
+
+        node.visible =
+          localReveal > 0.01;
+
+        node.position.x =
+          THREE.MathUtils.damp(
+            node.position.x,
+            THREE.MathUtils.lerp(
+              0,
+              entity.x,
+              localReveal,
+            ),
+            reduced ? 20 : 8,
+            delta,
+          );
+
+        node.position.y =
+          THREE.MathUtils.damp(
+            node.position.y,
+            THREE.MathUtils.lerp(
+              0,
+              entity.y,
+              localReveal,
+            ),
+            reduced ? 20 : 8,
+            delta,
+          );
+
+        const scale =
+          THREE.MathUtils.lerp(
+            0.15,
+            1,
+            localReveal,
+          );
+
+        node.scale.setScalar(scale);
+
+        if (
+          node.material instanceof
+            THREE.MeshBasicMaterial
+        ) {
+          node.material.opacity =
+            visibility *
+            localReveal *
+            0.92;
+        }
+      },
+    );
+
+    edgeRefs.current.forEach(
+      (edge, index) => {
+        if (
+          !edge ||
+          !(
+            edge.material instanceof
+            THREE.MeshBasicMaterial
+          )
+        ) {
+          return;
+        }
+
+        const localReveal =
+          range(
+            graphFormation,
+            0.34 + index * 0.06,
+            0.62 + index * 0.06,
+          );
+
+        edge.visible =
+          localReveal > 0.01;
+
+        edge.material.opacity =
+          visibility *
+          localReveal *
+          0.42;
+
+        edge.scale.x =
+          localReveal;
+      },
+    );
+  });
+
+  return (
+    <group
+      ref={groupRef}
+      position={[0, 0, -4.5]}
+    >
+      {/* source paper */}
+      <mesh ref={paperRef}>
+        <planeGeometry args={[4.9, 3.05]} />
+        <meshBasicMaterial
+          color="#DFFBFF"
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* abstract-like lines */}
+      {Array.from({ length: 11 }).map((_, index) => (
+        <mesh
+          key={`paper-line-${index}`}
+          position={[
+            -0.45 + (index % 3) * 0.12,
+            1.05 - index * 0.19,
+            0.025,
+          ]}
+          scale={[
+            1.65 - (index % 4) * 0.17,
+            1,
+            1,
+          ]}
+        >
+          <planeGeometry args={[1, 0.025]} />
+          <meshBasicMaterial
+            color={
+              index === 2 ||
+              index === 5 ||
+              index === 8
+                ? "#5EEAD4"
+                : "#64748B"
+            }
+            transparent
+            opacity={
+              index === 2 ||
+              index === 5 ||
+              index === 8
+                ? 0.52
+                : 0.22
+            }
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+
+      {/* extracted entity nodes */}
+      {PAPER_GRAPH_ENTITIES.map((entity, index) => (
+        <mesh
+          key={entity.label}
+          ref={(node) => {
+            nodeRefs.current[index] = node;
+          }}
+          position={[0, 0, 0.16]}
+          visible={false}
+        >
+          <sphereGeometry args={[0.12, 20, 20]} />
+          <meshBasicMaterial
+            color={entity.color}
+            transparent
+            opacity={0}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+
+          <pointLight
+            color={entity.color}
+            intensity={0.16}
+            distance={0.7}
+            decay={2}
+          />
+        </mesh>
+      ))}
+
+      {/* mechanistic edges */}
+      {edgeData.map((edge, index) => (
+        <mesh
+          key={`paper-edge-${index}`}
+          ref={(mesh) => {
+            edgeRefs.current[index] = mesh;
+          }}
+          position={[
+            edge.midpoint.x,
+            edge.midpoint.y,
+            0.08,
+          ]}
+          rotation={[0, 0, edge.angle]}
+          visible={false}
+        >
+          <planeGeometry
+            args={[edge.length, 0.018]}
+          />
+          <meshBasicMaterial
+            color={
+              index % 2 === 0
+                ? "#5EEAD4"
+                : "#7DD3FC"
+            }
+            transparent
+            opacity={0}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+
+
+/* ====================================================== */
+/* EVIDENCE FLOW + CONTRADICTION MODE                     */
+/* ====================================================== */
+
+const EVIDENCE_FLOW_NODES = [
+  { x: -1.85, y: 0.72, z: -0.15, color: "#5EEAD4", kind: "support" },
+  { x: -0.75, y: 1.18, z: 0.05, color: "#34D399", kind: "support" },
+  { x: 0.45, y: 0.86, z: 0.12, color: "#7DD3FC", kind: "support" },
+  { x: 1.58, y: 0.18, z: 0.05, color: "#F59E0B", kind: "limited" },
+  { x: 0.82, y: -0.92, z: 0.12, color: "#FB7185", kind: "conflict" },
+  { x: -0.72, y: -1.08, z: -0.04, color: "#5EEAD4", kind: "support" },
+] as const;
+
+const EVIDENCE_FLOW_EDGES = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [4, 5],
+  [5, 0],
+  [1, 4],
+] as const;
+
+function EvidenceFlowScene({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const groupRef =
+    useRef<THREE.Group | null>(null);
+
+  const pulseRefs =
+    useRef<Array<THREE.Mesh | null>>([]);
+
+  const edgeData =
+    useMemo(
+      () =>
+        EVIDENCE_FLOW_EDGES.map(
+          ([sourceIndex, targetIndex]) => {
+            const source =
+              EVIDENCE_FLOW_NODES[sourceIndex];
+
+            const target =
+              EVIDENCE_FLOW_NODES[targetIndex];
+
+            const start =
+              new THREE.Vector3(
+                source.x,
+                source.y,
+                source.z,
+              );
+
+            const end =
+              new THREE.Vector3(
+                target.x,
+                target.y,
+                target.z,
+              );
+
+            const direction =
+              end.clone().sub(start);
+
+            const distance =
+              direction.length();
+
+            const midpoint =
+              start
+                .clone()
+                .add(end)
+                .multiplyScalar(0.5);
+
+            const quaternion =
+              new THREE.Quaternion().setFromUnitVectors(
+                new THREE.Vector3(0, 1, 0),
+                direction.clone().normalize(),
+              );
+
+            return {
+              start,
+              end,
+              midpoint,
+              distance,
+              quaternion,
+              sourceIndex,
+              targetIndex,
+            };
+          },
+        ),
+      [],
+    );
+
+  useFrame((state, delta) => {
+    const group =
+      groupRef.current;
+
+    if (!group) return;
+
+    const p =
+      progress.get();
+
+    const visibility =
+      bell(
+        p,
+        0.61,
+        0.655,
+        0.79,
+        0.835,
+      );
+
+    const contradiction =
+      range(
+        p,
+        0.705,
+        0.79,
+      );
+
+    group.visible =
+      visibility > 0.004;
+
+    const targetScale =
+      THREE.MathUtils.lerp(
+        0.7,
+        1.12,
+        range(
+          p,
+          0.62,
+          0.75,
+        ),
+      );
+
+    group.scale.setScalar(
+      THREE.MathUtils.damp(
+        group.scale.x,
+        targetScale,
+        reduced ? 20 : 7,
+        delta,
+      ),
+    );
+
+    if (!reduced) {
+      group.rotation.y =
+        Math.sin(
+          state.clock.elapsedTime * 0.16,
+        ) * 0.05;
+
+      group.rotation.z =
+        Math.sin(
+          state.clock.elapsedTime * 0.11,
+        ) * 0.025;
+    }
+
+    pulseRefs.current.forEach(
+      (pulse, index) => {
+        if (!pulse) return;
+
+        const edge =
+          edgeData[index];
+
+        const phase =
+          (
+            state.clock.elapsedTime *
+              (
+                index === 4
+                  ? 0.07
+                  : 0.11
+              ) +
+            index * 0.17
+          ) % 1;
+
+        pulse.position.lerpVectors(
+          edge.start,
+          edge.end,
+          phase,
+        );
+
+        const conflictEdge =
+          index === 3 ||
+          index === 4;
+
+        const activeOpacity =
+          conflictEdge
+            ? THREE.MathUtils.lerp(
+                0.42,
+                1,
+                contradiction,
+              )
+            : 0.86;
+
+        if (
+          pulse.material instanceof
+            THREE.MeshBasicMaterial
+        ) {
+          pulse.material.opacity =
+            visibility *
+            activeOpacity;
+        }
+
+        pulse.visible =
+          visibility > 0.02;
+      },
+    );
+  });
+
+  return (
+    <group
+      ref={groupRef}
+      position={[
+        0,
+        0,
+        -2.6,
+      ]}
+    >
+      {EVIDENCE_FLOW_NODES.map(
+        (
+          node,
+          index,
+        ) => (
+          <group
+            key={`evidence-node-${index}`}
+            position={[
+              node.x,
+              node.y,
+              node.z,
+            ]}
+          >
+            <mesh>
+              <sphereGeometry
+                args={[
+                  node.kind === "conflict"
+                    ? 0.13
+                    : 0.105,
+                  18,
+                  18,
+                ]}
+              />
+              <meshBasicMaterial
+                color={node.color}
+                transparent
+                opacity={
+                  node.kind === "conflict"
+                    ? 0.88
+                    : 0.76
+                }
+                blending={
+                  THREE.AdditiveBlending
+                }
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </mesh>
+
+            <mesh>
+              <sphereGeometry
+                args={[
+                  node.kind === "conflict"
+                    ? 0.22
+                    : 0.17,
+                  16,
+                  16,
+                ]}
+              />
+              <meshBasicMaterial
+                color={node.color}
+                transparent
+                opacity={
+                  node.kind === "conflict"
+                    ? 0.1
+                    : 0.055
+                }
+                blending={
+                  THREE.AdditiveBlending
+                }
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </mesh>
+          </group>
+        ),
+      )}
+
+      {edgeData.map(
+        (
+          edge,
+          index,
+        ) => {
+          const conflictEdge =
+            index === 3 ||
+            index === 4;
+
+          return (
+            <group key={`evidence-edge-${index}`}>
+              <mesh
+                position={
+                  edge.midpoint
+                }
+                quaternion={
+                  edge.quaternion
+                }
+              >
+                <cylinderGeometry
+                  args={[
+                    conflictEdge
+                      ? 0.014
+                      : 0.009,
+                    conflictEdge
+                      ? 0.014
+                      : 0.009,
+                    edge.distance,
+                    6,
+                  ]}
+                />
+                <meshBasicMaterial
+                  color={
+                    conflictEdge
+                      ? "#FB7185"
+                      : index === 2
+                        ? "#FBBF24"
+                        : "#5EEAD4"
+                  }
+                  transparent
+                  opacity={
+                    conflictEdge
+                      ? 0.34
+                      : 0.22
+                  }
+                  blending={
+                    THREE.AdditiveBlending
+                  }
+                  depthWrite={false}
+                  toneMapped={false}
+                />
+              </mesh>
+
+              {!reduced && (
+                <mesh
+                  ref={(mesh) => {
+                    pulseRefs.current[index] =
+                      mesh;
+                  }}
+                >
+                  <sphereGeometry
+                    args={[
+                      conflictEdge
+                        ? 0.032
+                        : 0.025,
+                      12,
+                      12,
+                    ]}
+                  />
+                  <meshBasicMaterial
+                    color={
+                      conflictEdge
+                        ? "#FFF1F2"
+                        : "#FFFFFF"
+                    }
+                    transparent
+                    opacity={0}
+                    blending={
+                      THREE.AdditiveBlending
+                    }
+                    depthWrite={false}
+                    toneMapped={false}
+                  />
+                </mesh>
+              )}
+            </group>
+          );
+        },
+      )}
+    </group>
+  );
+}
+
+
+
+/* ====================================================== */
+/* HYPOTHESIS BIRTH                                       */
+/* ====================================================== */
+
+function HypothesisBirthScene({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const groupRef =
+    useRef<THREE.Group | null>(null);
+
+  const coreRef =
+    useRef<THREE.Mesh | null>(null);
+
+  const particles =
+    useMemo(
+      () =>
+        Array.from({
+          length: 24,
+        }).map((_, index) => {
+          const angle =
+            (
+              index /
+              24
+            ) *
+            Math.PI *
+            2;
+
+          const radius =
+            1.6 +
+            (
+              index %
+              5
+            ) *
+              0.23;
+
+          return {
+            start:
+              new THREE.Vector3(
+                Math.cos(angle) *
+                  radius,
+                Math.sin(angle) *
+                  radius *
+                  0.62,
+                -0.6 +
+                  (
+                    index %
+                    6
+                  ) *
+                    0.22,
+              ),
+            phase:
+              (
+                index %
+                7
+              ) /
+              7,
+          };
+        }),
+      [],
+    );
+
+  const particleRefs =
+    useRef<Array<THREE.Mesh | null>>([]);
+
+  useFrame((state, delta) => {
+    const group =
+      groupRef.current;
+
+    const core =
+      coreRef.current;
+
+    if (
+      !group ||
+      !core
+    ) {
+      return;
+    }
+
+    const p =
+      progress.get();
+
+    const visibility =
+      bell(
+        p,
+        0.77,
+        0.815,
+        0.91,
+        0.95,
+      );
+
+    const convergence =
+      range(
+        p,
+        0.79,
+        0.89,
+      );
+
+    group.visible =
+      visibility > 0.004;
+
+    particleRefs.current.forEach(
+      (
+        particle,
+        index,
+      ) => {
+        if (!particle) return;
+
+        const data =
+          particles[index];
+
+        const local =
+          THREE.MathUtils.clamp(
+            convergence *
+              1.18 -
+              data.phase *
+                0.18,
+            0,
+            1,
+          );
+
+        particle.position.lerpVectors(
+          data.start,
+          new THREE.Vector3(
+            0,
+            0,
+            0,
+          ),
+          local,
+        );
+
+        const scale =
+          THREE.MathUtils.lerp(
+            1,
+            0.42,
+            local,
+          );
+
+        particle.scale.setScalar(
+          scale,
+        );
+
+        if (
+          particle.material instanceof
+            THREE.MeshBasicMaterial
+        ) {
+          particle.material.opacity =
+            visibility *
+            THREE.MathUtils.lerp(
+              0.65,
+              0.08,
+              local,
+            );
+        }
+      },
+    );
+
+    const targetCoreScale =
+      THREE.MathUtils.lerp(
+        0.3,
+        1.4,
+        convergence,
+      );
+
+    core.scale.setScalar(
+      THREE.MathUtils.damp(
+        core.scale.x,
+        targetCoreScale,
+        reduced ? 20 : 8,
+        delta,
+      ),
+    );
+
+    if (
+      core.material instanceof
+        THREE.MeshBasicMaterial
+    ) {
+      core.material.opacity =
+        visibility *
+        THREE.MathUtils.lerp(
+          0.18,
+          0.96,
+          convergence,
+        );
+    }
+
+    if (!reduced) {
+      group.rotation.z +=
+        delta * 0.09;
+
+      const pulse =
+        1 +
+        Math.sin(
+          state.clock.elapsedTime *
+            2.4,
+        ) *
+          0.07;
+
+      core.scale.multiplyScalar(
+        pulse,
+      );
+    }
+  });
+
+  return (
+    <group
+      ref={groupRef}
+      position={[
+        0,
+        0,
+        -2.25,
+      ]}
+    >
+      {particles.map(
+        (
+          data,
+          index,
+        ) => (
+          <mesh
+            key={`hypothesis-particle-${index}`}
+            ref={(mesh) => {
+              particleRefs.current[index] =
+                mesh;
+            }}
+            position={data.start}
+          >
+            <sphereGeometry
+              args={[
+                0.035 +
+                  (
+                    index %
+                    3
+                  ) *
+                    0.008,
+                10,
+                10,
+              ]}
+            />
+            <meshBasicMaterial
+              color={
+                index % 4 === 0
+                  ? "#34D399"
+                  : index % 4 === 1
+                    ? "#5EEAD4"
+                    : index % 4 === 2
+                      ? "#7DD3FC"
+                      : "#FBBF24"
+              }
+              transparent
+              opacity={0}
+              blending={
+                THREE.AdditiveBlending
+              }
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        ),
+      )}
+
+      <mesh ref={coreRef}>
+        <sphereGeometry
+          args={[
+            0.22,
+            30,
+            30,
+          ]}
+        />
+        <meshBasicMaterial
+          color="#FFFFFF"
+          transparent
+          opacity={0}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <mesh>
+        <torusGeometry
+          args={[
+            0.72,
+            0.012,
+            8,
+            100,
+          ]}
+        />
+        <meshBasicMaterial
+          color="#5EEAD4"
+          transparent
+          opacity={0.18}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <mesh
+        rotation={[
+          1.05,
+          0.3,
+          0.2,
+        ]}
+      >
+        <torusGeometry
+          args={[
+            1.05,
+            0.008,
+            8,
+            110,
+          ]}
+        />
+        <meshBasicMaterial
+          color="#7DD3FC"
+          transparent
+          opacity={0.11}
+          blending={
+            THREE.AdditiveBlending
+          }
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+
+
+/* ====================================================== */
+/* RESEARCH CONSTELLATION                                 */
+/* ====================================================== */
+
+function ResearchConstellation({
+  progress,
+  reduced,
+}: JourneyProps) {
+  const pointsRef =
+    useRef<THREE.Points | null>(
+      null,
+    );
+
+  const materialRef =
+    useRef<THREE.PointsMaterial | null>(
+      null,
+    );
+
+  const positions =
+    useMemo(() => {
+      const count = 90;
+      const array =
+        new Float32Array(
+          count * 3,
+        );
+
+      for (
+        let i = 0;
+        i < count;
+        i++
+      ) {
+        const arm =
+          i % 5;
+
+        const radius =
+          0.6 +
+          (
+            i /
+            count
+          ) *
+            5.2;
+
+        const angle =
+          radius *
+            1.35 +
+          arm *
+            (
+              Math.PI *
+              2 /
+              5
+            );
+
+        array[
+          i * 3
+        ] =
+          Math.cos(angle) *
+          radius;
+
+        array[
+          i * 3 + 1
+        ] =
+          Math.sin(angle) *
+          radius *
+          0.58;
+
+        array[
+          i * 3 + 2
+        ] =
+          -1.5 +
+          Math.sin(
+            i * 0.73,
+          ) *
+            1.2;
+      }
+
+      return array;
+    }, []);
+
+  useFrame(
+    (
+      _state,
+      delta,
+    ) => {
+      const points =
+        pointsRef.current;
+
+      const material =
+        materialRef.current;
+
+      if (
+        !points ||
+        !material
+      ) {
+        return;
+      }
+
+      const p =
+        progress.get();
+
+      const visibility =
+        bell(
+          p,
+          0.885,
+          0.92,
+          0.975,
+          1,
+        );
+
+      material.opacity =
+        THREE.MathUtils.damp(
+          material.opacity,
+          visibility * 0.72,
+          reduced ? 20 : 8,
+          delta,
+        );
+
+      points.visible =
+        visibility > 0.004;
+
+      const scale =
+        THREE.MathUtils.lerp(
+          0.58,
+          1.28,
+          range(
+            p,
+            0.89,
+            0.985,
+          ),
+        );
+
+      points.scale.setScalar(
+        THREE.MathUtils.damp(
+          points.scale.x,
+          scale,
+          reduced ? 20 : 6,
+          delta,
+        ),
+      );
+
+      if (!reduced) {
+        points.rotation.z +=
+          delta * 0.025;
+
+        points.rotation.y +=
+          delta * 0.012;
+      }
+    },
+  );
+
+  return (
+    <points
+      ref={pointsRef}
+      position={[
+        0,
+        0,
+        -5,
+      ]}
+    >
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[
+            positions,
+            3,
+          ]}
+        />
+      </bufferGeometry>
+
+      <pointsMaterial
+        ref={materialRef}
+        color="#A5F3FC"
+        size={0.055}
+        transparent
+        opacity={0}
+        sizeAttenuation
+        blending={
+          THREE.AdditiveBlending
+        }
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </points>
+  );
+}
+
 
 /* ====================================================== */
 /* PERSISTENT PARTICLE FIELD                              */
@@ -895,7 +4138,7 @@ function MolecularField({
 
       <pointsMaterial
         ref={materialRef}
-        color="#D8CCFF"
+        color="#99F6E4"
         size={0.038}
         transparent
         opacity={0}
@@ -1067,12 +4310,12 @@ function EnergyTunnel({
                 index %
                     3 ===
                   0
-                  ? "#22D3EE"
+                  ? "#5EEAD4"
                   : index %
                         3 ===
                       1
-                    ? "#A78BFA"
-                    : "#F0ABFC"
+                    ? "#7DD3FC"
+                    : "#A5F3FC"
               }
               transparent
               opacity={0}
@@ -1334,7 +4577,7 @@ function JourneyDNA({
                 />
 
                 <meshBasicMaterial
-                  color="#D8B4FE"
+                  color="#99F6E4"
                   transparent
                   opacity={0}
                   blending={
@@ -1359,7 +4602,7 @@ function JourneyDNA({
                 />
 
                 <meshBasicMaterial
-                  color="#67E8F9"
+                  color="#7DD3FC"
                   transparent
                   opacity={0}
                   blending={
@@ -1388,7 +4631,7 @@ function JourneyDNA({
                 />
 
                 <meshBasicMaterial
-                  color="#A78BFA"
+                  color="#7DD3FC"
                   transparent
                   opacity={0}
                   blending={
@@ -1570,7 +4813,7 @@ function Singularity({
         />
 
         <meshBasicMaterial
-          color="#A78BFA"
+          color="#7DD3FC"
           transparent
           opacity={0}
           blending={
@@ -1598,7 +4841,7 @@ function Singularity({
         />
 
         <meshBasicMaterial
-          color="#22D3EE"
+          color="#5EEAD4"
           transparent
           opacity={0}
           blending={
@@ -1672,41 +4915,71 @@ function JourneyCamera({
             t,
           );
       } else if (
-        p < 0.35
+        p < 0.315
       ) {
         const t =
           range(
             p,
             0.215,
-            0.35,
+            0.315,
           );
 
         targetZ =
           THREE.MathUtils.lerp(
             7.15,
-            3.35,
+            4.45,
             t,
           );
 
         targetY =
           THREE.MathUtils.lerp(
             0.28,
+            0.06,
+            t,
+          );
+      } else if (
+        p < 0.455
+      ) {
+        const t =
+          range(
+            p,
+            0.315,
+            0.455,
+          );
+
+        targetZ =
+          THREE.MathUtils.lerp(
+            4.45,
+            2.75,
+            t,
+          );
+
+        targetY =
+          THREE.MathUtils.lerp(
+            0.06,
             0,
             t,
           );
+
+        targetX =
+          Math.sin(
+            t *
+              Math.PI,
+          ) *
+          0.055;
       } else if (
         p < 0.67
       ) {
         const t =
           range(
             p,
-            0.35,
+            0.455,
             0.67,
           );
 
         targetZ =
           THREE.MathUtils.lerp(
-            6.4,
+            5.8,
             3.75,
             t,
           );
@@ -1878,14 +5151,30 @@ function JourneyCamera({
             ),
           );
 
-        if (p > 0.215) {
+        if (
+          p > 0.215 &&
+          p < 0.455
+        ) {
           targetFov =
             THREE.MathUtils.lerp(
               44,
-              54,
+              36,
               range(
                 p,
                 0.215,
+                0.455,
+              ),
+            );
+        } else if (
+          p >= 0.455
+        ) {
+          targetFov =
+            THREE.MathUtils.lerp(
+              48,
+              54,
+              range(
+                p,
+                0.455,
                 0.67,
               ),
             );
@@ -1950,7 +5239,7 @@ function JourneyWorld({
           6,
         ]}
         intensity={1.1}
-        color="#EDE9FE"
+        color="#E6FFFB"
       />
 
       <pointLight
@@ -1960,7 +5249,7 @@ function JourneyWorld({
           3,
         ]}
         intensity={0.3}
-        color="#4F46E5"
+        color="#38BDF8"
       />
 
       <pointLight
@@ -1970,7 +5259,7 @@ function JourneyWorld({
           2,
         ]}
         intensity={0.3}
-        color="#22D3EE"
+        color="#5EEAD4"
       />
 
       <Stars
@@ -1978,6 +5267,31 @@ function JourneyWorld({
       />
 
       <JourneyEarth
+        progress={progress}
+        reduced={reduced}
+      />
+
+      <CinematicCellDive
+        progress={progress}
+        reduced={reduced}
+      />
+
+      <PaperKnowledgeGraphScene
+        progress={progress}
+        reduced={reduced}
+      />
+
+      <EvidenceFlowScene
+        progress={progress}
+        reduced={reduced}
+      />
+
+      <HypothesisBirthScene
+        progress={progress}
+        reduced={reduced}
+      />
+
+      <ResearchConstellation
         progress={progress}
         reduced={reduced}
       />
@@ -2060,20 +5374,52 @@ function JourneyCopy({
         style={{ opacity: earthOpacity }}
         className="pointer-events-none absolute inset-x-0 top-[8vh] z-20 mx-auto max-w-5xl px-6 text-center"
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-violet-200/60">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-teal-200/65">
           From organism to mechanism
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[76px]">
+        <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-6xl lg:text-[76px]">
           Life exists
-          <span className="block bg-gradient-to-r from-violet-400 via-white to-fuchsia-300 bg-clip-text text-transparent">
+          <span className="block bg-gradient-to-r from-teal-200 via-cyan-100 to-sky-300 bg-clip-text text-transparent">
             in layers.
           </span>
         </h2>
 
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-300/65">
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-300/78">
           Move from the scale of a living organism into the cellular and molecular systems that shape disease.
         </p>
+
+        <div className="mx-auto mt-5 flex w-fit items-center gap-2 rounded-full border border-teal-100/10 bg-[#071722]/55 px-3.5 py-2 font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-teal-100/55 backdrop-blur-xl">
+          <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_10px_rgba(94,234,212,.65)]" />
+          Global research links · Tashkent → Doha → USA
+        </div>
+
+        <div className="mx-auto mt-3 hidden w-fit items-center gap-2 sm:flex">
+          {[
+            ["🇺🇿", "Tashkent"],
+            ["🇶🇦", "Doha"],
+            ["🇺🇸", "Baltimore"],
+          ].map(([flag, city], index) => (
+            <div
+              key={city}
+              className="flex items-center gap-1.5 rounded-full border border-teal-100/[0.08] bg-[#071722]/42 px-2.5 py-1.5 font-mono text-[7px] font-semibold uppercase tracking-[0.12em] text-slate-300/70 backdrop-blur-xl"
+            >
+              <span className="text-[11px] leading-none">
+                {flag}
+              </span>
+
+              <span>
+                {city}
+              </span>
+
+              {index < 2 && (
+                <span className="ml-1 text-teal-300/45">
+                  →
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
       </motion.div>
 
       {/* TRANSITION */}
@@ -2081,13 +5427,13 @@ function JourneyCopy({
         style={{ opacity: transitionOpacity }}
         className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
       >
-        <p className="text-[8px] font-black uppercase tracking-[0.44em] text-cyan-200/50">
+        <p className="text-[8px] font-semibold uppercase tracking-[0.44em] text-teal-200/60">
           Scale transition
         </p>
 
-        <h3 className="mt-3 text-2xl font-black tracking-[-0.05em] text-white sm:text-4xl">
-          Leave the surface.
-          <span className="block text-cyan-100/80">Enter the biology.</span>
+        <h3 className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
+          Cross the scale barrier.
+          <span className="block text-teal-100/85">From tissue into a living cell.</span>
         </h3>
       </motion.div>
 
@@ -2096,18 +5442,18 @@ function JourneyCopy({
         style={{ opacity: cellularOpacity }}
         className="pointer-events-none absolute inset-x-0 top-[15vh] z-20 px-6 text-center"
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.44em] text-cyan-200/50">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.44em] text-teal-200/60">
           Layer 01 / Cellular
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[72px]">
+        <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-6xl lg:text-[72px]">
           Cancer begins
-          <span className="block bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">
+          <span className="block bg-gradient-to-r from-teal-200 via-cyan-100 to-sky-300 bg-clip-text text-transparent">
             inside living systems.
           </span>
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/65">
+        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/78">
           Tumor cells, fibroblasts, immune cells and their microenvironment interact as one dynamic biological layer.
         </p>
       </motion.div>
@@ -2117,18 +5463,18 @@ function JourneyCopy({
         style={{ opacity: molecularOpacity }}
         className="pointer-events-none absolute inset-x-0 top-[17vh] z-20 px-6 text-center"
       >
-        <p className="text-[9px] font-black uppercase tracking-[0.42em] text-violet-300/60">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.42em] text-sky-200/65">
           Layer 02 / Molecular signaling
         </p>
 
-        <h2 className="mt-4 text-4xl font-black tracking-[-0.06em] text-white sm:text-6xl lg:text-[72px]">
+        <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-6xl lg:text-[72px]">
           Cells communicate
-          <span className="block bg-gradient-to-r from-violet-400 via-white to-cyan-300 bg-clip-text text-transparent">
+          <span className="block bg-gradient-to-r from-teal-200 via-cyan-100 to-sky-300 bg-clip-text text-transparent">
             through molecular networks.
           </span>
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/70">
+        <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/82">
           Ligands, receptors, proteins and signaling pathways transmit biological information across the tumor system.
         </p>
       </motion.div>
@@ -2138,24 +5484,833 @@ function JourneyCopy({
         style={{ opacity: genomicOpacity }}
         className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
       >
-        <p className="text-[8px] font-black uppercase tracking-[0.44em] text-fuchsia-200/50">
+        <p className="text-[8px] font-semibold uppercase tracking-[0.44em] text-sky-200/65">
           Layer 03 / Genes & proteins
         </p>
 
-        <h3 className="mt-3 text-2xl font-black tracking-[-0.045em] text-white sm:text-4xl">
+        <h3 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
           Molecular changes become
-          <span className="block bg-gradient-to-r from-fuchsia-300 via-white to-cyan-300 bg-clip-text text-transparent">
+          <span className="block bg-gradient-to-r from-sky-200 via-cyan-100 to-sky-300 bg-clip-text text-transparent">
             biological behavior.
           </span>
         </h3>
 
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-300/60">
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-400/85">
           Genes and proteins feed into pathways, processes and ultimately the phenotypes we recognize as disease.
         </p>
       </motion.div>
     </>
   );
 }
+
+
+function CellDiveReticle({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [
+        0.235,
+        0.275,
+        0.39,
+        0.455,
+      ],
+      [
+        0,
+        0.72,
+        0.72,
+        0,
+      ],
+    );
+
+  const scale =
+    useTransform(
+      progress,
+      [
+        0.235,
+        0.455,
+      ],
+      [
+        1.25,
+        0.64,
+      ],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{
+        opacity,
+        scale,
+      }}
+      className="
+        pointer-events-none
+        absolute
+        left-1/2
+        top-1/2
+        z-[15]
+        h-[42vmin]
+        w-[42vmin]
+        -translate-x-1/2
+        -translate-y-1/2
+        rounded-full
+        border
+        border-teal-100/10
+      "
+    >
+      <span
+        className="
+          absolute
+          left-1/2
+          top-[-7px]
+          h-3.5
+          w-px
+          -translate-x-1/2
+          bg-teal-200/30
+        "
+      />
+
+      <span
+        className="
+          absolute
+          bottom-[-7px]
+          left-1/2
+          h-3.5
+          w-px
+          -translate-x-1/2
+          bg-teal-200/30
+        "
+      />
+
+      <span
+        className="
+          left-[-7px]
+          top-1/2
+          absolute
+          h-px
+          w-3.5
+          -translate-y-1/2
+          bg-teal-200/30
+        "
+      />
+
+      <span
+        className="
+          right-[-7px]
+          top-1/2
+          absolute
+          h-px
+          w-3.5
+          -translate-y-1/2
+          bg-teal-200/30
+        "
+      />
+
+      <span
+        className="
+          absolute
+          left-1/2
+          top-1/2
+          h-2
+          w-2
+          -translate-x-1/2
+          -translate-y-1/2
+          rounded-full
+          bg-white/75
+          shadow-[0_0_18px_rgba(153,246,228,.65)]
+        "
+      />
+    </motion.div>
+  );
+}
+
+
+
+
+/* ====================================================== */
+/* PAPER → GRAPH HUD                                      */
+/* ====================================================== */
+
+function PaperGraphHUD({
+  progress,
+  reduced,
+}: {
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [0.47, 0.51, 0.66, 0.705],
+      [0, 1, 1, 0],
+    );
+
+  const y =
+    useTransform(
+      progress,
+      [0.47, 0.705],
+      [reduced ? 0 : 10, 0],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ opacity, y }}
+      className="pointer-events-none absolute left-1/2 top-[13vh] z-[24] w-[min(92vw,720px)] -translate-x-1/2 text-center"
+    >
+      <div className="mx-auto w-fit rounded-full border border-teal-100/10 bg-[#06131d]/68 px-3 py-1.5 font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-teal-100/60 backdrop-blur-xl">
+        Literature intelligence
+      </div>
+
+      <h3 className="mt-4 text-[clamp(1.35rem,3vw,2.7rem)] font-semibold tracking-[-0.045em] text-slate-50">
+        From paper to mechanism.
+      </h3>
+
+      <p className="mx-auto mt-3 max-w-xl text-[11px] leading-6 text-slate-400 sm:text-xs">
+        Biological entities emerge from the literature and assemble into a structured, inspectable knowledge graph.
+      </p>
+
+      <div className="mx-auto mt-4 flex w-fit items-center gap-2 font-mono text-[7px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        <span>Abstract</span>
+        <span className="text-teal-300/45">→</span>
+        <span className="text-teal-100/75">Entities</span>
+        <span className="text-teal-300/45">→</span>
+        <span className="text-cyan-100/80">Mechanism graph</span>
+      </div>
+    </motion.div>
+  );
+}
+
+
+
+/* ====================================================== */
+/* EVIDENCE INTELLIGENCE HUD                              */
+/* ====================================================== */
+
+function EvidenceIntelligenceHUD({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [0.61, 0.655, 0.79, 0.835],
+      [0, 1, 1, 0],
+    );
+
+  const contradictionOpacity =
+    useTransform(
+      progress,
+      [0.695, 0.735, 0.79, 0.82],
+      [0, 1, 1, 0],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ opacity }}
+      className="
+        pointer-events-none
+        absolute
+        left-1/2
+        top-[11vh]
+        z-[25]
+        w-[min(92vw,760px)]
+        -translate-x-1/2
+        text-center
+      "
+    >
+      <div className="
+        mx-auto
+        w-fit
+        rounded-full
+        border
+        border-emerald-200/10
+        bg-[#06131d]/68
+        px-3
+        py-1.5
+        font-mono
+        text-[7px]
+        font-semibold
+        uppercase
+        tracking-[0.18em]
+        text-emerald-100/60
+        backdrop-blur-xl
+      ">
+        Evidence intelligence
+      </div>
+
+      <h3 className="
+        mt-4
+        text-[clamp(1.35rem,3vw,2.8rem)]
+        font-semibold
+        tracking-[-0.045em]
+        text-slate-50
+      ">
+        Evidence is not binary.
+      </h3>
+
+      <p className="
+        mx-auto
+        mt-3
+        max-w-xl
+        text-[11px]
+        leading-6
+        text-slate-400
+        sm:text-xs
+      ">
+        BioLayers separates supporting, contextual, limited and contradictory signals instead of collapsing them into a single answer.
+      </p>
+
+      <div className="
+        mx-auto
+        mt-4
+        flex
+        w-fit
+        flex-wrap
+        items-center
+        justify-center
+        gap-2
+      ">
+        {[
+          ["Supporting", "border-emerald-300/15 bg-emerald-300/[0.05] text-emerald-200"],
+          ["Contextual", "border-teal-300/15 bg-teal-300/[0.05] text-teal-200"],
+          ["Limited", "border-amber-300/15 bg-amber-300/[0.05] text-amber-200"],
+        ].map(([label, classes]) => (
+          <span
+            key={label}
+            className={`rounded-full border px-2.5 py-1 font-mono text-[7px] font-semibold uppercase tracking-[0.13em] ${classes}`}
+          >
+            {label}
+          </span>
+        ))}
+
+        <motion.span
+          style={{
+            opacity:
+              contradictionOpacity,
+          }}
+          className="
+            rounded-full
+            border
+            border-rose-300/20
+            bg-rose-300/[0.06]
+            px-2.5
+            py-1
+            font-mono
+            text-[7px]
+            font-semibold
+            uppercase
+            tracking-[0.13em]
+            text-rose-200
+            shadow-[0_0_24px_rgba(251,113,133,.08)]
+          "
+        >
+          Contradictory
+        </motion.span>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ====================================================== */
+/* HYPOTHESIS BIRTH HUD                                   */
+/* ====================================================== */
+
+function HypothesisBirthHUD({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [0.775, 0.815, 0.905, 0.95],
+      [0, 1, 1, 0],
+    );
+
+  const cardScale =
+    useTransform(
+      progress,
+      [0.8, 0.885],
+      [0.94, 1],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{
+        opacity,
+        scale: cardScale,
+      }}
+      className="
+        pointer-events-none
+        absolute
+        left-1/2
+        bottom-[9vh]
+        z-[26]
+        w-[min(92vw,690px)]
+        -translate-x-1/2
+      "
+    >
+      <div className="
+        rounded-[22px]
+        border
+        border-teal-100/10
+        bg-[#06131d]/78
+        p-4
+        shadow-[0_24px_70px_rgba(1,8,15,.32)]
+        backdrop-blur-2xl
+        sm:p-5
+      ">
+        <div className="
+          flex
+          flex-wrap
+          items-center
+          justify-between
+          gap-3
+        ">
+          <div>
+            <p className="
+              font-mono
+              text-[7px]
+              font-semibold
+              uppercase
+              tracking-[0.2em]
+              text-teal-200/55
+            ">
+              Generated hypothesis
+            </p>
+
+            <h4 className="
+              mt-2
+              text-sm
+              font-semibold
+              tracking-[-0.025em]
+              text-slate-100
+              sm:text-base
+            ">
+              Evidence paths converge into a testable mechanistic question.
+            </h4>
+          </div>
+
+          <span className="
+            rounded-full
+            border
+            border-amber-300/12
+            bg-amber-300/[0.04]
+            px-2.5
+            py-1
+            font-mono
+            text-[7px]
+            font-semibold
+            uppercase
+            tracking-[0.13em]
+            text-amber-200/80
+          ">
+            Hypothesis · not conclusion
+          </span>
+        </div>
+
+        <div className="
+          mt-4
+          grid
+          gap-2
+          sm:grid-cols-3
+        ">
+          {[
+            ["Supporting", "4 evidence paths", "text-emerald-200"],
+            ["Conflicting", "1 unresolved signal", "text-rose-200"],
+            ["Missing", "Human validation", "text-amber-200"],
+          ].map(
+            (
+              [label, value, accent],
+            ) => (
+              <div
+                key={label}
+                className="
+                  rounded-[14px]
+                  border
+                  border-teal-100/[0.06]
+                  bg-teal-100/[0.025]
+                  px-3
+                  py-2.5
+                "
+              >
+                <p className="
+                  font-mono
+                  text-[6px]
+                  uppercase
+                  tracking-[0.15em]
+                  text-slate-500
+                ">
+                  {label}
+                </p>
+
+                <p className={`mt-1.5 text-[10px] font-semibold ${accent}`}>
+                  {value}
+                </p>
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ====================================================== */
+/* RESEARCH CONSTELLATION HUD                             */
+/* ====================================================== */
+
+function ResearchConstellationHUD({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [0.89, 0.925, 0.975, 1],
+      [0, 1, 1, 0],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ opacity }}
+      className="
+        pointer-events-none
+        absolute
+        left-1/2
+        top-[12vh]
+        z-[27]
+        w-[min(92vw,760px)]
+        -translate-x-1/2
+        text-center
+      "
+    >
+      <p className="
+        font-mono
+        text-[7px]
+        font-semibold
+        uppercase
+        tracking-[0.22em]
+        text-sky-200/55
+      ">
+        Research constellation
+      </p>
+
+      <h3 className="
+        mt-3
+        text-[clamp(1.45rem,3.2vw,3rem)]
+        font-semibold
+        tracking-[-0.05em]
+        text-white
+      ">
+        Every mechanism is part of a larger map.
+      </h3>
+
+      <p className="
+        mx-auto
+        mt-3
+        max-w-xl
+        text-[11px]
+        leading-6
+        text-slate-400
+        sm:text-xs
+      ">
+        BioLayers connects cells, genes, proteins, pathways, evidence and hypotheses into one evolving research space.
+      </p>
+
+      <div className="
+        mx-auto
+        mt-4
+        flex
+        w-fit
+        items-center
+        gap-2
+        rounded-full
+        border
+        border-sky-200/10
+        bg-[#06131d]/62
+        px-3
+        py-1.5
+        font-mono
+        text-[7px]
+        font-semibold
+        uppercase
+        tracking-[0.14em]
+        text-sky-100/60
+        backdrop-blur-xl
+      ">
+        Evidence → Mechanism → Hypothesis
+      </div>
+    </motion.div>
+  );
+}
+
+
+/* ====================================================== */
+/* SCALE-DIVE HUD                                         */
+/* ====================================================== */
+
+function ScaleDiveHUD({
+  progress,
+  reduced,
+}: {
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [
+        0.19,
+        0.225,
+        0.435,
+        0.49,
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+      ],
+    );
+
+  const scale =
+    useTransform(
+      progress,
+      [
+        0.215,
+        0.49,
+      ],
+      [
+        0.96,
+        1.035,
+      ],
+    );
+
+  const earthActive =
+    useTransform(
+      progress,
+      [
+        0.19,
+        0.235,
+        0.27,
+      ],
+      [
+        1,
+        1,
+        0.26,
+      ],
+    );
+
+  const tissueActive =
+    useTransform(
+      progress,
+      [
+        0.225,
+        0.275,
+        0.345,
+        0.405,
+      ],
+      [
+        0.25,
+        1,
+        1,
+        0.3,
+      ],
+    );
+
+  const cellActive =
+    useTransform(
+      progress,
+      [
+        0.31,
+        0.37,
+        0.46,
+      ],
+      [
+        0.25,
+        1,
+        1,
+      ],
+    );
+
+  const nucleusActive =
+    useTransform(
+      progress,
+      [
+        0.365,
+        0.425,
+        0.485,
+      ],
+      [
+        0.2,
+        1,
+        0.72,
+      ],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{
+        opacity,
+        scale:
+          reduced
+            ? 1
+            : scale,
+      }}
+      className="
+        pointer-events-none
+        absolute
+        inset-x-0
+        bottom-[8vh]
+        z-[24]
+        px-5
+      "
+    >
+      <div
+        className="
+          mx-auto
+          flex
+          w-fit
+          max-w-[92vw]
+          items-center
+          gap-2
+          rounded-full
+          border
+          border-teal-100/10
+          bg-[#06131d]/72
+          px-3
+          py-2
+          shadow-[0_16px_50px_rgba(1,8,15,.26)]
+          backdrop-blur-2xl
+          sm:gap-3
+          sm:px-4
+        "
+      >
+        {[
+          {
+            label: "Earth",
+            code: "10⁷ m",
+            opacity:
+              earthActive,
+          },
+          {
+            label: "Tissue",
+            code: "10⁻³ m",
+            opacity:
+              tissueActive,
+          },
+          {
+            label: "Cell",
+            code: "10⁻⁵ m",
+            opacity:
+              cellActive,
+          },
+          {
+            label: "Nucleus",
+            code: "10⁻⁶ m",
+            opacity:
+              nucleusActive,
+          },
+        ].map(
+          (
+            item,
+            index,
+          ) => (
+            <div
+              key={
+                item.label
+              }
+              className="
+                flex
+                items-center
+                gap-2
+              "
+            >
+              <motion.div
+                style={{
+                  opacity:
+                    item.opacity,
+                }}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                "
+              >
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                    bg-teal-200
+                    shadow-[0_0_9px_rgba(94,234,212,.7)]
+                  "
+                />
+
+                <div>
+                  <p
+                    className="
+                      font-mono
+                      text-[7px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.17em]
+                      text-teal-50/90
+                      sm:text-[8px]
+                    "
+                  >
+                    {
+                      item.label
+                    }
+                  </p>
+
+                  <p
+                    className="
+                      mt-0.5
+                      font-mono
+                      text-[6px]
+                      uppercase
+                      tracking-[0.12em]
+                      text-slate-500
+                    "
+                  >
+                    {
+                      item.code
+                    }
+                  </p>
+                </div>
+              </motion.div>
+
+              {index <
+                3 && (
+                <span
+                  className="
+                    text-[9px]
+                    text-teal-300/28
+                  "
+                >
+                  →
+                </span>
+              )}
+            </div>
+          ),
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 
 /* ====================================================== */
 /* ATMOSPHERIC ENTRY                                      */
@@ -2239,8 +6394,8 @@ function AtmosphericEntry({
           -translate-y-1/2
           rounded-full
           border
-          border-cyan-100/35
-          shadow-[0_0_45px_rgba(103,232,249,.2),0_0_100px_rgba(139,92,246,.22)]
+          border-teal-100/30
+          shadow-[0_0_45px_rgba(94,234,212,.18),0_0_100px_rgba(125,211,252,.16)]
         "
       />
 
@@ -2258,10 +6413,10 @@ function AtmosphericEntry({
           origin-bottom
           -translate-x-1/2
           bg-gradient-to-t
-          from-cyan-200/10
-          via-white/80
+          from-teal-200/10
+          via-teal-100/75
           to-transparent
-          shadow-[0_0_18px_rgba(255,255,255,.8),0_0_58px_rgba(103,232,249,.45)]
+          shadow-[0_0_18px_rgba(255,255,255,.8),0_0_58px_rgba(94,234,212,.34)]
         "
       />
 
@@ -2318,9 +6473,9 @@ function AtmosphericEntry({
                 rounded-full
                 bg-gradient-to-b
                 from-transparent
-                via-cyan-100/80
-                to-violet-300/10
-                shadow-[0_0_10px_rgba(103,232,249,.5)]
+                via-teal-100/75
+                to-sky-300/10
+                shadow-[0_0_10px_rgba(94,234,212,.42)]
               "
               style={{
                 left: `${
@@ -2489,18 +6644,18 @@ function GeneMaterialization({
                 relative
                 rounded-full
                 border
-                border-violet-200/20
-                bg-violet-300/[0.055]
+                border-teal-100/18
+                bg-teal-300/[0.05]
                 px-3
                 py-1.5
                 font-mono
                 text-[9px]
-                font-black
+                font-semibold
                 uppercase
                 tracking-[0.24em]
-                text-violet-100/80
-                shadow-[0_0_24px_rgba(167,139,250,.12)]
-                backdrop-blur-xl
+                text-teal-50/85
+                shadow-[0_0_24px_rgba(94,234,212,.10)]
+                backdrop-blur-2xl
               "
             >
               <span
@@ -2512,8 +6667,8 @@ function GeneMaterialization({
                   w-2
                   -translate-y-1/2
                   rounded-full
-                  bg-cyan-200
-                  shadow-[0_0_12px_rgba(103,232,249,.8)]
+                  bg-teal-200
+                  shadow-[0_0_12px_rgba(94,234,212,.75)]
                 "
               />
 
@@ -2645,8 +6800,8 @@ function DNAToGraphBridge({
           -translate-y-1/2
           rounded-full
           border
-          border-violet-200/25
-          shadow-[0_0_45px_rgba(167,139,250,.18),0_0_110px_rgba(34,211,238,.10)]
+          border-teal-100/22
+          shadow-[0_0_45px_rgba(94,234,212,.14),0_0_110px_rgba(125,211,252,.08)]
         "
       />
 
@@ -2725,9 +6880,9 @@ function DNAToGraphBridge({
               rounded-full
               bg-gradient-to-br
               from-white
-              via-violet-200
-              to-cyan-300
-              shadow-[0_0_12px_rgba(196,181,253,.75)]
+              via-teal-100
+              to-sky-300
+              shadow-[0_0_12px_rgba(94,234,212,.65)]
             "
             style={{
               width:
@@ -2963,23 +7118,23 @@ const GRAPH_INFO: Record<
 function getNodeKindClasses(kind: BiologicalLayer) {
   switch (kind) {
     case "cell":
-      return "border-cyan-200/35 bg-cyan-400/[0.10] text-cyan-50 shadow-[0_0_38px_rgba(34,211,238,.20)]";
+      return "border-teal-200/35 bg-teal-400/[0.10] text-teal-50 shadow-[0_0_38px_rgba(45,212,191,.18)]";
     case "ligand":
     case "receptor":
-      return "border-sky-200/30 bg-sky-400/[0.08] text-sky-100 shadow-[0_0_32px_rgba(56,189,248,.16)]";
+      return "border-cyan-200/30 bg-cyan-400/[0.075] text-cyan-50 shadow-[0_0_32px_rgba(34,211,238,.14)]";
     case "gene":
     case "protein":
-      return "border-violet-200/30 bg-violet-400/[0.08] text-violet-100 shadow-[0_0_32px_rgba(139,92,246,.18)]";
+      return "border-sky-200/30 bg-sky-400/[0.075] text-sky-100 shadow-[0_0_32px_rgba(125,211,252,.14)]";
     case "pathway":
-      return "border-purple-200/35 bg-purple-400/[0.09] text-purple-100 shadow-[0_0_36px_rgba(168,85,247,.18)]";
+      return "border-indigo-200/25 bg-indigo-300/[0.055] text-indigo-100 shadow-[0_0_32px_rgba(165,180,252,.12)]";
     case "process":
-      return "border-fuchsia-200/35 bg-fuchsia-400/[0.09] text-fuchsia-100 shadow-[0_0_36px_rgba(217,70,239,.18)]";
+      return "border-emerald-200/28 bg-emerald-300/[0.06] text-emerald-100 shadow-[0_0_32px_rgba(110,231,183,.12)]";
     case "phenotype":
-      return "border-rose-200/35 bg-rose-400/[0.09] text-rose-100 shadow-[0_0_36px_rgba(244,63,94,.18)]";
+      return "border-amber-200/28 bg-amber-300/[0.055] text-amber-100 shadow-[0_0_32px_rgba(252,211,77,.10)]";
     case "disease":
-      return "border-pink-200/40 bg-pink-400/[0.11] text-white shadow-[0_0_48px_rgba(236,72,153,.24)]";
+      return "border-rose-200/30 bg-rose-300/[0.065] text-rose-50 shadow-[0_0_36px_rgba(253,164,175,.12)]";
     case "evidence":
-      return "border-white/25 bg-white/[0.08] text-white shadow-[0_0_34px_rgba(255,255,255,.12),0_0_55px_rgba(34,211,238,.12)]";
+      return "border-teal-100/25 bg-teal-100/[0.065] text-teal-50 shadow-[0_0_34px_rgba(153,246,228,.10),0_0_55px_rgba(45,212,191,.08)]";
     default:
       return "border-white/15 bg-white/[0.05] text-slate-100";
   }
@@ -3131,10 +7286,10 @@ function KnowledgeGraph({
         <p
           className="
             text-[8px]
-            font-black
+            font-semibold
             uppercase
             tracking-[0.42em]
-            text-cyan-200/50
+            text-teal-200/60
           "
         >
           Biological Layer Map
@@ -3144,7 +7299,7 @@ function KnowledgeGraph({
           className="
             mt-3
             text-3xl
-            font-black
+            font-semibold
             tracking-[-0.05em]
             text-white
             sm:text-5xl
@@ -3160,7 +7315,7 @@ function KnowledgeGraph({
             max-w-xl
             text-sm
             leading-7
-            text-slate-300/65
+            text-slate-300/78
           "
         >
           Move from cell to molecule, pathway, process and disease.
@@ -3434,10 +7589,10 @@ function KnowledgeGraph({
                     text-center
                     font-mono
                     text-[8px]
-                    font-black
+                    font-semibold
                     uppercase
                     tracking-[0.16em]
-                    backdrop-blur-xl
+                    backdrop-blur-2xl
                     transition-all
                     duration-300
                     ${getNodeKindClasses(node.kind)}
@@ -3603,7 +7758,7 @@ function KnowledgeGraph({
                   className="
                     font-mono
                     text-[7px]
-                    font-black
+                    font-semibold
                     uppercase
                     tracking-[0.3em]
                     text-cyan-200/45
@@ -3618,7 +7773,7 @@ function KnowledgeGraph({
                   className="
                     mt-1
                     text-lg
-                    font-black
+                    font-semibold
                     tracking-[-0.03em]
                     text-white
                   "
@@ -3634,15 +7789,15 @@ function KnowledgeGraph({
                   className="
                     rounded-full
                     border
-                    border-violet-200/15
-                    bg-violet-300/[0.05]
+                    border-teal-200/15
+                    bg-teal-300/[0.05]
                     px-3
                     py-1
                     font-mono
                     text-[7px]
                     uppercase
                     tracking-[0.2em]
-                    text-violet-200/50
+                    text-teal-100/60
                   "
                 >
                   Locked
@@ -3655,7 +7810,7 @@ function KnowledgeGraph({
                 mt-3
                 text-xs
                 leading-6
-                text-slate-300/70
+                text-slate-300/82
                 sm:text-sm
               "
             >
@@ -3669,6 +7824,64 @@ function KnowledgeGraph({
     </motion.div>
   );
 }
+
+
+/* ====================================================== */
+/* CLINICAL LOOP                                          */
+/* ====================================================== */
+
+function ClinicalLoopHUD({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
+  const opacity =
+    useTransform(
+      progress,
+      [0.94, 0.965, 0.988, 1],
+      [0, 1, 1, 0],
+    );
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ opacity }}
+      className="
+        pointer-events-none
+        absolute
+        inset-x-0
+        bottom-[5vh]
+        z-[29]
+        px-5
+        text-center
+      "
+    >
+      <p className="
+        font-mono
+        text-[7px]
+        font-semibold
+        uppercase
+        tracking-[0.22em]
+        text-teal-200/45
+      ">
+        Translational loop
+      </p>
+
+      <p className="
+        mx-auto
+        mt-2
+        max-w-lg
+        text-[11px]
+        leading-6
+        text-slate-400/85
+        sm:text-xs
+      ">
+        From biological complexity to structured evidence, testable mechanisms and research questions that can move back toward the patient.
+      </p>
+    </motion.div>
+  );
+}
+
 
 /* ====================================================== */
 /* COLLAPSE INTO ABOUT                                    */
@@ -3744,7 +7957,9 @@ export default function BioJourney() {
       null,
     );
 
-  const reduced = false;
+  const reduced = Boolean(
+    useReducedMotion(),
+  );
 
   const {
     scrollYProgress,
@@ -3761,13 +7976,19 @@ export default function BioJourney() {
     useSpring(
       scrollYProgress,
       {
-        stiffness: 78,
-        damping: 24,
-        mass: 0.34,
+        stiffness: reduced
+          ? 1000
+          : 78,
+        damping: reduced
+          ? 100
+          : 24,
+        mass: reduced
+          ? 0.1
+          : 0.34,
       },
     );
 
-  const violetAura =
+  const tealAura =
     useTransform(
       progress,
       [
@@ -3805,7 +8026,7 @@ export default function BioJourney() {
       ],
     );
 
-  const magentaAura =
+  const iceAura =
     useTransform(
       progress,
       [
@@ -3847,10 +8068,11 @@ export default function BioJourney() {
     <section
       ref={sectionRef}
       id="bio-journey"
+      aria-label="Biological scale journey from organism to molecular mechanism"
       className="
         relative
         h-[620vh]
-        bg-[#020105]
+        bg-[#06111a]
       "
     >
       <div
@@ -3859,7 +8081,7 @@ export default function BioJourney() {
           top-0
           h-screen
           overflow-hidden
-          bg-[#020105]
+          bg-[#06111a]
         "
       >
         {/* BASE */}
@@ -3868,7 +8090,7 @@ export default function BioJourney() {
           className="
             absolute
             inset-0
-            bg-[#020105]
+            bg-[#06111a]
           "
         />
 
@@ -3881,17 +8103,17 @@ export default function BioJourney() {
             absolute
             inset-0
             z-[1]
-            bg-[radial-gradient(circle_at_50%_52%,rgba(45,24,82,.18)_0%,rgba(15,8,30,.12)_38%,rgba(2,1,5,.25)_100%)]
+            bg-[radial-gradient(circle_at_50%_52%,rgba(13,45,55,.17)_0%,rgba(6,23,34,.13)_38%,rgba(4,13,20,.28)_100%)]
           "
         />
 
-        {/* VIOLET AURA */}
+        {/* TEAL CORE AURA */}
 
         <motion.div
           aria-hidden="true"
           style={{
             opacity:
-              violetAura,
+              tealAura,
           }}
           className="
             pointer-events-none
@@ -3906,7 +8128,7 @@ export default function BioJourney() {
             -translate-x-1/2
             -translate-y-1/2
             rounded-full
-            bg-[radial-gradient(circle,rgba(124,58,237,.30)_0%,rgba(91,33,182,.16)_24%,rgba(76,29,149,.06)_46%,transparent_72%)]
+            bg-[radial-gradient(circle,rgba(45,212,191,.20)_0%,rgba(34,211,238,.10)_26%,rgba(14,116,144,.035)_48%,transparent_72%)]
             blur-[105px]
           "
         />
@@ -3930,18 +8152,18 @@ export default function BioJourney() {
             min-h-[540px]
             min-w-[540px]
             rounded-full
-            bg-[radial-gradient(circle,rgba(34,211,238,.23)_0%,rgba(59,130,246,.08)_30%,transparent_68%)]
+            bg-[radial-gradient(circle,rgba(125,211,252,.18)_0%,rgba(34,211,238,.07)_30%,transparent_68%)]
             blur-[130px]
           "
         />
 
-        {/* MAGENTA AURA */}
+        {/* ICE-BLUE AURA */}
 
         <motion.div
           aria-hidden="true"
           style={{
             opacity:
-              magentaAura,
+              iceAura,
           }}
           className="
             pointer-events-none
@@ -3954,7 +8176,7 @@ export default function BioJourney() {
             min-h-[560px]
             min-w-[560px]
             rounded-full
-            bg-[radial-gradient(circle,rgba(217,70,239,.18)_0%,rgba(126,34,206,.07)_32%,transparent_70%)]
+            bg-[radial-gradient(circle,rgba(153,246,228,.10)_0%,rgba(125,211,252,.05)_34%,transparent_70%)]
             blur-[140px]
           "
         />
@@ -3979,10 +8201,14 @@ export default function BioJourney() {
               near: 0.1,
               far: 100,
             }}
-            dpr={[
-              1,
-              1.1,
-            ]}
+            dpr={
+              reduced
+                ? 1
+                : [
+                    1,
+                    1.1,
+                  ]
+            }
             gl={{
               alpha: true,
               antialias: true,
@@ -4019,6 +8245,54 @@ export default function BioJourney() {
         </div>
 
         {/* DOM EFFECTS */}
+
+        <CellDiveReticle
+          progress={
+            progress
+          }
+        />
+
+        <PaperGraphHUD
+          progress={
+            progress
+          }
+          reduced={
+            reduced
+          }
+        />
+
+        <EvidenceIntelligenceHUD
+          progress={
+            progress
+          }
+        />
+
+        <HypothesisBirthHUD
+          progress={
+            progress
+          }
+        />
+
+        <ResearchConstellationHUD
+          progress={
+            progress
+          }
+        />
+
+        <ClinicalLoopHUD
+          progress={
+            progress
+          }
+        />
+
+        <ScaleDiveHUD
+          progress={
+            progress
+          }
+          reduced={
+            reduced
+          }
+        />
 
         <AtmosphericEntry
           progress={
@@ -4081,7 +8355,7 @@ export default function BioJourney() {
             absolute
             inset-0
             z-30
-            bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,.70)_0%,rgba(196,181,253,.20)_10%,rgba(34,211,238,.08)_26%,transparent_62%)]
+            bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,.68)_0%,rgba(153,246,228,.18)_10%,rgba(125,211,252,.08)_26%,transparent_62%)]
           "
         />
 
@@ -4109,7 +8383,7 @@ export default function BioJourney() {
               text-[7px]
               uppercase
               tracking-[0.28em]
-              text-violet-200/25
+              text-teal-200/35
             "
           >
             Macro
@@ -4134,10 +8408,10 @@ export default function BioJourney() {
                 w-full
                 origin-left
                 bg-gradient-to-r
-                from-violet-400
+                from-teal-200
                 via-cyan-300
-                to-fuchsia-300
-                shadow-[0_0_14px_rgba(167,139,250,.7)]
+                to-sky-300
+                shadow-[0_0_14px_rgba(94,234,212,.55)]
               "
             />
           </div>

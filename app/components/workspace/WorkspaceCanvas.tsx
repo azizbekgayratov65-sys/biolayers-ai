@@ -12,15 +12,6 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 
-import {
-  AnimatePresence,
-  motion,
-} from "framer-motion";
-
-import {
-  useState,
-} from "react";
-
 import "@xyflow/react/dist/style.css";
 
 import type {
@@ -33,7 +24,6 @@ import type {
 
 import EntityNode from "./EntityNode";
 import BiologicalEdge from "./BiologicalEdge";
-import KnowledgeGraph3D from "./KnowledgeGraph3D";
 
 type EntityNodeType = Node<
   ResearchEntityData,
@@ -49,20 +39,28 @@ export type WorkspaceFlowInstance =
 type WorkspaceCanvasProps = {
   nodes: EntityNodeType[];
   edges: Edge[];
+
   onInit: (
     instance: WorkspaceFlowInstance,
   ) => void;
-  onNodesChange: OnNodesChange<EntityNodeType>;
+
+  onNodesChange:
+    OnNodesChange<EntityNodeType>;
+
   onSelectNode: (
     nodeId: string,
   ) => void;
+
   onSelectEdge: (
     edgeId: string,
   ) => void;
+
   onPaneClick: () => void;
+
   onNodeEnter: (
     nodeId: string,
   ) => void;
+
   onNodeLeave: () => void;
 };
 
@@ -71,18 +69,20 @@ const nodeTypes = {
 };
 
 const edgeTypes = {
-  biological:
-    BiologicalEdge,
+  biological: BiologicalEdge,
 };
 
-const miniMapColors: Record<EntityType, string> = {
-  cell: "#2dd4bf",
-  protein: "#a78bfa",
-  gene: "#22d3ee",
-  drug: "#f472b6",
-  pathway: "#fbbf24",
-  process: "#60a5fa",
-  disease: "#fb7185",
+const miniMapColors: Record<
+  EntityType,
+  string
+> = {
+  cell: "#5eead4",
+  protein: "#67e8f9",
+  gene: "#6ee7b7",
+  pathway: "#fcd34d",
+  process: "#7dd3fc",
+  disease: "#fda4af",
+  drug: "#fdba74",
 };
 
 export default function WorkspaceCanvas({
@@ -96,257 +96,269 @@ export default function WorkspaceCanvas({
   onNodeEnter,
   onNodeLeave,
 }: WorkspaceCanvasProps) {
-  const [mode, setMode] =
-    useState<
-      "2d" | "3d"
-    >("2d");
-
   return (
-    <div className="relative h-full w-full">
-      <div className="absolute right-4 top-4 z-[45] flex items-center rounded-[14px] border border-white/[0.08] bg-[#050814]/84 p-1 shadow-[0_12px_40px_rgba(0,0,0,.28)] backdrop-blur-xl">
-        {(
-          [
-            [
-              "2d",
-              "2D",
-            ],
-            [
-              "3d",
-              "3D",
-            ],
-          ] as const
-        ).map(
-          ([
-            value,
-            label,
-          ]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() =>
-                setMode(
-                  value,
-                )
-              }
-              className={`relative rounded-[10px] px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] transition ${
-                mode === value
-                  ? "text-white"
-                  : "text-slate-600 hover:text-slate-300"
-              }`}
-            >
-              {mode ===
-                value && (
-                <motion.span
-                  layoutId="workspace-graph-mode"
-                  className="absolute inset-0 rounded-[10px] border border-cyan-300/15 bg-cyan-300/[0.07] shadow-[0_0_20px_rgba(34,211,238,.08)]"
-                  transition={{
-                    type: "spring",
-                    stiffness:
-                      420,
-                    damping:
-                      34,
-                  }}
-                />
-              )}
+    <div
+      className="
+        relative
+        h-full
+        w-full
+        overflow-hidden
+        bg-[#07151f]
+      "
+    >
+      {/* ================================================= */}
+      {/* CANVAS ATMOSPHERE                                */}
+      {/* ================================================= */}
 
-              <span className="relative">
-                {label}
-              </span>
-            </button>
-          ),
-        )}
-      </div>
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          z-[0]
+          bg-[radial-gradient(circle_at_52%_44%,rgba(94,234,212,.04),transparent_35%)]
+        "
+      />
 
-      <AnimatePresence
-        mode="wait"
-        initial={false}
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          z-[0]
+          opacity-[0.28]
+          [mask-image:linear-gradient(to_bottom,black,transparent_88%)]
+          bg-[linear-gradient(rgba(153,246,228,.015)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.015)_1px,transparent_1px)]
+          bg-[size:96px_96px]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          inset-x-[18%]
+          top-0
+          z-[1]
+          h-px
+          bg-gradient-to-r
+          from-transparent
+          via-teal-200/[0.12]
+          to-transparent
+        "
+      />
+
+      {/* ================================================= */}
+      {/* REACT FLOW                                       */}
+      {/* ================================================= */}
+
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onInit={onInit}
+        onNodesChange={onNodesChange}
+        onNodeClick={(
+          _,
+          node,
+        ) => {
+          onSelectNode(node.id);
+        }}
+        onEdgeClick={(
+          _,
+          edge,
+        ) => {
+          onSelectEdge(edge.id);
+        }}
+        onPaneClick={onPaneClick}
+        onNodeMouseEnter={(
+          _,
+          node,
+        ) => {
+          onNodeEnter(node.id);
+        }}
+        onNodeMouseLeave={
+          onNodeLeave
+        }
+        fitView
+        fitViewOptions={{
+          padding: 0.12,
+          minZoom: 0.5,
+          maxZoom: 1.06,
+          duration: 760,
+        }}
+        nodesDraggable
+        nodesConnectable={false}
+        elementsSelectable
+        minZoom={0.34}
+        maxZoom={2.2}
+        panOnScroll
+        zoomOnScroll
+        defaultEdgeOptions={{
+          type: "biological",
+          markerEnd: {
+            type:
+              MarkerType.ArrowClosed,
+            color: "#7dd3fc",
+            width: 16,
+            height: 16,
+          },
+        }}
+        proOptions={{
+          hideAttribution: true,
+        }}
+        className="!bg-transparent"
       >
-        {mode === "2d" ? (
-          <motion.div
-            key="2d"
-            initial={{
-              opacity: 0,
-              scale: 0.985,
-              filter:
-                "blur(6px)",
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              filter:
-                "blur(0px)",
-            }}
-            exit={{
-              opacity: 0,
-              scale: 1.015,
-              filter:
-                "blur(6px)",
-            }}
-            transition={{
-              duration: 0.32,
-              ease: [
-                0.16,
-                1,
-                0.3,
-                1,
-              ],
-            }}
-            className="absolute inset-0"
-          >
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              nodeTypes={
-                nodeTypes
-              }
-              edgeTypes={
-                edgeTypes
-              }
-              onInit={onInit}
-              onNodesChange={
-                onNodesChange
-              }
-              onNodeClick={(
-                _,
-                node,
-              ) => {
-                onSelectNode(
-                  node.id,
-                );
-              }}
-              onEdgeClick={(
-                _,
-                edge,
-              ) => {
-                onSelectEdge(
-                  edge.id,
-                );
-              }}
-              onPaneClick={
-                onPaneClick
-              }
-              onNodeMouseEnter={(
-                _,
-                node,
-              ) => {
-                onNodeEnter(
-                  node.id,
-                );
-              }}
-              onNodeMouseLeave={
-                onNodeLeave
-              }
-              fitView
-              nodesDraggable
-              nodesConnectable={
-                false
-              }
-              minZoom={0.2}
-              maxZoom={2}
-              defaultEdgeOptions={{
-                type: "biological",
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
-                  color:
-                    "#64748b",
-                },
-              }}
-              proOptions={{
-                hideAttribution:
-                  true,
-              }}
-            >
-              <MiniMap
-                nodeColor={(
-                  node,
-                ) =>
-                  miniMapColors[
-                    node.data
-                      .type as EntityType
-                  ]
-                }
-                maskColor="rgba(2,6,23,.76)"
-                style={{
-                  background:
-                    "rgba(7,16,29,.92)",
-                  border:
-                    "1px solid rgba(255,255,255,.08)",
-                  borderRadius: 16,
-                }}
-              />
+        {/* ================================================= */}
+        {/* SCIENTIFIC GRID                                  */}
+        {/* ================================================= */}
 
-              <Controls
-                position="bottom-right"
-                style={{
-                  marginBottom: 82,
-                  marginRight: 12,
-                  overflow:
-                    "hidden",
-                  borderRadius: 14,
-                  border:
-                    "1px solid rgba(255,255,255,.08)",
-                  background:
-                    "rgba(7,16,29,.92)",
-                  boxShadow:
-                    "0 18px 50px rgba(0,0,0,.3)",
-                }}
-              />
+        <Background
+          gap={42}
+          size={1}
+          color="rgba(153,246,228,.095)"
+        />
 
-              <Background
-                gap={28}
-                size={1}
-                color="rgba(148,163,184,.07)"
-              />
-            </ReactFlow>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="3d"
-            initial={{
-              opacity: 0,
-              scale: 1.03,
-              filter:
-                "blur(8px)",
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              filter:
-                "blur(0px)",
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.985,
-              filter:
-                "blur(8px)",
-            }}
-            transition={{
-              duration: 0.38,
-              ease: [
-                0.16,
-                1,
-                0.3,
-                1,
-              ],
-            }}
-            className="absolute inset-0"
-          >
-            <KnowledgeGraph3D
-              nodes={nodes}
-              edges={edges}
-              onSelectNode={
-                onSelectNode
-              }
-              onSelectEdge={
-                onSelectEdge
-              }
-              onPaneClick={
-                onPaneClick
-              }
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* ================================================= */}
+        {/* MINI MAP                                         */}
+        {/* ================================================= */}
+
+        <MiniMap
+          pannable
+          zoomable
+          nodeStrokeWidth={2}
+          nodeColor={(node) =>
+            miniMapColors[
+              node.data
+                .type as EntityType
+            ]
+          }
+          maskColor="rgba(6,17,26,.74)"
+          className="
+            !hidden
+            md:!block
+          "
+          style={{
+            width: 164,
+            height: 108,
+            right: 14,
+            bottom: 16,
+
+            background:
+              "rgba(10,27,38,.90)",
+
+            border:
+              "1px solid rgba(153,246,228,.10)",
+
+            borderRadius: 16,
+
+            boxShadow:
+              "0 16px 46px rgba(1,8,15,.34)",
+
+            backdropFilter:
+              "blur(18px)",
+          }}
+        />
+
+        {/* ================================================= */}
+        {/* FLOW CONTROLS                                    */}
+        {/* ================================================= */}
+
+        <Controls
+          position="bottom-right"
+          showInteractive={false}
+          style={{
+            marginBottom: 132,
+            marginRight: 14,
+
+            overflow:
+              "hidden",
+
+            borderRadius: 13,
+
+            border:
+              "1px solid rgba(153,246,228,.10)",
+
+            background:
+              "rgba(10,27,38,.92)",
+
+            boxShadow:
+              "0 14px 42px rgba(1,8,15,.30)",
+          }}
+        />
+      </ReactFlow>
+
+      {/* ================================================= */}
+      {/* CANVAS FRAME                                     */}
+      {/* ================================================= */}
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          left-4
+          top-4
+          z-[3]
+          h-5
+          w-5
+          border-l
+          border-t
+          border-teal-200/[0.09]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          right-4
+          top-4
+          z-[3]
+          h-5
+          w-5
+          border-r
+          border-t
+          border-teal-200/[0.09]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          bottom-4
+          left-4
+          z-[3]
+          h-5
+          w-5
+          border-b
+          border-l
+          border-teal-200/[0.07]
+        "
+      />
+
+      <div
+        aria-hidden="true"
+        className="
+          pointer-events-none
+          absolute
+          bottom-4
+          right-4
+          z-[3]
+          h-5
+          w-5
+          border-b
+          border-r
+          border-teal-200/[0.07]
+        "
+      />
     </div>
   );
 }

@@ -43,6 +43,48 @@ export default function HeroSection() {
         />
 
         {/* ================================================= */}
+        {/* SUBTLE HERO LIGHT                                */}
+        {/* ================================================= */}
+
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            left-[18%]
+            top-[28%]
+            z-[2]
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-teal-300/[0.025]
+            blur-[100px]
+          "
+        />
+
+        {/* ================================================= */}
+        {/* TOP SCIENTIFIC LINE                              */}
+        {/* ================================================= */}
+
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            left-1/2
+            top-[84px]
+            z-[3]
+            h-px
+            w-[min(72vw,900px)]
+            -translate-x-1/2
+            bg-gradient-to-r
+            from-transparent
+            via-teal-200/[0.09]
+            to-transparent
+          "
+        />
+
+        {/* ================================================= */}
         {/* STAGE NARRATIVE                                  */}
         {/* ================================================= */}
 
@@ -58,7 +100,7 @@ export default function HeroSection() {
       </section>
 
       {/* ================================================= */}
-      {/* CURSOR ENERGY FIELD                              */}
+      {/* CURSOR ENERGY FIELD                               */}
       {/* ================================================= */}
 
       <CursorEnergyField />

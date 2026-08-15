@@ -11,6 +11,7 @@ import ScientificSourcesSection from "./components/sections/ScientificSourcesSec
 import MultiPaperEvidenceSection from "./components/sections/MultiPaperEvidenceSection";
 import ResearchCopilotSection from "./components/sections/ResearchCopilotSection";
 import HypothesisBuilderSection from "./components/sections/HypothesisBuilderSection";
+import ResearchMentorshipSection from "./components/sections/ResearchMentorshipSection";
 import AboutSection from "./components/sections/AboutSection";
 
 import BioJourney from "./components/journey/BioJourney";
@@ -21,7 +22,8 @@ export default function Home() {
       className="
         relative
         min-h-screen
-        bg-[#020105]
+        bg-[#06111a]
+        text-slate-100
       "
       style={{
         overflowX: "clip",
@@ -94,7 +96,13 @@ export default function Home() {
       <BioJourney />
 
       {/* ================================================= */}
-      {/* 11 — ABOUT                                       */}
+      {/* 11 — RESEARCH MENTORSHIP                         */}
+      {/* ================================================= */}
+
+      <ResearchMentorshipSection />
+
+      {/* ================================================= */}
+      {/* 12 — ABOUT                                       */}
       {/* ================================================= */}
 
       <AboutSection />

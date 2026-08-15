@@ -14,9 +14,22 @@ type EvidenceClassification =
   | "contextual"
   | "unrelated";
 
+type EvidenceBasis =
+  | "metadata_only"
+  | "abstract_and_metadata"
+  | "source_text_and_metadata"
+  | "source_text_abstract_and_metadata";
+
 type EvidencePaper = {
   pmid: string;
   title: string;
+
+  /*
+    New:
+    abstract retrieved from PubMed EFetch.
+  */
+  abstract: string | null;
+
   journal: string;
   year: string;
   authors: string[];
@@ -34,17 +47,24 @@ type RelationshipInput = {
 
 type EvidenceAssessment = {
   pmid: string;
-  classification: EvidenceClassification;
+
+  classification:
+    EvidenceClassification;
+
   confidence: number;
+
   rationale: string;
+
   evidenceBasis:
-    | "metadata_only"
-    | "source_text_and_metadata";
+    EvidenceBasis;
 };
 
 type EvidenceSummary = {
   totalCandidates: number;
   analyzed: number;
+
+  withAbstract: number;
+  withoutAbstract: number;
 
   supporting: number;
   contradicting: number;
@@ -65,16 +85,20 @@ type ClassifyEvidenceResponse = {
     target: string;
   };
 
-  assessments: EvidenceAssessment[];
+  assessments:
+    EvidenceAssessment[];
 
-  summary: EvidenceSummary;
+  summary:
+    EvidenceSummary;
 
-  limitations: string[];
+  limitations:
+    string[];
 
   meta?: {
     provider: string;
     model: string;
     analyzedPapers: number;
+    abstractsAvailable: number;
   };
 
   error?: string;
@@ -86,7 +110,13 @@ type RequestBody = {
 };
 
 type GroqResult = {
-  assessments?: EvidenceAssessment[];
+  assessments?: Array<{
+    pmid?: unknown;
+    classification?: unknown;
+    confidence?: unknown;
+    rationale?: unknown;
+    evidenceBasis?: unknown;
+  }>;
 
   summary?: {
     supporting?: number;
@@ -96,16 +126,37 @@ type GroqResult = {
     strength?: EvidenceSummary["strength"];
   };
 
-  limitations?: string[];
+  limitations?: unknown[];
 };
 
 /* =========================================================
    LIMITS
    ========================================================= */
 
-const MAX_PAPERS = 20;
-const MAX_TITLE_LENGTH = 600;
-const MAX_SOURCE_TEXT_LENGTH = 12_000;
+const MAX_PAPERS =
+  20;
+
+const MAX_TITLE_LENGTH =
+  600;
+
+/*
+  Limiting every abstract prevents an unexpectedly
+  large request while still preserving enough scientific
+  context for classification.
+*/
+const MAX_ABSTRACT_LENGTH =
+  3_000;
+
+const MAX_SOURCE_TEXT_LENGTH =
+  4_000;
+
+/*
+  Evidence classification is deliberately split into small batches.
+  This keeps each Groq request comfortably below request/token limits
+  while preserving all candidate papers in the final BioLayers result.
+*/
+const EVIDENCE_BATCH_SIZE =
+  4;
 
 /* =========================================================
    HELPERS
@@ -115,14 +166,22 @@ function cleanText(
   value: unknown,
   maxLength: number,
 ): string {
-  if (typeof value !== "string") {
+  if (
+    typeof value !== "string"
+  ) {
     return "";
   }
 
   return value
     .trim()
-    .replace(/\s+/g, " ")
-    .slice(0, maxLength);
+    .replace(
+      /\s+/g,
+      " ",
+    )
+    .slice(
+      0,
+      maxLength,
+    );
 }
 
 function clampConfidence(
@@ -136,7 +195,10 @@ function clampConfidence(
   }
 
   return Math.min(
-    Math.max(value, 0),
+    Math.max(
+      value,
+      0,
+    ),
     1,
   );
 }
@@ -149,6 +211,18 @@ function isClassification(
     value === "contradicting" ||
     value === "contextual" ||
     value === "unrelated"
+  );
+}
+
+function isEvidenceBasis(
+  value: unknown,
+): value is EvidenceBasis {
+  return (
+    value === "metadata_only" ||
+    value === "abstract_and_metadata" ||
+    value === "source_text_and_metadata" ||
+    value ===
+      "source_text_abstract_and_metadata"
   );
 }
 
@@ -224,14 +298,18 @@ function sanitizeRelationship(
 function sanitizePapers(
   value: unknown,
 ): EvidencePaper[] {
-  if (!Array.isArray(value)) {
+  if (
+    !Array.isArray(value)
+  ) {
     return [];
   }
 
   const result:
     EvidencePaper[] = [];
 
-  for (const entry of value) {
+  for (
+    const entry of value
+  ) {
     if (
       !entry ||
       typeof entry !==
@@ -265,6 +343,12 @@ function sanitizePapers(
       continue;
     }
 
+    const abstract =
+      cleanText(
+        item.abstract,
+        MAX_ABSTRACT_LENGTH,
+      );
+
     const authors:
       string[] = [];
 
@@ -283,7 +367,9 @@ function sanitizePapers(
             120,
           );
 
-        if (cleanAuthor) {
+        if (
+          cleanAuthor
+        ) {
           authors.push(
             cleanAuthor,
           );
@@ -300,7 +386,12 @@ function sanitizePapers(
 
     result.push({
       pmid,
+
       title,
+
+      abstract:
+        abstract ||
+        null,
 
       journal:
         cleanText(
@@ -320,16 +411,17 @@ function sanitizePapers(
 
       doi:
         typeof item.doi ===
-        "string"
+          "string"
           ? cleanText(
               item.doi,
               220,
-            ) || null
+            ) ||
+            null
           : null,
 
       pubmedUrl:
         typeof item.pubmedUrl ===
-        "string"
+          "string"
           ? cleanText(
               item.pubmedUrl,
               600,
@@ -358,6 +450,7 @@ function buildContext({
 }: {
   relationship:
     RelationshipInput;
+
   papers:
     EvidencePaper[];
 }) {
@@ -367,44 +460,67 @@ function buildContext({
         (
           paper,
           index,
-        ) =>
-          `${index + 1}. PMID ${paper.pmid}
-Title: ${paper.title}
-Journal: ${paper.journal}
-Year: ${paper.year}${
-            paper.doi
-              ? `\nDOI: ${paper.doi}`
-              : ""
-          }`,
+        ) => {
+          const abstractText =
+            paper.abstract
+              ? paper.abstract
+              : "NO ABSTRACT AVAILABLE";
+
+          return `
+PAPER ${index + 1}
+
+PMID:
+${paper.pmid}
+
+TITLE:
+${paper.title}
+
+ABSTRACT:
+${abstractText}
+
+JOURNAL:
+${paper.journal}
+
+YEAR:
+${paper.year}
+
+DOI:
+${paper.doi ?? "Not available"}
+`.trim();
+        },
       )
       .join(
-        "\n\n",
+        "\n\n==============================\n\n",
       );
 
   return `
-BIOLOGICAL RELATIONSHIP
+SELECTED BIOLOGICAL RELATIONSHIP
 
-Source:
+SOURCE:
 ${relationship.source}
 
-Relation:
+RELATION:
 ${relationship.relation}
 
-Target:
+TARGET:
 ${relationship.target}
 
-Relationship description:
+RELATIONSHIP DESCRIPTION:
 ${
   relationship.description ||
   "No additional relationship description supplied."
 }
 
-SOURCE TEXT FROM THE USER'S GRAPH INPUT
+ORIGINAL BIOLAYERS SOURCE TEXT
 
 ${
   relationship.sourceText ||
   "No source paragraph supplied."
 }
+
+IMPORTANT:
+The source text above defines the user's graph context.
+Do not treat it as independent PubMed evidence.
 
 CANDIDATE PUBMED RECORDS
 
@@ -419,75 +535,264 @@ ${papersText}
 const SYSTEM_PROMPT = `
 You are the BioLayers Evidence Classification Engine.
 
-Your job is to classify PubMed candidate records relative to ONE explicit biological relationship.
+You classify PubMed records relative to ONE explicit biological relationship.
 
-Scientific rules:
+The relationship always has this structure:
+
+SOURCE -> RELATION -> TARGET
+
+Example:
+
+Cancer-associated fibroblasts -> secretes -> CXCL12
+
+
+SCIENTIFIC RULES
 
 1. Use ONLY the information supplied in the request.
 
-2. You are usually given PubMed metadata such as titles, journals, years and identifiers.
-Do NOT pretend you have read an abstract, full paper, methods, results or supplementary data unless that information is explicitly supplied.
+2. When an abstract is available, use the ABSTRACT as the primary evidence for classifying the PubMed paper.
 
-3. A paper title mentioning both entities does NOT automatically prove that the source causes, activates, secretes, inhibits, promotes, regulates or otherwise affects the target.
+3. The paper title, journal, DOI, year and authors are metadata. Metadata can provide context but normally cannot establish a biological mechanism by itself.
 
-4. Classification meanings:
+4. The BioLayers source paragraph describes the user's graph context. It MUST NOT be treated as independent evidence that a PubMed paper supports the relationship.
 
-supporting:
-The supplied information explicitly supports the selected relationship with the same biological direction or mechanism.
+5. Do not claim to have read full text, figures, supplementary data, methods or results beyond information explicitly present in the supplied abstract.
 
-contradicting:
-The supplied information explicitly opposes, reverses or challenges the selected relationship.
+6. Never invent findings.
 
-contextual:
-The record is scientifically relevant to one or both entities or to the disease/mechanistic context, but the supplied information does not directly establish the selected relationship.
+7. Never invent quotations.
 
-unrelated:
-The supplied information does not provide meaningful evidence or context for the selected relationship.
+8. Never use outside biological knowledge to upgrade a candidate paper to supporting evidence.
 
-5. Because metadata alone is weak evidence, prefer "contextual" over "supporting" whenever the relationship is not explicit.
+9. A paper may mention both SOURCE and TARGET but still fail to support the exact RELATION.
 
-6. Be conservative.
+For example:
 
-7. Confidence measures confidence in YOUR classification based on supplied information only.
-It is NOT confidence that the biological claim is true.
+SOURCE = cancer-associated fibroblasts
+RELATION = secretes
+TARGET = CXCL12
 
-8. Never invent quotations.
+A paper discussing fibroblasts and CXCL12 is NOT automatically supporting.
 
-9. Never invent findings.
+The abstract must provide evidence consistent with fibroblasts producing, releasing, secreting, expressing, or otherwise generating CXCL12 in a manner compatible with the selected relationship.
 
-10. Never use outside knowledge to upgrade a paper from contextual to supporting.
 
-11. Return exactly one assessment for every supplied PMID.
+CLASSIFICATIONS
 
-12. Return ONLY valid JSON.
+SUPPORTING
 
-The JSON structure must be:
+Use "supporting" only when the supplied abstract or explicit supplied evidence directly supports the selected biological relationship and direction.
+
+Examples of suitable evidence:
+- SOURCE secretes TARGET
+- SOURCE produces TARGET
+- SOURCE increases TARGET secretion
+- experimental evidence directly establishes the requested mechanism
+
+Do not classify as supporting merely because both entities occur in the same abstract.
+
+
+CONTRADICTING
+
+Use "contradicting" when the abstract explicitly reports evidence opposing the selected relationship.
+
+Examples:
+- SOURCE does not produce TARGET
+- inhibition experiments challenge the selected mechanism
+- evidence supports an opposite direction or mechanism
+
+
+CONTEXTUAL
+
+Use "contextual" when the paper is scientifically relevant but does not directly establish or oppose the relationship.
+
+Examples:
+- both entities appear in the same disease context
+- the pathway is discussed but directionality is unclear
+- SOURCE and TARGET participate in related processes
+- abstract suggests an association without establishing the selected relation
+
+
+UNRELATED
+
+Use "unrelated" when the paper provides no meaningful evidence or useful scientific context for the selected relationship.
+
+
+CONFIDENCE
+
+confidence represents confidence in YOUR CLASSIFICATION based on the supplied information.
+
+It is NOT confidence that the biological claim itself is universally true.
+
+Suggested interpretation:
+
+0.90-1.00
+Very clear classification from the abstract.
+
+0.75-0.89
+Strongly indicated.
+
+0.55-0.74
+Reasonable but some ambiguity remains.
+
+0.35-0.54
+Weak information.
+
+Do not use high confidence when no abstract is available unless the title is exceptionally explicit.
+
+
+EVIDENCE BASIS
+
+Return exactly one of:
+
+"metadata_only"
+
+Use when no abstract is available and classification relies on title/metadata.
+
+"abstract_and_metadata"
+
+Use when an abstract is available and classification is based on it.
+
+"source_text_and_metadata"
+
+Use only when no abstract exists but source context materially helps interpret metadata.
+
+"source_text_abstract_and_metadata"
+
+Use when both source graph context and PubMed abstract materially contribute to interpretation.
+
+
+OUTPUT REQUIREMENTS
+
+Return exactly ONE assessment for EVERY supplied PMID.
+
+Return ONLY valid JSON.
+
+Required structure:
 
 {
   "assessments": [
     {
-      "pmid": "string",
-      "classification": "supporting | contradicting | contextual | unrelated",
-      "confidence": 0.0,
-      "rationale": "short explanation",
-      "evidenceBasis": "metadata_only | source_text_and_metadata"
+      "pmid": "12345678",
+      "classification": "supporting",
+      "confidence": 0.91,
+      "rationale": "The abstract directly reports that the source cell population produces the target molecule.",
+      "evidenceBasis": "abstract_and_metadata"
     }
   ],
+
   "summary": {
     "supporting": 0,
     "contradicting": 0,
     "contextual": 0,
     "unrelated": 0,
-    "strength": "unassessed | limited | moderate | strong"
+    "strength": "unassessed"
   },
+
   "limitations": [
-    "string"
+    "The analysis uses abstracts rather than complete primary full text."
   ]
 }
+
+strength must be one of:
+
+"unassessed"
+"limited"
+"moderate"
+"strong"
+
+Do not assign strong evidence solely because many papers were retrieved.
+
+Be conservative.
 `;
 
 /* =========================================================
-   GROQ ERROR
+   BATCH CLASSIFICATION
+   ========================================================= */
+
+async function classifyEvidenceBatch({
+  groq,
+  model,
+  relationship,
+  papers,
+}: {
+  groq: Groq;
+  model: string;
+  relationship: RelationshipInput;
+  papers: EvidencePaper[];
+}): Promise<GroqResult> {
+  const completion =
+    await groq.chat.completions.create({
+      model,
+      temperature: 0.1,
+      max_tokens: 2_500,
+
+      response_format: {
+        type: "json_object",
+      },
+
+      messages: [
+        {
+          role: "system",
+          content: SYSTEM_PROMPT,
+        },
+        {
+          role: "user",
+          content: buildContext({
+            relationship,
+            papers,
+          }),
+        },
+      ],
+    });
+
+  const outputText =
+    completion.choices[0]
+      ?.message
+      ?.content
+      ?.trim();
+
+  if (!outputText) {
+    throw new Error(
+      "Groq returned an empty evidence-classification response.",
+    );
+  }
+
+  try {
+    return JSON.parse(
+      outputText,
+    ) as GroqResult;
+  } catch {
+    throw new Error(
+      "Groq returned invalid JSON.",
+    );
+  }
+}
+
+function chunkPapers(
+  papers: EvidencePaper[],
+  size: number,
+): EvidencePaper[][] {
+  const chunks: EvidencePaper[][] = [];
+
+  for (
+    let index = 0;
+    index < papers.length;
+    index += size
+  ) {
+    chunks.push(
+      papers.slice(
+        index,
+        index + size,
+      ),
+    );
+  }
+
+  return chunks;
+}
+
+/* =========================================================
+   GROQ ERROR HANDLING
    ========================================================= */
 
 function getGroqError(
@@ -509,29 +814,38 @@ function getGroqError(
 
     const status =
       typeof record.status ===
-      "number"
+        "number"
         ? record.status
         : 500;
 
-    if (status === 401) {
+    if (
+      status === 401
+    ) {
       return {
         status: 401,
+
         message:
           "The Groq API key is invalid.",
       };
     }
 
-    if (status === 403) {
+    if (
+      status === 403
+    ) {
       return {
         status: 403,
+
         message:
           "This Groq model is not available for the current project.",
       };
     }
 
-    if (status === 429) {
+    if (
+      status === 429
+    ) {
       return {
         status: 429,
+
         message:
           "The Groq free-tier rate limit has been reached. Please wait and try again.",
       };
@@ -539,7 +853,7 @@ function getGroqError(
 
     if (
       typeof record.message ===
-      "string" &&
+        "string" &&
       record.message.trim()
     ) {
       return {
@@ -557,6 +871,7 @@ function getGroqError(
 
   return {
     status: 500,
+
     message:
       error instanceof Error
         ? error.message
@@ -599,7 +914,9 @@ export async function POST(
         body.relationship,
       );
 
-    if (!relationship) {
+    if (
+      !relationship
+    ) {
       return NextResponse.json(
         {
           error:
@@ -621,7 +938,8 @@ export async function POST(
       );
 
     if (
-      papers.length === 0
+      papers.length ===
+      0
     ) {
       return NextResponse.json(
         {
@@ -634,8 +952,20 @@ export async function POST(
       );
     }
 
+    const withAbstract =
+      papers.filter(
+        (paper) =>
+          Boolean(
+            paper.abstract,
+          ),
+      ).length;
+
+    const withoutAbstract =
+      papers.length -
+      withAbstract;
+
     /* =====================================================
-       GROQ CONFIG
+       GROQ
        ===================================================== */
 
     const apiKey =
@@ -643,7 +973,9 @@ export async function POST(
         .GROQ_API_KEY
         ?.trim();
 
-    if (!apiKey) {
+    if (
+      !apiKey
+    ) {
       return NextResponse.json(
         {
           error:
@@ -667,87 +999,59 @@ export async function POST(
       });
 
     /* =====================================================
-       CLASSIFICATION
+       CLASSIFICATION — BATCHED
        ===================================================== */
 
-    const completion =
-      await groq.chat.completions.create({
-        model,
+    const batches =
+      chunkPapers(
+        papers,
+        EVIDENCE_BATCH_SIZE,
+      );
 
-        temperature: 0.1,
+    const batchResults:
+      GroqResult[] = [];
 
-        max_tokens: 4_000,
+    for (
+      const batch of batches
+    ) {
+      const batchResult =
+        await classifyEvidenceBatch({
+          groq,
+          model,
+          relationship,
+          papers: batch,
+        });
 
-        response_format: {
-          type:
-            "json_object",
-        },
-
-        messages: [
-          {
-            role:
-              "system",
-
-            content:
-              SYSTEM_PROMPT,
-          },
-
-          {
-            role:
-              "user",
-
-            content:
-              buildContext({
-                relationship,
-                papers,
-              }),
-          },
-        ],
-      });
-
-    const outputText =
-      completion.choices[0]
-        ?.message?.content
-        ?.trim();
-
-    if (!outputText) {
-      return NextResponse.json(
-        {
-          error:
-            "Groq returned an empty evidence-classification response.",
-        },
-        {
-          status: 502,
-        },
+      batchResults.push(
+        batchResult,
       );
     }
 
+    /*
+      Merge only paper-level model output here.
+      Aggregate counts and strength are recalculated below
+      from the validated assessments, so the model cannot
+      inflate the final evidence summary.
+    */
+    const aiResult:
+      GroqResult = {
+        assessments:
+          batchResults.flatMap(
+            (result) =>
+              result.assessments ??
+              [],
+          ),
+
+        limitations:
+          batchResults.flatMap(
+            (result) =>
+              result.limitations ??
+              [],
+          ),
+      };
+
     /* =====================================================
-       PARSE JSON
-       ===================================================== */
-
-    let aiResult:
-      GroqResult;
-
-    try {
-      aiResult =
-        JSON.parse(
-          outputText,
-        ) as GroqResult;
-    } catch {
-      return NextResponse.json(
-        {
-          error:
-            "Groq returned invalid JSON.",
-        },
-        {
-          status: 502,
-        },
-      );
-    }
-
-    /* =====================================================
-       VALID PMIDS
+       VALID PMID SET
        ===================================================== */
 
     const validPaperIds =
@@ -758,11 +1062,25 @@ export async function POST(
         ),
       );
 
+    const paperByPmid =
+      new Map(
+        papers.map(
+          (paper) => [
+            paper.pmid,
+            paper,
+          ],
+        ),
+      );
+
     const assessmentMap =
       new Map<
         string,
         EvidenceAssessment
       >();
+
+    /* =====================================================
+       VALIDATE MODEL OUTPUT
+       ===================================================== */
 
     for (
       const assessment of
@@ -777,9 +1095,15 @@ export async function POST(
         continue;
       }
 
+      const pmid =
+        cleanText(
+          assessment.pmid,
+          30,
+        );
+
       if (
         !validPaperIds.has(
-          assessment.pmid,
+          pmid,
         )
       ) {
         continue;
@@ -793,11 +1117,56 @@ export async function POST(
         continue;
       }
 
+      const paper =
+        paperByPmid.get(
+          pmid,
+        );
+
+      let evidenceBasis:
+        EvidenceBasis;
+
+      if (
+        isEvidenceBasis(
+          assessment.evidenceBasis,
+        )
+      ) {
+        evidenceBasis =
+          assessment.evidenceBasis;
+      } else if (
+        paper?.abstract
+      ) {
+        evidenceBasis =
+          "abstract_and_metadata";
+      } else {
+        evidenceBasis =
+          "metadata_only";
+      }
+
+      /*
+        Safety correction:
+
+        If PubMed supplied no abstract, the model cannot
+        claim abstract-based classification.
+      */
+      if (
+        !paper?.abstract &&
+        (
+          evidenceBasis ===
+            "abstract_and_metadata" ||
+          evidenceBasis ===
+            "source_text_abstract_and_metadata"
+        )
+      ) {
+        evidenceBasis =
+          relationship.sourceText
+            ? "source_text_and_metadata"
+            : "metadata_only";
+      }
+
       assessmentMap.set(
-        assessment.pmid,
+        pmid,
         {
-          pmid:
-            assessment.pmid,
+          pmid,
 
           classification:
             assessment.classification,
@@ -810,45 +1179,59 @@ export async function POST(
           rationale:
             cleanText(
               assessment.rationale,
-              800,
+              1_200,
             ) ||
             "No classification rationale was returned.",
 
-          evidenceBasis:
-            assessment.evidenceBasis ===
-            "source_text_and_metadata"
-              ? "source_text_and_metadata"
-              : "metadata_only",
+          evidenceBasis,
         },
       );
     }
 
     /* =====================================================
-       GUARANTEE ONE RESULT PER PAPER
+       GUARANTEE ONE ASSESSMENT PER PAPER
        ===================================================== */
 
     const assessments:
       EvidenceAssessment[] =
       papers.map(
-        (paper) =>
-          assessmentMap.get(
-            paper.pmid,
-          ) ?? {
+        (paper) => {
+          const existing =
+            assessmentMap.get(
+              paper.pmid,
+            );
+
+          if (
+            existing
+          ) {
+            return existing;
+          }
+
+          return {
             pmid:
               paper.pmid,
 
             classification:
-              "contextual",
+              paper.abstract
+                ? "contextual"
+                : "unrelated",
 
             confidence:
-              0.35,
+              paper.abstract
+                ? 0.35
+                : 0.3,
 
             rationale:
-              "The model did not return a valid assessment for this PMID, so BioLayers conservatively treated it as contextual rather than supporting evidence.",
+              paper.abstract
+                ? "The model did not return a valid classification for this PMID, so BioLayers conservatively treated the record as contextual rather than direct supporting evidence."
+                : "No abstract or valid model assessment was available, so BioLayers conservatively did not treat this record as supporting evidence.",
 
             evidenceBasis:
-              "metadata_only",
-          },
+              paper.abstract
+                ? "abstract_and_metadata"
+                : "metadata_only",
+          };
+        },
       );
 
     /* =====================================================
@@ -884,7 +1267,11 @@ export async function POST(
       ).length;
 
     /* =====================================================
-       CONSERVATIVE EVIDENCE STRENGTH
+       EVIDENCE STRENGTH
+
+       Important:
+       This remains conservative because abstracts still
+       do not equal complete primary literature review.
        ===================================================== */
 
     let strength:
@@ -896,7 +1283,9 @@ export async function POST(
     ) {
       strength =
         "limited";
-    } else if (
+    }
+
+    if (
       supporting >= 2 &&
       contradicting === 0
     ) {
@@ -905,10 +1294,61 @@ export async function POST(
     }
 
     /*
-      Important:
-      title/metadata-only analysis never automatically
-      produces STRONG evidence.
+      Strong requires more than simple paper count.
+
+      We require:
+      - at least 4 supporting abstracts
+      - no contradiction
+      - at least 3 high-confidence supporting classifications
+      - abstracts actually available
     */
+    const highConfidenceSupporting =
+      assessments.filter(
+        (assessment) =>
+          assessment.classification ===
+            "supporting" &&
+          assessment.confidence >=
+            0.85 &&
+          (
+            assessment.evidenceBasis ===
+              "abstract_and_metadata" ||
+            assessment.evidenceBasis ===
+              "source_text_abstract_and_metadata"
+          ),
+      ).length;
+
+    if (
+      supporting >= 4 &&
+      contradicting === 0 &&
+      highConfidenceSupporting >=
+        3
+    ) {
+      strength =
+        "strong";
+    }
+
+    /*
+      Contradiction lowers confidence in aggregate strength.
+    */
+    if (
+      contradicting > 0
+    ) {
+      if (
+        supporting <=
+        contradicting
+      ) {
+        strength =
+          supporting > 0
+            ? "limited"
+            : "unassessed";
+      } else if (
+        strength ===
+        "strong"
+      ) {
+        strength =
+          "moderate";
+      }
+    }
 
     /* =====================================================
        LIMITATIONS
@@ -918,20 +1358,30 @@ export async function POST(
       Array.isArray(
         aiResult.limitations,
       )
-        ? aiResult.limitations
-            .filter(
-              (
-                item,
-              ): item is string =>
-                typeof item ===
-                "string" &&
-                item.trim().length >
-                  0,
-            )
-            .slice(
-              0,
-              5,
-            )
+        ? Array.from(
+            new Set(
+              aiResult.limitations
+                .filter(
+                  (
+                    item,
+                  ): item is string =>
+                    typeof item ===
+                      "string" &&
+                    item.trim().length >
+                      0,
+                )
+                .map(
+                  (item) =>
+                    cleanText(
+                      item,
+                      500,
+                    ),
+                ),
+            ),
+          ).slice(
+            0,
+            5,
+          )
         : [];
 
     if (
@@ -939,12 +1389,25 @@ export async function POST(
       0
     ) {
       limitations.push(
-        "Classification is based primarily on PubMed metadata and does not replace review of abstracts or primary full-text literature.",
+        "Evidence classification uses PubMed abstracts and metadata rather than complete primary full-text articles.",
+      );
+    }
+
+    if (
+      withoutAbstract >
+      0
+    ) {
+      limitations.push(
+        `${withoutAbstract} of ${papers.length} candidate publication${
+          withoutAbstract === 1
+            ? ""
+            : "s"
+        } had no PubMed abstract available and therefore received a more limited assessment.`,
       );
     }
 
     /* =====================================================
-       RESPONSE
+       FINAL RESPONSE
        ===================================================== */
 
     const result:
@@ -970,6 +1433,10 @@ export async function POST(
           analyzed:
             assessments.length,
 
+          withAbstract,
+
+          withoutAbstract,
+
           supporting,
 
           contradicting,
@@ -991,13 +1458,17 @@ export async function POST(
 
           analyzedPapers:
             assessments.length,
+
+          abstractsAvailable:
+            withAbstract,
         },
       };
 
     return NextResponse.json(
       result,
       {
-        status: 200,
+        status:
+          200,
 
         headers: {
           "Cache-Control":
@@ -1005,7 +1476,9 @@ export async function POST(
         },
       },
     );
-  } catch (error) {
+  } catch (
+    error
+  ) {
     const details =
       getGroqError(
         error,

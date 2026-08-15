@@ -45,13 +45,13 @@ type ConnectBiologyPanelProps = {
 };
 
 const typeColors: Record<EntityType, string> = {
-  cell: "#2dd4bf",
-  protein: "#a78bfa",
-  gene: "#22d3ee",
-  drug: "#f472b6",
-  pathway: "#fbbf24",
-  process: "#60a5fa",
-  disease: "#fb7185",
+  cell: "#5eead4",
+  protein: "#c4b5fd",
+  gene: "#6ee7b7",
+  drug: "#fdba74",
+  pathway: "#fcd34d",
+  process: "#7dd3fc",
+  disease: "#fda4af",
 };
 
 function confidenceToEvidence(
@@ -247,51 +247,83 @@ export default function ConnectBiologyPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[64] bg-[#01040a]/55 backdrop-blur-sm"
+            className="absolute inset-0 z-[64] bg-[#020b12]/58 backdrop-blur-[5px]"
           />
 
           <motion.section
-            initial={{ opacity: 0, x: 80, scale: 0.985 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 80, scale: 0.985 }}
+            initial={{
+              opacity: 0,
+              x: 84,
+              scale: 0.985,
+              filter: "blur(8px)",
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+              scale: 1,
+              filter: "blur(0px)",
+            }}
+            exit={{
+              opacity: 0,
+              x: 84,
+              scale: 0.985,
+              filter: "blur(8px)",
+            }}
             transition={{
-              duration: 0.32,
+              duration: 0.34,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="absolute bottom-5 right-5 top-5 z-[65] flex w-[min(520px,calc(100vw-40px))] flex-col overflow-hidden rounded-[28px] border border-[#21303a] bg-[#071017]/95 shadow-[0_30px_120px_rgba(0,0,0,.58)]"
+            className="absolute bottom-5 right-5 top-5 z-[65] flex w-[min(560px,calc(100vw-40px))] flex-col overflow-hidden rounded-[24px] border border-teal-100/[0.08] bg-[#081722]/97 shadow-[0_30px_120px_rgba(1,8,15,.56)] backdrop-blur-3xl"
           >
-            <header className="border-b border-[#1d2b33] px-6 py-5">
-              <div className="flex items-start justify-between gap-6">
+            {/* Header */}
+            <header className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-6">
+              <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full bg-teal-300/[0.045] blur-3xl" />
+              <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-teal-200/[0.18] to-transparent" />
+
+              <div className="relative flex items-start justify-between gap-6">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-[#d6ff4b] shadow-[0_0_12px_rgba(214,255,75,.7)]" />
-                    <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#9cae83]">
+                    <motion.span
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      animate={{
+                        opacity: [0.55, 1, 0.55],
+                        scale: [1, 1.22, 1],
+                      }}
+                      transition={{
+                        duration: 2.6,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">
                       BioLayers / Mechanism Engine
                     </p>
                   </div>
 
-                  <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#eef4e4]">
+                  <h2 className="mt-3 text-[25px] font-semibold tracking-[-0.038em] text-[#f0fbfa]">
                     Connect the Biology
                   </h2>
 
-                  <p className="mt-2 max-w-md text-xs leading-6 text-[#819099]">
+                  <p className="mt-2 max-w-md text-[12px] leading-6 text-slate-400">
                     Select two biological entities and trace the
-                    shortest mechanistic bridge already present
-                    in your research graph.
+                    shortest mechanistic bridge already represented
+                    in the research graph.
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-[11px] border border-[#28353d] bg-[#0b151b] px-3 py-2 font-mono text-[10px] text-[#70808a] transition hover:border-[#50616a] hover:text-white"
+                  className="rounded-[11px] border border-teal-100/[0.07] bg-white/[0.018] px-3 py-2 font-mono text-[10px] text-slate-400 transition duration-300 hover:bg-white/[0.04] hover:text-slate-100"
                 >
                   ESC
                 </button>
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-6 py-5">
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
               <div className="grid gap-3">
                 <EntitySelector
                   label="01 / SOURCE"
@@ -304,13 +336,16 @@ export default function ConnectBiologyPanel({
                   }}
                 />
 
-                <button
+                <motion.button
                   type="button"
                   onClick={swapEntities}
-                  className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-[#2d3940] bg-[#0a1218] font-mono text-xs text-[#a8b3b9] transition hover:border-[#d6ff4b]/40 hover:text-[#d6ff4b]"
+                  whileHover={{ rotate: 180, scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.25 }}
+                  className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-teal-100/[0.07] bg-[#0a1b26]/72 text-[13px] text-slate-400 shadow-[0_8px_20px_rgba(1,8,15,.16)] transition hover:border-teal-200/[0.15] hover:text-teal-200"
                 >
                   ⇅
-                </button>
+                </motion.button>
 
                 <EntitySelector
                   label="02 / TARGET"
@@ -324,28 +359,35 @@ export default function ConnectBiologyPanel({
                 />
               </div>
 
-              <div className="mt-5 flex gap-3">
+              <div className="mt-5 flex gap-2.5">
                 <button
                   type="button"
                   onClick={connectBiology}
-                  className="flex-1 rounded-[14px] border border-[#d6ff4b]/25 bg-[#d6ff4b] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#071006] transition hover:brightness-110"
+                  className="group relative flex-1 overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.09em] text-[#062029] shadow-[0_12px_28px_rgba(45,212,191,.12)] transition duration-300 hover:-translate-y-0.5"
                 >
-                  Find Mechanistic Path
+                  <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
+                  <span className="relative">
+                    Find mechanistic path
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={reset}
-                  className="rounded-[14px] border border-[#26343c] bg-[#0a1319] px-4 py-3 text-xs font-semibold text-[#778690] transition hover:text-white"
+                  className="rounded-[13px] border border-teal-100/[0.07] bg-white/[0.018] px-4 py-3 text-[11px] font-semibold text-slate-400 transition duration-300 hover:bg-white/[0.04] hover:text-slate-100"
                 >
                   Reset
                 </button>
               </div>
 
               {error && (
-                <div className="mt-4 rounded-[15px] border border-[#743a40] bg-[#35181b] px-4 py-3 text-xs leading-5 text-[#ffb4b8]">
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 rounded-[13px] border border-rose-200/[0.11] bg-rose-200/[0.035] px-4 py-3 text-[11px] leading-5 text-rose-200"
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
               <AnimatePresence mode="wait">
@@ -358,18 +400,20 @@ export default function ConnectBiologyPanel({
                     transition={{ duration: 0.3 }}
                     className="mt-7"
                   >
-                    <div className="flex items-end justify-between gap-4 border-b border-[#1e2b32] pb-4">
+                    <div className="flex items-end justify-between gap-4 border-b border-teal-100/[0.06] pb-4">
                       <div>
-                        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#708087]">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-slate-500">
                           Mechanistic bridge
                         </p>
-                        <h3 className="mt-2 text-lg font-semibold text-[#edf5e7]">
-                          {sourceNode?.data.label ?? "Source"} →{" "}
+
+                        <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.025em] text-[#f0fbfa]">
+                          {sourceNode?.data.label ?? "Source"}{" "}
+                          <span className="text-teal-300/60">→</span>{" "}
                           {targetNode?.data.label ?? "Target"}
                         </h3>
                       </div>
 
-                      <span className="rounded-full border border-[#304047] bg-[#0a151b] px-3 py-1 font-mono text-[9px] text-[#819099]">
+                      <span className="rounded-full border border-teal-100/[0.06] bg-black/[0.1] px-3 py-1 font-mono text-[9px] text-slate-400">
                         {result.edges.length} transitions
                       </span>
                     </div>
@@ -382,8 +426,13 @@ export default function ConnectBiologyPanel({
                           <div key={pathNode.nodeId}>
                             <div className="relative flex items-start gap-4">
                               <div className="relative flex flex-col items-center">
-                                <span
-                                  className="h-3 w-3 shrink-0 rounded-full border-2 border-[#071017]"
+                                <motion.span
+                                  initial={{ scale: 0.7, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{
+                                    delay: index * 0.04,
+                                  }}
+                                  className="h-3 w-3 shrink-0 rounded-full border-2 border-[#081722]"
                                   style={{
                                     backgroundColor:
                                       typeColors[pathNode.type],
@@ -395,30 +444,43 @@ export default function ConnectBiologyPanel({
 
                                 {index <
                                   result.nodes.length - 1 && (
-                                  <div className="h-16 w-px bg-[#26353c]" />
+                                  <div className="relative h-16 w-px overflow-hidden bg-teal-100/[0.08]">
+                                    <motion.div
+                                      initial={{ y: "-100%" }}
+                                      animate={{ y: "100%" }}
+                                      transition={{
+                                        duration: 1.6,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                        delay: index * 0.15,
+                                      }}
+                                      className="absolute inset-x-0 h-8 bg-gradient-to-b from-transparent via-teal-300/55 to-transparent"
+                                    />
+                                  </div>
                                 )}
                               </div>
 
                               <div className="-mt-1 min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
-                                    <p className="text-sm font-semibold text-[#e4ede7]">
+                                    <p className="text-[13px] font-semibold text-slate-100">
                                       {pathNode.label}
                                     </p>
-                                    <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-[#65747c]">
+
+                                    <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-500">
                                       {pathNode.type}
                                     </p>
                                   </div>
 
-                                  <span className="font-mono text-[9px] text-[#495960]">
+                                  <span className="font-mono text-[9px] text-slate-600">
                                     {String(index + 1).padStart(2, "0")}
                                   </span>
                                 </div>
 
                                 {nextEdge && (
-                                  <div className="mt-3 flex items-center gap-3">
+                                  <div className="mt-3 flex items-center gap-2.5">
                                     <div className="min-w-0 flex-1">
-                                      <p className="truncate font-mono text-[10px] text-[#b6c899]">
+                                      <p className="truncate font-mono text-[10px] text-teal-200/75">
                                         {nextEdge.relation}
                                       </p>
                                     </div>
@@ -427,7 +489,7 @@ export default function ConnectBiologyPanel({
                                       level={nextEdge.evidenceLevel}
                                     />
 
-                                    <span className="font-mono text-[9px] text-[#637078]">
+                                    <span className="font-mono text-[9px] text-slate-500">
                                       {Math.round(
                                         nextEdge.confidence * 100,
                                       )}
@@ -445,21 +507,33 @@ export default function ConnectBiologyPanel({
                     <button
                       type="button"
                       onClick={() => onFocusPath(result)}
-                      className="mt-7 w-full rounded-[15px] border border-[#d6ff4b]/25 bg-[#152014] px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#d6ff4b] transition hover:bg-[#1d2919]"
+                      className="group relative mt-7 w-full overflow-hidden rounded-[13px] border border-teal-200/[0.12] bg-teal-200/[0.045] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.09em] text-teal-100 transition duration-300 hover:-translate-y-0.5 hover:bg-teal-200/[0.075]"
                     >
-                      Focus Path in Graph →
+                      <span className="relative flex items-center justify-center gap-2">
+                        Focus path in graph
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">
+                          →
+                        </span>
+                      </span>
                     </button>
 
-                    <div className="mt-4 rounded-[14px] border border-[#28363d] bg-[#081218] p-4">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[#66757d]">
-                        Interpretation
-                      </p>
-                      <p className="mt-2 text-xs leading-6 text-[#829097]">
-                        This path is computed only from relationships
-                        currently represented in the BioLayers graph.
-                        It is a research navigation aid, not a causal
-                        or clinical conclusion.
-                      </p>
+                    <div className="mt-4 rounded-[14px] border border-amber-200/[0.07] bg-amber-200/[0.022] p-4">
+                      <div className="flex gap-3">
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300" />
+
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300">
+                            Interpretation
+                          </p>
+
+                          <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                            This path is computed only from relationships
+                            currently represented in the BioLayers graph.
+                            It is a research navigation aid, not a causal
+                            or clinical conclusion.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -486,8 +560,8 @@ function EntitySelector({
   const selected = nodes.find((node) => node.id === value);
 
   return (
-    <label className="block rounded-[18px] border border-[#26343c] bg-[#091319] p-4">
-      <span className="font-mono text-[9px] uppercase tracking-[0.17em] text-[#65757c]">
+    <label className="block rounded-[16px] border border-teal-100/[0.06] bg-[#0a1b26]/48 p-4 transition duration-300 focus-within:border-teal-200/[0.14] focus-within:bg-teal-200/[0.02]">
+      <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">
         {label}
       </span>
 
@@ -497,16 +571,19 @@ function EntitySelector({
           style={{
             backgroundColor: selected
               ? typeColors[selected.data.type]
-              : "#43515a",
+              : "#475569",
+            boxShadow: selected
+              ? `0 0 10px ${typeColors[selected.data.type]}55`
+              : undefined,
           }}
         />
 
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#e5ece8] outline-none"
+          className="min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-slate-100 outline-none"
         >
-          <option value="" className="bg-[#071017]">
+          <option value="" className="bg-[#081722]">
             Choose entity...
           </option>
 
@@ -514,7 +591,7 @@ function EntitySelector({
             <option
               key={node.id}
               value={node.id}
-              className="bg-[#071017]"
+              className="bg-[#081722]"
             >
               {node.data.label} — {node.data.type}
             </option>
@@ -536,12 +613,12 @@ function EvidenceTag({
 }) {
   const className =
     level === "Established"
-      ? "border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-200"
+      ? "border-emerald-200/[0.14] bg-emerald-200/[0.045] text-emerald-200"
       : level === "Supported"
-        ? "border-cyan-300/20 bg-cyan-300/[0.06] text-cyan-200"
+        ? "border-teal-200/[0.14] bg-teal-200/[0.045] text-teal-200"
         : level === "Emerging"
-          ? "border-amber-300/20 bg-amber-300/[0.06] text-amber-200"
-          : "border-rose-300/20 bg-rose-300/[0.06] text-rose-200";
+          ? "border-amber-200/[0.14] bg-amber-200/[0.045] text-amber-200"
+          : "border-rose-200/[0.14] bg-rose-200/[0.045] text-rose-200";
 
   return (
     <span

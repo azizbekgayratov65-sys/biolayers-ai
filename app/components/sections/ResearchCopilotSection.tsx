@@ -35,12 +35,13 @@ const prompts: CopilotPrompt[] = [
     reasoning:
       "The pathway is not a single direct jump. TGF-β binds its receptor complex, activates intracellular SMAD signaling, and changes transcriptional regulation linked to cell-state plasticity.",
     evidence:
-      "BioLayers would surface the papers and evidence sentences supporting each intermediate relationship rather than presenting only the final association.",
+      "BioLayers can surface the papers and evidence sentences supporting each intermediate relationship rather than presenting only the final association.",
     uncertainty:
-      "The strength and consequence of TGF-β-driven EMT can vary substantially by cancer type, model, mutation background and microenvironment.",
+      "The strength and biological consequence of TGF-β-driven EMT can vary by cancer type, experimental model, mutation background, and microenvironment.",
     nextQuestion:
       "Which cancer contexts show the strongest evidence for TGF-β-driven EMT?",
   },
+
   {
     id: "conflict",
     question: "Show conflicting evidence.",
@@ -50,12 +51,13 @@ const prompts: CopilotPrompt[] = [
     reasoning:
       "This suggests that EMT should be represented as context-dependent biology rather than a universal binary mechanism.",
     evidence:
-      "A multi-paper evidence layer can group supporting, conflicting and model-specific findings around the same mechanistic edge.",
+      "A multi-paper evidence layer can group supporting, conflicting, and model-specific findings around the same mechanistic edge.",
     uncertainty:
-      "Differences in experimental definitions of EMT, lineage tracing, tumor type and model systems can produce apparently contradictory conclusions.",
+      "Differences in experimental definitions of EMT, lineage tracing, tumor type, and model systems can produce apparently contradictory conclusions.",
     nextQuestion:
       "Which experimental models are responsible for the strongest disagreement?",
   },
+
   {
     id: "weakest",
     question: "Which connection is weakest?",
@@ -63,14 +65,15 @@ const prompts: CopilotPrompt[] = [
     answer:
       "In this demonstration, the transition from EMT-associated changes to a complete metastatic phenotype carries the greatest uncertainty.",
     reasoning:
-      "Metastasis is a multistep process involving invasion, survival, circulation, colonization and adaptation. One transcriptional program rarely explains the entire phenotype.",
+      "Metastasis is a multistep process involving invasion, survival, circulation, colonization, and adaptation. One transcriptional program rarely explains the entire phenotype.",
     evidence:
-      "BioLayers can compare evidence density, directness, experimental context and contradictory findings for each edge.",
+      "BioLayers can compare evidence density, directness, experimental context, and contradictory findings for each mechanistic edge.",
     uncertainty:
-      "A low-confidence edge does not mean the relationship is false. It means current evidence may be indirect, heterogeneous or context-dependent.",
+      "A low-confidence edge does not mean the relationship is false. It means current evidence may be indirect, heterogeneous, or context-dependent.",
     nextQuestion:
       "What intermediate mechanisms could explain the gap between EMT and metastasis?",
   },
+
   {
     id: "gap",
     question: "What mechanism is still uncertain?",
@@ -78,7 +81,7 @@ const prompts: CopilotPrompt[] = [
     answer:
       "A major unresolved step may be how molecular signaling changes translate into successful metastatic colonization at a distant organ.",
     reasoning:
-      "Many studies explain early signaling and invasion, but the transition from dissemination to organ-specific colonization requires additional stromal, immune and metabolic interactions.",
+      "Many studies explain early signaling and invasion, but the transition from dissemination to organ-specific colonization requires additional stromal, immune, and metabolic interactions.",
     evidence:
       "BioLayers can identify where a mechanistic chain contains dense evidence on both sides but weak direct evidence connecting the intermediate steps.",
     uncertainty:
@@ -99,17 +102,24 @@ const mechanism = [
 ];
 
 export default function ResearchCopilotSection() {
-  const [selectedPromptId, setSelectedPromptId] = React.useState("edge");
+  const [selectedPromptId, setSelectedPromptId] =
+    React.useState("edge");
 
   const selectedPrompt =
-    prompts.find((prompt) => prompt.id === selectedPromptId) ?? prompts[0];
+    prompts.find((prompt) => prompt.id === selectedPromptId) ??
+    prompts[0];
 
   return (
     <section
+      id="research-copilot"
+      aria-labelledby="research-copilot-heading"
       className="
         relative
         isolate
         overflow-hidden
+        border-t
+        border-teal-100/[0.04]
+        bg-[#06111a]
         px-6
         py-28
         md:px-10
@@ -118,7 +128,9 @@ export default function ResearchCopilotSection() {
         lg:py-44
       "
     >
-      {/* BACKGROUND */}
+      {/* ================================================= */}
+      {/* BACKGROUND                                       */}
+      {/* ================================================= */}
 
       <div
         className="
@@ -132,7 +144,7 @@ export default function ResearchCopilotSection() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-cyan-500/[0.04]
+          bg-teal-400/[0.032]
           blur-[210px]
         "
       />
@@ -147,7 +159,7 @@ export default function ResearchCopilotSection() {
           h-[500px]
           w-[500px]
           rounded-full
-          bg-purple-500/[0.04]
+          bg-sky-400/[0.028]
           blur-[170px]
         "
       />
@@ -162,18 +174,29 @@ export default function ResearchCopilotSection() {
           h-[520px]
           w-[520px]
           rounded-full
-          bg-fuchsia-500/[0.045]
+          bg-indigo-400/[0.02]
           blur-[170px]
         "
       />
 
       <div className="mx-auto max-w-7xl">
-        {/* HEADER */}
+        {/* ================================================= */}
+        {/* HEADER                                           */}
+        {/* ================================================= */}
 
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
+          initial={{
+            opacity: 0,
+            y: 22,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.25,
+          }}
           transition={{
             duration: 0.75,
             ease: [0.22, 1, 0.36, 1],
@@ -187,13 +210,14 @@ export default function ResearchCopilotSection() {
               font-medium
               uppercase
               tracking-[0.3em]
-              text-purple-300/70
+              text-teal-200/75
             "
           >
             Mechanism-aware research copilot
           </div>
 
           <h2
+            id="research-copilot-heading"
             className="
               text-4xl
               font-semibold
@@ -206,13 +230,14 @@ export default function ResearchCopilotSection() {
             "
           >
             Ask the mechanism,
+
             <span
               className="
                 ml-3
                 bg-gradient-to-r
-                from-cyan-300
-                via-purple-300
-                to-fuchsia-300
+                from-teal-200
+                via-cyan-300
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
@@ -227,19 +252,21 @@ export default function ResearchCopilotSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/50
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
           >
-            BioLayers Copilot reasons over the current biological map,
-            evidence and uncertainty — so researchers can ask why a
-            connection exists, where it is weak and what should be
-            investigated next.
+            BioLayers Copilot is designed to reason over the current
+            biological map, evidence, and uncertainty — so researchers
+            can ask why a connection exists, where it is weak, and what
+            should be investigated next.
           </p>
         </motion.div>
 
-        {/* WORKSPACE */}
+        {/* ================================================= */}
+        {/* WORKSPACE                                        */}
+        {/* ================================================= */}
 
         <div
           className="
@@ -250,23 +277,34 @@ export default function ResearchCopilotSection() {
             xl:grid-cols-[420px_minmax(0,1fr)]
           "
         >
-          {/* LEFT — MECHANISM CONTEXT */}
+          {/* ================================================= */}
+          {/* LEFT — MECHANISM CONTEXT                         */}
+          {/* ================================================= */}
 
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            initial={{
+              opacity: 0,
+              x: -20,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: 0.2,
+            }}
             transition={{
               duration: 0.8,
               ease: [0.22, 1, 0.36, 1],
             }}
             className="
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
+              border-teal-100/[0.085]
+              bg-[#0a1b26]/50
               p-6
-              backdrop-blur-xl
+              backdrop-blur-2xl
             "
           >
             <div
@@ -278,25 +316,41 @@ export default function ResearchCopilotSection() {
                 font-semibold
                 uppercase
                 tracking-[0.18em]
-                text-white/26
+                text-slate-500/90
               "
             >
               <GitBranch className="h-4 w-4" />
+
               Active mechanism context
             </div>
 
             <div className="mt-6 space-y-2">
               {mechanism.map((node, index) => (
                 <React.Fragment key={node}>
-                  <div
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      y: 10,
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    viewport={{
+                      once: true,
+                    }}
+                    transition={{
+                      duration: 0.45,
+                      delay: index * 0.05,
+                    }}
                     className="
                       flex
                       items-center
                       gap-3
                       rounded-[16px]
                       border
-                      border-white/[0.07]
-                      bg-white/[0.02]
+                      border-teal-100/[0.065]
+                      bg-teal-100/[0.02]
                       px-4
                       py-3
                     "
@@ -311,11 +365,11 @@ export default function ResearchCopilotSection() {
                         justify-center
                         rounded-full
                         border
-                        border-cyan-300/10
-                        bg-cyan-300/[0.04]
+                        border-teal-200/10
+                        bg-teal-300/[0.045]
                         text-[10px]
                         font-semibold
-                        text-cyan-200/55
+                        text-teal-100/70
                       "
                     >
                       {index + 1}
@@ -325,12 +379,12 @@ export default function ResearchCopilotSection() {
                       className="
                         text-sm
                         font-medium
-                        text-white/62
+                        text-slate-300/82
                       "
                     >
                       {node}
                     </div>
-                  </div>
+                  </motion.div>
 
                   {index < mechanism.length - 1 && (
                     <div
@@ -339,8 +393,8 @@ export default function ResearchCopilotSection() {
                         h-4
                         w-px
                         bg-gradient-to-b
-                        from-cyan-300/20
-                        to-purple-300/10
+                        from-teal-200/20
+                        to-sky-300/10
                       "
                     />
                   )}
@@ -348,13 +402,15 @@ export default function ResearchCopilotSection() {
               ))}
             </div>
 
+            {/* CONTEXT CARD */}
+
             <div
               className="
                 mt-6
-                rounded-[18px]
+                rounded-[16px]
                 border
-                border-white/[0.07]
-                bg-black/20
+                border-teal-100/[0.065]
+                bg-black/15
                 p-4
               "
             >
@@ -367,10 +423,11 @@ export default function ResearchCopilotSection() {
                   font-semibold
                   uppercase
                   tracking-[0.15em]
-                  text-cyan-300/45
+                  text-teal-200/60
                 "
               >
                 <BrainCircuit className="h-3.5 w-3.5" />
+
                 Copilot context
               </div>
 
@@ -379,21 +436,33 @@ export default function ResearchCopilotSection() {
                   mt-2
                   text-xs
                   leading-5
-                  text-white/34
+                  text-slate-400/90
                 "
               >
-                The assistant sees the selected mechanism, evidence states,
-                biological direction and unresolved gaps.
+                The assistant can reason over the selected mechanism,
+                evidence states, biological directionality, and unresolved
+                gaps.
               </p>
             </div>
           </motion.div>
 
-          {/* RIGHT — COPILOT */}
+          {/* ================================================= */}
+          {/* RIGHT — COPILOT                                  */}
+          {/* ================================================= */}
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
+            initial={{
+              opacity: 0,
+              y: 24,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: 0.15,
+            }}
             transition={{
               duration: 0.8,
               delay: 0.05,
@@ -401,14 +470,16 @@ export default function ResearchCopilotSection() {
             }}
             className="
               overflow-hidden
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
-              backdrop-blur-xl
+              border-teal-100/[0.085]
+              bg-[#0a1b26]/50
+              backdrop-blur-2xl
             "
           >
-            {/* COPILOT HEADER */}
+            {/* ================================================= */}
+            {/* COPILOT HEADER                                    */}
+            {/* ================================================= */}
 
             <div
               className="
@@ -416,7 +487,7 @@ export default function ResearchCopilotSection() {
                 flex-col
                 gap-4
                 border-b
-                border-white/[0.07]
+                border-teal-100/[0.065]
                 px-6
                 py-5
                 md:flex-row
@@ -434,10 +505,11 @@ export default function ResearchCopilotSection() {
                     font-semibold
                     uppercase
                     tracking-[0.18em]
-                    text-white/26
+                    text-slate-500/90
                   "
                 >
                   <MessageSquareText className="h-4 w-4" />
+
                   Research Copilot
                 </div>
 
@@ -445,7 +517,7 @@ export default function ResearchCopilotSection() {
                   className="
                     mt-2
                     text-sm
-                    text-white/45
+                    text-slate-400/90
                   "
                 >
                   Ask questions grounded in the current mechanism.
@@ -460,26 +532,29 @@ export default function ResearchCopilotSection() {
                   gap-2
                   rounded-full
                   border
-                  border-purple-300/10
-                  bg-purple-300/[0.04]
+                  border-sky-200/10
+                  bg-sky-200/[0.035]
                   px-3
                   py-1.5
                   text-[10px]
                   font-medium
-                  text-purple-200/55
+                  text-sky-100/70
                 "
               >
                 <Sparkles className="h-3.5 w-3.5" />
+
                 Mechanism aware
               </div>
             </div>
 
-            {/* QUICK QUESTIONS */}
+            {/* ================================================= */}
+            {/* QUICK QUESTIONS                                  */}
+            {/* ================================================= */}
 
             <div
               className="
                 border-b
-                border-white/[0.07]
+                border-teal-100/[0.065]
                 px-6
                 py-5
               "
@@ -490,7 +565,7 @@ export default function ResearchCopilotSection() {
                   font-semibold
                   uppercase
                   tracking-[0.16em]
-                  text-white/22
+                  text-slate-500/75
                 "
               >
                 Ask
@@ -505,13 +580,16 @@ export default function ResearchCopilotSection() {
                 "
               >
                 {prompts.map((prompt) => {
-                  const selected = prompt.id === selectedPromptId;
+                  const selected =
+                    prompt.id === selectedPromptId;
 
                   return (
                     <button
                       key={prompt.id}
                       type="button"
-                      onClick={() => setSelectedPromptId(prompt.id)}
+                      onClick={() =>
+                        setSelectedPromptId(prompt.id)
+                      }
                       className={`
                         rounded-full
                         border
@@ -524,8 +602,8 @@ export default function ResearchCopilotSection() {
 
                         ${
                           selected
-                            ? "border-cyan-300/20 bg-cyan-300/[0.065] text-cyan-100/80"
-                            : "border-white/[0.07] bg-white/[0.02] text-white/38 hover:border-white/[0.13] hover:bg-white/[0.04] hover:text-white/60"
+                            ? "border-teal-200/20 bg-teal-300/[0.07] text-teal-50/85"
+                            : "border-teal-100/[0.065] bg-teal-100/[0.02] text-slate-400/85 hover:border-teal-100/[0.13] hover:bg-teal-100/[0.04] hover:text-teal-50/85"
                         }
                       `}
                     >
@@ -536,19 +614,32 @@ export default function ResearchCopilotSection() {
               </div>
             </div>
 
-            {/* RESPONSE */}
+            {/* ================================================= */}
+            {/* RESPONSE                                         */}
+            {/* ================================================= */}
 
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedPrompt.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{
+                  opacity: 0,
+                  y: 10,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  y: -8,
+                }}
                 transition={{
                   duration: 0.25,
                 }}
                 className="p-6"
               >
+                {/* QUESTION */}
+
                 <div
                   className="
                     flex
@@ -566,11 +657,17 @@ export default function ResearchCopilotSection() {
                       justify-center
                       rounded-xl
                       border
-                      border-purple-300/10
-                      bg-purple-300/[0.045]
+                      border-sky-200/10
+                      bg-sky-200/[0.04]
                     "
                   >
-                    <BrainCircuit className="h-4 w-4 text-purple-200/60" />
+                    <BrainCircuit
+                      className="
+                        h-4
+                        w-4
+                        text-sky-100/75
+                      "
+                    />
                   </div>
 
                   <div>
@@ -580,7 +677,7 @@ export default function ResearchCopilotSection() {
                         font-semibold
                         uppercase
                         tracking-[0.15em]
-                        text-purple-300/45
+                        text-teal-200/60
                       "
                     >
                       {selectedPrompt.category}
@@ -591,7 +688,7 @@ export default function ResearchCopilotSection() {
                         mt-1
                         text-lg
                         font-medium
-                        text-white/80
+                        text-teal-50/88
                       "
                     >
                       {selectedPrompt.question}
@@ -599,26 +696,28 @@ export default function ResearchCopilotSection() {
                   </div>
                 </div>
 
+                {/* STRUCTURED ANSWER */}
+
                 <div className="mt-7 space-y-3">
                   <CopilotBlock
                     icon={MessageSquareText}
                     label="Answer"
                     value={selectedPrompt.answer}
-                    accent="text-cyan-300/55"
+                    accent="text-cyan-200/75"
                   />
 
                   <CopilotBlock
                     icon={GitBranch}
                     label="Mechanistic reasoning"
                     value={selectedPrompt.reasoning}
-                    accent="text-purple-300/55"
+                    accent="text-teal-200/70"
                   />
 
                   <CopilotBlock
                     icon={BookOpenText}
                     label="Evidence"
                     value={selectedPrompt.evidence}
-                    accent="text-fuchsia-300/55"
+                    accent="text-sky-200/70"
                   />
 
                   <CopilotBlock
@@ -629,15 +728,17 @@ export default function ResearchCopilotSection() {
                   />
                 </div>
 
-                {/* NEXT RESEARCH QUESTION */}
+                {/* ================================================= */}
+                {/* NEXT RESEARCH QUESTION                            */}
+                {/* ================================================= */}
 
                 <div
                   className="
                     mt-6
                     rounded-[20px]
                     border
-                    border-cyan-300/10
-                    bg-cyan-300/[0.035]
+                    border-teal-200/10
+                    bg-teal-300/[0.04]
                     p-5
                   "
                 >
@@ -650,10 +751,11 @@ export default function ResearchCopilotSection() {
                       font-semibold
                       uppercase
                       tracking-[0.15em]
-                      text-cyan-300/45
+                      text-teal-200/60
                     "
                   >
                     <CircleHelp className="h-3.5 w-3.5" />
+
                     Next research question
                   </div>
 
@@ -662,17 +764,19 @@ export default function ResearchCopilotSection() {
                       mt-3
                       text-sm
                       leading-6
-                      text-white/52
+                      text-slate-300/85
                     "
                   >
                     {selectedPrompt.nextQuestion}
                   </p>
                 </div>
 
-                {/* HYPOTHESIS CTA */}
+                {/* ================================================= */}
+                {/* HYPOTHESIS CTA                                   */}
+                {/* ================================================= */}
 
-                <button
-                  type="button"
+                <a
+                  href="#hypothesis-builder"
                   className="
                     group
                     mt-5
@@ -683,17 +787,17 @@ export default function ResearchCopilotSection() {
                     gap-2
                     rounded-[16px]
                     border
-                    border-white/[0.1]
-                    bg-white/[0.045]
+                    border-teal-100/[0.10]
+                    bg-teal-100/[0.045]
                     px-5
                     py-3.5
                     text-sm
                     font-medium
-                    text-white/72
+                    text-teal-50/82
                     transition
                     duration-300
-                    hover:border-fuchsia-300/20
-                    hover:bg-fuchsia-300/[0.05]
+                    hover:border-teal-200/20
+                    hover:bg-teal-300/[0.055]
                     hover:text-white
                   "
                 >
@@ -710,18 +814,26 @@ export default function ResearchCopilotSection() {
                       group-hover:translate-x-1
                     "
                   />
-                </button>
+                </a>
               </motion.div>
             </AnimatePresence>
           </motion.div>
         </div>
 
-        {/* BOTTOM NOTE */}
+        {/* ================================================= */}
+        {/* BOTTOM NOTE                                      */}
+        {/* ================================================= */}
 
         <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          initial={{
+            opacity: 0,
+          }}
+          whileInView={{
+            opacity: 1,
+          }}
+          viewport={{
+            once: true,
+          }}
           transition={{
             duration: 0.7,
           }}
@@ -732,17 +844,22 @@ export default function ResearchCopilotSection() {
             text-center
             text-xs
             leading-6
-            text-white/24
+            text-slate-500/80
           "
         >
-          The homepage interaction is illustrative. In the full workspace,
-          Copilot responses can be grounded in the actual graph, papers and
-          evidence attached to the active research project.
+          This homepage interaction is illustrative. In the full
+          workspace, Copilot responses can be grounded in the actual
+          mechanism graph, papers, and evidence attached to the active
+          research project.
         </motion.p>
       </div>
     </section>
   );
 }
+
+/* =========================================================
+   COPILOT RESPONSE BLOCK
+   ========================================================= */
 
 function CopilotBlock({
   icon: Icon,
@@ -750,7 +867,9 @@ function CopilotBlock({
   value,
   accent,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
   label: string;
   value: string;
   accent: string;
@@ -758,10 +877,10 @@ function CopilotBlock({
   return (
     <div
       className="
-        rounded-[18px]
+        rounded-[16px]
         border
-        border-white/[0.07]
-        bg-white/[0.018]
+        border-teal-100/[0.065]
+        bg-[#0a1b26]/42
         p-5
       "
     >
@@ -778,6 +897,7 @@ function CopilotBlock({
         `}
       >
         <Icon className="h-3.5 w-3.5" />
+
         {label}
       </div>
 
@@ -786,7 +906,7 @@ function CopilotBlock({
           mt-3
           text-sm
           leading-6
-          text-white/43
+          text-slate-400/90
         "
       >
         {value}

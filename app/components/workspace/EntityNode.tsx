@@ -1,21 +1,12 @@
 "use client";
 
-import {
-  motion,
-  useReducedMotion,
-} from "framer-motion";
-
+import { motion } from "framer-motion";
 import {
   Handle,
   Position,
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-
-import {
-  BookOpenText,
-  ShieldCheck,
-} from "lucide-react";
 
 import type {
   ResearchEntityData,
@@ -25,48 +16,49 @@ import BiologicalArtwork, {
   entityVisualTheme,
 } from "./BiologicalArtwork";
 
-/* =========================================================
-   TYPES
-   ========================================================= */
-
 type EntityNodeType = Node<
   ResearchEntityData,
   "entity"
 >;
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
-
-function formatConfidence(
-  value?: number,
+function confidencePercent(
+  confidence?: number,
 ) {
   if (
-    typeof value !== "number" ||
-    !Number.isFinite(value)
+    typeof confidence !== "number" ||
+    Number.isNaN(confidence)
   ) {
     return null;
   }
 
-  const normalized =
-    value <= 1
-      ? value * 100
-      : value;
-
   return Math.round(
     Math.min(
-      Math.max(
-        normalized,
-        0,
-      ),
-      100,
-    ),
+      Math.max(confidence, 0),
+      1,
+    ) * 100,
   );
 }
 
-/* =========================================================
-   ENTITY NODE
-   ========================================================= */
+function getTypeTitle(type: ResearchEntityData["type"]) {
+  switch (type) {
+    case "cell":
+      return "CELL";
+    case "protein":
+      return "PROTEIN";
+    case "gene":
+      return "GENE";
+    case "pathway":
+      return "PATHWAY";
+    case "process":
+      return "PROCESS";
+    case "disease":
+      return "DISEASE";
+    case "drug":
+      return "THERAPY";
+    default:
+      return String(type).toUpperCase();
+  }
+}
 
 export default function EntityNode({
   data,
@@ -74,446 +66,252 @@ export default function EntityNode({
   sourcePosition = Position.Bottom,
   targetPosition = Position.Top,
 }: NodeProps<EntityNodeType>) {
-  const reduceMotion =
-    Boolean(
-      useReducedMotion(),
-    );
-
   const theme =
-    entityVisualTheme[
-      data.type
-    ];
+    entityVisualTheme[data.type];
 
   const confidence =
-    formatConfidence(
+    confidencePercent(
       data.confidence,
     );
 
-  const evidenceQuote =
-    typeof data.evidenceQuote ===
-      "string"
-      ? data.evidenceQuote.trim()
-      : "";
-
-  const hasEvidence =
-    evidenceQuote.length > 0;
+  const aliases =
+    Array.isArray(data.aliases)
+      ? data.aliases
+          .filter(Boolean)
+          .slice(0, 2)
+      : [];
 
   return (
     <motion.div
-      initial={
-        reduceMotion
-          ? false
-          : {
-              opacity: 0,
-              scale: 0.82,
-              y: 16,
-              filter:
-                "blur(10px)",
-            }
-      }
+      initial={{
+        opacity: 0,
+        scale: 0.9,
+        y: 14,
+        filter: "blur(10px)",
+      }}
       animate={{
         opacity: 1,
-        scale: 1,
+        scale: selected
+          ? [1, 1.018, 1]
+          : 1,
         y: 0,
-        filter:
-          "blur(0px)",
+        filter: "blur(0px)",
       }}
       transition={{
-        duration:
-          reduceMotion
-            ? 0
-            : 0.5,
-        ease: [
-          0.16,
-          1,
-          0.3,
-          1,
-        ],
-      }}
-      whileHover={
-        reduceMotion
-          ? undefined
-          : {
-              y: -4,
-              scale: 1.02,
+        opacity: {
+          duration: 0.42,
+        },
+        y: {
+          duration: 0.42,
+          ease: [0.16, 1, 0.3, 1],
+        },
+        filter: {
+          duration: 0.42,
+        },
+        scale: selected
+          ? {
+              duration: 3.4,
+              repeat: Infinity,
+              ease: "easeInOut",
             }
-      }
-      className="
-        group
-        relative
-        w-[252px]
-      "
+          : {
+              duration: 0.24,
+            },
+      }}
+      whileHover={{
+        y: -6,
+        scale: selected ? 1.025 : 1.018,
+      }}
+      className="group relative w-[304px] select-none"
     >
-      {/* ================================================= */}
-      {/* SELECTED GLOW                                     */}
-      {/* ================================================= */}
+      {/* ambient halo */}
+      <motion.div
+        animate={{
+          opacity: selected
+            ? [0.22, 0.48, 0.22]
+            : [0.08, 0.16, 0.08],
+          scale: selected
+            ? [0.98, 1.05, 0.98]
+            : [0.99, 1.02, 0.99],
+        }}
+        transition={{
+          duration: selected ? 3.2 : 5.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="pointer-events-none absolute -inset-3 rounded-[34px] blur-[22px]"
+        style={{
+          background: `radial-gradient(circle at 50% 45%, ${theme.glow}, transparent 68%)`,
+        }}
+      />
 
+      {/* selected perimeter */}
       {selected && (
         <motion.div
-          aria-hidden="true"
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  opacity: [
-                    0.2,
-                    0.45,
-                    0.2,
-                  ],
-                }
-          }
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: [0.38, 0.8, 0.38],
+          }}
           transition={{
             duration: 2.8,
             repeat: Infinity,
-            ease:
-              "easeInOut",
+            ease: "easeInOut",
           }}
-          className="
-            pointer-events-none
-            absolute
-            -inset-[10px]
-            rounded-[30px]
-            blur-[16px]
-          "
+          className="pointer-events-none absolute -inset-[1px] rounded-[27px]"
           style={{
-            background:
-              `linear-gradient(
-                135deg,
-                ${theme.accentSoft},
-                ${theme.glow}
-              )`,
+            background: `linear-gradient(135deg, ${theme.accent}66, transparent 34%, transparent 66%, ${theme.secondary}55)`,
           }}
         />
       )}
 
-      {/* ================================================= */}
-      {/* TARGET HANDLE                                     */}
-      {/* ================================================= */}
-
       <Handle
         type="target"
-        position={
-          targetPosition
-        }
+        position={targetPosition}
         style={{
-          width: 9,
-          height: 9,
+          width: 11,
+          height: 11,
           background:
             theme.accent,
           border:
-            "2px solid #050814",
-          boxShadow:
-            `0 0 12px ${theme.glow}`,
-          zIndex: 30,
+            "3px solid #081722",
+          boxShadow: `0 0 16px ${theme.glow}`,
+          zIndex: 40,
         }}
       />
 
-      {/* ================================================= */}
-      {/* CARD                                              */}
-      {/* ================================================= */}
-
       <div
-        className={`
-          relative
-          overflow-hidden
-          rounded-[24px]
-          border
-          bg-[#050814]/92
-          p-2.5
-          shadow-[0_24px_70px_rgba(0,0,0,.42)]
-          backdrop-blur-2xl
-          transition-all
-          duration-300
-
-          ${
-            selected
-              ? "ring-1 ring-white/20"
-              : ""
-          }
-        `}
+        className="relative overflow-hidden rounded-[26px] border bg-[linear-gradient(155deg,rgba(14,38,50,.96),rgba(7,24,35,.96)_58%,rgba(6,19,29,.98))] p-2.5 shadow-[0_24px_60px_rgba(1,7,13,.36)] backdrop-blur-2xl transition-all duration-300 group-hover:shadow-[0_30px_72px_rgba(1,7,13,.46)]"
         style={{
-          borderColor:
-            selected
-              ? theme.accent
-              : theme.border,
-
-          boxShadow:
-            selected
-              ? `0 28px 90px rgba(0,0,0,.48), 0 0 30px ${theme.glow}`
-              : `0 22px 60px rgba(0,0,0,.36), 0 0 14px ${theme.accentSoft}`,
+          borderColor: selected
+            ? `${theme.accent}66`
+            : `${theme.accent}32`,
+          boxShadow: selected
+            ? `0 30px 80px rgba(1,7,13,.5), 0 0 26px ${theme.accentSoft}`
+            : `0 24px 60px rgba(1,7,13,.36), 0 0 18px ${theme.accentSoft}`,
         }}
       >
-        {/* ================================================= */}
-        {/* BIOLOGICAL ART                                   */}
-        {/* ================================================= */}
-
-        <BiologicalArtwork
-          type={
-            data.type
-          }
-          label={
-            data.label
-          }
-          active={
-            selected
-          }
+        {/* top polish */}
+        <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div
+          className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full blur-[52px]"
+          style={{
+            background: theme.accentSoft,
+          }}
         />
 
-        {/* ================================================= */}
-        {/* NODE INFORMATION                                 */}
-        {/* ================================================= */}
+        <div className="relative overflow-hidden rounded-[20px] border border-white/[0.045] bg-[#06141e]/72">
+          <BiologicalArtwork
+            type={data.type}
+            label={data.label}
+            active={selected}
+          />
 
-        <div
-          className="
-            relative
-            px-2
-            pb-2
-            pt-3
-          "
-        >
-          <div
-            className="
-              flex
-              items-start
-              justify-between
-              gap-3
-            "
-          >
-            {/* LABEL */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#071823] to-transparent" />
+        </div>
 
+        <div className="relative px-2.5 pb-2.5 pt-3">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p
-                className="
-                  text-[8px]
-                  font-bold
-                  uppercase
-                  tracking-[0.22em]
-                "
-                style={{
-                  color:
-                    theme.accent,
-                }}
-              >
-                {theme.label}
-              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                  className="rounded-full border px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em]"
+                  style={{
+                    color: theme.accent,
+                    borderColor: `${theme.accent}30`,
+                    backgroundColor: `${theme.accent}0d`,
+                  }}
+                >
+                  {getTypeTitle(data.type)}
+                </span>
 
-              <p
-                className="
-                  mt-1
-                  max-w-[190px]
-                  text-[15px]
-                  font-semibold
-                  leading-5
-                  tracking-[-0.025em]
-                  text-white
-                "
-              >
+                {confidence !== null && (
+                  <span className="rounded-full border border-teal-100/[0.07] bg-black/[0.12] px-2 py-1 font-mono text-[9px] font-bold tracking-[0.03em] text-slate-400">
+                    AI {confidence}%
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-2 max-w-[250px] text-[17px] font-semibold leading-[1.22] tracking-[-0.03em] text-[#f1fbfa]">
                 {data.label}
               </p>
             </div>
 
-            {/* CONFIDENCE */}
-
-            <div
-              className="
-                flex
-                shrink-0
-                flex-col
-                items-end
-                gap-1.5
-              "
-            >
-              {confidence !== null && (
-                <div
-                  className="
-                    rounded-full
-                    border
-                    border-white/[0.08]
-                    bg-white/[0.025]
-                    px-2
-                    py-1
-                    text-[9px]
-                    font-bold
-                    text-white/48
-                  "
-                  title="Entity extraction confidence"
-                >
-                  {confidence}%
-                </div>
-              )}
-
-              <span
-                className="
-                  h-2
-                  w-2
-                  rounded-full
-                "
-                style={{
-                  background:
-                    theme.accent,
-
-                  boxShadow:
-                    `0 0 10px ${theme.accent}`,
-                }}
-              />
-            </div>
+            <motion.span
+              animate={{
+                opacity: [0.45, 1, 0.45],
+                scale: [0.85, 1.25, 0.85],
+              }}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+              style={{
+                background:
+                  theme.accent,
+                boxShadow: `0 0 12px ${theme.accent}`,
+              }}
+            />
           </div>
 
-          {/* ================================================= */}
-          {/* DESCRIPTION                                      */}
-          {/* ================================================= */}
-
-          {data.description && (
-            <p
-              className="
-                mt-3
-                line-clamp-2
-                text-[10px]
-                leading-4
-                text-slate-400/70
-              "
-            >
-              {data.description}
+          {aliases.length > 0 && (
+            <p className="mt-2 line-clamp-1 text-[10px] leading-4 text-slate-500">
+              <span className="text-slate-600">
+                AKA
+              </span>{" "}
+              {aliases.join(" · ")}
             </p>
           )}
 
-          {/* ================================================= */}
-          {/* DIVIDER                                          */}
-          {/* ================================================= */}
+          {confidence !== null && (
+            <div className="mt-3">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+                  Extraction confidence
+                </span>
+                <span className="font-mono text-[9px] text-slate-500">
+                  {confidence}%
+                </span>
+              </div>
 
-          <div
-            className="
-              mt-3
-              h-px
-              w-full
-              opacity-35
-            "
-            style={{
-              background:
-                `linear-gradient(
-                  90deg,
-                  transparent,
-                  ${theme.accent},
-                  ${theme.secondary},
-                  transparent
-                )`,
-            }}
-          />
-
-          {/* ================================================= */}
-          {/* EVIDENCE STATUS                                   */}
-          {/* ================================================= */}
-
-          <div
-            className="
-              mt-3
-              flex
-              items-center
-              justify-between
-              gap-3
-            "
-          >
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-                text-[9px]
-                font-medium
-                uppercase
-                tracking-[0.12em]
-                text-white/28
-              "
-            >
-              {hasEvidence ? (
-                <>
-                  <ShieldCheck
-                    className="
-                      h-3
-                      w-3
-                      text-emerald-300/70
-                    "
-                  />
-
-                  Evidence linked
-                </>
-              ) : (
-                <>
-                  <BookOpenText
-                    className="
-                      h-3
-                      w-3
-                      text-white/30
-                    "
-                  />
-
-                  No direct quote
-                </>
-              )}
-            </div>
-
-            <span
-              className="
-                text-[8px]
-                uppercase
-                tracking-[0.12em]
-                text-white/18
-              "
-            >
-              {data.type}
-            </span>
-          </div>
-
-          {/* ================================================= */}
-          {/* EVIDENCE QUOTE                                    */}
-          {/* ================================================= */}
-
-          {hasEvidence && (
-            <div
-              className="
-                mt-3
-                rounded-[12px]
-                border
-                border-white/[0.06]
-                bg-black/20
-                px-3
-                py-2
-              "
-            >
-              <p
-                className="
-                  line-clamp-2
-                  text-[10px]
-                  leading-4
-                  text-white/28
-                "
-              >
-                “{evidenceQuote}”
-              </p>
+              <div className="h-[3px] overflow-hidden rounded-full bg-white/[0.045]">
+                <motion.div
+                  initial={{
+                    width: 0,
+                  }}
+                  animate={{
+                    width: `${confidence}%`,
+                  }}
+                  transition={{
+                    duration: 0.7,
+                    delay: 0.12,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="h-full rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
+                    boxShadow: `0 0 10px ${theme.glow}`,
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ================================================= */}
-      {/* SOURCE HANDLE                                     */}
-      {/* ================================================= */}
-
       <Handle
         type="source"
-        position={
-          sourcePosition
-        }
+        position={sourcePosition}
         style={{
-          width: 9,
-          height: 9,
+          width: 11,
+          height: 11,
           background:
             theme.secondary,
           border:
-            "2px solid #050814",
-          boxShadow:
-            `0 0 12px ${theme.glow}`,
-          zIndex: 30,
+            "3px solid #081722",
+          boxShadow: `0 0 16px ${theme.glow}`,
+          zIndex: 40,
         }}
       />
     </motion.div>

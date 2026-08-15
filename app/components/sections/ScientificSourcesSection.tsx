@@ -1,122 +1,120 @@
 "use client";
 
-import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+} from "framer-motion";
+
 import {
   ArrowRight,
-  BrainCircuit,
   BookOpenText,
-  CircleHelp,
-  GitBranch,
-  Lightbulb,
-  MessageSquareText,
-  ShieldAlert,
+  CheckCircle2,
+  Database,
+  Dna,
+  FileSearch,
+  Layers3,
+  Network,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
-type CopilotPrompt = {
-  id: string;
-  question: string;
+type SourceCard = {
+  name: string;
+  shortName: string;
   category: string;
-  answer: string;
-  reasoning: string;
-  evidence: string;
-  uncertainty: string;
-  nextQuestion: string;
+  description: string;
+  role: string;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
 };
 
-const prompts: CopilotPrompt[] = [
+const sources: SourceCard[] = [
   {
-    id: "edge",
-    question: "Why does TGF-β connect to EMT?",
-    category: "Mechanistic explanation",
-    answer:
-      "TGF-β signaling can activate SMAD-dependent transcriptional programs that alter epithelial identity and promote EMT-associated phenotypes.",
-    reasoning:
-      "The pathway is not a single direct jump. TGF-β binds its receptor complex, activates intracellular SMAD signaling, and changes transcriptional regulation linked to cell-state plasticity.",
-    evidence:
-      "BioLayers can surface the papers and evidence sentences supporting each intermediate relationship rather than presenting only the final association.",
-    uncertainty:
-      "The strength and biological consequence of TGF-β-driven EMT can vary by cancer type, experimental model, mutation background, and microenvironment.",
-    nextQuestion:
-      "Which cancer contexts show the strongest evidence for TGF-β-driven EMT?",
+    name: "PubMed",
+    shortName: "PM",
+    category: "Literature",
+    description:
+      "Peer-reviewed biomedical literature used to trace mechanistic claims back to source papers.",
+    role: "Claims · evidence sentences · citations",
+    icon: BookOpenText,
   },
-
   {
-    id: "conflict",
-    question: "Show conflicting evidence.",
-    category: "Evidence conflict",
-    answer:
-      "Some studies support EMT-associated programs as important contributors to invasion and metastasis, while others show that metastatic dissemination can occur without a complete canonical EMT.",
-    reasoning:
-      "This suggests that EMT should be represented as context-dependent biology rather than a universal binary mechanism.",
-    evidence:
-      "A multi-paper evidence layer can group supporting, conflicting, and model-specific findings around the same mechanistic edge.",
-    uncertainty:
-      "Differences in experimental definitions of EMT, lineage tracing, tumor type, and model systems can produce apparently contradictory conclusions.",
-    nextQuestion:
-      "Which experimental models are responsible for the strongest disagreement?",
+    name: "Reactome",
+    shortName: "RX",
+    category: "Pathways",
+    description:
+      "Curated biological pathways used to contextualize signaling relationships and pathway-level mechanisms.",
+    role: "Pathways · reactions · biological processes",
+    icon: Network,
   },
-
   {
-    id: "weakest",
-    question: "Which connection is weakest?",
-    category: "Evidence strength",
-    answer:
-      "In this demonstration, the transition from EMT-associated changes to a complete metastatic phenotype carries the greatest uncertainty.",
-    reasoning:
-      "Metastasis is a multistep process involving invasion, survival, circulation, colonization, and adaptation. One transcriptional program rarely explains the entire phenotype.",
-    evidence:
-      "BioLayers can compare evidence density, directness, experimental context, and contradictory findings for each mechanistic edge.",
-    uncertainty:
-      "A low-confidence edge does not mean the relationship is false. It means current evidence may be indirect, heterogeneous, or context-dependent.",
-    nextQuestion:
-      "What intermediate mechanisms could explain the gap between EMT and metastasis?",
+    name: "UniProt",
+    shortName: "UP",
+    category: "Proteins",
+    description:
+      "Protein-level annotation for names, functions, identifiers, and molecular context.",
+    role: "Proteins · functions · identifiers",
+    icon: Layers3,
   },
-
   {
-    id: "gap",
-    question: "What mechanism is still uncertain?",
-    category: "Mechanistic gap",
-    answer:
-      "A major unresolved step may be how molecular signaling changes translate into successful metastatic colonization at a distant organ.",
-    reasoning:
-      "Many studies explain early signaling and invasion, but the transition from dissemination to organ-specific colonization requires additional stromal, immune, and metabolic interactions.",
-    evidence:
-      "BioLayers can identify where a mechanistic chain contains dense evidence on both sides but weak direct evidence connecting the intermediate steps.",
-    uncertainty:
-      "The missing link may represent incomplete literature integration rather than a truly unknown biological mechanism.",
-    nextQuestion:
-      "Search for evidence connecting SMAD signaling to organ-specific metastatic colonization.",
+    name: "Human Protein Atlas",
+    shortName: "HPA",
+    category: "Expression",
+    description:
+      "Expression and tissue context used to connect molecular mechanisms with biological and disease environments.",
+    role: "Tissue · cell type · expression context",
+    icon: FileSearch,
+  },
+  {
+    name: "NCBI Gene",
+    shortName: "NG",
+    category: "Genes",
+    description:
+      "Gene-level reference information used to normalize entities and connect literature mentions to canonical genes.",
+    role: "Genes · aliases · genomic context",
+    icon: Dna,
   },
 ];
 
-const mechanism = [
-  "CAF",
-  "TGF-β",
-  "TGFBR",
-  "SMAD2/3",
-  "EMT",
-  "Invasion",
-  "Metastasis",
+const provenanceSteps = [
+  {
+    step: "01",
+    title: "Retrieve",
+    text: "Find relevant biomedical literature and structured biological references.",
+  },
+  {
+    step: "02",
+    title: "Normalize",
+    text: "Map mentions to consistent biological entities and identifiers.",
+  },
+  {
+    step: "03",
+    title: "Connect",
+    text: "Reconstruct directional mechanistic relationships between entities.",
+  },
+  {
+    step: "04",
+    title: "Verify",
+    text: "Attach evidence, source context, and uncertainty to each relationship.",
+  },
 ];
 
-export default function ResearchCopilotSection() {
-  const [selectedPromptId, setSelectedPromptId] =
-    React.useState("edge");
-
-  const selectedPrompt =
-    prompts.find((prompt) => prompt.id === selectedPromptId) ??
-    prompts[0];
+export default function ScientificSourcesSection() {
+  const reduceMotion =
+    Boolean(useReducedMotion());
 
   return (
     <section
-      id="research-copilot"
-      aria-labelledby="research-copilot-heading"
+      id="scientific-sources"
+      aria-labelledby="scientific-sources-heading"
       className="
         relative
         isolate
         overflow-hidden
+        border-t
+        border-teal-100/[0.04]
+        bg-[#06111a]
         px-6
         py-28
         md:px-10
@@ -130,49 +128,50 @@ export default function ResearchCopilotSection() {
       {/* ================================================= */}
 
       <div
+        aria-hidden="true"
         className="
           pointer-events-none
           absolute
           left-1/2
-          top-1/2
-          -z-10
-          h-[1000px]
+          top-[38%]
+          -z-20
+          h-[900px]
           w-[1100px]
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-cyan-500/[0.04]
+          bg-teal-400/[0.035]
           blur-[210px]
         "
       />
 
       <div
+        aria-hidden="true"
         className="
           pointer-events-none
           absolute
-          left-[-160px]
-          top-[15%]
-          -z-10
-          h-[500px]
-          w-[500px]
+          right-[-180px]
+          top-[12%]
+          -z-20
+          h-[480px]
+          w-[480px]
           rounded-full
-          bg-purple-500/[0.04]
+          bg-sky-400/[0.03]
           blur-[170px]
         "
       />
 
       <div
+        aria-hidden="true"
         className="
           pointer-events-none
           absolute
-          bottom-[-200px]
-          right-[-120px]
-          -z-10
-          h-[520px]
-          w-[520px]
-          rounded-full
-          bg-fuchsia-500/[0.045]
-          blur-[170px]
+          inset-0
+          -z-20
+          opacity-[0.28]
+          [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]
+          bg-[linear-gradient(rgba(153,246,228,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.018)_1px,transparent_1px)]
+          bg-[size:84px_84px]
         "
       />
 
@@ -182,10 +181,14 @@ export default function ResearchCopilotSection() {
         {/* ================================================= */}
 
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 22,
-          }}
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 22,
+                }
+          }
           whileInView={{
             opacity: 1,
             y: 0,
@@ -195,51 +198,68 @@ export default function ResearchCopilotSection() {
             amount: 0.25,
           }}
           transition={{
-            duration: 0.75,
-            ease: [0.22, 1, 0.36, 1],
+            duration: reduceMotion
+              ? 0
+              : 0.75,
+            ease: [
+              0.22,
+              1,
+              0.36,
+              1,
+            ],
           }}
           className="max-w-5xl"
         >
           <div
             className="
               mb-6
-              text-sm
-              font-medium
+              inline-flex
+              items-center
+              gap-2
+              rounded-full
+              border
+              border-teal-200/15
+              bg-teal-300/[0.04]
+              px-4
+              py-2
+              text-[10px]
+              font-bold
               uppercase
-              tracking-[0.3em]
-              text-purple-300/70
+              tracking-[0.22em]
+              text-teal-100/75
             "
           >
-            Mechanism-aware research copilot
+            <Database className="h-3.5 w-3.5" />
+            Scientific data infrastructure
           </div>
 
           <h2
-            id="research-copilot-heading"
+            id="scientific-sources-heading"
             className="
+              max-w-5xl
               text-4xl
               font-semibold
               leading-[1.04]
-              tracking-[-0.045em]
-              text-white
+              tracking-[-0.05em]
+              text-teal-50
               sm:text-5xl
               md:text-6xl
               lg:text-7xl
             "
           >
-            Ask the mechanism,
-
+            Every mechanism needs
             <span
               className="
                 ml-3
                 bg-gradient-to-r
-                from-cyan-300
-                via-purple-300
-                to-fuchsia-300
+                from-teal-200
+                via-cyan-200
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
             >
-              not just the chatbot.
+              scientific grounding.
             </span>
           </h2>
 
@@ -249,59 +269,465 @@ export default function ResearchCopilotSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/50
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
           >
-            BioLayers Copilot is designed to reason over the current
-            biological map, evidence, and uncertainty — so researchers
-            can ask why a connection exists, where it is weak, and what
-            should be investigated next.
+            BioLayers is designed to connect
+            mechanistic reasoning with
+            biomedical literature and curated
+            biological resources — so users can
+            move from a relationship on the map
+            back to the evidence and biological
+            context behind it.
           </p>
         </motion.div>
 
         {/* ================================================= */}
-        {/* WORKSPACE                                        */}
+        {/* SOURCE CARDS                                     */}
         {/* ================================================= */}
 
         <div
           className="
             mt-16
             grid
-            items-start
-            gap-6
-            xl:grid-cols-[420px_minmax(0,1fr)]
+            gap-4
+            md:grid-cols-2
+            xl:grid-cols-5
           "
         >
-          {/* ================================================= */}
-          {/* LEFT — MECHANISM CONTEXT                         */}
-          {/* ================================================= */}
+          {sources.map(
+            (source, index) => {
+              const Icon =
+                source.icon;
 
-          <motion.div
-            initial={{
-              opacity: 0,
-              x: -20,
-            }}
-            whileInView={{
-              opacity: 1,
-              x: 0,
-            }}
-            viewport={{
-              once: true,
-              amount: 0.2,
-            }}
-            transition={{
-              duration: 0.8,
-              ease: [0.22, 1, 0.36, 1],
-            }}
+              return (
+                <motion.article
+                  key={source.name}
+                  initial={
+                    reduceMotion
+                      ? false
+                      : {
+                          opacity: 0,
+                          y: 20,
+                        }
+                  }
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: 0.2,
+                  }}
+                  transition={{
+                    duration:
+                      reduceMotion
+                        ? 0
+                        : 0.58,
+                    delay:
+                      reduceMotion
+                        ? 0
+                        : index *
+                          0.06,
+                  }}
+                  whileHover={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          y: -4,
+                        }
+                  }
+                  className="
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-[24px]
+                    border
+                    border-teal-100/[0.07]
+                    bg-[#0a1b26]/50
+                    p-5
+                    shadow-[0_18px_55px_rgba(1,8,15,.16)]
+                    backdrop-blur-2xl
+                    transition-colors
+                    duration-300
+                    hover:border-teal-100/[0.14]
+                    hover:bg-[#0d2430]/62
+                  "
+                >
+                  <div
+                    aria-hidden="true"
+                    className="
+                      pointer-events-none
+                      absolute
+                      -right-16
+                      -top-16
+                      h-36
+                      w-36
+                      rounded-full
+                      bg-teal-300/[0.045]
+                      blur-[60px]
+                      transition
+                      duration-500
+                      group-hover:bg-teal-300/[0.075]
+                    "
+                  />
+
+                  <div
+                    className="
+                      relative
+                      flex
+                      items-start
+                      justify-between
+                      gap-4
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        h-11
+                        w-11
+                        items-center
+                        justify-center
+                        rounded-[14px]
+                        border
+                        border-teal-100/[0.08]
+                        bg-teal-100/[0.035]
+                      "
+                    >
+                      <Icon className="h-4 w-4 text-teal-200/70" />
+                    </div>
+
+                    <span
+                      className="
+                        font-mono
+                        text-[9px]
+                        font-bold
+                        uppercase
+                        tracking-[0.18em]
+                        text-slate-500
+                      "
+                    >
+                      {source.shortName}
+                    </span>
+                  </div>
+
+                  <div className="relative mt-6">
+                    <p
+                      className="
+                        text-[9px]
+                        font-bold
+                        uppercase
+                        tracking-[0.18em]
+                        text-teal-200/55
+                      "
+                    >
+                      {source.category}
+                    </p>
+
+                    <h3
+                      className="
+                        mt-2
+                        text-xl
+                        font-semibold
+                        tracking-[-0.035em]
+                        text-teal-50
+                      "
+                    >
+                      {source.name}
+                    </h3>
+
+                    <p
+                      className="
+                        mt-3
+                        text-sm
+                        leading-6
+                        text-slate-400/90
+                      "
+                    >
+                      {
+                        source.description
+                      }
+                    </p>
+                  </div>
+
+                  <div
+                    className="
+                      relative
+                      mt-6
+                      border-t
+                      border-teal-100/[0.055]
+                      pt-4
+                    "
+                  >
+                    <p
+                      className="
+                        text-[9px]
+                        font-semibold
+                        uppercase
+                        tracking-[0.14em]
+                        text-slate-500
+                      "
+                    >
+                      {source.role}
+                    </p>
+                  </div>
+                </motion.article>
+              );
+            },
+          )}
+        </div>
+
+        {/* ================================================= */}
+        {/* PROVENANCE WORKFLOW                              */}
+        {/* ================================================= */}
+
+        <motion.div
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 24,
+                }
+          }
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          transition={{
+            duration:
+              reduceMotion
+                ? 0
+                : 0.75,
+          }}
+          className="
+            relative
+            mt-8
+            overflow-hidden
+            rounded-[28px]
+            border
+            border-teal-100/[0.08]
+            bg-[#0a1b26]/48
+            p-6
+            backdrop-blur-2xl
+            md:p-8
+          "
+        >
+          <div
+            aria-hidden="true"
             className="
-              rounded-[30px]
+              pointer-events-none
+              absolute
+              inset-x-20
+              top-0
+              h-px
+              bg-gradient-to-r
+              from-transparent
+              via-teal-200/25
+              to-transparent
+            "
+          />
+
+          <div
+            className="
+              flex
+              flex-col
+              gap-6
+              lg:flex-row
+              lg:items-end
+              lg:justify-between
+            "
+          >
+            <div>
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-[0.18em]
+                  text-teal-200/60
+                "
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Provenance pipeline
+              </div>
+
+              <h3
+                className="
+                  mt-4
+                  max-w-3xl
+                  text-2xl
+                  font-semibold
+                  tracking-[-0.04em]
+                  text-teal-50
+                  sm:text-3xl
+                "
+              >
+                From source data to
+                traceable biological
+                relationships.
+              </h3>
+            </div>
+
+            <div
+              className="
+                inline-flex
+                w-fit
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-emerald-300/12
+                bg-emerald-300/[0.035]
+                px-3
+                py-1.5
+                text-[10px]
+                font-semibold
+                text-emerald-200/70
+              "
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Evidence-aware by design
+            </div>
+          </div>
+
+          <div
+            className="
+              mt-8
+              grid
+              gap-3
+              lg:grid-cols-4
+            "
+          >
+            {provenanceSteps.map(
+              (item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={
+                    reduceMotion
+                      ? false
+                      : {
+                          opacity: 0,
+                          y: 14,
+                        }
+                  }
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                  }}
+                  transition={{
+                    duration:
+                      reduceMotion
+                        ? 0
+                        : 0.5,
+                    delay:
+                      reduceMotion
+                        ? 0
+                        : index *
+                          0.06,
+                  }}
+                  className="
+                    relative
+                    rounded-[18px]
+                    border
+                    border-teal-100/[0.06]
+                    bg-teal-100/[0.022]
+                    p-5
+                  "
+                >
+                  <span
+                    className="
+                      font-mono
+                      text-[9px]
+                      font-bold
+                      tracking-[0.16em]
+                      text-teal-200/45
+                    "
+                  >
+                    {item.step}
+                  </span>
+
+                  <h4
+                    className="
+                      mt-4
+                      text-base
+                      font-semibold
+                      text-teal-50/90
+                    "
+                  >
+                    {item.title}
+                  </h4>
+
+                  <p
+                    className="
+                      mt-2
+                      text-xs
+                      leading-6
+                      text-slate-400/90
+                    "
+                  >
+                    {item.text}
+                  </p>
+                </motion.div>
+              ),
+            )}
+          </div>
+        </motion.div>
+
+        {/* ================================================= */}
+        {/* EXAMPLE EVIDENCE TRACE                            */}
+        {/* ================================================= */}
+
+        <motion.div
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 20,
+                }
+          }
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          transition={{
+            duration:
+              reduceMotion
+                ? 0
+                : 0.68,
+          }}
+          className="
+            mt-5
+            grid
+            gap-4
+            lg:grid-cols-[1.15fr_.85fr]
+          "
+        >
+          <div
+            className="
+              rounded-[24px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
+              border-teal-100/[0.065]
+              bg-[#0a1b26]/42
               p-6
-              backdrop-blur-xl
+              backdrop-blur-2xl
             "
           >
             <div
@@ -310,604 +736,185 @@ export default function ResearchCopilotSection() {
                 items-center
                 gap-2
                 text-[10px]
-                font-semibold
+                font-bold
                 uppercase
-                tracking-[0.18em]
-                text-white/26
+                tracking-[0.17em]
+                text-teal-200/60
               "
             >
-              <GitBranch className="h-4 w-4" />
-
-              Active mechanism context
+              <FileSearch className="h-4 w-4" />
+              Example evidence trace
             </div>
-
-            <div className="mt-6 space-y-2">
-              {mechanism.map((node, index) => (
-                <React.Fragment key={node}>
-                  <motion.div
-                    initial={{
-                      opacity: 0,
-                      y: 10,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      duration: 0.45,
-                      delay: index * 0.05,
-                    }}
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      rounded-[16px]
-                      border
-                      border-white/[0.07]
-                      bg-white/[0.02]
-                      px-4
-                      py-3
-                    "
-                  >
-                    <div
-                      className="
-                        flex
-                        h-7
-                        w-7
-                        shrink-0
-                        items-center
-                        justify-center
-                        rounded-full
-                        border
-                        border-cyan-300/10
-                        bg-cyan-300/[0.04]
-                        text-[10px]
-                        font-semibold
-                        text-cyan-200/55
-                      "
-                    >
-                      {index + 1}
-                    </div>
-
-                    <div
-                      className="
-                        text-sm
-                        font-medium
-                        text-white/62
-                      "
-                    >
-                      {node}
-                    </div>
-                  </motion.div>
-
-                  {index < mechanism.length - 1 && (
-                    <div
-                      className="
-                        ml-[13px]
-                        h-4
-                        w-px
-                        bg-gradient-to-b
-                        from-cyan-300/20
-                        to-purple-300/10
-                      "
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* CONTEXT CARD */}
 
             <div
               className="
                 mt-6
-                rounded-[18px]
-                border
-                border-white/[0.07]
-                bg-black/20
-                p-4
+                flex
+                flex-wrap
+                items-center
+                gap-3
               "
             >
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.15em]
-                  text-cyan-300/45
-                "
-              >
-                <BrainCircuit className="h-3.5 w-3.5" />
-
-                Copilot context
-              </div>
-
-              <p
-                className="
-                  mt-2
-                  text-xs
-                  leading-5
-                  text-white/34
-                "
-              >
-                The assistant can reason over the selected mechanism,
-                evidence states, biological directionality, and unresolved
-                gaps.
-              </p>
+              <EntityPill label="TGF-β" />
+              <ArrowRight className="h-4 w-4 text-teal-200/35" />
+              <RelationPill label="activates" />
+              <ArrowRight className="h-4 w-4 text-teal-200/35" />
+              <EntityPill label="SMAD2/3" />
             </div>
-          </motion.div>
 
-          {/* ================================================= */}
-          {/* RIGHT — COPILOT                                  */}
-          {/* ================================================= */}
+            <p
+              className="
+                mt-6
+                max-w-3xl
+                text-sm
+                leading-7
+                text-slate-300/80
+              "
+            >
+              A relationship should not
+              exist as an isolated edge.
+              BioLayers is designed to keep
+              the supporting literature,
+              biological context, and source
+              provenance attached to the
+              mechanism.
+            </p>
+          </div>
 
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 24,
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0,
-            }}
-            viewport={{
-              once: true,
-              amount: 0.15,
-            }}
-            transition={{
-              duration: 0.8,
-              delay: 0.05,
-              ease: [0.22, 1, 0.36, 1],
-            }}
+          <div
             className="
-              overflow-hidden
-              rounded-[30px]
+              rounded-[24px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
-              backdrop-blur-xl
+              border-teal-100/[0.065]
+              bg-[#0a1b26]/42
+              p-6
+              backdrop-blur-2xl
             "
           >
-            {/* ================================================= */}
-            {/* COPILOT HEADER                                    */}
-            {/* ================================================= */}
-
             <div
               className="
                 flex
-                flex-col
-                gap-4
-                border-b
-                border-white/[0.07]
-                px-6
-                py-5
-                md:flex-row
-                md:items-center
-                md:justify-between
+                items-center
+                gap-2
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-[0.17em]
+                text-sky-200/65
               "
             >
-              <div>
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-2
-                    text-[10px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.18em]
-                    text-white/26
-                  "
-                >
-                  <MessageSquareText className="h-4 w-4" />
-
-                  Research Copilot
-                </div>
-
-                <div
-                  className="
-                    mt-2
-                    text-sm
-                    text-white/45
-                  "
-                >
-                  Ask questions grounded in the current mechanism.
-                </div>
-              </div>
-
-              <div
-                className="
-                  inline-flex
-                  w-fit
-                  items-center
-                  gap-2
-                  rounded-full
-                  border
-                  border-purple-300/10
-                  bg-purple-300/[0.04]
-                  px-3
-                  py-1.5
-                  text-[10px]
-                  font-medium
-                  text-purple-200/55
-                "
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-
-                Mechanism aware
-              </div>
+              <Sparkles className="h-4 w-4" />
+              Research principle
             </div>
 
-            {/* ================================================= */}
-            {/* QUICK QUESTIONS                                  */}
-            {/* ================================================= */}
-
-            <div
+            <p
               className="
-                border-b
-                border-white/[0.07]
-                px-6
-                py-5
+                mt-5
+                text-lg
+                font-semibold
+                leading-8
+                tracking-[-0.02em]
+                text-teal-50/88
               "
             >
-              <div
+              No black-box mechanism.
+            </p>
+
+            <p
+              className="
+                mt-3
+                text-sm
+                leading-7
+                text-slate-400/90
+              "
+            >
+              Every important relationship
+              should remain inspectable:
+              where it came from, what
+              supports it, where it applies,
+              and where uncertainty remains.
+            </p>
+
+            <a
+              href="#multi-paper-evidence"
+              className="
+                group
+                mt-6
+                inline-flex
+                items-center
+                gap-2
+                text-xs
+                font-semibold
+                text-teal-200/75
+                transition
+                hover:text-teal-100
+              "
+            >
+              See evidence synthesis
+
+              <ArrowRight
                 className="
-                  text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.16em]
-                  text-white/22
+                  h-3.5
+                  w-3.5
+                  transition-transform
+                  duration-300
+                  group-hover:translate-x-1
                 "
-              >
-                Ask
-              </div>
-
-              <div
-                className="
-                  mt-3
-                  flex
-                  flex-wrap
-                  gap-2
-                "
-              >
-                {prompts.map((prompt) => {
-                  const selected =
-                    prompt.id === selectedPromptId;
-
-                  return (
-                    <button
-                      key={prompt.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedPromptId(prompt.id)
-                      }
-                      className={`
-                        rounded-full
-                        border
-                        px-3.5
-                        py-2
-                        text-xs
-                        font-medium
-                        transition
-                        duration-300
-
-                        ${
-                          selected
-                            ? "border-cyan-300/20 bg-cyan-300/[0.065] text-cyan-100/80"
-                            : "border-white/[0.07] bg-white/[0.02] text-white/38 hover:border-white/[0.13] hover:bg-white/[0.04] hover:text-white/60"
-                        }
-                      `}
-                    >
-                      {prompt.question}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ================================================= */}
-            {/* RESPONSE                                         */}
-            {/* ================================================= */}
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedPrompt.id}
-                initial={{
-                  opacity: 0,
-                  y: 10,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: -8,
-                }}
-                transition={{
-                  duration: 0.25,
-                }}
-                className="p-6"
-              >
-                {/* QUESTION */}
-
-                <div
-                  className="
-                    flex
-                    items-start
-                    gap-3
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-purple-300/10
-                      bg-purple-300/[0.045]
-                    "
-                  >
-                    <BrainCircuit
-                      className="
-                        h-4
-                        w-4
-                        text-purple-200/60
-                      "
-                    />
-                  </div>
-
-                  <div>
-                    <div
-                      className="
-                        text-[9px]
-                        font-semibold
-                        uppercase
-                        tracking-[0.15em]
-                        text-purple-300/45
-                      "
-                    >
-                      {selectedPrompt.category}
-                    </div>
-
-                    <div
-                      className="
-                        mt-1
-                        text-lg
-                        font-medium
-                        text-white/80
-                      "
-                    >
-                      {selectedPrompt.question}
-                    </div>
-                  </div>
-                </div>
-
-                {/* STRUCTURED ANSWER */}
-
-                <div className="mt-7 space-y-3">
-                  <CopilotBlock
-                    icon={MessageSquareText}
-                    label="Answer"
-                    value={selectedPrompt.answer}
-                    accent="text-cyan-300/55"
-                  />
-
-                  <CopilotBlock
-                    icon={GitBranch}
-                    label="Mechanistic reasoning"
-                    value={selectedPrompt.reasoning}
-                    accent="text-purple-300/55"
-                  />
-
-                  <CopilotBlock
-                    icon={BookOpenText}
-                    label="Evidence"
-                    value={selectedPrompt.evidence}
-                    accent="text-fuchsia-300/55"
-                  />
-
-                  <CopilotBlock
-                    icon={ShieldAlert}
-                    label="Uncertainty"
-                    value={selectedPrompt.uncertainty}
-                    accent="text-amber-300/55"
-                  />
-                </div>
-
-                {/* ================================================= */}
-                {/* NEXT RESEARCH QUESTION                            */}
-                {/* ================================================= */}
-
-                <div
-                  className="
-                    mt-6
-                    rounded-[20px]
-                    border
-                    border-cyan-300/10
-                    bg-cyan-300/[0.035]
-                    p-5
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      text-[9px]
-                      font-semibold
-                      uppercase
-                      tracking-[0.15em]
-                      text-cyan-300/45
-                    "
-                  >
-                    <CircleHelp className="h-3.5 w-3.5" />
-
-                    Next research question
-                  </div>
-
-                  <p
-                    className="
-                      mt-3
-                      text-sm
-                      leading-6
-                      text-white/52
-                    "
-                  >
-                    {selectedPrompt.nextQuestion}
-                  </p>
-                </div>
-
-                {/* ================================================= */}
-                {/* HYPOTHESIS CTA                                   */}
-                {/* ================================================= */}
-
-                <a
-                  href="#hypothesis-builder"
-                  className="
-                    group
-                    mt-5
-                    inline-flex
-                    w-full
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-[16px]
-                    border
-                    border-white/[0.1]
-                    bg-white/[0.045]
-                    px-5
-                    py-3.5
-                    text-sm
-                    font-medium
-                    text-white/72
-                    transition
-                    duration-300
-                    hover:border-fuchsia-300/20
-                    hover:bg-fuchsia-300/[0.05]
-                    hover:text-white
-                  "
-                >
-                  <Lightbulb className="h-4 w-4" />
-
-                  Build hypothesis from this gap
-
-                  <ArrowRight
-                    className="
-                      h-4
-                      w-4
-                      transition-transform
-                      duration-300
-                      group-hover:translate-x-1
-                    "
-                  />
-                </a>
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* ================================================= */}
-        {/* BOTTOM NOTE                                      */}
-        {/* ================================================= */}
-
-        <motion.p
-          initial={{
-            opacity: 0,
-          }}
-          whileInView={{
-            opacity: 1,
-          }}
-          viewport={{
-            once: true,
-          }}
-          transition={{
-            duration: 0.7,
-          }}
-          className="
-            mx-auto
-            mt-8
-            max-w-3xl
-            text-center
-            text-xs
-            leading-6
-            text-white/24
-          "
-        >
-          This homepage interaction is illustrative. In the full
-          workspace, Copilot responses can be grounded in the actual
-          mechanism graph, papers, and evidence attached to the active
-          research project.
-        </motion.p>
+              />
+            </a>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-/* =========================================================
-   COPILOT RESPONSE BLOCK
-   ========================================================= */
-
-function CopilotBlock({
-  icon: Icon,
+function EntityPill({
   label,
-  value,
-  accent,
 }: {
-  icon: React.ComponentType<{
-    className?: string;
-  }>;
   label: string;
-  value: string;
-  accent: string;
 }) {
   return (
-    <div
+    <span
       className="
-        rounded-[18px]
+        rounded-[13px]
         border
-        border-white/[0.07]
-        bg-white/[0.018]
-        p-5
+        border-teal-200/12
+        bg-teal-300/[0.045]
+        px-4
+        py-2
+        text-sm
+        font-semibold
+        text-teal-50
       "
     >
-      <div
-        className={`
-          flex
-          items-center
-          gap-2
-          text-[9px]
-          font-semibold
-          uppercase
-          tracking-[0.15em]
-          ${accent}
-        `}
-      >
-        <Icon className="h-3.5 w-3.5" />
+      {label}
+    </span>
+  );
+}
 
-        {label}
-      </div>
-
-      <p
-        className="
-          mt-3
-          text-sm
-          leading-6
-          text-white/43
-        "
-      >
-        {value}
-      </p>
-    </div>
+function RelationPill({
+  label,
+}: {
+  label: string;
+}) {
+  return (
+    <span
+      className="
+        rounded-full
+        border
+        border-sky-200/10
+        bg-sky-200/[0.035]
+        px-3
+        py-1.5
+        text-[10px]
+        font-bold
+        uppercase
+        tracking-[0.14em]
+        text-sky-100/70
+      "
+    >
+      {label}
+    </span>
   );
 }

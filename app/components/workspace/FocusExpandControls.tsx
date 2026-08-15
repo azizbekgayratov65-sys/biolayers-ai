@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 type FocusExpandControlsProps = {
   demoMode: boolean;
   cinematicFocus: boolean;
@@ -22,35 +24,67 @@ export default function FocusExpandControls({
   return (
     <div
       data-export-ignore="true"
-      className={`absolute left-5 z-30 flex flex-col items-start gap-1.5 ${
+      className={`absolute left-4 z-30 hidden items-center gap-1.5 sm:flex ${
         demoMode ? "bottom-24" : "bottom-5"
       }`}
     >
-      <button
+      <motion.button
         type="button"
+        whileTap={{ scale: 0.97 }}
         onClick={() =>
           cinematicFocus
             ? void exitCinematicFocus()
             : void enterCinematicFocus()
         }
         disabled={!hasSelectedNode}
-        className={`w-[178px] rounded-[13px] border px-3.5 py-2.5 text-left text-[9px] font-bold uppercase tracking-[0.13em] shadow-xl backdrop-blur-2xl transition ${
+        className={`rounded-[12px] border px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.09em] shadow-[0_12px_36px_rgba(1,8,15,.25)] backdrop-blur-2xl transition duration-300 ${
           cinematicFocus
-            ? "border-rose-300/20 bg-rose-300/[0.09] text-rose-100 hover:bg-rose-300/[0.15]"
-            : "border-cyan-300/20 bg-[#07101d]/90 text-cyan-100 hover:bg-cyan-300/[0.09]"
-        } disabled:cursor-not-allowed disabled:opacity-35`}
+            ? "border-rose-200/[0.15] bg-rose-200/[0.06] text-rose-100 hover:bg-rose-200/[0.09]"
+            : "border-teal-200/[0.12] bg-[#0a1b26]/86 text-teal-100 hover:-translate-y-0.5 hover:bg-teal-200/[0.05]"
+        } disabled:cursor-not-allowed disabled:opacity-30`}
       >
-        {cinematicFocus ? "Exit cinematic focus" : "Cinematic focus"}
-      </button>
+        <span className="flex items-center gap-2">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              cinematicFocus
+                ? "bg-rose-300 shadow-[0_0_8px_rgba(253,164,175,.7)]"
+                : "bg-teal-300 shadow-[0_0_8px_rgba(94,234,212,.65)]"
+            }`}
+          />
+          {cinematicFocus ? "Exit focus" : "Cinematic focus"}
+        </span>
+      </motion.button>
 
-      <button
+      <motion.button
         type="button"
+        whileTap={{ scale: 0.97 }}
         onClick={() => void expandSelectedEntity()}
         disabled={!hasSelectedNode || expandingGraph}
-        className="w-[178px] rounded-[13px] border border-violet-300/20 bg-[#07101d]/90 px-3.5 py-2.5 text-left text-[9px] font-bold uppercase tracking-[0.13em] text-violet-100 shadow-xl backdrop-blur-2xl transition hover:bg-violet-300/[0.09] disabled:cursor-not-allowed disabled:opacity-35"
+        className="rounded-[12px] border border-sky-200/[0.12] bg-[#0a1b26]/86 px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.09em] text-sky-100 shadow-[0_12px_36px_rgba(1,8,15,.25)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-sky-200/[0.05] disabled:cursor-not-allowed disabled:opacity-30"
       >
-        {expandingGraph ? "Expanding..." : "Expand entity"}
-      </button>
+        <span className="flex items-center gap-2">
+          <motion.span
+            animate={
+              expandingGraph
+                ? { rotate: 360 }
+                : { rotate: 0 }
+            }
+            transition={
+              expandingGraph
+                ? {
+                    duration: 1,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }
+                : undefined
+            }
+            className="text-[12px] text-sky-300"
+          >
+            ✦
+          </motion.span>
+          {expandingGraph ? "Expanding" : "Expand entity"}
+        </span>
+      </motion.button>
     </div>
   );
 }

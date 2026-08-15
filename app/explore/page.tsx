@@ -6,9 +6,12 @@ import {
   useRef,
   useState,
 } from "react";
-import Link from "next/link";
 import { toPng } from "html-to-image";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 
 import {
   MarkerType,
@@ -26,6 +29,8 @@ import {
 
 import type {
   ApiGraphResponse,
+  EvidencePaperAssessment,
+  EvidenceSummary,
   ResearchEdgeData,
   ResearchEntityData,
 } from "../lib/researchGraph";
@@ -59,7 +64,6 @@ import useWorkspace from "../hooks/useWorkspace";
 import useCellOntology, {
   type CellOntologyTerm,
 } from "../hooks/useCellOntology";
-import BiologicalArtwork from "../components/workspace/BiologicalArtwork";
 import ConnectBiologyPanel, {
   type BiologicalPathResult,
 } from "../components/workspace/ConnectBiologyPanel";
@@ -176,7 +180,80 @@ function getEvidenceProfile(
   paperCount: number,
   loading = false,
   hasError = false,
+  summary?: EvidenceSummary,
 ): EvidenceProfile {
+  /*
+    Once PubMed papers have been classified, the evidence
+    profile must come from the classification result — never
+    from retrieval volume.
+  */
+  if (
+    summary &&
+    summary.analyzed > 0
+  ) {
+    if (
+      summary.strength === "strong"
+    ) {
+      return {
+        level: "Strong",
+        score: 92,
+        description:
+          `${summary.supporting} supporting, ${summary.contextual} contextual, ` +
+          `${summary.contradicting} contradicting and ${summary.unrelated} unrelated ` +
+          `publication${summary.analyzed === 1 ? "" : "s"} were classified.`,
+        badgeClass:
+          "border-emerald-300/20 bg-emerald-300/[0.07] text-emerald-200",
+        meterClass:
+          "from-emerald-300 via-teal-300 to-sky-300",
+      };
+    }
+
+    if (
+      summary.strength === "moderate"
+    ) {
+      return {
+        level: "Moderate",
+        score: 72,
+        description:
+          `${summary.supporting} supporting, ${summary.contextual} contextual and ` +
+          `${summary.contradicting} contradicting publication${
+            summary.analyzed === 1 ? "" : "s"
+          } were classified.`,
+        badgeClass:
+          "border-cyan-300/20 bg-cyan-300/[0.07] text-cyan-200",
+        meterClass:
+          "from-teal-300 via-cyan-300 to-sky-300",
+      };
+    }
+
+    if (
+      summary.strength === "limited"
+    ) {
+      return {
+        level: "Limited",
+        score: 48,
+        description:
+          `The Evidence Engine found ${summary.supporting} direct supporting ` +
+          `publication${summary.supporting === 1 ? "" : "s"} among ${summary.analyzed} analyzed records.`,
+        badgeClass:
+          "border-amber-300/20 bg-amber-300/[0.07] text-amber-200",
+        meterClass:
+          "from-amber-300 via-teal-300 to-sky-300",
+      };
+    }
+
+    return {
+      level: "No evidence",
+      score: 20,
+      description:
+        `${summary.analyzed} publications were classified, but none currently establish direct support strongly enough to raise the aggregate evidence level.`,
+      badgeClass:
+        "border-slate-300/15 bg-slate-300/[0.05] text-slate-200",
+      meterClass:
+        "from-slate-500 via-slate-400 to-teal-300",
+    };
+  }
+
   if (loading) {
     return {
       level: "Limited",
@@ -184,9 +261,9 @@ function getEvidenceProfile(
       description:
         "Candidate literature is currently being retrieved from PubMed.",
       badgeClass:
-        "border-slate-300/15 bg-slate-300/[0.05] text-slate-300",
+        "border-slate-300/15 bg-slate-300/[0.05] text-slate-200",
       meterClass:
-        "from-slate-500 via-cyan-300 to-violet-300",
+        "from-slate-500 via-teal-300 to-sky-300",
     };
   }
 
@@ -199,7 +276,7 @@ function getEvidenceProfile(
       badgeClass:
         "border-rose-300/15 bg-rose-300/[0.05] text-rose-200",
       meterClass:
-        "from-rose-400 via-rose-300 to-amber-300",
+        "from-rose-300 via-orange-300 to-amber-300",
     };
   }
 
@@ -210,40 +287,32 @@ function getEvidenceProfile(
       description:
         "No candidate PubMed publications are currently loaded. This does not prove that the biological relationship lacks evidence.",
       badgeClass:
-        "border-slate-300/15 bg-slate-300/[0.05] text-slate-300",
+        "border-slate-300/15 bg-slate-300/[0.05] text-slate-200",
       meterClass:
-        "from-slate-500 via-slate-400 to-cyan-300",
+        "from-slate-500 via-slate-400 to-teal-300",
     };
   }
 
   return {
-    /*
-      Important:
-      PubMed retrieval volume must NOT be interpreted
-      as evidence strength.
-
-      We temporarily reuse the existing EvidenceLevel type
-      until we introduce a dedicated retrieval-status type.
-    */
     level: "Limited",
     score: 42,
     description:
       `${paperCount} candidate PubMed publication${
         paperCount === 1 ? "" : "s"
       } ${paperCount === 1 ? "is" : "are"} currently loaded. ` +
-      "These records have not yet been classified as supporting, contradicting, contextual, or unrelated evidence.",
+      "These records are candidates until the Evidence Engine classifies their abstracts.",
     badgeClass:
       "border-amber-300/15 bg-amber-300/[0.06] text-amber-200",
     meterClass:
-      "from-amber-400 via-cyan-300 to-violet-300",
+      "from-amber-300 via-teal-300 to-sky-300",
   };
 }
 
 const nodeClassNames: Record<EntityType, string> = {
   cell: "bg-teal-400",
   protein: "bg-violet-400",
-  gene: "bg-cyan-400",
-  drug: "bg-fuchsia-400",
+  gene: "bg-emerald-400",
+  drug: "bg-orange-400",
   pathway: "bg-amber-400",
   process: "bg-blue-400",
   disease: "bg-rose-400",
@@ -369,6 +438,8 @@ function buildEdgePubMedQuery({
 }
 
 export default function ExplorePage() {
+  const reduceMotion = Boolean(useReducedMotion());
+
   const [showWorkspaceReveal, setShowWorkspaceReveal] =
     useState(true);
 
@@ -726,9 +797,9 @@ drug: true,
     const timeout = window.setTimeout(
       () => {
         void flowInstance.fitView({
-          padding: 0.22,
-          minZoom: 0.4,
-          maxZoom: 1.15,
+          padding: 0.12,
+          minZoom: 0.52,
+          maxZoom: 1.24,
           duration: 600,
         });
       },
@@ -831,7 +902,7 @@ drug: true,
               : 0.22,
           filter:
             pathActive && onMechanisticPath
-              ? "drop-shadow(0 0 16px rgba(214,255,75,.22))"
+              ? "drop-shadow(0 0 16px rgba(94,234,212,.20))"
               : undefined,
           transition:
             "opacity 180ms ease, filter 180ms ease",
@@ -957,40 +1028,114 @@ drug: true,
     pubMedLoading,
   ]);
 
+  function handleEvidenceAnalyzed(result: {
+    assessments:
+      EvidencePaperAssessment[];
+
+    summary:
+      EvidenceSummary;
+
+    limitations:
+      string[];
+
+    provider:
+      string;
+
+    model:
+      string;
+
+    analyzedAt:
+      string;
+  }) {
+    if (!selectedEdgeId) {
+      return;
+    }
+
+    setEdges((current) =>
+      current.map((edge) => {
+        if (
+          edge.id !==
+          selectedEdgeId
+        ) {
+          return edge;
+        }
+
+        return {
+          ...edge,
+
+          data: {
+            ...(edge.data ?? {}),
+
+            evidenceCount:
+              result.summary
+                .totalCandidates,
+
+            literatureQuery:
+              edgePubMedQuery,
+
+            paperAssessments:
+              result.assessments.map(
+                (assessment) => ({
+                  ...assessment,
+                  analyzedAt:
+                    result.analyzedAt,
+                }),
+              ),
+
+            evidenceSummary:
+              result.summary,
+
+            evidenceAnalyzedAt:
+              result.analyzedAt,
+          },
+        };
+      }),
+    );
+  }
+
   function getEdgeEvidenceLevel(
     edge: Edge<ResearchEdgeData>,
   ): Exclude<EvidenceLensMode, "all"> {
-    const confidence =
-      typeof edge.data?.confidence === "number"
-        ? edge.data.confidence
-        : null;
-
-    const evidenceCount =
-      typeof edge.data?.evidenceCount === "number"
-        ? edge.data.evidenceCount
-        : typeof edge.data?.evidenceQuote === "string" &&
-            edge.data.evidenceQuote.trim().length > 0
-          ? 1
-          : 0;
+    const summary =
+      edge.data?.evidenceSummary;
 
     if (
-      (confidence !== null && confidence >= 0.85) ||
-      evidenceCount >= 4
+      summary &&
+      summary.analyzed > 0
     ) {
-      return "established";
+      if (
+        summary.strength === "strong"
+      ) {
+        return "established";
+      }
+
+      if (
+        summary.strength === "moderate"
+      ) {
+        return "supported";
+      }
+
+      if (
+        summary.strength === "limited"
+      ) {
+        return "emerging";
+      }
+
+      return "hypothesis";
     }
 
-    if (
-      (confidence !== null && confidence >= 0.7) ||
-      evidenceCount >= 2
-    ) {
-      return "supported";
-    }
+    /*
+      Extraction confidence and candidate PubMed retrieval
+      are not literature evidence. A quote from the submitted
+      source can make an edge "emerging", but not established.
+    */
+    const hasSourceEvidence =
+      typeof edge.data?.evidenceQuote ===
+        "string" &&
+      edge.data.evidenceQuote.trim().length >
+        0;
 
-    if (
-      (confidence !== null && confidence >= 0.5) ||
-      evidenceCount >= 1
-    ) {
+    if (hasSourceEvidence) {
       return "emerging";
     }
 
@@ -1057,17 +1202,17 @@ drug: true,
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: onMechanisticPath
-            ? "#d6ff4b"
+            ? "#5eead4"
             : highlighted
-              ? "#67e8f9"
+              ? "#7dd3fc"
               : "#64748b",
         },
 
         style: {
           stroke: onMechanisticPath
-            ? "#d6ff4b"
+            ? "#5eead4"
             : highlighted
-              ? "#67e8f9"
+              ? "#7dd3fc"
               : "#64748b",
           strokeWidth: onMechanisticPath
             ? 4.4
@@ -1084,15 +1229,15 @@ drug: true,
             : 1,
           cursor: "pointer",
           filter: onMechanisticPath
-            ? "drop-shadow(0 0 7px rgba(214,255,75,.55))"
+            ? "drop-shadow(0 0 7px rgba(94,234,212,.50))"
             : undefined,
         },
 
         labelStyle: {
           fill: onMechanisticPath
-            ? "#eaff9f"
+            ? "#ccfbf1"
             : highlighted
-              ? "#a5f3fc"
+              ? "#cffafe"
               : "#94a3b8",
           fontSize:
             onMechanisticPath || isSelected
@@ -1102,7 +1247,7 @@ drug: true,
         },
 
         labelBgStyle: {
-          fill: "#07111f",
+          fill: "#081722",
           fillOpacity: shouldDim
             ? 0.12
             : 0.94,
@@ -1390,7 +1535,7 @@ drug: true,
     setCinematicFocus(true);
 
     const width =
-      node.measured?.width ?? 244;
+      node.measured?.width ?? 292;
     const height =
       node.measured?.height ?? 170;
 
@@ -1515,9 +1660,9 @@ drug: true,
     setActiveMechanisticPath(null);
 
     await flowInstance?.fitView({
-      padding: 0.22,
-      minZoom: 0.38,
-      maxZoom: 1.12,
+      padding: 0.12,
+      minZoom: 0.5,
+      maxZoom: 1.22,
       duration: 700,
     });
   }
@@ -1536,10 +1681,10 @@ drug: true,
     setHoveredId(null);
 
     const width =
-      targetNode.measured?.width ?? 220;
+      targetNode.measured?.width ?? 292;
 
     const height =
-      targetNode.measured?.height ?? 80;
+      targetNode.measured?.height ?? 230;
 
     await flowInstance.setCenter(
       targetNode.position.x + width / 2,
@@ -1747,8 +1892,7 @@ drug: true,
           `${term.label} is a standardized class from ${term.ontologyLabel} (${term.id}).`,
         aliases: [],
         confidence: 1,
-        evidenceQuote:
-          `Imported from ${term.ontologyLabel} (${term.id}).`,
+        evidenceQuote: "",
       },
     };
 
@@ -1757,28 +1901,11 @@ drug: true,
       newNode,
     ]);
 
-    if (anchorNode) {
-      setEdges((current) => [
-        ...current,
-        {
-          id: `${anchorNode.id}-${nodeId}-ontology`,
-          source: anchorNode.id,
-          target: nodeId,
-          label: "related-cell-type",
-          type: "biological",
-          data: {
-            relationType:
-              "associated_with",
-            description:
-              "Cell Ontology-derived relationship added by the user.",
-            confidence: 1,
-            evidenceQuote: "",
-            directionality:
-              "undirected",
-          },
-        },
-      ]);
-    }
+    /*
+      Importing an ontology class establishes the node identity only.
+      It must not create a biological relationship to the currently
+      selected entity unless that relationship is supported separately.
+    */
 
     setSelectedId(nodeId);
     setSelectedEdgeId(null);
@@ -1883,9 +2010,9 @@ drug: true,
     setCinematicFocus(false);
 
     await flowInstance?.fitView({
-      padding: 0.22,
-      minZoom: 0.38,
-      maxZoom: 1.12,
+      padding: 0.12,
+      minZoom: 0.5,
+      maxZoom: 1.22,
       duration: 850,
     });
   }
@@ -1978,9 +2105,9 @@ drug: true,
     setHoveredId(null);
 
     await flowInstance?.fitView({
-      padding: 0.22,
-      minZoom: 0.38,
-      maxZoom: 1.12,
+      padding: 0.12,
+      minZoom: 0.5,
+      maxZoom: 1.22,
       duration: 950,
     });
   }
@@ -2203,7 +2330,7 @@ drug: true,
       const dataUrl = await toPng(
         graphContainerRef.current,
         {
-          backgroundColor: "#050816",
+          backgroundColor: "#081722",
           cacheBust: true,
           pixelRatio: 2,
           filter: (element) => {
@@ -2298,6 +2425,14 @@ drug: true,
           "directed",
         evidenceCount:
           edge.data?.evidenceCount ?? 0,
+        literatureQuery:
+          edge.data?.literatureQuery ?? "",
+        paperAssessments:
+          edge.data?.paperAssessments ?? [],
+        evidenceSummary:
+          edge.data?.evidenceSummary ?? null,
+        evidenceAnalyzedAt:
+          edge.data?.evidenceAnalyzedAt ?? null,
       })),
       evidence: {
         selectedEntity:
@@ -2617,9 +2752,9 @@ ${edgeXml}
     );
 
     await flowInstance?.fitView({
-      padding: 0.18,
-      minZoom: 0.35,
-      maxZoom: 1.08,
+      padding: 0.14,
+      minZoom: 0.44,
+      maxZoom: 1.14,
       duration: 900,
     });
 
@@ -2630,6 +2765,7 @@ ${edgeXml}
     pubMedPapers.length,
     pubMedLoading,
     Boolean(pubMedError),
+    selectedEdge?.data?.evidenceSummary,
   );
 
 
@@ -2737,15 +2873,19 @@ ${edgeXml}
       </AnimatePresence>
 
       <main
-        className={`relative h-[100dvh] overflow-hidden bg-[#030610] text-white transition-all duration-1000 ${
+        className={`relative h-[100dvh] overflow-hidden bg-[#07131f] text-[#eaf7f5] transition-all duration-1000 ${
           showWorkspaceReveal
             ? "scale-[1.025] opacity-0 blur-xl"
             : "scale-100 opacity-100 blur-0"
         }`}
       >
-        {/* Global workspace atmosphere */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_-10%,rgba(34,211,238,.11),transparent_36%),radial-gradient(circle_at_90%_45%,rgba(139,92,246,.1),transparent_34%),linear-gradient(180deg,#050914_0%,#02040b_100%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.025] [background-image:linear-gradient(rgba(255,255,255,.38)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.38)_1px,transparent_1px)] [background-size:64px_64px]" />
+        {/* BioLayers scientific atmosphere */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,#07131f_0%,#091b27_42%,#071822_72%,#06111a_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_5%,rgba(45,212,191,.14),transparent_32%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_38%,rgba(56,189,248,.12),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_53%_48%,rgba(94,234,212,.055),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(153,246,228,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.5)_1px,transparent_1px)] [background-size:72px_72px]" />
+        <div className="pointer-events-none absolute left-[15%] right-[15%] top-0 h-px bg-gradient-to-r from-transparent via-teal-300/30 to-transparent" />
 
         <WorkspaceHeader
           demoMode={demoMode}
@@ -2766,7 +2906,7 @@ ${edgeXml}
           className={`relative z-20 grid grid-cols-1 ${
             demoMode
               ? "h-[100dvh] lg:grid-cols-1"
-              : "h-[calc(100dvh-72px)] lg:grid-cols-[278px_minmax(0,1fr)_332px]"
+              : "h-[calc(100dvh-72px)] lg:grid-cols-[176px_minmax(0,1fr)_232px] xl:grid-cols-[184px_minmax(0,1fr)_242px] 2xl:grid-cols-[192px_minmax(0,1fr)_252px]"
           }`}
         >
           <ProjectSidebar
@@ -2805,72 +2945,112 @@ ${edgeXml}
                   100,
               });
             }}
-            className="relative min-h-0 overflow-hidden bg-[#050816]"
+            className="relative min-h-0 min-w-0 overflow-hidden bg-[#081722]"
           >
             <LivingWorkspaceAtmosphere
               view={workspaceView}
             />
             <motion.div
-              animate={{
-                left: `${cursorPosition.x}%`,
-                top: `${cursorPosition.y}%`,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 90,
-                damping: 24,
-                mass: 0.55,
-              }}
-              className="pointer-events-none absolute z-[2] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(103,232,249,.11),rgba(139,92,246,.055)_35%,transparent_68%)] blur-[12px]"
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      left: `${cursorPosition.x}%`,
+                      top: `${cursorPosition.y}%`,
+                    }
+              }
+              style={
+                reduceMotion
+                  ? {
+                      left: `${cursorPosition.x}%`,
+                      top: `${cursorPosition.y}%`,
+                    }
+                  : undefined
+              }
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      type: "spring",
+                      stiffness: 90,
+                      damping: 24,
+                      mass: 0.55,
+                    }
+              }
+              className="pointer-events-none absolute z-[2] h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(94,234,212,.10),rgba(56,189,248,.045)_38%,transparent_70%)] blur-[18px]"
             />
-            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_42%,rgba(34,211,238,.07),transparent_30%),radial-gradient(circle_at_82%_15%,rgba(139,92,246,.065),transparent_28%),radial-gradient(circle_at_15%_85%,rgba(236,72,153,.04),transparent_28%)]" />
+            {/* Scientific depth */}
+            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_45%,rgba(45,212,191,.07),transparent_31%),radial-gradient(circle_at_90%_12%,rgba(56,189,248,.065),transparent_28%),radial-gradient(circle_at_8%_90%,rgba(20,184,166,.05),transparent_26%)]" />
 
-            <div className="pointer-events-none absolute inset-0 z-[1] opacity-35 [background-image:radial-gradient(circle,rgba(103,232,249,.42)_1px,transparent_1.5px),radial-gradient(circle,rgba(196,181,253,.28)_1px,transparent_1.5px)] [background-position:0_0,22px_18px] [background-size:54px_54px,72px_72px]" />
+            {/* Molecular dot field */}
+            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.18] [background-image:radial-gradient(circle,rgba(153,246,228,.55)_1px,transparent_1.4px)] [background-size:48px_48px]" />
+
+            {/* Fine grid */}
+            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.035] [background-image:linear-gradient(rgba(153,246,228,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.6)_1px,transparent_1px)] [background-size:96px_96px]" />
+
+            {/* Canvas vignette */}
+            <div className="pointer-events-none absolute inset-0 z-[2] shadow-[inset_0_0_120px_rgba(2,12,18,.55)]" />
 
             <motion.div
-              animate={{
-                backgroundPosition: [
-                  "0px 0px",
-                  "96px 54px",
-                ],
-              }}
-              transition={{
-                duration: 22,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      backgroundPosition: [
+                        "0px 0px",
+                        "96px 54px",
+                      ],
+                    }
+              }
+              transition={
+                reduceMotion
+                  ? undefined
+                  : {
+                      duration: 22,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }
+              }
               className="pointer-events-none absolute inset-0 z-[1] opacity-[0.09] [background-image:linear-gradient(115deg,transparent_42%,rgba(103,232,249,.4)_50%,transparent_58%)] [background-size:220px_220px]"
             />
 
             <motion.div
-              animate={{
-                x: [-30, 45, -30],
-                y: [-20, 24, -20],
-                opacity: [0.05, 0.11, 0.05],
-              }}
-              transition={{
-                duration: 12,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="pointer-events-none absolute left-[20%] top-[18%] z-[1] h-80 w-80 rounded-full bg-cyan-400/20 blur-[130px]"
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      x: [-30, 45, -30],
+                      y: [-20, 24, -20],
+                      opacity: [0.05, 0.11, 0.05],
+                    }
+              }
+              transition={
+                reduceMotion
+                  ? undefined
+                  : {
+                      duration: 12,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }
+              }
+              className="pointer-events-none absolute left-[20%] top-[18%] z-[1] h-80 w-80 rounded-full bg-teal-300/15 blur-[130px]"
             />
 
             {workspaceView === "graph" && !demoMode && (
               <div
                 data-export-ignore="true"
-                className="absolute left-5 top-24 z-[42] flex flex-col items-start gap-2"
+                className="absolute left-4 top-20 z-[42] flex flex-col items-start gap-2"
               >
-                <div className="flex flex-col gap-1 rounded-[16px] border border-white/[0.07] bg-[#071018]/88 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,.34)] backdrop-blur-2xl">
+                <div className="flex flex-col gap-1 rounded-[16px] border border-teal-100/[0.075] bg-[#0a1b26]/90 p-1.5 shadow-[0_18px_55px_rgba(1,8,15,.34)] backdrop-blur-2xl">
                   <button
                     type="button"
                     onClick={() =>
                       setConnectBiologyOpen(true)
                     }
-                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#d6ff4b] transition hover:border-[#d6ff4b]/20 hover:bg-[#d6ff4b]/[0.055]"
+                    className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-teal-100 transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.045]"
                     title="Trace a mechanistic path between two entities"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#d6ff4b] shadow-[0_0_9px_rgba(214,255,75,.7)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.65)]" />
                     Connect
                   </button>
 
@@ -2879,10 +3059,10 @@ ${edgeXml}
                     onClick={() =>
                       setEvidenceLensOpen(true)
                     }
-                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#ff9c73] transition hover:border-[#ff8b5e]/20 hover:bg-[#ff8b5e]/[0.055]"
+                    className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-sky-100 transition duration-300 hover:border-sky-200/[0.12] hover:bg-sky-200/[0.04]"
                     title="Filter the graph by evidence strength"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff8b5e] shadow-[0_0_9px_rgba(255,139,94,.65)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_9px_rgba(125,211,252,.6)]" />
                     Evidence
                   </button>
 
@@ -2891,10 +3071,10 @@ ${edgeXml}
                     onClick={() =>
                       setHypothesisBuilderOpen(true)
                     }
-                    className="group relative flex w-[132px] items-center gap-2 overflow-hidden rounded-[11px] border border-transparent px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.11em] text-[#e8d9b5] transition hover:border-[#e8d9b5]/20 hover:bg-[#e8d9b5]/[0.055]"
+                    className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-cyan-100 transition duration-300 hover:border-cyan-200/[0.12] hover:bg-cyan-200/[0.04]"
                     title="Turn graph context into a testable hypothesis"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#e8d9b5]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_9px_rgba(103,232,249,.55)]" />
                     Hypothesis
                   </button>
 
@@ -2904,7 +3084,7 @@ ${edgeXml}
                       onClick={() => {
                         void clearMechanisticPath();
                       }}
-                      className="w-[132px] rounded-[10px] px-3 py-2 text-left font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-slate-500 transition hover:bg-white/[0.04] hover:text-white"
+                      className="w-[154px] rounded-[10px] px-3 py-2 text-left font-mono text-[13px] font-bold uppercase tracking-[0.1em] text-slate-200 transition hover:bg-white/[0.04] hover:text-white"
                     >
                       Clear path
                     </button>
@@ -2913,15 +3093,15 @@ ${edgeXml}
 
                 {(evidenceLensMode !== "all" ||
                   activeMechanisticPath) && (
-                  <div className="pointer-events-none flex max-w-[180px] flex-col gap-1 rounded-[10px] border border-white/[0.055] bg-[#050b10]/78 px-3 py-2 backdrop-blur-xl">
+                  <div className="pointer-events-none flex max-w-[220px] flex-col gap-1 rounded-[10px] border border-white/[0.055] bg-[#091821]/88 px-3 py-2 backdrop-blur-xl">
                     {activeMechanisticPath && (
-                      <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-[#9bad74]">
+                      <span className="font-mono text-[13px] font-bold uppercase tracking-[0.12em] text-teal-300">
                         Path · {activeMechanisticPath.nodes.length} entities
                       </span>
                     )}
 
                     {evidenceLensMode !== "all" && (
-                      <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-[#c88369]">
+                      <span className="font-mono text-[13px] font-bold uppercase tracking-[0.12em] text-sky-300">
                         Lens · {evidenceLensMode}
                       </span>
                     )}
@@ -2972,34 +3152,42 @@ ${edgeXml}
               {workspaceView !== "graph" && (
                 <motion.div
                   key={workspaceView}
-                  initial={{
-                    opacity: 0,
-                    y: 18,
-                    filter: "blur(10px)",
-                  }}
+                  initial={
+                    reduceMotion
+                      ? false
+                      : {
+                          opacity: 0,
+                          y: 18,
+                          filter: "blur(10px)",
+                        }
+                  }
                   animate={{
                     opacity: 1,
                     y: 0,
                     filter: "blur(0px)",
                   }}
-                  exit={{
-                    opacity: 0,
-                    y: -12,
-                    filter: "blur(10px)",
-                  }}
+                  exit={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          opacity: 0,
+                          y: -12,
+                          filter: "blur(10px)",
+                        }
+                  }
                   transition={{
-                    duration: 0.4,
+                    duration: reduceMotion ? 0 : 0.4,
                     ease: [0.16, 1, 0.3, 1],
                   }}
-                  className="absolute inset-0 z-[25] overflow-y-auto bg-[linear-gradient(145deg,rgba(2,6,23,.95),rgba(6,8,24,.92),rgba(3,7,18,.96))] p-5 backdrop-blur-3xl sm:p-8"
+                  className="absolute inset-0 z-[25] overflow-y-auto bg-[linear-gradient(145deg,rgba(7,19,31,.97),rgba(9,27,39,.95),rgba(6,17,26,.98))] p-5 backdrop-blur-3xl sm:p-7 xl:p-9"
                 >
                   <LivingWorkspaceAtmosphere
                     view={workspaceView}
                   />
-                  <div className="relative z-10 mx-auto max-w-6xl pb-24">
-                    <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="relative z-10 mx-auto w-full max-w-[1480px] pb-24">
+                    <div className="flex flex-col gap-4 border-b border-teal-100/[0.065] pb-6 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">
                           {workspaceView === "evidence"
                             ? "Evidence explorer"
                             : workspaceView === "citations"
@@ -3011,11 +3199,11 @@ ${edgeXml}
                                   : "PubMed literature"}
                         </p>
 
-                        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-white sm:text-5xl">
+                        <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-[#f0fbfa] sm:text-[42px]">
                           {selectedEntity.label}
                         </h2>
 
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">
+                        <p className="mt-3 max-w-2xl text-[13px] leading-6 text-slate-400">
                           {workspaceView === "evidence"
                             ? "Inspect mechanistic connections, evidence coverage and the scientific context surrounding the selected biological entity."
                             : workspaceView === "citations"
@@ -3033,7 +3221,7 @@ ${edgeXml}
                         onClick={() =>
                           setWorkspaceView("graph")
                         }
-                        className="self-start rounded-[14px] border border-white/10 bg-white/[0.035] px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.07] hover:text-white sm:self-auto"
+                        className="self-start rounded-[12px] border border-teal-100/[0.07] bg-white/[0.018] px-4 py-2.5 text-[11px] font-semibold text-slate-300 transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.035] hover:text-teal-50 sm:self-auto"
                       >
                         Back to graph
                       </button>
@@ -3091,13 +3279,13 @@ ${edgeXml}
                     ) : workspaceView ===
                       "citations" ? (
                       <section className="mt-7">
-                        <div className="rounded-[30px] border border-white/[0.08] bg-[radial-gradient(circle_at_50%_30%,rgba(34,211,238,.09),transparent_36%),rgba(255,255,255,.018)] p-5 sm:p-8">
+                        <div className="rounded-[24px] border border-teal-100/[0.07] bg-[radial-gradient(circle_at_50%_26%,rgba(94,234,212,.055),transparent_34%),rgba(10,27,38,.44)] p-5 shadow-[0_18px_52px_rgba(1,8,15,.12)] sm:p-7">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">
                                 Entity-to-paper map
                               </p>
-                              <h3 className="mt-2 text-xl font-semibold text-white">
+                              <h3 className="mt-2 text-[19px] font-semibold text-[#f0fbfa]">
                                 Literature connected to {selectedEntity.label}
                               </h3>
                             </div>
@@ -3108,19 +3296,19 @@ ${edgeXml}
                           </div>
 
                           <div className="relative mt-8">
-                            <div className="mx-auto max-w-md rounded-[26px] border border-cyan-300/25 bg-[linear-gradient(145deg,rgba(34,211,238,.14),rgba(5,8,20,.96))] p-5 text-center shadow-[0_0_65px_rgba(34,211,238,.14)]">
-                              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+                            <div className="mx-auto max-w-md rounded-[20px] border border-teal-200/[0.12] bg-[linear-gradient(145deg,rgba(94,234,212,.07),rgba(8,23,34,.92))] p-5 text-center shadow-[0_18px_48px_rgba(1,8,15,.22)]">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-teal-300">
                                 {selectedEntity.type}
                               </p>
-                              <h4 className="mt-3 text-2xl font-semibold text-white">
+                              <h4 className="mt-3 text-[22px] font-semibold text-[#f0fbfa]">
                                 {selectedEntity.label}
                               </h4>
-                              <p className="mx-auto mt-3 max-w-sm text-xs leading-6 text-slate-400">
+                              <p className="mx-auto mt-3 max-w-sm text-[11px] leading-6 text-slate-400">
                                 {selectedEntity.description}
                               </p>
                             </div>
 
-                            <div className="mx-auto h-10 w-px bg-gradient-to-b from-cyan-300/65 to-violet-300/20" />
+                            <div className="mx-auto h-10 w-px bg-gradient-to-b from-teal-300/55 to-sky-300/15" />
 
                             {pubMedLoading ? (
                               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -3128,18 +3316,20 @@ ${edgeXml}
                                   (item) => (
                                     <div
                                       key={item}
-                                      className="animate-pulse rounded-[24px] border border-white/[0.07] bg-white/[0.025] p-5"
+                                      className={`rounded-[24px] border border-teal-100/[0.07] bg-teal-100/[0.025] p-5 ${
+                                          reduceMotion ? "" : "animate-pulse"
+                                        }`}
                                     >
-                                      <div className="h-2.5 w-1/3 rounded-full bg-white/[0.08]" />
-                                      <div className="mt-4 h-3 w-full rounded-full bg-white/[0.06]" />
-                                      <div className="mt-2 h-3 w-4/5 rounded-full bg-white/[0.06]" />
+                                      <div className="h-2.5 w-1/3 rounded-full bg-teal-100/[0.08]" />
+                                      <div className="mt-4 h-3 w-full rounded-full bg-teal-100/[0.06]" />
+                                      <div className="mt-2 h-3 w-4/5 rounded-full bg-teal-100/[0.06]" />
                                     </div>
                                   ),
                                 )}
                               </div>
                             ) : pubMedPapers.length === 0 ? (
-                              <div className="rounded-[24px] border border-dashed border-white/[0.1] bg-white/[0.02] p-8 text-center">
-                                <p className="text-sm text-slate-500">
+                              <div className="rounded-[24px] border border-dashed border-teal-100/[0.1] bg-teal-100/[0.02] p-8 text-center">
+                                <p className="text-sm text-slate-200">
                                   No PubMed records are currently connected to this entity.
                                 </p>
                               </div>
@@ -3150,36 +3340,45 @@ ${edgeXml}
                                     <motion.button
                                       key={`citation-${paper.pmid}`}
                                       type="button"
-                                      initial={{
-                                        opacity: 0,
-                                        y: 18,
-                                      }}
+                                      initial={
+                                        reduceMotion
+                                          ? false
+                                          : {
+                                              opacity: 0,
+                                              y: 18,
+                                            }
+                                      }
                                       animate={{
                                         opacity: 1,
                                         y: 0,
                                       }}
                                       transition={{
-                                        delay:
-                                          index * 0.06,
-                                        duration: 0.4,
+                                        delay: reduceMotion
+                                          ? 0
+                                          : index * 0.06,
+                                        duration: reduceMotion ? 0 : 0.4,
                                       }}
-                                      whileHover={{
-                                        y: -5,
-                                        scale: 1.01,
-                                      }}
+                                      whileHover={
+                                        reduceMotion
+                                          ? undefined
+                                          : {
+                                              y: -5,
+                                              scale: 1.01,
+                                            }
+                                      }
                                       onClick={() =>
                                         openPaperInspector(
                                           paper,
                                         )
                                       }
-                                      className="group relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.025] p-5 text-left shadow-[0_18px_55px_rgba(0,0,0,.2)] transition hover:border-violet-300/25 hover:bg-violet-300/[0.04]"
+                                      className="group relative overflow-hidden rounded-[18px] border border-teal-100/[0.055] bg-[#0a1b26]/46 p-4 text-left shadow-[0_14px_40px_rgba(1,8,15,.14)] transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.025]"
                                     >
-                                      <div className="pointer-events-none absolute left-1/2 top-0 h-5 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-b from-violet-300/10 to-violet-300/65" />
+                                      <div className="pointer-events-none absolute left-1/2 top-0 h-5 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-b from-teal-300/08 to-teal-300/45" />
                                       <div className="flex items-center justify-between gap-3">
-                                        <span className="rounded-full border border-violet-300/15 bg-violet-300/[0.06] px-2.5 py-1 font-mono text-[8px] text-violet-200">
+                                        <span className="rounded-full border border-teal-200/[0.09] bg-teal-200/[0.03] px-2.5 py-1 font-mono text-[10px] text-teal-200">
                                           PMID {paper.pmid}
                                         </span>
-                                        <span className="text-[9px] font-semibold text-slate-600 transition group-hover:text-cyan-300">
+                                        <span className="text-[10px] font-semibold text-slate-500 transition group-hover:text-teal-300">
                                           Inspect ↗
                                         </span>
                                       </div>
@@ -3188,13 +3387,13 @@ ${edgeXml}
                                         {paper.title}
                                       </h4>
 
-                                      <p className="mt-4 text-[10px] leading-5 text-slate-500">
+                                      <p className="mt-4 text-[11px] leading-5 text-slate-500">
                                         {paper.journal} · {paper.year}
                                       </p>
 
-                                      <div className="mt-4 h-px bg-gradient-to-r from-transparent via-violet-300/20 to-transparent" />
+                                      <div className="mt-4 h-px bg-gradient-to-r from-transparent via-teal-300/15 to-transparent" />
 
-                                      <p className="mt-3 text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                      <p className="mt-3 text-[9px] uppercase tracking-[0.13em] text-slate-500">
                                         Connected to {selectedEntity.label}
                                       </p>
                                     </motion.button>
@@ -3253,7 +3452,12 @@ ${edgeXml}
       : selectedNode?.data.label ??
         null
   }
-sourceText={sourceText}
+
+  sourceText={sourceText}
+
+  onEvidenceAnalyzed={
+    handleEvidenceAnalyzed
+  }
 />                    )}
                   </div>
                 </motion.div>
@@ -3279,16 +3483,10 @@ sourceText={sourceText}
             <AnimatePresence>
               {workspaceView === "graph" && cinematicFocus && (
                 <motion.div
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                  className="pointer-events-none absolute inset-0 z-[8] bg-[radial-gradient(circle_at_50%_50%,transparent_24%,rgba(2,6,23,.22)_52%,rgba(2,6,23,.72)_100%)]"
+                  initial={reduceMotion ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={reduceMotion ? undefined : { opacity: 0 }}
+                  className="pointer-events-none absolute inset-0 z-[8] bg-[radial-gradient(circle_at_50%_50%,transparent_24%,rgba(2,11,18,.18)_52%,rgba(2,11,18,.72)_100%)]"
                 />
               )}
             </AnimatePresence>
@@ -3434,7 +3632,7 @@ function EvidenceBadge({
 }) {
   return (
     <span
-      className={`shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] ${profile.badgeClass}`}
+      className={`shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-bold uppercase tracking-[0.13em] ${profile.badgeClass}`}
     >
       {profile.level}
     </span>

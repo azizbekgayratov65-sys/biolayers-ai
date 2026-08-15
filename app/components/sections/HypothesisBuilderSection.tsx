@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Beaker,
@@ -38,13 +38,19 @@ const hypothesisSteps = [
 ];
 
 export default function HypothesisBuilderSection() {
+  const reduceMotion = Boolean(useReducedMotion());
+
   return (
     <section
   id="hypothesis-builder"
+  aria-labelledby="hypothesis-builder-heading"
   className="
     relative
     isolate
     overflow-hidden
+    border-t
+    border-teal-100/[0.04]
+    bg-[#06111a]
     px-6
     py-28
     md:px-10
@@ -67,7 +73,7 @@ export default function HypothesisBuilderSection() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-fuchsia-500/[0.04]
+          bg-teal-400/[0.032]
           blur-[210px]
         "
       />
@@ -82,7 +88,7 @@ export default function HypothesisBuilderSection() {
           h-[500px]
           w-[500px]
           rounded-full
-          bg-cyan-500/[0.04]
+          bg-sky-400/[0.03]
           blur-[170px]
         "
       />
@@ -91,7 +97,7 @@ export default function HypothesisBuilderSection() {
         {/* HEADER */}
 
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{
@@ -103,17 +109,18 @@ export default function HypothesisBuilderSection() {
           <div
             className="
               mb-6
-              text-sm
-              font-medium
+              text-[10px]
+              font-bold
               uppercase
-              tracking-[0.3em]
-              text-fuchsia-300/70
+              tracking-[0.22em]
+              text-teal-200/75
             "
           >
             Hypothesis Builder
           </div>
 
           <h2
+            id="hypothesis-builder-heading"
             className="
               text-4xl
               font-semibold
@@ -130,9 +137,9 @@ export default function HypothesisBuilderSection() {
               className="
                 ml-3
                 bg-gradient-to-r
-                from-cyan-300
-                via-purple-300
-                to-fuchsia-300
+                from-teal-200
+                via-cyan-300
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
@@ -147,7 +154,7 @@ export default function HypothesisBuilderSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/50
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
@@ -172,7 +179,7 @@ export default function HypothesisBuilderSection() {
           {/* LEFT */}
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
             transition={{
@@ -180,12 +187,12 @@ export default function HypothesisBuilderSection() {
               ease: [0.22, 1, 0.36, 1],
             }}
             className="
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
+              border-teal-100/[0.085]
+              bg-[#0a1b26]/48
               p-6
-              backdrop-blur-xl
+              backdrop-blur-2xl
               md:p-8
             "
           >
@@ -198,7 +205,7 @@ export default function HypothesisBuilderSection() {
                 font-semibold
                 uppercase
                 tracking-[0.18em]
-                text-white/26
+                text-slate-500/90
               "
             >
               <Lightbulb className="h-4 w-4" />
@@ -212,7 +219,7 @@ export default function HypothesisBuilderSection() {
                 return (
                   <motion.div
                     key={step.title}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{
@@ -220,10 +227,10 @@ export default function HypothesisBuilderSection() {
                       delay: index * 0.08,
                     }}
                     className="
-                      rounded-[20px]
+                      rounded-[18px]
                       border
-                      border-white/[0.07]
-                      bg-white/[0.02]
+                      border-teal-100/[0.065]
+                      bg-teal-100/[0.02]
                       p-5
                     "
                   >
@@ -237,11 +244,11 @@ export default function HypothesisBuilderSection() {
                           justify-center
                           rounded-xl
                           border
-                          border-white/[0.07]
-                          bg-white/[0.025]
+                          border-teal-100/[0.065]
+                          bg-teal-100/[0.025]
                         "
                       >
-                        <Icon className="h-4 w-4 text-white/45" />
+                        <Icon className="h-4 w-4 text-slate-400/90" />
                       </div>
 
                       <div
@@ -250,7 +257,7 @@ export default function HypothesisBuilderSection() {
                           font-semibold
                           uppercase
                           tracking-[0.12em]
-                          text-white/24
+                          text-slate-500/80
                         "
                       >
                         Step {index + 1}
@@ -262,7 +269,7 @@ export default function HypothesisBuilderSection() {
                         mt-5
                         text-lg
                         font-medium
-                        text-white/72
+                        text-teal-50/82
                       "
                     >
                       {step.title}
@@ -273,7 +280,7 @@ export default function HypothesisBuilderSection() {
                         mt-2
                         text-sm
                         leading-6
-                        text-white/36
+                        text-slate-400/90
                       "
                     >
                       {step.text}
@@ -288,7 +295,7 @@ export default function HypothesisBuilderSection() {
             <div
               className="
                 mt-6
-                rounded-[22px]
+                rounded-[20px]
                 border
                 border-amber-300/10
                 bg-amber-300/[0.025]
@@ -320,15 +327,15 @@ export default function HypothesisBuilderSection() {
                   gap-3
                   text-sm
                   font-medium
-                  text-white/65
+                  text-teal-50/76
                 "
               >
                 <span
                   className="
                     rounded-xl
                     border
-                    border-white/[0.07]
-                    bg-white/[0.025]
+                    border-teal-100/[0.065]
+                    bg-teal-100/[0.025]
                     px-4
                     py-2
                   "
@@ -336,7 +343,7 @@ export default function HypothesisBuilderSection() {
                   SMAD3 activation
                 </span>
 
-                <ArrowRight className="h-4 w-4 text-white/20" />
+                <ArrowRight className="h-4 w-4 text-slate-500/75" />
 
                 <span
                   className="
@@ -353,14 +360,14 @@ export default function HypothesisBuilderSection() {
                   ?
                 </span>
 
-                <ArrowRight className="h-4 w-4 text-white/20" />
+                <ArrowRight className="h-4 w-4 text-slate-500/75" />
 
                 <span
                   className="
                     rounded-xl
                     border
-                    border-white/[0.07]
-                    bg-white/[0.025]
+                    border-teal-100/[0.065]
+                    bg-teal-100/[0.025]
                     px-4
                     py-2
                   "
@@ -375,7 +382,7 @@ export default function HypothesisBuilderSection() {
                   max-w-3xl
                   text-xs
                   leading-5
-                  text-white/32
+                  text-slate-400/82
                 "
               >
                 The map contains evidence on both sides of the chain, but
@@ -388,7 +395,7 @@ export default function HypothesisBuilderSection() {
           {/* RIGHT — GENERATED STRUCTURE */}
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.15 }}
             transition={{
@@ -398,11 +405,11 @@ export default function HypothesisBuilderSection() {
             }}
             className="
               overflow-hidden
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-white/[0.022]
-              backdrop-blur-xl
+              border-teal-100/[0.085]
+              bg-[#0a1b26]/48
+              backdrop-blur-2xl
             "
           >
             <div
@@ -411,7 +418,7 @@ export default function HypothesisBuilderSection() {
                 items-center
                 justify-between
                 border-b
-                border-white/[0.07]
+                border-teal-100/[0.065]
                 px-6
                 py-5
               "
@@ -425,7 +432,7 @@ export default function HypothesisBuilderSection() {
                   font-semibold
                   uppercase
                   tracking-[0.18em]
-                  text-white/26
+                  text-slate-500/90
                 "
               >
                 <Sparkles className="h-4 w-4" />
@@ -436,15 +443,15 @@ export default function HypothesisBuilderSection() {
                 className="
                   rounded-full
                   border
-                  border-purple-300/10
-                  bg-purple-300/[0.04]
+                  border-sky-200/10
+                  bg-sky-200/[0.035]
                   px-3
                   py-1.5
                   text-[9px]
                   font-medium
                   uppercase
                   tracking-[0.12em]
-                  text-purple-200/50
+                  text-sky-100/65
                 "
               >
                 Demo
@@ -455,7 +462,7 @@ export default function HypothesisBuilderSection() {
               <HypothesisBlock
                 icon={Lightbulb}
                 label="Hypothesis"
-                accent="text-cyan-300/55"
+                accent="text-teal-200/70"
               >
                 Increased SMAD3 activity may promote molecular programs that
                 enhance metastatic colonization of bone in a context-dependent
@@ -465,7 +472,7 @@ export default function HypothesisBuilderSection() {
               <HypothesisBlock
                 icon={GitBranch}
                 label="Mechanistic rationale"
-                accent="text-purple-300/55"
+                accent="text-sky-200/70"
               >
                 TGF-β/SMAD signaling can alter transcriptional states linked to
                 invasion, stromal interaction, and metastatic progression.
@@ -484,7 +491,7 @@ export default function HypothesisBuilderSection() {
               <HypothesisBlock
                 icon={FlaskConical}
                 label="Possible validation"
-                accent="text-fuchsia-300/55"
+                accent="text-cyan-200/70"
               >
                 Compare bone-colonization phenotypes after controlled SMAD3
                 perturbation in an appropriate metastatic cancer model.
@@ -521,7 +528,7 @@ export default function HypothesisBuilderSection() {
                     mt-2
                     text-xs
                     leading-5
-                    text-white/35
+                    text-slate-400/85
                   "
                 >
                   Hypotheses should remain clearly separated from established
@@ -530,8 +537,30 @@ export default function HypothesisBuilderSection() {
                 </p>
               </div>
 
-              <button
-                type="button"
+              <div
+                className="
+                  mt-5
+                  grid
+                  grid-cols-3
+                  gap-2
+                "
+              >
+                <OutputMetric
+                  value="1"
+                  label="Gap"
+                />
+                <OutputMetric
+                  value="1"
+                  label="Hypothesis"
+                />
+                <OutputMetric
+                  value="1"
+                  label="Validation path"
+                />
+              </div>
+
+              <a
+                href="/explore"
                 className="
                   group
                   mt-6
@@ -542,17 +571,17 @@ export default function HypothesisBuilderSection() {
                   gap-2
                   rounded-[16px]
                   border
-                  border-white/[0.1]
-                  bg-white/[0.045]
+                  border-teal-100/[0.10]
+                  bg-teal-100/[0.045]
                   px-5
                   py-3.5
                   text-sm
                   font-medium
-                  text-white/72
+                  text-teal-50/82
                   transition
                   duration-300
-                  hover:border-fuchsia-300/20
-                  hover:bg-fuchsia-300/[0.055]
+                  hover:border-teal-200/20
+                  hover:bg-teal-300/[0.06]
                   hover:text-white
                 "
               >
@@ -567,12 +596,52 @@ export default function HypothesisBuilderSection() {
                     group-hover:translate-x-1
                   "
                 />
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>
       </div>
     </section>
+  );
+}
+
+
+function OutputMetric({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
+  return (
+    <div
+      className="
+        rounded-[14px]
+        border
+        border-teal-100/[0.055]
+        bg-teal-100/[0.02]
+        px-3
+        py-3
+        text-center
+      "
+    >
+      <div className="text-sm font-semibold text-teal-50/85">
+        {value}
+      </div>
+
+      <div
+        className="
+          mt-1
+          text-[8px]
+          font-semibold
+          uppercase
+          tracking-[0.11em]
+          text-slate-500/80
+        "
+      >
+        {label}
+      </div>
+    </div>
   );
 }
 
@@ -591,7 +660,7 @@ function HypothesisBlock({
     <div
       className="
         border-b
-        border-white/[0.07]
+        border-teal-100/[0.065]
         py-5
         first:pt-0
       "
@@ -617,7 +686,7 @@ function HypothesisBlock({
           mt-3
           text-sm
           leading-6
-          text-white/43
+          text-slate-400/90
         "
       >
         {children}

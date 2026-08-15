@@ -1,6 +1,13 @@
 "use client";
 
-type LayoutDirection = "TB" | "LR";
+import {
+  motion,
+  useReducedMotion,
+} from "framer-motion";
+
+type LayoutDirection =
+  | "TB"
+  | "LR";
 
 type GraphWorkspaceControlsProps = {
   demoMode: boolean;
@@ -8,12 +15,18 @@ type GraphWorkspaceControlsProps = {
   layoutDirection: LayoutDirection;
   toggleDemoMode: () => Promise<void>;
   startNarrative: () => void;
-  changeLayout: (direction: LayoutDirection) => Promise<void>;
+  changeLayout: (
+    direction: LayoutDirection,
+  ) => Promise<void>;
   resetView: () => Promise<void>;
   searchQuery: string;
-  setSearchQuery: (value: string) => void;
+  setSearchQuery: (
+    value: string,
+  ) => void;
   searchError: string;
-  setSearchError: (value: string) => void;
+  setSearchError: (
+    value: string,
+  ) => void;
   exportError: string;
   findEntity: () => Promise<void>;
 };
@@ -33,124 +46,469 @@ export default function GraphWorkspaceControls({
   exportError,
   findEntity,
 }: GraphWorkspaceControlsProps) {
+  const reduceMotion =
+    Boolean(useReducedMotion());
+
+  const errorMessage =
+    searchError || exportError;
+
   return (
     <>
-      {/* Graph identity — top left */}
+      {/* ================================================= */}
+      {/* GRAPH STATUS                                     */}
+      {/* ================================================= */}
+
       <div
         data-export-ignore="true"
-        className="absolute left-3 top-3 z-20 flex max-w-[calc(100%-24px)] items-center gap-2 sm:left-5 sm:top-5"
+        className="
+          absolute
+          left-4
+          top-4
+          z-20
+          hidden
+          sm:block
+        "
       >
-        <div className="rounded-[16px] border border-white/[0.09] bg-[#07101d]/85 px-3.5 py-2.5 shadow-[0_18px_55px_rgba(0,0,0,.32)] backdrop-blur-2xl sm:px-4">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300">
-            Generated knowledge graph
-          </p>
+        <div
+          className="
+            rounded-[16px]
+            border
+            border-teal-100/[0.075]
+            bg-[#0a1b26]/78
+            px-3.5
+            py-2.5
+            shadow-[0_14px_42px_rgba(1,8,15,.24)]
+            backdrop-blur-2xl
+          "
+        >
+          <div className="flex items-center gap-2">
+            <motion.span
+              className="
+                h-1.5
+                w-1.5
+                rounded-full
+                bg-teal-300
+                shadow-[0_0_9px_rgba(94,234,212,.75)]
+              "
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      opacity: [
+                        0.55,
+                        1,
+                        0.55,
+                      ],
+                    }
+              }
+              transition={
+                reduceMotion
+                  ? undefined
+                  : {
+                      duration: 2.6,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }
+              }
+            />
 
-          <p className="mt-1 hidden text-xs text-slate-500 sm:block">
-            Hover to isolate relationships. Click to inspect.
+            <p
+              className="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-[0.18em]
+                text-teal-300
+              "
+            >
+              Knowledge graph
+            </p>
+          </div>
+
+          <p
+            className="
+              mt-1.5
+              text-[11px]
+              text-slate-400
+            "
+          >
+            Hover to isolate · click to inspect
           </p>
         </div>
       </div>
 
-      {/* Graph actions — top right, deliberately leaving the far-right
-          corner free for WorkspaceCanvas' 2D / 3D switch. */}
+      {/* ================================================= */}
+      {/* TOP-RIGHT GRAPH CONTROLS                         */}
+      {/* ================================================= */}
+
       <div
         data-export-ignore="true"
-        className="absolute right-[118px] top-3 z-20 hidden max-w-[calc(100%-360px)] flex-wrap justify-end gap-1.5 xl:flex sm:top-5"
+        className="
+          absolute
+          right-[112px]
+          top-4
+          z-20
+          hidden
+          items-center
+          gap-1.5
+          xl:flex
+        "
       >
         <button
           type="button"
-          onClick={() => void toggleDemoMode()}
-          className={`rounded-[13px] border px-3 py-2 text-[8px] font-bold uppercase tracking-[0.12em] shadow-lg backdrop-blur-2xl transition ${
+          onClick={() =>
+            void toggleDemoMode()
+          }
+          aria-pressed={demoMode}
+          className={`rounded-[12px] border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] shadow-[0_10px_30px_rgba(1,8,15,.18)] backdrop-blur-2xl transition duration-300 ${
             demoMode
-              ? "border-rose-300/20 bg-rose-300/[0.09] text-rose-100"
-              : "border-violet-300/20 bg-[#07101d]/88 text-violet-100 hover:bg-violet-300/[0.08]"
+              ? "border-rose-200/[0.18] bg-rose-200/[0.06] text-rose-100"
+              : "border-sky-200/[0.12] bg-[#0a1b26]/78 text-sky-100 hover:-translate-y-0.5 hover:bg-sky-200/[0.05]"
           }`}
         >
-          {demoMode ? "Exit demo" : "Demo"}
+          {demoMode
+            ? "Exit demo"
+            : "Demo"}
         </button>
 
         <button
           type="button"
           onClick={startNarrative}
-          disabled={narrativeStepCount === 0}
-          className="rounded-[13px] border border-cyan-300/20 bg-[#07101d]/88 px-3 py-2 text-[8px] font-bold uppercase tracking-[0.12em] text-cyan-100 shadow-lg backdrop-blur-2xl transition hover:bg-cyan-300/[0.08] disabled:opacity-35"
+          disabled={
+            narrativeStepCount === 0
+          }
+          title={
+            narrativeStepCount > 0
+              ? "Play the current mechanism as a guided narrative"
+              : "No mechanism narrative is available"
+          }
+          className="
+            rounded-[12px]
+            border
+            border-teal-200/[0.13]
+            bg-[#0a1b26]/78
+            px-3
+            py-2
+            text-[10px]
+            font-bold
+            uppercase
+            tracking-[0.1em]
+            text-teal-100
+            shadow-[0_10px_30px_rgba(1,8,15,.18)]
+            backdrop-blur-2xl
+            transition
+            duration-300
+            hover:-translate-y-0.5
+            hover:bg-teal-200/[0.05]
+            disabled:cursor-not-allowed
+            disabled:opacity-30
+          "
         >
           Mechanism
         </button>
 
-        <div className="hidden rounded-[13px] border border-white/[0.09] bg-[#07101d]/88 p-1 shadow-lg backdrop-blur-2xl 2xl:flex">
-          <button
-            type="button"
-            onClick={() => void changeLayout("TB")}
-            className={`rounded-[9px] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.1em] transition ${
-              layoutDirection === "TB"
-                ? "bg-white/[0.1] text-white"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-          >
-            Vertical
-          </button>
+        <div
+          className="
+            hidden
+            rounded-[12px]
+            border
+            border-teal-100/[0.07]
+            bg-[#0a1b26]/78
+            p-1
+            shadow-[0_10px_30px_rgba(1,8,15,.18)]
+            backdrop-blur-2xl
+            2xl:flex
+          "
+        >
+          {(
+            [
+              [
+                "TB",
+                "Vertical",
+              ],
+              [
+                "LR",
+                "Horizontal",
+              ],
+            ] as const
+          ).map(
+            ([
+              value,
+              label,
+            ]) => {
+              const active =
+                layoutDirection ===
+                value;
 
-          <button
-            type="button"
-            onClick={() => void changeLayout("LR")}
-            className={`rounded-[9px] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.1em] transition ${
-              layoutDirection === "LR"
-                ? "bg-white/[0.1] text-white"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-          >
-            Horizontal
-          </button>
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    void changeLayout(
+                      value,
+                    )
+                  }
+                  className={`relative rounded-[9px] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.08em] transition ${
+                    active
+                      ? "text-teal-50"
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="graph-layout-active"
+                      className="
+                        absolute
+                        inset-0
+                        rounded-[9px]
+                        border
+                        border-teal-200/[0.1]
+                        bg-teal-200/[0.06]
+                      "
+                      transition={
+                        reduceMotion
+                          ? {
+                              duration: 0,
+                            }
+                          : {
+                              type: "spring",
+                              stiffness: 420,
+                              damping: 32,
+                            }
+                      }
+                    />
+                  )}
+
+                  <span className="relative z-10">
+                    {label}
+                  </span>
+                </button>
+              );
+            },
+          )}
         </div>
 
         <button
           type="button"
-          onClick={() => void resetView()}
-          className="rounded-[13px] border border-white/[0.09] bg-[#07101d]/88 px-3 py-2 text-[8px] font-bold uppercase tracking-[0.1em] text-slate-300 shadow-lg backdrop-blur-2xl transition hover:bg-white/[0.08]"
+          onClick={() =>
+            void resetView()
+          }
+          title="Fit the full graph into view"
+          className="
+            rounded-[12px]
+            border
+            border-teal-100/[0.07]
+            bg-[#0a1b26]/78
+            px-3
+            py-2
+            text-[10px]
+            font-bold
+            uppercase
+            tracking-[0.08em]
+            text-slate-300
+            shadow-[0_10px_30px_rgba(1,8,15,.18)]
+            backdrop-blur-2xl
+            transition
+            duration-300
+            hover:-translate-y-0.5
+            hover:bg-teal-100/[0.035]
+            hover:text-teal-50
+          "
         >
           Fit
         </button>
       </div>
 
-      {/* Search occupies the bottom center by itself. */}
+      {/* ================================================= */}
+      {/* SEARCH / FOCUS BAR                               */}
+      {/* ================================================= */}
+
       <div
         data-export-ignore="true"
-        className="absolute bottom-4 left-1/2 z-30 w-[min(72%,520px)] -translate-x-1/2"
+        className="
+          absolute
+          bottom-5
+          left-1/2
+          z-30
+          w-[min(82%,580px)]
+          -translate-x-1/2
+          sm:w-[min(72%,580px)]
+        "
       >
-        <div className="flex items-center rounded-[18px] border border-white/[0.1] bg-[#07101d]/94 p-1.5 shadow-[0_24px_70px_rgba(0,0,0,.46)] backdrop-blur-2xl">
-          <span className="pl-3 pr-1.5 text-slate-600">
+        <motion.div
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 8,
+                }
+          }
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration:
+              reduceMotion
+                ? 0
+                : 0.35,
+            ease: [
+              0.16,
+              1,
+              0.3,
+              1,
+            ],
+          }}
+          className="
+            group
+            flex
+            items-center
+            rounded-[17px]
+            border
+            border-teal-100/[0.09]
+            bg-[#0a1b26]/92
+            p-1.5
+            shadow-[0_22px_64px_rgba(1,8,15,.42)]
+            backdrop-blur-2xl
+            transition
+            duration-300
+            focus-within:border-teal-200/[0.2]
+            focus-within:shadow-[0_24px_70px_rgba(13,148,136,.15)]
+          "
+        >
+          <span
+            aria-hidden="true"
+            className="
+              pl-3
+              pr-1.5
+              text-[15px]
+              text-teal-200/60
+            "
+          >
             ⌕
           </span>
 
           <input
             value={searchQuery}
             onChange={(event) => {
-              setSearchQuery(event.target.value);
+              setSearchQuery(
+                event.target.value,
+              );
+
               setSearchError("");
             }}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (
+                event.key ===
+                "Enter"
+              ) {
                 void findEntity();
               }
             }}
-            placeholder="Search cells, proteins, pathways..."
-            className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm text-white outline-none placeholder:text-slate-600"
+            aria-label="Search biological entities in the graph"
+            placeholder="Search cells, genes, proteins, pathways..."
+            className="
+              min-w-0
+              flex-1
+              bg-transparent
+              px-2
+              py-2.5
+              text-[13px]
+              font-medium
+              text-slate-100
+              outline-none
+              placeholder:text-slate-500
+            "
           />
 
           <button
             type="button"
-            onClick={() => void findEntity()}
-            className="rounded-[12px] bg-white px-4 py-2.5 text-xs font-bold text-slate-950"
+            onClick={() =>
+              void findEntity()
+            }
+            disabled={
+              searchQuery.trim()
+                .length === 0
+            }
+            className="
+              group/focus
+              relative
+              overflow-hidden
+              rounded-[11px]
+              border
+              border-teal-200/[0.18]
+              bg-[linear-gradient(135deg,#99f6e4,#67e8f9)]
+              px-4
+              py-2.5
+              text-[11px]
+              font-extrabold
+              text-[#062029]
+              shadow-[0_8px_22px_rgba(45,212,191,.13)]
+              transition
+              duration-300
+              hover:-translate-y-0.5
+              disabled:cursor-not-allowed
+              disabled:opacity-45
+            "
           >
-            Focus
-          </button>
-        </div>
+            <span
+              aria-hidden="true"
+              className="
+                absolute
+                inset-0
+                translate-x-[-120%]
+                bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)]
+                transition-transform
+                duration-700
+                group-hover/focus:translate-x-[120%]
+              "
+            />
 
-        {(searchError || exportError) && (
-          <p className="mx-auto mt-2 w-fit rounded-full border border-rose-300/15 bg-rose-950/70 px-3 py-1.5 text-[10px] text-rose-200 backdrop-blur-xl">
-            {searchError || exportError}
-          </p>
+            <span className="relative">
+              Focus
+            </span>
+          </button>
+        </motion.div>
+
+        {errorMessage && (
+          <motion.p
+            role="alert"
+            aria-live="polite"
+            initial={
+              reduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 4,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            className="
+              mx-auto
+              mt-2
+              w-fit
+              max-w-full
+              rounded-full
+              border
+              border-rose-200/[0.12]
+              bg-rose-950/55
+              px-3
+              py-1.5
+              text-center
+              text-[10px]
+              font-medium
+              text-rose-200
+              backdrop-blur-xl
+            "
+          >
+            {errorMessage}
+          </motion.p>
         )}
       </div>
     </>

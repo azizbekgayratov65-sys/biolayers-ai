@@ -8,8 +8,13 @@ import {
   useState,
 } from "react";
 
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+} from "framer-motion";
+
 import { useRouter } from "next/navigation";
+
 import {
   ArrowRight,
   BookOpenText,
@@ -20,70 +25,79 @@ import {
 
 import PortalTransition from "./PortalTransition";
 
-/* =========================================================
-   CONFIG
-   ========================================================= */
-
 const EXAMPLE_TEXT =
   "Cancer-associated fibroblasts promote prostate cancer bone metastasis through CXCL12 signaling and remodeling of the tumor microenvironment.";
 
 const TRANSITION_DURATION = 3900;
 
-/* =========================================================
-   HERO CONTENT
-   ========================================================= */
-
 export default function HeroContent() {
   const router = useRouter();
-  const reduceMotion = Boolean(useReducedMotion());
+
+  const reduceMotion = Boolean(
+    useReducedMotion(),
+  );
 
   const [text, setText] = useState("");
+
   const [error, setError] = useState("");
-  const [transitioning, setTransitioning] = useState(false);
 
-  const transitionTimerRef = useRef<number | null>(null);
+  const [
+    transitioning,
+    setTransitioning,
+  ] = useState(false);
 
-  /* =======================================================
-     CLEANUP
-     ======================================================= */
+  const transitionTimerRef =
+    useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
-      if (transitionTimerRef.current !== null) {
-        window.clearTimeout(transitionTimerRef.current);
+      if (
+        transitionTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          transitionTimerRef.current,
+        );
       }
     };
   }, []);
 
-  /* =======================================================
-     WORKSPACE TRANSITION
-     ======================================================= */
+  const goToWorkspace =
+    useCallback(() => {
+      if (transitioning) {
+        return;
+      }
 
-  const goToWorkspace = useCallback(() => {
-    if (transitioning) {
-      return;
-    }
+      setError("");
+      setTransitioning(true);
 
-    setError("");
-    setTransitioning(true);
+      if (
+        transitionTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          transitionTimerRef.current,
+        );
+      }
 
-    if (transitionTimerRef.current !== null) {
-      window.clearTimeout(transitionTimerRef.current);
-    }
+      transitionTimerRef.current =
+        window.setTimeout(
+          () => {
+            router.push("/explore");
+          },
+          reduceMotion
+            ? 150
+            : TRANSITION_DURATION,
+        );
+    }, [
+      reduceMotion,
+      router,
+      transitioning,
+    ]);
 
-    transitionTimerRef.current = window.setTimeout(
-      () => {
-        router.push("/explore");
-      },
-      reduceMotion ? 150 : TRANSITION_DURATION,
-    );
-  }, [reduceMotion, router, transitioning]);
-
-  /* =======================================================
-     SUBMIT
-     ======================================================= */
-
-  function openWorkspace(event: FormEvent<HTMLFormElement>) {
+  function openWorkspace(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (transitioning) {
@@ -116,10 +130,6 @@ export default function HeroContent() {
     goToWorkspace();
   }
 
-  /* =======================================================
-     EXAMPLE
-     ======================================================= */
-
   function useExample() {
     if (transitioning) {
       return;
@@ -129,72 +139,472 @@ export default function HeroContent() {
     setError("");
   }
 
-  /* =======================================================
-     SCROLL TO PRODUCT
-     ======================================================= */
-
   function exploreProduct() {
     const target =
-      document.getElementById("capabilities");
+      document.getElementById(
+        "capabilities",
+      );
 
     if (!target) {
       return;
     }
 
     target.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
+      behavior: reduceMotion
+        ? "auto"
+        : "smooth",
       block: "start",
     });
   }
-
-  /* =======================================================
-     RENDER
-     ======================================================= */
 
   return (
     <>
       <motion.div
         animate={{
-          scale: transitioning ? 0.975 : 1,
-          opacity: transitioning ? 0.72 : 1,
+          scale: transitioning
+            ? 0.978
+            : 1,
+          opacity: transitioning
+            ? 0.68
+            : 1,
           filter: transitioning
-            ? "blur(1.5px)"
+            ? "blur(2px)"
             : "blur(0px)",
         }}
         transition={{
-          duration: reduceMotion ? 0 : 0.5,
+          duration: reduceMotion
+            ? 0
+            : 0.55,
           ease: [0.16, 1, 0.3, 1],
         }}
         className="
-          relative
-          z-20
-          mx-auto
-          flex
-          min-h-screen
-          w-full
-          max-w-[1500px]
-          items-center
-          px-6
-          pb-12
-          pt-32
+          relative z-20 mx-auto flex
+          min-h-screen w-full
+          max-w-[1560px] items-center
+          px-6 pb-14 pt-32
           sm:px-10
-          lg:px-16
-          lg:pt-28
+          lg:px-16 lg:pt-28
+          2xl:px-20
         "
       >
         <div
           className="
-            w-full
-            max-w-[720px]
-            lg:-translate-x-6
-            xl:-translate-x-12
+            w-full max-w-[760px]
+            lg:-translate-x-3
+            xl:-translate-x-7
           "
         >
-          {/* ================================================= */}
-          {/* POSITIONING BADGE                                 */}
-          {/* ================================================= */}
+          {/* ============================================= */}
+          {/* BIOLAYERS BRAND                              */}
+          {/* ============================================= */}
 
           <motion.div
+            initial={
+              reduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: -12,
+                    scale: 0.94,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            transition={{
+              duration: reduceMotion
+                ? 0
+                : 0.8,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="
+              mb-7 flex
+              items-center gap-4
+            "
+          >
+            {/* Logo */}
+
+            <div
+              className="
+                relative flex
+                h-[62px] w-[62px]
+                shrink-0
+                items-center
+                justify-center
+              "
+            >
+              {/* ambient glow */}
+
+              <motion.div
+                aria-hidden="true"
+                animate={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        opacity: [
+                          0.35,
+                          0.7,
+                          0.35,
+                        ],
+                        scale: [
+                          0.9,
+                          1.15,
+                          0.9,
+                        ],
+                      }
+                }
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="
+                  pointer-events-none
+                  absolute inset-[-10px]
+                  rounded-[24px]
+                  bg-teal-300/[0.12]
+                  blur-2xl
+                "
+              />
+
+              {/* orbit */}
+
+              <motion.div
+                aria-hidden="true"
+                animate={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        rotate: 360,
+                      }
+                }
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="
+                  pointer-events-none
+                  absolute inset-[-6px]
+                  rounded-[21px]
+                  border
+                  border-teal-200/[0.09]
+                "
+              >
+                <span
+                  className="
+                    absolute
+                    left-1/2 top-[-2px]
+                    h-[5px] w-[5px]
+                    -translate-x-1/2
+                    rounded-full
+                    bg-teal-200
+                    shadow-[0_0_12px_rgba(153,246,228,.95)]
+                  "
+                />
+              </motion.div>
+
+              {/* logo frame */}
+
+              <div
+                className="
+                  relative flex
+                  h-[62px] w-[62px]
+                  items-center
+                  justify-center
+                  overflow-hidden
+                  rounded-[18px]
+                  border
+                  border-teal-200/[0.15]
+                  bg-[#06131d]/75
+                  shadow-[0_12px_38px_rgba(1,8,15,.32),0_0_30px_rgba(45,212,191,.08)]
+                  backdrop-blur-2xl
+                "
+              >
+                <div
+                  aria-hidden="true"
+                  className="
+                    pointer-events-none
+                    absolute inset-x-2 top-0
+                    h-px
+                    bg-gradient-to-r
+                    from-transparent
+                    via-teal-200/30
+                    to-transparent
+                  "
+                />
+
+                <img
+                  src="/branding/biolayers-logo.png"
+                  alt="BioLayers AI"
+                  draggable={false}
+                  className="
+                    relative z-10
+                    h-[48px] w-[48px]
+                    select-none
+                    object-contain
+                    brightness-125
+                    contrast-125
+                    drop-shadow-[0_0_10px_rgba(153,246,228,.25)]
+                  "
+                />
+
+                {/* scan */}
+
+                {!reduceMotion && (
+                  <motion.div
+                    aria-hidden="true"
+                    initial={{
+                      y: -35,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      y: [
+                        -35,
+                        35,
+                        35,
+                      ],
+                      opacity: [
+                        0,
+                        0.8,
+                        0,
+                      ],
+                    }}
+                    transition={{
+                      duration: 2.4,
+                      repeat: Infinity,
+                      repeatDelay: 2.8,
+                      ease: "easeInOut",
+                    }}
+                    className="
+                      pointer-events-none
+                      absolute
+                      left-2 right-2 top-1/2
+                      h-px
+                      bg-gradient-to-r
+                      from-transparent
+                      via-teal-100
+                      to-transparent
+                      shadow-[0_0_9px_rgba(153,246,228,.9)]
+                    "
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* brand text */}
+
+            <div className="min-w-0">
+              <div
+                className="
+                  flex items-center
+                  gap-2.5
+                "
+              >
+                <span
+                  className="
+                    text-[17px]
+                    font-semibold
+                    tracking-[-0.025em]
+                    text-[#f2fbfa]
+                  "
+                >
+                  BioLayers
+                </span>
+
+                <span
+                  className="
+                    rounded-full
+                    border
+                    border-teal-200/[0.13]
+                    bg-teal-200/[0.055]
+                    px-2 py-0.5
+                    text-[7px]
+                    font-extrabold
+                    uppercase
+                    tracking-[0.19em]
+                    text-teal-200
+                  "
+                >
+                  AI
+                </span>
+              </div>
+
+              <p
+                className="
+                  mt-1
+                  text-[8px]
+                  font-bold
+                  uppercase
+                  tracking-[0.18em]
+                  text-slate-500
+                  sm:text-[9px]
+                "
+              >
+                Computational Oncology
+                Intelligence
+              </p>
+            </div>
+          </motion.div>
+
+          {/* ============================================= */}
+          {/* CATEGORY BADGE                               */}
+          {/* ============================================= */}
+
+          <motion.div
+            initial={
+              reduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 14,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: reduceMotion
+                ? 0
+                : 0.72,
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
+            }}
+            className="
+              mb-7 inline-flex
+              items-center gap-3
+              rounded-full
+              border
+              border-teal-200/[0.14]
+              bg-[#0a1b26]/55
+              px-4 py-2
+              shadow-[0_10px_34px_rgba(1,8,15,.18)]
+              backdrop-blur-2xl
+            "
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className="
+                  absolute inline-flex
+                  h-full w-full
+                  animate-ping
+                  rounded-full
+                  bg-teal-300
+                  opacity-45
+                "
+              />
+
+              <span
+                className="
+                  relative inline-flex
+                  h-2 w-2
+                  rounded-full
+                  bg-teal-300
+                  shadow-[0_0_12px_rgba(94,234,212,.8)]
+                "
+              />
+            </span>
+
+            <span
+              className="
+                text-[10px]
+                font-bold uppercase
+                tracking-[0.22em]
+                text-teal-100/85
+                sm:text-[11px]
+              "
+            >
+              AI-driven Computational
+              Oncology &amp; Precision Medicine
+            </span>
+          </motion.div>
+
+          {/* ============================================= */}
+          {/* HEADLINE                                     */}
+          {/* ============================================= */}
+
+          <motion.h1
+            initial={
+              reduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 24,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: reduceMotion
+                ? 0
+                : 0.06,
+              duration: reduceMotion
+                ? 0
+                : 0.86,
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
+            }}
+            className="
+              max-w-[760px]
+              text-[54px]
+              font-semibold
+              leading-[0.93]
+              tracking-[-0.062em]
+              text-[#f3fbfa]
+              sm:text-[66px]
+              lg:text-[78px]
+              xl:text-[88px]
+            "
+          >
+            Map cancer
+
+            <span
+              className="
+                block
+                bg-gradient-to-r
+                from-teal-200
+                via-cyan-300
+                to-sky-300
+                bg-clip-text
+                text-transparent
+              "
+            >
+              mechanisms.
+            </span>
+
+            <span
+              className="
+                mt-3 block
+                max-w-[680px]
+                text-[0.56em]
+                font-medium
+                leading-[1.02]
+                tracking-[-0.042em]
+                text-slate-300
+              "
+            >
+              Trace every claim.
+            </span>
+          </motion.h1>
+
+          {/* ============================================= */}
+          {/* DESCRIPTION                                  */}
+          {/* ============================================= */}
+
+          <motion.p
             initial={
               reduceMotion
                 ? false
@@ -208,166 +618,38 @@ export default function HeroContent() {
               y: 0,
             }}
             transition={{
-              duration: reduceMotion ? 0 : 0.8,
-              ease: [0.16, 1, 0.3, 1],
+              delay: reduceMotion
+                ? 0
+                : 0.18,
+              duration: reduceMotion
+                ? 0
+                : 0.76,
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="
-              mb-7
-              inline-flex
-              items-center
-              gap-3
-              rounded-full
-              border
-              border-cyan-400/20
-              bg-cyan-400/[0.055]
-              px-4
-              py-2
-              backdrop-blur-xl
-            "
-          >
-            <span className="relative flex h-2 w-2">
-              <span
-                className="
-                  absolute
-                  inline-flex
-                  h-full
-                  w-full
-                  animate-ping
-                  rounded-full
-                  bg-cyan-300
-                  opacity-50
-                "
-              />
-
-              <span
-                className="
-                  relative
-                  inline-flex
-                  h-2
-                  w-2
-                  rounded-full
-                  bg-cyan-300
-                "
-              />
-            </span>
-
-            <span
-              className="
-                text-[10px]
-                font-semibold
-                uppercase
-                tracking-[0.28em]
-                text-cyan-100/80
-                sm:text-[11px]
-              "
-            >
-              AI × Computational Oncology
-            </span>
-          </motion.div>
-
-          {/* ================================================= */}
-          {/* HEADLINE                                         */}
-          {/* ================================================= */}
-
-          <motion.h1
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 28,
-                  }
-            }
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              delay: reduceMotion ? 0 : 0.08,
-              duration: reduceMotion ? 0 : 0.9,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="
-              max-w-[700px]
-              text-5xl
-              font-semibold
-              leading-[0.94]
-              tracking-[-0.06em]
-              text-white
-              sm:text-6xl
-              lg:text-[76px]
-              xl:text-[82px]
-            "
-          >
-            Map cancer
-
-            <span
-              className="
-                block
-                bg-gradient-to-r
-                from-cyan-300
-                via-blue-400
-                to-violet-400
-                bg-clip-text
-                text-transparent
-              "
-            >
-              mechanisms.
-            </span>
-
-            <span
-              className="
-                mt-2
-                block
-                text-[0.63em]
-                leading-[1]
-                tracking-[-0.045em]
-                text-white/72
-              "
-            >
-              Trace every claim.
-            </span>
-          </motion.h1>
-
-          {/* ================================================= */}
-          {/* DESCRIPTION                                      */}
-          {/* ================================================= */}
-
-          <motion.p
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 22,
-                  }
-            }
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              delay: reduceMotion ? 0 : 0.2,
-              duration: reduceMotion ? 0 : 0.8,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="
-              mt-7
-              max-w-[620px]
-              text-base
+              mt-7 max-w-[650px]
+              text-[16px]
               leading-8
-              text-slate-300/80
-              sm:text-lg
+              text-slate-300/90
+              sm:text-[18px]
             "
           >
-            BioLayers transforms fragmented oncology literature
-            into evidence-linked maps of cells, genes, proteins,
-            pathways, biological processes, and disease mechanisms.
+            BioLayers transforms fragmented
+            oncology literature into
+            evidence-linked maps of cells,
+            genes, proteins, pathways,
+            biological processes, and disease
+            mechanisms.
           </motion.p>
 
-          {/* ================================================= */}
-          {/* VALUE SIGNALS                                    */}
-          {/* ================================================= */}
+          {/* ============================================= */}
+          {/* SIGNALS                                      */}
+          {/* ============================================= */}
 
           <motion.div
             initial={
@@ -375,7 +657,7 @@ export default function HeroContent() {
                 ? false
                 : {
                     opacity: 0,
-                    y: 16,
+                    y: 12,
                   }
             }
             animate={{
@@ -383,14 +665,15 @@ export default function HeroContent() {
               y: 0,
             }}
             transition={{
-              delay: reduceMotion ? 0 : 0.28,
-              duration: reduceMotion ? 0 : 0.75,
-              ease: [0.16, 1, 0.3, 1],
+              delay: reduceMotion
+                ? 0
+                : 0.26,
+              duration: reduceMotion
+                ? 0
+                : 0.7,
             }}
             className="
-              mt-6
-              flex
-              flex-wrap
+              mt-6 flex flex-wrap
               gap-2
             "
           >
@@ -410,9 +693,9 @@ export default function HeroContent() {
             />
           </motion.div>
 
-          {/* ================================================= */}
-          {/* INPUT WORKSPACE                                  */}
-          {/* ================================================= */}
+          {/* ============================================= */}
+          {/* INPUT                                        */}
+          {/* ============================================= */}
 
           <motion.form
             onSubmit={openWorkspace}
@@ -421,7 +704,7 @@ export default function HeroContent() {
                 ? false
                 : {
                     opacity: 0,
-                    y: 28,
+                    y: 24,
                   }
             }
             animate={{
@@ -429,79 +712,81 @@ export default function HeroContent() {
               y: 0,
             }}
             transition={{
-              delay: reduceMotion ? 0 : 0.36,
-              duration: reduceMotion ? 0 : 0.9,
-              ease: [0.16, 1, 0.3, 1],
+              delay: reduceMotion
+                ? 0
+                : 0.34,
+              duration: reduceMotion
+                ? 0
+                : 0.84,
+              ease: [
+                0.16,
+                1,
+                0.3,
+                1,
+              ],
             }}
             className="
-              mt-8
-              w-full
-              max-w-[620px]
-              lg:-translate-x-2
-              xl:-translate-x-5
+              mt-8 w-full
+              max-w-[650px]
             "
           >
-            {/* INPUT LABEL */}
-
             <div
               className="
-                mb-3
-                flex
+                mb-3 flex
                 items-center
                 justify-between
-                gap-4
-                px-1
+                gap-4 px-1
               "
             >
               <div
                 className="
-                  flex
-                  items-center
-                  gap-2
-                  text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.18em]
-                  text-white/30
+                  flex items-center
+                  gap-2 text-[10px]
+                  font-bold uppercase
+                  tracking-[0.17em]
+                  text-slate-400
                 "
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-3.5 w-3.5 text-teal-300" />
 
                 Try BioLayers
               </div>
 
               <div
                 className="
-                  hidden
-                  text-[9px]
-                  uppercase
-                  tracking-[0.16em]
-                  text-white/18
+                  hidden text-[9px]
+                  font-semibold uppercase
+                  tracking-[0.15em]
+                  text-slate-600
                   sm:block
                 "
               >
-                Research text → mechanism
+                Research text → evidence-linked
+                mechanism
               </div>
             </div>
 
             <div
               className={`
-                overflow-hidden
-                rounded-[26px]
+                relative overflow-hidden
+                rounded-[24px]
                 border
-                bg-slate-950/55
-                shadow-[0_30px_100px_rgba(3,105,161,0.16)]
-                backdrop-blur-2xl
-                transition-all
-                duration-300
+                bg-[#081722]/82
+                shadow-[0_28px_90px_rgba(1,8,15,.34)]
+                backdrop-blur-3xl
+                transition-all duration-300
 
                 ${
                   transitioning
-                    ? "border-cyan-300/30 shadow-[0_0_70px_rgba(34,211,238,.18)]"
-                    : "border-white/10 hover:border-white/[0.16]"
+                    ? "border-teal-200/[0.24] shadow-[0_0_70px_rgba(45,212,191,.12)]"
+                    : "border-teal-100/[0.08] hover:border-teal-200/[0.14]"
                 }
               `}
             >
+              <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-teal-200/[0.18] to-transparent" />
+
+              <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-teal-300/[0.035] blur-3xl" />
+
               <textarea
                 value={text}
                 disabled={transitioning}
@@ -511,16 +796,13 @@ export default function HeroContent() {
                 }}
                 placeholder="Paste a paragraph from a cancer research paper..."
                 className="
-                  min-h-36
-                  w-full
-                  resize-none
+                  relative min-h-36
+                  w-full resize-none
                   bg-transparent
-                  px-6
-                  pb-4
-                  pt-6
+                  px-6 pb-4 pt-6
                   text-[15px]
                   leading-7
-                  text-white
+                  text-[#eefaf8]
                   outline-none
                   placeholder:text-slate-500
                   disabled:cursor-not-allowed
@@ -529,43 +811,37 @@ export default function HeroContent() {
 
               <div
                 className="
-                  flex
-                  flex-col
-                  gap-3
+                  relative flex
+                  flex-col gap-3
                   border-t
-                  border-white/10
-                  bg-white/[0.025]
+                  border-teal-100/[0.06]
+                  bg-black/[0.08]
                   p-4
                   sm:flex-row
                   sm:items-center
                   sm:justify-between
                 "
               >
-                {/* EXAMPLE */}
-
                 <button
                   type="button"
                   onClick={useExample}
                   disabled={transitioning}
                   className="
-                    rounded-xl
-                    px-3
-                    py-2
+                    rounded-[11px]
+                    px-3 py-2
                     text-left
-                    text-sm
-                    font-medium
+                    text-[12px]
+                    font-semibold
                     text-slate-400
                     transition
-                    hover:bg-white/5
-                    hover:text-white
+                    hover:bg-white/[0.035]
+                    hover:text-slate-100
                     disabled:cursor-not-allowed
                     disabled:opacity-50
                   "
                 >
                   Use an example
                 </button>
-
-                {/* SUBMIT */}
 
                 <motion.button
                   type="submit"
@@ -574,48 +850,54 @@ export default function HeroContent() {
                     reduceMotion
                       ? undefined
                       : {
-                          scale: transitioning
-                            ? 1
-                            : 1.02,
+                          scale:
+                            transitioning
+                              ? 1
+                              : 1.015,
                         }
                   }
                   whileTap={
                     reduceMotion
                       ? undefined
                       : {
-                          scale: transitioning
-                            ? 1
-                            : 0.97,
+                          scale:
+                            transitioning
+                              ? 1
+                              : 0.98,
                         }
                   }
                   animate={{
-                    boxShadow: transitioning
-                      ? [
-                          "0 15px 40px rgba(255,255,255,.12)",
-                          "0 0 54px rgba(103,232,249,.34)",
-                          "0 15px 40px rgba(255,255,255,.12)",
-                        ]
-                      : "0 15px 40px rgba(255,255,255,.12)",
+                    boxShadow:
+                      transitioning
+                        ? [
+                            "0 12px 34px rgba(45,212,191,.10)",
+                            "0 0 48px rgba(103,232,249,.25)",
+                            "0 12px 34px rgba(45,212,191,.10)",
+                          ]
+                        : "0 12px 34px rgba(45,212,191,.10)",
                   }}
                   transition={{
-                    duration: transitioning
-                      ? 0.9
-                      : 0.25,
-                    repeat: transitioning
-                      ? Infinity
-                      : 0,
+                    duration:
+                      transitioning
+                        ? 0.9
+                        : 0.25,
+                    repeat:
+                      transitioning
+                        ? Infinity
+                        : 0,
                   }}
                   className="
-                    group
-                    relative
+                    group relative
                     overflow-hidden
-                    rounded-2xl
-                    bg-white
-                    px-6
-                    py-3
-                    text-sm
-                    font-semibold
-                    text-slate-950
+                    rounded-[13px]
+                    border
+                    border-teal-100/[0.16]
+                    bg-[linear-gradient(135deg,#99f6e4_0%,#67e8f9_56%,#7dd3fc_100%)]
+                    px-6 py-3
+                    text-[12px]
+                    font-extrabold
+                    text-[#062029]
+                    shadow-[0_12px_30px_rgba(45,212,191,.14)]
                     disabled:cursor-not-allowed
                     disabled:opacity-80
                   "
@@ -635,26 +917,18 @@ export default function HeroContent() {
                       }}
                       className="
                         pointer-events-none
-                        absolute
-                        inset-y-0
+                        absolute inset-y-0
                         w-20
                         bg-gradient-to-r
                         from-transparent
-                        via-cyan-200/65
+                        via-white/55
                         to-transparent
                         blur-md
                       "
                     />
                   )}
 
-                  <span
-                    className="
-                      relative
-                      flex
-                      items-center
-                      gap-2
-                    "
-                  >
+                  <span className="relative flex items-center gap-2">
                     {transitioning
                       ? "Opening workspace..."
                       : "Build mechanism"}
@@ -662,8 +936,7 @@ export default function HeroContent() {
                     {!transitioning && (
                       <ArrowRight
                         className="
-                          h-4
-                          w-4
+                          h-4 w-4
                           transition-transform
                           duration-300
                           group-hover:translate-x-1
@@ -675,10 +948,31 @@ export default function HeroContent() {
               </div>
             </div>
 
-            {/* ERROR */}
-
             {error && (
               <motion.p
+                initial={{
+                  opacity: 0,
+                  y: 5,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                className="
+                  mt-3 rounded-[11px]
+                  border border-rose-200/[0.09]
+                  bg-rose-200/[0.025]
+                  px-3 py-2
+                  text-[11px]
+                  text-rose-200
+                "
+              >
+                {error}
+              </motion.p>
+            )}
+
+            {transitioning && (
+              <motion.div
                 initial={{
                   opacity: 0,
                   y: 6,
@@ -688,62 +982,18 @@ export default function HeroContent() {
                   y: 0,
                 }}
                 className="
-                  mt-3
-                  text-sm
-                  text-rose-300
-                "
-              >
-                {error}
-              </motion.p>
-            )}
-
-            {/* TRANSITION STATUS */}
-
-            {transitioning && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 8,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                className="
-                  mt-4
-                  flex
-                  items-center
-                  gap-3
-                  text-xs
-                  uppercase
-                  tracking-[0.18em]
-                  text-cyan-200/70
+                  mt-4 flex
+                  items-center gap-3
+                  text-[10px]
+                  font-bold uppercase
+                  tracking-[0.17em]
+                  text-teal-200/75
                 "
               >
                 <span className="relative flex h-2 w-2">
-                  <span
-                    className="
-                      absolute
-                      inline-flex
-                      h-full
-                      w-full
-                      animate-ping
-                      rounded-full
-                      bg-cyan-300
-                      opacity-60
-                    "
-                  />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-300 opacity-55" />
 
-                  <span
-                    className="
-                      relative
-                      inline-flex
-                      h-2
-                      w-2
-                      rounded-full
-                      bg-cyan-300
-                    "
-                  />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-300" />
                 </span>
 
                 Building biological workspace
@@ -751,9 +1001,9 @@ export default function HeroContent() {
             )}
           </motion.form>
 
-          {/* ================================================= */}
-          {/* SECONDARY CTA                                    */}
-          {/* ================================================= */}
+          {/* ============================================= */}
+          {/* PRODUCT LINK                                 */}
+          {/* ============================================= */}
 
           <motion.button
             type="button"
@@ -769,30 +1019,29 @@ export default function HeroContent() {
               opacity: 1,
             }}
             transition={{
-              delay: reduceMotion ? 0 : 0.65,
-              duration: reduceMotion ? 0 : 0.8,
+              delay: reduceMotion
+                ? 0
+                : 0.62,
+              duration: reduceMotion
+                ? 0
+                : 0.75,
             }}
             className="
-              group
-              mt-6
-              flex
-              items-center
+              group mt-6
+              flex items-center
               gap-2
-              text-xs
-              font-medium
-              text-white/35
+              text-[11px]
+              font-semibold
+              text-slate-500
               transition-colors
-              hover:text-white/65
-              lg:-translate-x-2
-              xl:-translate-x-5
+              hover:text-teal-100
             "
           >
             See how BioLayers works
 
             <ArrowRight
               className="
-                h-3.5
-                w-3.5
+                h-3.5 w-3.5
                 transition-transform
                 duration-300
                 group-hover:translate-x-1
@@ -800,9 +1049,9 @@ export default function HeroContent() {
             />
           </motion.button>
 
-          {/* ================================================= */}
-          {/* BIOLOGICAL LAYERS                                */}
-          {/* ================================================= */}
+          {/* ============================================= */}
+          {/* ENTITY TYPES                                 */}
+          {/* ============================================= */}
 
           <motion.div
             initial={
@@ -816,23 +1065,22 @@ export default function HeroContent() {
               opacity: 1,
             }}
             transition={{
-              delay: reduceMotion ? 0 : 0.75,
-              duration: reduceMotion ? 0 : 1,
+              delay: reduceMotion
+                ? 0
+                : 0.72,
+              duration: reduceMotion
+                ? 0
+                : 0.9,
             }}
             className="
-              mt-7
-              flex
-              max-w-[620px]
-              flex-wrap
-              gap-x-7
-              gap-y-3
-              text-[10px]
-              font-medium
-              uppercase
-              tracking-[0.16em]
-              text-slate-500
-              lg:-translate-x-2
-              xl:-translate-x-5
+              mt-7 flex
+              max-w-[650px]
+              flex-wrap gap-x-6
+              gap-y-2
+              text-[9px]
+              font-bold uppercase
+              tracking-[0.15em]
+              text-slate-600
             "
           >
             <span>Cells</span>
@@ -845,18 +1093,12 @@ export default function HeroContent() {
         </div>
       </motion.div>
 
-      {/* =================================================== */}
-      {/* PORTAL TRANSITION                                  */}
-      {/* =================================================== */}
-
-      <PortalTransition active={transitioning} />
+      <PortalTransition
+        active={transitioning}
+      />
     </>
   );
 }
-
-/* =========================================================
-   VALUE SIGNAL
-   ========================================================= */
 
 function Signal({
   icon: Icon,
@@ -870,22 +1112,20 @@ function Signal({
   return (
     <div
       className="
-        inline-flex
-        items-center
-        gap-2
-        rounded-full
+        inline-flex items-center
+        gap-2 rounded-full
         border
-        border-white/[0.07]
-        bg-white/[0.025]
-        px-3
-        py-1.5
+        border-teal-100/[0.065]
+        bg-[#0a1b26]/42
+        px-3 py-1.5
         text-[10px]
-        font-medium
-        text-white/40
+        font-semibold
+        text-slate-400
+        shadow-[0_8px_24px_rgba(1,8,15,.10)]
         backdrop-blur-xl
       "
     >
-      <Icon className="h-3 w-3 text-cyan-300/45" />
+      <Icon className="h-3 w-3 text-teal-300/70" />
 
       {text}
     </div>

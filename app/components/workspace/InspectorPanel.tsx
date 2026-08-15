@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 import type {
   EntityData,
@@ -39,9 +39,9 @@ type InspectorPanelProps = {
 
 const entityColorClass: Record<EntityType, string> = {
   cell: "bg-teal-400",
-  protein: "bg-violet-400",
+  protein: "bg-cyan-300",
   gene: "bg-cyan-400",
-  drug: "bg-fuchsia-400",
+  drug: "bg-orange-300",
   pathway: "bg-amber-400",
   process: "bg-blue-400",
   disease: "bg-rose-400",
@@ -59,6 +59,8 @@ export default function InspectorPanel({
   openPaperInspector,
   onAskCopilot,
 }: InspectorPanelProps) {
+  const reduceMotion = Boolean(useReducedMotion());
+
   return (
 <motion.div
                 key={`${selectedEntity.label}-${selectedEntity.type}`}
@@ -82,7 +84,7 @@ export default function InspectorPanel({
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >
-                <div className="mt-4 rounded-[26px] border border-white/[0.09] bg-[linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))] p-5 shadow-[0_24px_80px_rgba(0,0,0,.24)]">
+                <div className="mt-4 rounded-[26px] border border-teal-100/[0.09] bg-[linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))] p-5 shadow-[0_24px_80px_rgba(0,0,0,.24)]">
                   <div className="flex items-center justify-between">
                     <span className="rounded-full border border-cyan-300/15 bg-cyan-300/[0.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-cyan-200">
                       {selectedEntity.type}
@@ -113,7 +115,7 @@ export default function InspectorPanel({
                   />
                 </div>
 
-                <div className="mt-4 rounded-[22px] border border-white/[0.08] bg-white/[0.025] p-4">
+                <div className="mt-4 rounded-[22px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300">
@@ -129,7 +131,7 @@ export default function InspectorPanel({
                     />
                   </div>
 
-                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-teal-100/[0.06]">
                     <div
                       className={`h-full rounded-full bg-gradient-to-r ${evidenceProfile.meterClass}`}
                       style={{
@@ -148,13 +150,14 @@ export default function InspectorPanel({
                     code="ROLE_01"
                     title="Biological role"
                     text="This entity contributes to the biological mechanism represented in the submitted research paragraph."
+                    reduceMotion={reduceMotion}
                   />
                 </div>
 
-                <div className="mt-6 rounded-[22px] border border-white/[0.08] bg-white/[0.025] p-4">
+                <div className="mt-6 rounded-[22px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300">
                         Connected entities
                       </p>
 
@@ -163,13 +166,13 @@ export default function InspectorPanel({
                       </p>
                     </div>
 
-                    <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 font-mono text-[9px] text-slate-400">
+                    <span className="rounded-full border border-teal-100/[0.08] bg-teal-100/[0.04] px-2.5 py-1 font-mono text-[9px] text-slate-400">
                       {relatedConnections.length}
                     </span>
                   </div>
 
                   {relatedConnections.length === 0 ? (
-                    <div className="mt-4 rounded-[16px] border border-white/[0.06] bg-black/20 p-3">
+                    <div className="mt-4 rounded-[16px] border border-teal-100/[0.06] bg-black/15 p-3">
                       <p className="text-xs leading-5 text-slate-500">
                         No visible direct connections for this entity.
                       </p>
@@ -186,7 +189,7 @@ export default function InspectorPanel({
                                 connection.nodeId,
                               )
                             }
-                            className="group flex w-full items-center justify-between gap-3 rounded-[16px] border border-white/[0.07] bg-black/20 p-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300/20 hover:bg-violet-300/[0.04]"
+                            className="group flex w-full items-center justify-between gap-3 rounded-[16px] border border-teal-100/[0.07] bg-black/15 p-3 text-left transition hover:-translate-y-0.5 hover:border-teal-300/20 hover:bg-teal-300/[0.04]"
                           >
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
@@ -210,7 +213,7 @@ export default function InspectorPanel({
                               </p>
                             </div>
 
-                            <span className="shrink-0 rounded-[10px] border border-white/[0.08] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-slate-500 transition group-hover:border-cyan-300/20 group-hover:text-cyan-300">
+                            <span className="shrink-0 rounded-[10px] border border-teal-100/[0.08] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-slate-500 transition group-hover:border-cyan-300/20 group-hover:text-cyan-300">
                               Focus
                             </span>
                           </button>
@@ -233,7 +236,7 @@ export default function InspectorPanel({
                       </p>
                     </div>
 
-                    <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 font-mono text-[9px] text-slate-400">
+                    <span className="rounded-full border border-teal-100/[0.08] bg-teal-100/[0.04] px-2.5 py-1 font-mono text-[9px] text-slate-400">
                       {pubMedLoading
                         ? "..."
                         : pubMedPapers.length}
@@ -245,7 +248,7 @@ export default function InspectorPanel({
                       {[0, 1, 2].map((item) => (
                         <div
                           key={item}
-                          className="animate-pulse rounded-[16px] border border-white/[0.06] bg-black/20 p-3"
+                          className={`${reduceMotion ? "" : "animate-pulse"} rounded-[16px] border border-teal-100/[0.06] bg-black/15 p-3`}
                         >
                           <div className="h-2.5 w-2/3 rounded-full bg-white/[0.08]" />
                           <div className="mt-3 h-2 w-full rounded-full bg-white/[0.05]" />
@@ -267,7 +270,7 @@ export default function InspectorPanel({
                   {!pubMedLoading &&
                     !pubMedError &&
                     pubMedPapers.length === 0 && (
-                      <div className="mt-4 rounded-[16px] border border-white/[0.06] bg-black/20 p-3">
+                      <div className="mt-4 rounded-[16px] border border-teal-100/[0.06] bg-black/15 p-3">
                         <p className="text-xs leading-5 text-slate-500">
                           No matching oncology papers were found for this entity.
                         </p>
@@ -287,7 +290,7 @@ export default function InspectorPanel({
                                   paper,
                                 )
                               }
-                              className="group block w-full rounded-[17px] border border-white/[0.07] bg-black/20 p-3.5 text-left transition hover:-translate-y-0.5 hover:border-cyan-300/20 hover:bg-cyan-300/[0.035]"
+                              className="group block w-full rounded-[17px] border border-teal-100/[0.07] bg-black/15 p-3.5 text-left transition hover:-translate-y-0.5 hover:border-cyan-300/20 hover:bg-cyan-300/[0.035]"
                             >
                               <div className="flex items-center justify-between gap-3">
                                 <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-cyan-300/60">
@@ -318,7 +321,7 @@ export default function InspectorPanel({
                               )}
 
                               {paper.doi && (
-                                <p className="mt-2 truncate font-mono text-[8px] text-violet-300/55">
+                                <p className="mt-2 truncate font-mono text-[8px] text-teal-300/55">
                                   DOI {paper.doi}
                                 </p>
                               )}
@@ -329,8 +332,8 @@ export default function InspectorPanel({
                     )}
                 </div>
 
-                <div className="mt-6 rounded-[22px] border border-violet-300/12 bg-violet-300/[0.045] p-4">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300">
+                <div className="mt-6 rounded-[22px] border border-teal-300/12 bg-teal-300/[0.045] p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300">
                     BioLayers Copilot
                   </p>
 
@@ -343,7 +346,7 @@ export default function InspectorPanel({
                   <button
                     type="button"
                     onClick={onAskCopilot}
-                    className="mt-4 w-full rounded-[14px] bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 px-4 py-3 text-xs font-bold text-slate-950 transition hover:brightness-110"
+                    className="mt-4 w-full rounded-[14px] bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 px-4 py-3 text-xs font-bold text-slate-950 transition hover:brightness-110"
                   >
                     Ask BioLayers AI
                   </button>
@@ -360,7 +363,7 @@ function InspectorMetric({
   label: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.025] p-4">
+    <div className="rounded-[18px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
       <p className="truncate text-lg font-semibold capitalize text-white">
         {value}
       </p>
@@ -389,17 +392,19 @@ function RoleCard({
   code,
   title,
   text,
+  reduceMotion,
 }: {
   code: string;
   title: string;
   text: string;
+  reduceMotion: boolean;
 }) {
   return (
     <motion.div
       whileHover={{
         y: -3,
       }}
-      className="rounded-[20px] border border-white/[0.08] bg-white/[0.028] p-4 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.035]"
+      className="rounded-[20px] border border-teal-100/[0.08] bg-[#0a1b26]/52 p-4 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.035]"
     >
       <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-cyan-300/55">
         {code}

@@ -229,9 +229,9 @@ export default function HeroStageNarrative() {
           absolute
           bottom-8
           right-6
-          w-[min(400px,calc(100vw-3rem))]
+          w-[min(420px,calc(100vw-3rem))]
           sm:right-10
-          lg:bottom-12
+          lg:bottom-10
           lg:right-14
           xl:right-20
         "
@@ -240,13 +240,13 @@ export default function HeroStageNarrative() {
           className="
             relative
             overflow-hidden
-            rounded-[26px]
+            rounded-[24px]
             border
-            border-white/[0.08]
-            bg-[#050814]/40
+            border-teal-100/[0.08]
+            bg-[#081722]/58
             p-4
-            shadow-[0_24px_80px_rgba(0,0,0,.22)]
-            backdrop-blur-xl
+            shadow-[0_28px_90px_rgba(1,8,15,.32)]
+            backdrop-blur-2xl
             sm:p-5
           "
         >
@@ -263,7 +263,7 @@ export default function HeroStageNarrative() {
               h-px
               bg-gradient-to-r
               from-transparent
-              via-cyan-300/30
+              via-teal-200/25
               to-transparent
             "
           />
@@ -304,7 +304,7 @@ export default function HeroStageNarrative() {
                     w-full
                     animate-ping
                     rounded-full
-                    bg-cyan-300
+                    bg-teal-300
                     opacity-40
                   "
                 />
@@ -316,7 +316,7 @@ export default function HeroStageNarrative() {
                     h-1.5
                     w-1.5
                     rounded-full
-                    bg-cyan-300
+                    bg-teal-300
                   "
                 />
               </span>
@@ -327,10 +327,10 @@ export default function HeroStageNarrative() {
                   font-bold
                   uppercase
                   tracking-[0.22em]
-                  text-cyan-300/70
+                  text-teal-300/75
                 "
               >
-                Mechanism reconstruction
+                Biological reconstruction
               </p>
             </div>
 
@@ -338,7 +338,7 @@ export default function HeroStageNarrative() {
               className="
                 font-mono
                 text-[9px]
-                text-slate-600
+                text-slate-500
               "
             >
               {activeStage.index}/05
@@ -400,7 +400,7 @@ export default function HeroStageNarrative() {
                     font-semibold
                     uppercase
                     tracking-[0.2em]
-                    text-violet-300/75
+                    text-sky-300/70
                   "
                 >
                   {activeStage.eyebrow}
@@ -414,7 +414,7 @@ export default function HeroStageNarrative() {
                     text-xl
                     font-semibold
                     tracking-[-0.035em]
-                    text-white
+                    text-[#f0fbfa]
                     sm:text-2xl
                   "
                 >
@@ -429,7 +429,7 @@ export default function HeroStageNarrative() {
                     max-w-[340px]
                     text-xs
                     leading-6
-                    text-slate-400
+                    text-slate-300/80
                     sm:text-[13px]
                   "
                 >
@@ -470,7 +470,7 @@ export default function HeroStageNarrative() {
                       h-[3px]
                       overflow-hidden
                       rounded-full
-                      bg-white/[0.06]
+                      bg-teal-100/[0.055]
                     "
                   >
                     <motion.div
@@ -480,9 +480,9 @@ export default function HeroStageNarrative() {
                         left-0
                         rounded-full
                         bg-gradient-to-r
-                        from-cyan-300
-                        via-violet-300
-                        to-fuchsia-300
+                        from-teal-300
+                        via-cyan-300
+                        to-sky-300
                       "
                       animate={{
                         width: isPast
@@ -530,7 +530,7 @@ export default function HeroStageNarrative() {
                 text-[8px]
                 uppercase
                 tracking-[0.16em]
-                text-slate-600
+                text-slate-500
               "
             >
               Paper
@@ -541,7 +541,7 @@ export default function HeroStageNarrative() {
                 flex
                 items-center
                 gap-1.5
-                text-slate-700
+                text-slate-600
               "
             >
               <span>·</span>
@@ -554,7 +554,7 @@ export default function HeroStageNarrative() {
                 text-[8px]
                 uppercase
                 tracking-[0.16em]
-                text-slate-600
+                text-slate-500
               "
             >
               Research map

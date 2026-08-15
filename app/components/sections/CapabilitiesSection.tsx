@@ -30,8 +30,8 @@ const capabilities: Capability[] = [
     text:
       "Identify cells, genes, proteins, pathways, biological processes, and disease mechanisms from complex oncology literature.",
     label: "ENTITY EXTRACTION",
-    gradient: "from-cyan-300 via-blue-400 to-violet-400",
-    glow: "rgba(34, 211, 238, 0.16)",
+    gradient: "from-teal-200 via-cyan-300 to-sky-300",
+    glow: "rgba(45, 212, 191, 0.12)",
     icon: ScanSearch,
     pipelineFrom: "PAPER",
     pipelineTo: "ENTITIES",
@@ -43,8 +43,8 @@ const capabilities: Capability[] = [
     text:
       "Transform extracted entities into directional biological relationships organized across mechanistic layers rather than a flat graph.",
     label: "MECHANISM INTELLIGENCE",
-    gradient: "from-violet-300 via-fuchsia-400 to-cyan-300",
-    glow: "rgba(168, 85, 247, 0.16)",
+    gradient: "from-cyan-200 via-sky-300 to-indigo-300",
+    glow: "rgba(125, 211, 252, 0.11)",
     icon: GitBranch,
     pipelineFrom: "ENTITIES",
     pipelineTo: "MECHANISM",
@@ -56,8 +56,8 @@ const capabilities: Capability[] = [
     text:
       "Preserve the path from biological relationships back to supporting papers, evidence sentences, PMID or DOI records, and experimental context.",
     label: "EVIDENCE PROVENANCE",
-    gradient: "from-fuchsia-300 via-rose-400 to-cyan-300",
-    glow: "rgba(236, 72, 153, 0.16)",
+    gradient: "from-teal-200 via-cyan-200 to-indigo-300",
+    glow: "rgba(165, 180, 252, 0.10)",
     icon: BookOpenText,
     pipelineFrom: "MECHANISM",
     pipelineTo: "EVIDENCE",
@@ -76,8 +76,8 @@ export default function CapabilitiesSection() {
         z-40
         overflow-hidden
         border-y
-        border-cyan-300/[0.07]
-        bg-[#01040c]
+        border-teal-100/[0.055]
+        bg-[#06111a]
         px-6
         py-24
         sm:px-10
@@ -95,7 +95,7 @@ export default function CapabilitiesSection() {
           pointer-events-none
           absolute
           inset-0
-          bg-[radial-gradient(circle_at_10%_20%,rgba(6,182,212,.10),transparent_30%),radial-gradient(circle_at_90%_30%,rgba(139,92,246,.11),transparent_31%),radial-gradient(circle_at_50%_120%,rgba(236,72,153,.07),transparent_42%)]
+          bg-[radial-gradient(circle_at_10%_20%,rgba(45,212,191,.075),transparent_30%),radial-gradient(circle_at_90%_30%,rgba(125,211,252,.06),transparent_31%),radial-gradient(circle_at_50%_120%,rgba(165,180,252,.035),transparent_42%)]
         "
       />
 
@@ -123,8 +123,8 @@ export default function CapabilitiesSection() {
         "
         style={{
           backgroundImage: `
-            linear-gradient(rgba(34,211,238,.18) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,92,246,.15) 1px, transparent 1px)
+            linear-gradient(rgba(94,234,212,.11) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(125,211,252,.08) 1px, transparent 1px)
           `,
           backgroundSize: "72px 72px",
         }}
@@ -156,7 +156,7 @@ export default function CapabilitiesSection() {
           h-[520px]
           w-[520px]
           rounded-full
-          bg-cyan-500/[0.09]
+          bg-teal-400/[0.06]
           blur-[150px]
         "
       />
@@ -187,7 +187,7 @@ export default function CapabilitiesSection() {
           h-[560px]
           w-[560px]
           rounded-full
-          bg-violet-600/[0.09]
+          bg-sky-400/[0.05]
           blur-[155px]
         "
       />
@@ -240,8 +240,8 @@ export default function CapabilitiesSection() {
                 gap-3
                 rounded-full
                 border
-                border-cyan-300/15
-                bg-cyan-300/[0.04]
+                border-teal-200/15
+                bg-teal-300/[0.045]
                 px-4
                 py-2
                 backdrop-blur-xl
@@ -253,8 +253,8 @@ export default function CapabilitiesSection() {
                   h-1.5
                   w-1.5
                   rounded-full
-                  bg-cyan-300
-                  shadow-[0_0_12px_rgba(103,232,249,.7)]
+                  bg-teal-300
+                  shadow-[0_0_12px_rgba(94,234,212,.7)]
                 "
               />
 
@@ -264,7 +264,7 @@ export default function CapabilitiesSection() {
                   font-black
                   uppercase
                   tracking-[0.3em]
-                  text-cyan-100
+                  text-teal-100
                 "
               >
                 Core intelligence systems
@@ -277,8 +277,8 @@ export default function CapabilitiesSection() {
                 mt-6
                 max-w-4xl
                 text-4xl
-                font-black
-                leading-[1]
+                font-semibold
+                leading-[1.02]
                 tracking-[-0.05em]
                 text-white
                 sm:text-5xl
@@ -292,10 +292,9 @@ export default function CapabilitiesSection() {
                   mt-1
                   block
                   bg-gradient-to-r
-                  from-cyan-300
-                  via-blue-400
-                  via-violet-400
-                  to-fuchsia-400
+                  from-teal-200
+                  via-cyan-300
+                  to-sky-300
                   bg-clip-text
                   text-transparent
                 "
@@ -309,7 +308,7 @@ export default function CapabilitiesSection() {
             className="
               max-w-md
               border-l
-              border-violet-300/25
+              border-teal-200/20
               pl-5
               text-sm
               font-medium
@@ -366,10 +365,10 @@ export default function CapabilitiesSection() {
           }}
           className="
             mt-8
-            rounded-[28px]
+            rounded-[24px]
             border
-            border-white/[0.07]
-            bg-white/[0.018]
+            border-teal-100/[0.065]
+            bg-[#0a1b26]/42
             p-5
             backdrop-blur-xl
             sm:p-6
@@ -381,7 +380,7 @@ export default function CapabilitiesSection() {
               font-black
               uppercase
               tracking-[0.22em]
-              text-slate-600
+              text-slate-500
             "
           >
             BioLayers core flow
@@ -482,10 +481,10 @@ function CapabilityCard({
         relative
         min-h-[360px]
         overflow-hidden
-        rounded-[32px]
+        rounded-[26px]
         border
-        border-white/[0.085]
-        bg-[#040817]/75
+        border-teal-100/[0.08]
+        bg-[#081722]/72
         p-7
         backdrop-blur-2xl
         sm:p-8
@@ -577,11 +576,11 @@ function CapabilityCard({
             justify-center
             rounded-2xl
             border
-            border-white/[0.09]
-            bg-white/[0.03]
+            border-teal-100/[0.085]
+            bg-teal-100/[0.035]
           "
         >
-          <Icon className="h-5 w-5 text-white/58" />
+          <Icon className="h-5 w-5 text-teal-50/70" />
         </div>
       </div>
 
@@ -594,7 +593,7 @@ function CapabilityCard({
           relative
           mt-10
           text-2xl
-          font-black
+          font-semibold
           tracking-[-0.035em]
           text-white
           sm:text-3xl
@@ -626,8 +625,8 @@ function CapabilityCard({
           mt-9
           rounded-[18px]
           border
-          border-white/[0.065]
-          bg-black/20
+          border-teal-100/[0.06]
+          bg-black/15
           p-4
         "
       >
@@ -637,7 +636,7 @@ function CapabilityCard({
             font-black
             uppercase
             tracking-[0.2em]
-            text-slate-600
+            text-slate-500
           "
         >
           System transformation
@@ -655,15 +654,15 @@ function CapabilityCard({
             className="
               rounded-xl
               border
-              border-white/[0.07]
-              bg-white/[0.025]
+              border-teal-100/[0.065]
+              bg-teal-100/[0.025]
               px-3
               py-2
               font-mono
               text-[10px]
               font-bold
               tracking-[0.12em]
-              text-white/45
+              text-slate-400/85
             "
           >
             {pipelineFrom}
@@ -685,7 +684,7 @@ function CapabilityCard({
                 -ml-px
                 h-4
                 w-4
-                text-white/30
+                text-teal-200/35
               "
             />
           </div>
@@ -694,15 +693,15 @@ function CapabilityCard({
             className="
               rounded-xl
               border
-              border-white/[0.07]
-              bg-white/[0.025]
+              border-teal-100/[0.065]
+              bg-teal-100/[0.025]
               px-3
               py-2
               font-mono
               text-[10px]
               font-bold
               tracking-[0.12em]
-              text-white/58
+              text-teal-50/70
             "
           >
             {pipelineTo}
@@ -742,7 +741,7 @@ function CapabilityCard({
           w-12
           border-b
           border-l
-          border-white/[0.05]
+          border-teal-100/[0.045]
         "
       />
 
@@ -757,7 +756,7 @@ function CapabilityCard({
           w-12
           border-r
           border-t
-          border-white/[0.05]
+          border-teal-100/[0.045]
         "
       />
     </motion.article>
@@ -779,14 +778,14 @@ function FlowNode({
         flex-1
         rounded-[16px]
         border
-        border-white/[0.07]
-        bg-white/[0.018]
+        border-teal-100/[0.065]
+        bg-[#0a1b26]/42
         px-4
         py-3
         text-center
         text-xs
         font-semibold
-        text-white/45
+        text-slate-400/85
       "
     >
       {text}
@@ -803,7 +802,7 @@ function FlowArrow() {
         w-4
         shrink-0
         rotate-90
-        text-cyan-300/25
+        text-teal-300/30
         lg:rotate-0
       "
     />

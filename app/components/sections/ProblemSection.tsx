@@ -165,6 +165,9 @@ export default function ProblemSection() {
         relative
         isolate
         overflow-hidden
+        border-t
+        border-teal-100/[0.045]
+        bg-[#06111a]
         px-6
         py-28
         md:px-10
@@ -189,7 +192,7 @@ export default function ProblemSection() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-fuchsia-500/[0.08]
+          bg-teal-400/[0.055]
           blur-[180px]
         "
       />
@@ -204,7 +207,7 @@ export default function ProblemSection() {
           h-[500px]
           w-[500px]
           rounded-full
-          bg-cyan-500/[0.05]
+          bg-sky-400/[0.045]
           blur-[160px]
         "
       />
@@ -219,7 +222,7 @@ export default function ProblemSection() {
           h-[550px]
           w-[550px]
           rounded-full
-          bg-purple-500/[0.05]
+          bg-indigo-400/[0.035]
           blur-[170px]
         "
       />
@@ -268,7 +271,7 @@ export default function ProblemSection() {
             font-medium
             uppercase
             tracking-[0.3em]
-            text-fuchsia-300/80
+            text-teal-200/80
           "
         >
           The research problem
@@ -307,7 +310,7 @@ export default function ProblemSection() {
               sm:text-5xl
               md:text-6xl
               lg:text-7xl
-              xl:text-[82px]
+              xl:text-[78px]
             "
           >
             Cancer research isn&apos;t short on information.
@@ -317,9 +320,9 @@ export default function ProblemSection() {
                 mt-2
                 block
                 bg-gradient-to-r
-                from-fuchsia-300
-                via-purple-300
-                to-cyan-300
+                from-teal-200
+                via-cyan-200
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
@@ -334,7 +337,7 @@ export default function ProblemSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/55
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
@@ -394,16 +397,16 @@ export default function ProblemSection() {
                   group
                   relative
                   overflow-hidden
-                  rounded-[28px]
+                  rounded-[24px]
                   border
-                  border-white/[0.09]
-                  bg-white/[0.025]
+                  border-teal-100/[0.085]
+                  bg-[#0a1b26]/58
                   p-7
-                  backdrop-blur-xl
+                  backdrop-blur-2xl
                   transition-colors
                   duration-500
-                  hover:border-white/[0.16]
-                  hover:bg-white/[0.045]
+                  hover:border-teal-100/[0.16]
+                  hover:bg-[#0d2430]/72
                   md:p-8
                 "
               >
@@ -415,9 +418,9 @@ export default function ProblemSection() {
                     absolute
                     inset-0
                     bg-gradient-to-br
-                    from-fuchsia-500/[0.08]
+                    from-teal-400/[0.055]
                     via-transparent
-                    to-cyan-500/[0.06]
+                    to-sky-400/[0.045]
                     opacity-0
                     transition-opacity
                     duration-500
@@ -437,7 +440,7 @@ export default function ProblemSection() {
                     h-px
                     bg-gradient-to-r
                     from-transparent
-                    via-white/20
+                    via-teal-100/20
                     to-transparent
                     opacity-0
                     transition-opacity
@@ -461,15 +464,15 @@ export default function ProblemSection() {
                         justify-center
                         rounded-2xl
                         border
-                        border-white/[0.08]
-                        bg-white/[0.035]
+                        border-teal-100/[0.08]
+                        bg-teal-100/[0.035]
                       "
                     >
                       <Icon
                         className="
                           h-5
                           w-5
-                          text-white/65
+                          text-teal-50/75
                         "
                       />
                     </div>
@@ -478,10 +481,10 @@ export default function ProblemSection() {
                       className="
                         h-4
                         w-4
-                        text-white/20
+                        text-slate-500/75
                         transition
                         duration-300
-                        group-hover:text-white/55
+                        group-hover:text-slate-300/80
                       "
                     />
                   </div>
@@ -521,7 +524,7 @@ export default function ProblemSection() {
                       text-[15px]
                       font-medium
                       leading-6
-                      text-white/70
+                      text-slate-200/85
                     "
                   >
                     {item.label}
@@ -537,7 +540,7 @@ export default function ProblemSection() {
                       max-w-[290px]
                       text-sm
                       leading-6
-                      text-white/38
+                      text-slate-400/80
                     "
                   >
                     {item.detail}
@@ -551,17 +554,17 @@ export default function ProblemSection() {
                     className="
                       mt-7
                       border-t
-                      border-white/[0.07]
+                      border-teal-100/[0.065]
                       pt-5
                       text-[11px]
                       font-medium
                       uppercase
                       leading-5
                       tracking-[0.12em]
-                      text-white/25
+                      text-slate-500/80
                       transition-colors
                       duration-300
-                      group-hover:text-white/45
+                      group-hover:text-slate-300/80
                     "
                   >
                     {item.source}
@@ -598,12 +601,12 @@ export default function ProblemSection() {
             relative
             mt-20
             overflow-hidden
-            rounded-[34px]
+            rounded-[28px]
             border
-            border-white/[0.09]
-            bg-white/[0.025]
+            border-teal-100/[0.085]
+            bg-[#0a1b26]/58
             p-8
-            backdrop-blur-xl
+            backdrop-blur-2xl
             md:p-10
             lg:p-12
           "
@@ -620,7 +623,7 @@ export default function ProblemSection() {
               w-[350px]
               -translate-y-1/2
               rounded-full
-              bg-fuchsia-500/[0.08]
+              bg-teal-400/[0.055]
               blur-[120px]
             "
           />
@@ -644,7 +647,7 @@ export default function ProblemSection() {
                   font-medium
                   uppercase
                   tracking-[0.28em]
-                  text-white/35
+                  text-slate-500
                 "
               >
                 BioLayers approach
@@ -672,7 +675,7 @@ export default function ProblemSection() {
                   max-w-2xl
                   text-sm
                   leading-7
-                  text-white/45
+                  text-slate-400/85
                   md:text-base
                 "
               >
@@ -694,8 +697,8 @@ export default function ProblemSection() {
                 gap-2
                 rounded-full
                 border
-                border-white/[0.12]
-                bg-white/[0.05]
+                border-teal-100/[0.14]
+                bg-teal-100/[0.055]
                 px-6
                 py-3.5
                 text-sm
@@ -703,8 +706,8 @@ export default function ProblemSection() {
                 text-white
                 transition
                 duration-300
-                hover:border-white/[0.2]
-                hover:bg-white/[0.09]
+                hover:border-teal-100/[0.24]
+                hover:bg-teal-100/[0.10]
               "
             >
               See how it works
@@ -746,8 +749,8 @@ export default function ProblemSection() {
             max-w-4xl
             text-center
             text-[11px]
-            leading-5
-            text-white/20
+            leading-6
+            text-slate-500/75
           "
         >
           Metrics represent distinct reference datasets

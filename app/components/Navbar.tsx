@@ -26,13 +26,18 @@ const navItems = [
   },
   {
     href: "#scientific-sources",
-    label: "Science",
+    label: "Research",
     id: "scientific-sources",
   },
   {
     href: "#research-copilot",
     label: "Copilot",
     id: "research-copilot",
+  },
+  {
+    href: "#research-mentorship",
+    label: "Mentorship",
+    id: "research-mentorship",
   },
   {
     href: "#about",
@@ -58,7 +63,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      setScrolled(window.scrollY > 18);
     };
 
     handleScroll();
@@ -153,6 +158,24 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   /* =======================================================
+     CLOSE MOBILE MENU ON DESKTOP RESIZE
+     ======================================================= */
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  /* =======================================================
      RENDER
      ======================================================= */
 
@@ -189,24 +212,28 @@ export default function Navbar() {
         <motion.div
           animate={{
             backgroundColor: scrolled
-              ? "rgba(2, 4, 13, 0.88)"
-              : "rgba(2, 4, 13, 0.42)",
+              ? "rgba(6, 17, 26, 0.93)"
+              : "rgba(6, 17, 26, 0.34)",
             borderColor: scrolled
-              ? "rgba(255,255,255,0.10)"
-              : "rgba(103,232,249,0.07)",
+              ? "rgba(153,246,228,0.13)"
+              : "rgba(94,234,212,0.07)",
+            boxShadow: scrolled
+              ? "0 22px 70px rgba(0,0,0,.30)"
+              : "0 12px 42px rgba(0,0,0,.14)",
           }}
           transition={{
-            duration: 0.3,
+            duration: 0.32,
+            ease: [0.16, 1, 0.3, 1],
           }}
           className="
             relative
             mx-auto
-            max-w-[1500px]
+            max-w-[1540px]
             overflow-hidden
-            rounded-[22px]
+            rounded-[20px]
             border
             backdrop-blur-2xl
-            shadow-[0_18px_70px_rgba(0,0,0,.24)]
+            
           "
         >
           {/* ================================================= */}
@@ -223,7 +250,7 @@ export default function Navbar() {
               h-px
               bg-gradient-to-r
               from-transparent
-              via-cyan-300/35
+              via-teal-200/30
               to-transparent
             "
           />
@@ -242,7 +269,7 @@ export default function Navbar() {
               h-44
               w-44
               rounded-full
-              bg-cyan-400/[0.05]
+              bg-teal-400/[0.055]
               blur-[70px]
             "
           />
@@ -257,8 +284,29 @@ export default function Navbar() {
               h-44
               w-44
               rounded-full
-              bg-violet-500/[0.06]
+              bg-sky-400/[0.045]
               blur-[70px]
+            "
+          />
+
+          <motion.div
+            aria-hidden="true"
+            animate={{
+              opacity: scrolled ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            className="
+              pointer-events-none
+              absolute
+              inset-x-0
+              bottom-0
+              h-px
+              bg-gradient-to-r
+              from-transparent
+              via-teal-200/20
+              to-transparent
             "
           />
 
@@ -266,11 +314,17 @@ export default function Navbar() {
           {/* NAVBAR CONTENT                                    */}
           {/* ================================================= */}
 
-          <div
+          <motion.div
+            animate={{
+              height: scrolled ? 64 : 72,
+            }}
+            transition={{
+              duration: 0.28,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             className="
               relative
               flex
-              h-[70px]
               items-center
               justify-between
               gap-5
@@ -302,6 +356,12 @@ export default function Navbar() {
                         scale: 1.05,
                       }
                 }
+                animate={{
+                  scale: scrolled ? 0.94 : 1,
+                }}
+                transition={{
+                  duration: 0.25,
+                }}
                 className="
                   relative
                   flex
@@ -312,8 +372,8 @@ export default function Navbar() {
                   overflow-hidden
                   rounded-[13px]
                   border
-                  border-cyan-300/20
-                  bg-cyan-300/[0.04]
+                  border-teal-200/20
+                  bg-teal-300/[0.045]
                 "
               >
                 <div
@@ -322,9 +382,9 @@ export default function Navbar() {
                     absolute
                     inset-0
                     bg-gradient-to-br
-                    from-cyan-300/[0.10]
+                    from-teal-200/[0.12]
                     via-transparent
-                    to-violet-400/[0.12]
+                    to-sky-300/[0.10]
                   "
                 />
 
@@ -334,7 +394,7 @@ export default function Navbar() {
                     text-[11px]
                     font-black
                     tracking-[0.08em]
-                    text-cyan-50
+                    text-teal-50
                   "
                 >
                   BL
@@ -358,11 +418,11 @@ export default function Navbar() {
                     mt-0.5
                     hidden
                     font-mono
-                    text-[7px]
+                    text-[9px]
                     font-bold
                     uppercase
                     tracking-[0.2em]
-                    text-white/25
+                    text-slate-500
                     sm:block
                   "
                 >
@@ -420,16 +480,16 @@ export default function Navbar() {
                   gap-2
                   rounded-[13px]
                   border
-                  border-violet-300/10
-                  bg-violet-300/[0.025]
+                  border-sky-200/10
+                  bg-sky-200/[0.025]
                   px-4
                   text-xs
                   font-semibold
-                  text-white/55
+                  text-slate-300/75
                   transition
                   duration-300
-                  hover:border-violet-300/20
-                  hover:bg-violet-300/[0.05]
+                  hover:border-sky-200/20
+                  hover:bg-sky-200/[0.05]
                   hover:text-white/80
                 "
               >
@@ -437,7 +497,7 @@ export default function Navbar() {
                   className="
                     h-3.5
                     w-3.5
-                    text-violet-300/55
+                    text-sky-300/70
                   "
                 />
 
@@ -472,16 +532,16 @@ export default function Navbar() {
                     gap-2
                     rounded-[13px]
                     border
-                    border-cyan-300/20
-                    bg-cyan-300/[0.06]
+                    border-teal-200/20
+                    bg-teal-300/[0.07]
                     px-4
                     text-xs
                     font-bold
-                    text-cyan-50
+                    text-teal-50
                     transition
                     duration-300
-                    hover:border-cyan-300/35
-                    hover:bg-cyan-300/[0.10]
+                    hover:border-teal-200/35
+                    hover:bg-teal-300/[0.11]
                   "
                 >
                   Open Workspace
@@ -522,7 +582,7 @@ export default function Navbar() {
                 justify-center
                 rounded-[13px]
                 border
-                border-white/[0.08]
+                border-teal-100/[0.08]
                 bg-white/[0.025]
                 text-white/65
                 transition
@@ -538,7 +598,7 @@ export default function Navbar() {
                 <Menu className="h-4 w-4" />
               )}
             </button>
-          </div>
+          </motion.div>
         </motion.div>
       </motion.header>
 
@@ -569,7 +629,7 @@ export default function Navbar() {
               fixed
               inset-0
               z-[90]
-              bg-[#020105]/92
+              bg-[#06111a]/96
               px-4
               pb-6
               pt-[100px]
@@ -590,7 +650,7 @@ export default function Navbar() {
                 w-[600px]
                 -translate-x-1/2
                 rounded-full
-                bg-violet-500/[0.08]
+                bg-teal-400/[0.065]
                 blur-[140px]
               "
             />
@@ -623,8 +683,8 @@ export default function Navbar() {
                 overflow-hidden
                 rounded-[26px]
                 border
-                border-white/[0.08]
-                bg-white/[0.02]
+                border-teal-100/[0.08]
+                bg-[#0a1b26]/58
                 p-4
                 shadow-[0_30px_100px_rgba(0,0,0,.4)]
               "
@@ -659,8 +719,8 @@ export default function Navbar() {
 
                         ${
                           active
-                            ? "border-cyan-300/15 bg-cyan-300/[0.055]"
-                            : "border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]"
+                            ? "border-teal-200/15 bg-teal-300/[0.06]"
+                            : "border-transparent hover:border-teal-100/[0.08] hover:bg-teal-100/[0.03]"
                         }
                       `}
                     >
@@ -671,7 +731,7 @@ export default function Navbar() {
                             text-[8px]
                             font-bold
                             tracking-[0.15em]
-                            text-cyan-300/35
+                            text-teal-300/45
                           "
                         >
                           0{index + 1}
@@ -700,8 +760,8 @@ export default function Navbar() {
                             h-1.5
                             w-1.5
                             rounded-full
-                            bg-cyan-300
-                            shadow-[0_0_10px_rgba(103,232,249,.8)]
+                            bg-teal-300
+                            shadow-[0_0_10px_rgba(94,234,212,.75)]
                           "
                         />
                       )}
@@ -718,7 +778,7 @@ export default function Navbar() {
                   grid
                   gap-2
                   border-t
-                  border-white/[0.06]
+                  border-teal-100/[0.055]
                   pt-4
                   sm:grid-cols-2
                 "
@@ -735,16 +795,16 @@ export default function Navbar() {
                     gap-2
                     rounded-[16px]
                     border
-                    border-violet-300/12
-                    bg-violet-300/[0.035]
+                    border-sky-200/12
+                    bg-sky-200/[0.035]
                     px-4
                     py-3.5
                     text-sm
                     font-semibold
-                    text-violet-100/70
+                    text-sky-100/75
                     transition
-                    hover:border-violet-300/25
-                    hover:bg-violet-300/[0.07]
+                    hover:border-sky-200/25
+                    hover:bg-sky-200/[0.07]
                     hover:text-white
                   "
                 >
@@ -766,16 +826,16 @@ export default function Navbar() {
                     gap-2
                     rounded-[16px]
                     border
-                    border-cyan-300/20
-                    bg-cyan-300/[0.065]
+                    border-teal-200/20
+                    bg-teal-300/[0.065]
                     px-4
                     py-3.5
                     text-sm
                     font-bold
-                    text-cyan-50
+                    text-teal-50
                     transition
-                    hover:border-cyan-300/35
-                    hover:bg-cyan-300/[0.10]
+                    hover:border-teal-200/35
+                    hover:bg-teal-300/[0.11]
                   "
                 >
                   Open Workspace
@@ -802,11 +862,11 @@ export default function Navbar() {
                   px-2
                   pb-1
                   font-mono
-                  text-[7px]
+                  text-[9px]
                   font-bold
                   uppercase
                   tracking-[0.2em]
-                  text-white/20
+                  text-slate-500/80
                 "
               >
                 <span
@@ -814,7 +874,7 @@ export default function Navbar() {
                     h-1.5
                     w-1.5
                     rounded-full
-                    bg-violet-300/60
+                    bg-teal-300/65
                   "
                 />
 
@@ -884,8 +944,8 @@ function DesktopNavItem({
             inset-0
             rounded-[12px]
             border
-            border-cyan-300/10
-            bg-cyan-300/[0.035]
+            border-teal-200/10
+            bg-teal-300/[0.035]
           "
         />
       )}
@@ -905,8 +965,8 @@ function DesktopNavItem({
             w-5
             -translate-x-1/2
             rounded-full
-            bg-cyan-300
-            shadow-[0_0_8px_rgba(103,232,249,.65)]
+            bg-teal-300
+            shadow-[0_0_8px_rgba(94,234,212,.65)]
           "
         />
       )}

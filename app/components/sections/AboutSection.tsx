@@ -47,13 +47,6 @@ const principles = [
 export default function AboutSection() {
   const reduceMotion = Boolean(useReducedMotion());
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-  };
-
   return (
     <section
       id="about"
@@ -63,8 +56,8 @@ export default function AboutSection() {
         isolate
         overflow-hidden
         border-t
-        border-white/[0.06]
-        bg-[#020105]
+        border-teal-100/[0.05]
+        bg-[#06111a]
         px-6
         py-28
         sm:px-10
@@ -84,7 +77,7 @@ export default function AboutSection() {
           absolute
           inset-0
           -z-30
-          bg-[#020105]
+          bg-[#06111a]
         "
       />
 
@@ -102,7 +95,7 @@ export default function AboutSection() {
           w-[1000px]
           -translate-x-1/2
           rounded-full
-          bg-violet-500/[0.075]
+          bg-teal-400/[0.055]
           blur-[180px]
         "
       />
@@ -133,12 +126,12 @@ export default function AboutSection() {
           h-[500px]
           w-[500px]
           rounded-full
-          bg-cyan-400/[0.065]
+          bg-sky-400/[0.045]
           blur-[170px]
         "
       />
 
-      {/* Violet atmosphere */}
+      {/* Teal atmosphere */}
 
       <motion.div
         aria-hidden="true"
@@ -164,7 +157,7 @@ export default function AboutSection() {
           h-[540px]
           w-[540px]
           rounded-full
-          bg-violet-500/[0.07]
+          bg-teal-400/[0.045]
           blur-[180px]
         "
       />
@@ -183,8 +176,8 @@ export default function AboutSection() {
         "
         style={{
           backgroundImage: `
-            linear-gradient(rgba(103,232,249,.18) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,92,246,.15) 1px, transparent 1px)
+            linear-gradient(rgba(94,234,212,.14) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(125,211,252,.10) 1px, transparent 1px)
           `,
           backgroundSize: "80px 80px",
         }}
@@ -238,11 +231,11 @@ export default function AboutSection() {
                 gap-3
                 rounded-full
                 border
-                border-cyan-300/15
-                bg-cyan-300/[0.035]
+                border-teal-200/15
+                bg-teal-300/[0.04]
                 px-4
                 py-2
-                backdrop-blur-xl
+                backdrop-blur-2xl
               "
             >
               <span
@@ -251,18 +244,18 @@ export default function AboutSection() {
                   h-1.5
                   w-1.5
                   rounded-full
-                  bg-cyan-300
-                  shadow-[0_0_12px_rgba(103,232,249,.65)]
+                  bg-teal-300
+                  shadow-[0_0_12px_rgba(94,234,212,.60)]
                 "
               />
 
               <span
                 className="
                   text-[9px]
-                  font-black
+                  font-semibold
                   uppercase
                   tracking-[0.3em]
-                  text-cyan-100/75
+                  text-teal-50/80
                 "
               >
                 About BioLayers AI
@@ -275,9 +268,9 @@ export default function AboutSection() {
                 mt-7
                 max-w-5xl
                 text-4xl
-                font-black
+                font-semibold
                 leading-[0.98]
-                tracking-[-0.06em]
+                tracking-[-0.05em]
                 text-white
                 sm:text-5xl
                 lg:text-6xl
@@ -290,9 +283,9 @@ export default function AboutSection() {
                 className="
                   block
                   bg-gradient-to-r
-                  from-cyan-300
-                  via-white
-                  to-violet-400
+                  from-teal-200
+                  via-cyan-100
+                  to-sky-300
                   bg-clip-text
                   text-transparent
                 "
@@ -308,7 +301,7 @@ export default function AboutSection() {
                 text-base
                 font-medium
                 leading-8
-                text-slate-300/70
+                text-slate-300/82
                 sm:text-lg
                 sm:leading-9
               "
@@ -325,14 +318,14 @@ export default function AboutSection() {
           <div
             className="
               border-l
-              border-white/[0.08]
+              border-teal-100/[0.07]
               pl-6
               lg:mb-2
               lg:pl-8
             "
           >
             <div className="flex items-center gap-3">
-              <Microscope className="h-4 w-4 text-violet-300/60" />
+              <Microscope className="h-4 w-4 text-teal-200/65" />
 
               <span
                 className="
@@ -341,7 +334,7 @@ export default function AboutSection() {
                   font-bold
                   uppercase
                   tracking-[0.25em]
-                  text-violet-200/45
+                  text-teal-100/55
                 "
               >
                 Research origin
@@ -355,7 +348,7 @@ export default function AboutSection() {
                 font-semibold
                 leading-8
                 tracking-[-0.02em]
-                text-white/75
+                text-teal-50/82
               "
             >
               Built from a researcher&apos;s frustration with fragmented
@@ -367,7 +360,7 @@ export default function AboutSection() {
                 mt-4
                 text-sm
                 leading-7
-                text-slate-400/65
+                text-slate-400/85
               "
             >
               The idea is simple: researchers should not have to reconstruct
@@ -407,8 +400,8 @@ export default function AboutSection() {
             h-px
             origin-left
             bg-gradient-to-r
-            from-cyan-300/30
-            via-white/[0.08]
+            from-teal-200/30
+            via-cyan-100/[0.08]
             to-transparent
             lg:mt-28
           "
@@ -466,14 +459,14 @@ export default function AboutSection() {
                   overflow-hidden
                   rounded-[26px]
                   border
-                  border-white/[0.07]
-                  bg-white/[0.018]
+                  border-teal-100/[0.065]
+                  bg-[#0a1b26]/44
                   p-6
-                  backdrop-blur-xl
+                  backdrop-blur-2xl
                   transition-colors
                   duration-300
-                  hover:border-white/[0.12]
-                  hover:bg-white/[0.025]
+                  hover:border-teal-100/[0.13]
+                  hover:bg-teal-100/[0.035]
                   sm:p-7
                 "
               >
@@ -489,11 +482,11 @@ export default function AboutSection() {
                     h-52
                     w-52
                     rounded-full
-                    bg-violet-500/[0.07]
+                    bg-teal-400/[0.045]
                     blur-[80px]
                     transition-all
                     duration-500
-                    group-hover:bg-cyan-400/[0.09]
+                    group-hover:bg-teal-300/[0.07]
                   "
                 />
 
@@ -513,10 +506,10 @@ export default function AboutSection() {
                       className="
                         font-mono
                         text-[8px]
-                        font-black
+                        font-semibold
                         uppercase
                         tracking-[0.25em]
-                        text-cyan-200/35
+                        text-teal-200/45
                       "
                     >
                       {principle.label}
@@ -529,7 +522,7 @@ export default function AboutSection() {
                         text-[10px]
                         font-bold
                         tracking-[0.2em]
-                        text-white/20
+                        text-slate-500/75
                       "
                     >
                       {principle.number}
@@ -545,11 +538,11 @@ export default function AboutSection() {
                       justify-center
                       rounded-2xl
                       border
-                      border-white/[0.07]
-                      bg-white/[0.025]
+                      border-teal-100/[0.065]
+                      bg-teal-100/[0.03]
                     "
                   >
-                    <Icon className="h-4 w-4 text-white/45" />
+                    <Icon className="h-4 w-4 text-slate-300/75" />
                   </div>
                 </div>
 
@@ -560,9 +553,9 @@ export default function AboutSection() {
                     relative
                     mt-10
                     text-2xl
-                    font-black
+                    font-semibold
                     tracking-[-0.035em]
-                    text-white/90
+                    text-teal-50/92
                   "
                 >
                   {principle.title}
@@ -574,7 +567,7 @@ export default function AboutSection() {
                     mt-5
                     text-sm
                     leading-7
-                    text-slate-400/70
+                    text-slate-400/88
                   "
                 >
                   {principle.text}
@@ -589,7 +582,7 @@ export default function AboutSection() {
                     mt-8
                     h-px
                     overflow-hidden
-                    bg-white/[0.05]
+                    bg-teal-100/[0.045]
                   "
                 >
                   <div
@@ -597,8 +590,8 @@ export default function AboutSection() {
                       h-full
                       w-20
                       bg-gradient-to-r
-                      from-cyan-300/45
-                      to-violet-400/20
+                      from-teal-200/45
+                      to-sky-300/20
                     "
                   />
                 </div>
@@ -637,13 +630,13 @@ export default function AboutSection() {
             relative
             mt-16
             overflow-hidden
-            rounded-[32px]
+            rounded-[28px]
             border
-            border-white/[0.075]
-            bg-white/[0.018]
+            border-teal-100/[0.07]
+            bg-[#0a1b26]/44
             px-6
             py-12
-            backdrop-blur-xl
+            backdrop-blur-2xl
             sm:px-10
             sm:py-14
             lg:mt-20
@@ -665,7 +658,7 @@ export default function AboutSection() {
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              bg-violet-500/[0.065]
+              bg-teal-400/[0.045]
               blur-[120px]
             "
           />
@@ -684,10 +677,10 @@ export default function AboutSection() {
                 className="
                   font-mono
                   text-[8px]
-                  font-black
+                  font-semibold
                   uppercase
                   tracking-[0.28em]
-                  text-violet-200/45
+                  text-teal-100/55
                 "
               >
                 The long-term vision
@@ -699,7 +692,7 @@ export default function AboutSection() {
                   h-px
                   w-12
                   bg-gradient-to-r
-                  from-violet-300/60
+                  from-teal-200/60
                   to-transparent
                 "
               />
@@ -710,33 +703,33 @@ export default function AboutSection() {
                 className="
                   max-w-4xl
                   text-2xl
-                  font-black
+                  font-semibold
                   leading-[1.3]
                   tracking-[-0.04em]
-                  text-white/90
+                  text-teal-50/92
                   sm:text-3xl
                   lg:text-4xl
                 "
               >
                 A research environment where scientists can move from
 
-                <span className="text-cyan-200">
+                <span className="text-teal-100">
                   {" "}evidence
                 </span>
 
-                <span className="text-white/25">
+                <span className="text-slate-500/80">
                   {" "}→{" "}
                 </span>
 
-                <span className="text-violet-200">
+                <span className="text-sky-200">
                   mechanism
                 </span>
 
-                <span className="text-white/25">
+                <span className="text-slate-500/80">
                   {" "}→{" "}
                 </span>
 
-                <span className="text-fuchsia-200">
+                <span className="text-cyan-200">
                   hypothesis
                 </span>
 
@@ -775,7 +768,7 @@ export default function AboutSection() {
           className="
             mt-24
             border-t
-            border-white/[0.06]
+            border-teal-100/[0.05]
             pt-14
             lg:mt-32
             lg:pt-16
@@ -794,15 +787,43 @@ export default function AboutSection() {
             <div>
               <div
                 className="
-                  font-mono
-                  text-[8px]
-                  font-black
-                  uppercase
-                  tracking-[0.3em]
-                  text-cyan-200/35
+                  flex
+                  flex-wrap
+                  items-center
+                  gap-3
                 "
               >
-                BioLayers AI
+                <div
+                  className="
+                    font-mono
+                    text-[8px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.3em]
+                    text-teal-200/45
+                  "
+                >
+                  BioLayers AI
+                </div>
+
+                <span
+                  className="
+                    rounded-full
+                    border
+                    border-emerald-300/10
+                    bg-emerald-300/[0.035]
+                    px-2.5
+                    py-1
+                    font-mono
+                    text-[7px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.16em]
+                    text-emerald-200/65
+                  "
+                >
+                  Research platform in development
+                </span>
               </div>
 
               <h3
@@ -810,7 +831,7 @@ export default function AboutSection() {
                   mt-5
                   max-w-3xl
                   text-3xl
-                  font-black
+                  font-semibold
                   tracking-[-0.045em]
                   text-white
                   sm:text-4xl
@@ -818,15 +839,14 @@ export default function AboutSection() {
                 "
               >
                 See the mechanism,
-                <span className="block text-white/40">
+                <span className="block text-slate-400/85">
                   not just the paper.
                 </span>
               </h3>
             </div>
 
-            <button
-              type="button"
-              onClick={scrollToTop}
+            <a
+              href="/explore"
               className="
                 group
                 inline-flex
@@ -835,18 +855,18 @@ export default function AboutSection() {
                 gap-4
                 rounded-full
                 border
-                border-cyan-300/20
-                bg-cyan-300/[0.055]
+                border-teal-200/20
+                bg-teal-300/[0.055]
                 px-6
                 py-4
                 text-sm
                 font-bold
-                text-cyan-50
-                backdrop-blur-xl
+                text-teal-50
+                backdrop-blur-2xl
                 transition-all
                 duration-300
-                hover:border-cyan-300/35
-                hover:bg-cyan-300/[0.09]
+                hover:border-teal-200/35
+                hover:bg-teal-300/[0.09]
               "
             >
               Explore BioLayers
@@ -860,7 +880,7 @@ export default function AboutSection() {
                   group-hover:translate-x-1
                 "
               />
-            </button>
+            </a>
           </div>
 
           {/* Footer line */}
@@ -872,7 +892,7 @@ export default function AboutSection() {
               flex-col
               gap-3
               border-t
-              border-white/[0.045]
+              border-teal-100/[0.04]
               pt-6
               sm:flex-row
               sm:items-center
@@ -885,7 +905,7 @@ export default function AboutSection() {
                 text-[7px]
                 uppercase
                 tracking-[0.24em]
-                text-white/20
+                text-slate-500/75
               "
             >
               Computational oncology · Mechanistic intelligence
@@ -897,10 +917,10 @@ export default function AboutSection() {
                 text-[7px]
                 uppercase
                 tracking-[0.24em]
-                text-white/15
+                text-slate-600/80
               "
             >
-              Research platform in development
+              Evidence-aware biological reasoning
             </span>
           </div>
         </motion.div>

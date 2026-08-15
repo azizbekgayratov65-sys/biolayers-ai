@@ -75,11 +75,7 @@ export default function CopilotPanel({
           onClick={() =>
             setCopilotOpen(true)
           }
-          className={`fixed bottom-5 right-5 z-[80] items-center gap-2 rounded-full ${
-            demoMode
-              ? "hidden"
-              : "hidden lg:flex"
-          } border border-violet-300/20 bg-[linear-gradient(135deg,rgba(139,92,246,.92),rgba(34,211,238,.88))] px-4 py-3 text-xs font-bold text-white shadow-[0_18px_60px_rgba(139,92,246,.28)] transition hover:-translate-y-1 hover:brightness-110`}
+          className={`fixed bottom-5 right-5 z-[80] items-center gap-2 rounded-full ${demoMode ? "hidden" : "hidden lg:flex"} border border-teal-200/[0.16] bg-[linear-gradient(135deg,rgba(153,246,228,.94),rgba(103,232,249,.9))] px-4 py-3 text-[11px] font-extrabold text-[#062029] shadow-[0_16px_48px_rgba(45,212,191,.2)] transition duration-300 hover:-translate-y-1`}
         >
           <span className="h-2 w-2 rounded-full bg-white shadow-[0_0_10px_white]" />
           Copilot
@@ -103,7 +99,7 @@ export default function CopilotPanel({
                 onClick={() =>
                   setCopilotOpen(false)
                 }
-                className="fixed inset-0 z-[90] bg-black/45 backdrop-blur-[2px]"
+                className="fixed inset-0 z-[90] bg-[#020b12]/55 backdrop-blur-[5px]"
               />
 
               <motion.aside
@@ -126,11 +122,11 @@ export default function CopilotPanel({
                   duration: 0.35,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="fixed bottom-0 right-0 top-0 z-[100] flex w-full flex-col border-l border-white/[0.09] bg-[#050814]/96 shadow-[-30px_0_100px_rgba(0,0,0,.42)] backdrop-blur-3xl sm:w-[520px]"
+                className="fixed bottom-0 right-0 top-0 z-[100] flex w-full flex-col border-l border-teal-100/[0.08] bg-[#081722]/97 shadow-[-30px_0_100px_rgba(1,8,15,.48)] backdrop-blur-3xl sm:w-[540px]"
               >
-                <div className="flex items-start justify-between border-b border-white/[0.08] px-5 py-5">
+                <div className="flex items-start justify-between border-b border-teal-100/[0.065] px-5 py-5">
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-violet-300">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-teal-300">
                       BioLayers Copilot
                     </p>
 
@@ -138,7 +134,7 @@ export default function CopilotPanel({
                       {selectedEntity.label}
                     </h2>
 
-                    <p className="mt-1 text-xs capitalize text-slate-500">
+                    <p className="mt-1 text-xs capitalize text-slate-400">
                       {selectedEntity.type} ·{" "}
                       {relatedConnectionCount} direct links ·{" "}
                       {pubMedPaperCount} papers
@@ -150,13 +146,13 @@ export default function CopilotPanel({
                     onClick={() =>
                       setCopilotOpen(false)
                     }
-                    className="rounded-[12px] border border-white/10 px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-white/[0.05] hover:text-white"
+                    className="rounded-[12px] border border-white/10 px-3 py-2 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
                   >
                     Close
                   </button>
                 </div>
 
-                <div className="border-b border-white/[0.08] px-5 py-4">
+                <div className="border-b border-teal-100/[0.065] px-5 py-4">
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                     {(
                       [
@@ -205,8 +201,8 @@ export default function CopilotPanel({
                           className={`rounded-[13px] border px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] transition ${
                             copilotMode ===
                             mode
-                              ? "border-violet-300/25 bg-violet-300/[0.09] text-violet-200"
-                              : "border-white/[0.08] bg-white/[0.025] text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
+                              ? "border-teal-200/25 bg-teal-200/[0.09] text-violet-200"
+                              : "border-teal-100/[0.065] bg-white/[0.018] text-slate-400 hover:bg-white/[0.05] hover:text-slate-200"
                           } disabled:cursor-not-allowed disabled:opacity-50`}
                         >
                           {label}
@@ -220,8 +216,8 @@ export default function CopilotPanel({
                   {copilotMessages.length ===
                     0 &&
                     !copilotLoading && (
-                      <div className="rounded-[24px] border border-white/[0.08] bg-[linear-gradient(145deg,rgba(139,92,246,.07),rgba(34,211,238,.035))] p-5">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+                      <div className="rounded-[24px] border border-teal-100/[0.065] bg-[linear-gradient(145deg,rgba(139,92,246,.07),rgba(34,211,238,.035))] p-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
                           Grounded context
                         </p>
 
@@ -257,7 +253,7 @@ export default function CopilotPanel({
                         "user" ? (
                           <div
                             key={message.id}
-                            className="ml-auto max-w-[86%] rounded-[20px] rounded-br-[6px] bg-gradient-to-r from-violet-400 to-cyan-300 px-4 py-3 text-sm leading-6 text-slate-950 shadow-[0_12px_30px_rgba(139,92,246,.16)]"
+                            className="ml-auto max-w-[86%] rounded-[20px] rounded-br-[6px] bg-gradient-to-r from-teal-300 to-sky-300 px-4 py-3 text-sm leading-6 text-slate-950 shadow-[0_12px_30px_rgba(139,92,246,.16)]"
                           >
                             {
                               message.content
@@ -266,7 +262,7 @@ export default function CopilotPanel({
                         ) : (
                           <div
                             key={message.id}
-                            className="rounded-[22px] border border-white/[0.08] bg-white/[0.028] p-5"
+                            className="rounded-[22px] border border-teal-100/[0.065] bg-[#0a1b26]/52 p-5"
                           >
                             {message.title && (
                               <h3 className="text-lg font-semibold tracking-[-0.025em] text-white">
@@ -288,7 +284,7 @@ export default function CopilotPanel({
                                 .length >
                                 0 && (
                                 <div className="mt-5">
-                                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
                                     Key points
                                   </p>
 
@@ -300,10 +296,10 @@ export default function CopilotPanel({
                                       ) => (
                                         <div
                                           key={`${message.id}-point-${index}`}
-                                          className="flex gap-3 rounded-[14px] border border-white/[0.06] bg-black/20 p-3"
+                                          className="flex gap-3 rounded-[14px] border border-teal-100/[0.045] bg-black/[0.10] p-3"
                                         >
                                           <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_8px_#67e8f9]" />
-                                          <p className="text-xs leading-6 text-slate-400">
+                                          <p className="text-[11px] leading-5 text-slate-400">
                                             {
                                               point
                                             }
@@ -321,7 +317,7 @@ export default function CopilotPanel({
                                 .length >
                                 0 && (
                                 <div className="mt-5 rounded-[16px] border border-amber-300/12 bg-amber-300/[0.035] p-4">
-                                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
                                     Limitations
                                   </p>
 
@@ -333,7 +329,7 @@ export default function CopilotPanel({
                                       ) => (
                                         <p
                                           key={`${message.id}-limitation-${index}`}
-                                          className="text-xs leading-6 text-amber-100/65"
+                                          className="text-[11px] leading-5 text-amber-100/65"
                                         >
                                           •{" "}
                                           {
@@ -352,7 +348,7 @@ export default function CopilotPanel({
                                 .length >
                                 0 && (
                                 <div className="mt-5">
-                                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-violet-300">
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">
                                     Supplied PubMed references
                                   </p>
 
@@ -366,9 +362,9 @@ export default function CopilotPanel({
                                           href={`https://pubmed.ncbi.nlm.nih.gov/${citation.pmid}/`}
                                           target="_blank"
                                           rel="noreferrer"
-                                          className="block rounded-[14px] border border-white/[0.06] bg-black/20 p-3 transition hover:border-violet-300/20 hover:bg-violet-300/[0.035]"
+                                          className="block rounded-[14px] border border-teal-100/[0.045] bg-black/[0.10] p-3 transition hover:border-teal-200/20 hover:bg-teal-200/[0.035]"
                                         >
-                                          <p className="font-mono text-[8px] text-violet-300/70">
+                                          <p className="font-mono text-[9px] text-teal-300/70">
                                             PMID{" "}
                                             {
                                               citation.pmid
@@ -381,7 +377,7 @@ export default function CopilotPanel({
                                             }
                                           </p>
 
-                                          <p className="mt-2 text-[10px] leading-5 text-slate-600">
+                                          <p className="mt-2 text-[11px] leading-5 text-slate-400">
                                             {
                                               citation.support
                                             }
@@ -438,9 +434,9 @@ export default function CopilotPanel({
                   </div>
 
                   {copilotLoading && (
-                    <div className="mt-4 rounded-[22px] border border-violet-300/12 bg-violet-300/[0.035] p-5">
+                    <div className="mt-4 rounded-[22px] border border-teal-200/12 bg-teal-200/[0.035] p-5">
                       <div className="flex items-center gap-3">
-                        <span className="h-2 w-2 animate-pulse rounded-full bg-violet-300 shadow-[0_0_12px_#c4b5fd]" />
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-teal-200 shadow-[0_0_12px_#c4b5fd]" />
                         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-200">
                           Copilot is reasoning
                         </p>
@@ -456,7 +452,7 @@ export default function CopilotPanel({
 
                   {copilotError && (
                     <div className="mt-4 rounded-[18px] border border-rose-300/15 bg-rose-300/[0.04] p-4">
-                      <p className="text-xs leading-6 text-rose-200">
+                      <p className="text-[11px] leading-5 text-rose-200">
                         {
                           copilotError
                         }
@@ -472,9 +468,9 @@ export default function CopilotPanel({
                       "custom",
                     );
                   }}
-                  className="border-t border-white/[0.08] p-4"
+                  className="border-t border-teal-100/[0.065] p-4"
                 >
-                  <div className="rounded-[20px] border border-white/[0.1] bg-black/25 p-2">
+                  <div className="rounded-[20px] border border-white/[0.1] bg-black/[0.12] p-2">
                     <textarea
                       value={copilotQuestion}
                       onChange={(event) => {
@@ -491,11 +487,11 @@ export default function CopilotPanel({
                       }}
                       placeholder={`Ask about ${selectedEntity.label}...`}
                       rows={3}
-                      className="w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 text-white outline-none placeholder:text-slate-600"
+                      className="w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 text-white outline-none placeholder:text-slate-400"
                     />
 
                     <div className="flex items-center justify-between gap-3 px-2 pb-1">
-                      <p className="text-[9px] text-slate-600">
+                      <p className="text-[9px] text-slate-400">
                         Grounded in graph + PubMed
                       </p>
 
@@ -504,7 +500,7 @@ export default function CopilotPanel({
                         disabled={
                           copilotLoading
                         }
-                        className="rounded-[13px] bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-[13px] bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {copilotLoading
                           ? "Thinking..."
@@ -529,11 +525,11 @@ function CopilotContextMetric({
   value: string;
 }) {
   return (
-    <div className="rounded-[14px] border border-white/[0.07] bg-black/20 px-3 py-3 text-center">
+    <div className="rounded-[14px] border border-teal-100/[0.055] bg-black/[0.10] px-3 py-3 text-center">
       <p className="text-base font-semibold text-white">
         {value}
       </p>
-      <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.14em] text-slate-600">
+      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
         {label}
       </p>
     </div>

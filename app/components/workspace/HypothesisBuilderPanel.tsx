@@ -343,175 +343,162 @@ export default function HypothesisBuilderPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[64] bg-[#030403]/60 backdrop-blur-sm"
+            className="absolute inset-0 z-[64] bg-[#020b12]/62 backdrop-blur-[6px]"
           />
 
           <motion.section
-            initial={{
-              opacity: 0,
-              y: 36,
-              scale: 0.985,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: 36,
-              scale: 0.985,
-            }}
-            transition={{
-              duration: 0.34,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="absolute bottom-5 left-1/2 top-5 z-[67] flex w-[min(760px,calc(100vw-40px))] -translate-x-1/2 flex-col overflow-hidden rounded-[24px] border border-[#4a4435] bg-[#11110d]/98 shadow-[0_34px_130px_rgba(0,0,0,.68)]"
+            initial={{ opacity: 0, y: 34, scale: 0.985, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 34, scale: 0.985, filter: "blur(8px)" }}
+            transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute bottom-5 left-1/2 top-5 z-[67] flex w-[min(820px,calc(100vw-40px))] -translate-x-1/2 flex-col overflow-hidden rounded-[26px] border border-teal-100/[0.08] bg-[#081722]/98 shadow-[0_34px_130px_rgba(1,8,15,.64)] backdrop-blur-3xl"
           >
-            <header className="border-b border-[#383326] bg-[#17160f] px-6 py-5">
-              <div className="flex items-start justify-between gap-6">
-                <div>
-                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.21em] text-[#a99d78]">
-                    BL-HYP / Research notebook
-                  </p>
+            <header className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-7">
+              <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-teal-300/[0.045] blur-3xl" />
+              <div className="pointer-events-none absolute -left-20 bottom-[-110px] h-56 w-56 rounded-full bg-sky-300/[0.025] blur-3xl" />
+              <div className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-teal-200/[0.18] to-transparent" />
 
-                  <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#f0ead7]">
+              <div className="relative flex items-start justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <motion.span
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      animate={{ opacity: [0.55, 1, 0.55], scale: [1, 1.22, 1] }}
+                      transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">
+                      BL-HYP / Research Engine
+                    </p>
+                  </div>
+
+                  <h2 className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-[#f0fbfa] sm:text-[30px]">
                     Hypothesis Builder
                   </h2>
 
-                  <p className="mt-2 max-w-xl text-xs leading-6 text-[#aaa38f]">
-                    Convert the current graph context into a falsifiable
-                    research question, a mechanistic hypothesis, and an
-                    evidence-gap checklist.
+                  <p className="mt-2 max-w-xl text-[12px] leading-6 text-slate-400">
+                    Convert the current graph context into a falsifiable research
+                    question, mechanistic hypothesis, experimental direction,
+                    and evidence-gap checklist.
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-[10px] border border-[#484231] bg-[#0f0f0b] px-3 py-2 font-mono text-[10px] text-[#9a927d] transition hover:border-[#77705c] hover:text-white"
+                  className="rounded-[11px] border border-teal-100/[0.07] bg-white/[0.018] px-3 py-2 font-mono text-[10px] text-slate-400 transition duration-300 hover:bg-white/[0.04] hover:text-slate-100"
                 >
                   ESC
                 </button>
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <NotebookBlock
-                index="01"
-                label="Research question"
-                text={draft.question}
-              />
-
-              <NotebookBlock
-                index="02"
-                label="Testable hypothesis"
-                text={draft.hypothesis}
-                emphasized
-              />
-
-              <NotebookBlock
-                index="03"
-                label="Graph rationale"
-                text={draft.rationale}
-              />
-
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                <NotebookBlock
-                  index="04"
-                  label="Perturbation concept"
-                  text={draft.perturbation}
-                />
-
-                <NotebookBlock
-                  index="05"
-                  label="Falsification criterion"
-                  text={draft.falsification}
-                />
+            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+              <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                <StatusMetric label="Mode" value={activePath ? "Path" : "Entity"} />
+                <StatusMetric label="Entities" value={String(activePath?.nodes.length ?? 1)} />
+                <StatusMetric label="Relations" value={String(activePath?.edges.length ?? 0)} />
+                <StatusMetric label="Readouts" value={String(draft.readouts.length)} />
               </div>
 
-              <section className="mt-5 border border-[#3a3528] bg-[#15140e]">
-                <div className="flex items-center justify-between border-b border-[#302c22] px-4 py-3">
+              <NotebookBlock index="01" label="Research question" text={draft.question} />
+              <NotebookBlock index="02" label="Testable hypothesis" text={draft.hypothesis} emphasized />
+              <NotebookBlock index="03" label="Graph rationale" text={draft.rationale} />
+
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <NotebookBlock index="04" label="Perturbation concept" text={draft.perturbation} />
+                <NotebookBlock index="05" label="Falsification criterion" text={draft.falsification} />
+              </div>
+
+              <section className="mt-3 overflow-hidden rounded-[16px] border border-teal-100/[0.055] bg-[#0a1b26]/46">
+                <div className="flex items-center justify-between border-b border-teal-100/[0.05] px-4 py-3.5">
                   <div>
-                    <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#77705e]">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-sky-300">
                       06 / Suggested readouts
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-[#ded7c2]">
+                    <p className="mt-1.5 text-[13px] font-semibold text-slate-100">
                       What would you actually measure?
                     </p>
                   </div>
-
-                  <span className="font-mono text-[9px] text-[#716b59]">
-                    {draft.readouts.length} READOUTS
+                  <span className="rounded-full border border-sky-200/[0.08] bg-sky-200/[0.025] px-2.5 py-1 font-mono text-[9px] text-sky-200/70">
+                    {draft.readouts.length} readouts
                   </span>
                 </div>
 
-                <div className="divide-y divide-[#2c291f]">
-                  {draft.readouts.map(
-                    (item, index) => (
-                      <div
-                        key={item}
-                        className="flex gap-4 px-4 py-3"
-                      >
-                        <span className="font-mono text-[9px] text-[#756f5c]">
-                          {String(
-                            index + 1,
-                          ).padStart(2, "0")}
-                        </span>
-
-                        <p className="text-xs leading-6 text-[#aaa38f]">
-                          {item}
-                        </p>
-                      </div>
-                    ),
-                  )}
+                <div className="divide-y divide-teal-100/[0.045]">
+                  {draft.readouts.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.035 }}
+                      className="group flex gap-4 px-4 py-3.5 transition hover:bg-white/[0.015]"
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[8px] border border-sky-200/[0.08] bg-sky-200/[0.025] font-mono text-[8px] text-sky-300">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <p className="text-[11px] leading-6 text-slate-400 group-hover:text-slate-300">
+                        {item}
+                      </p>
+                    </motion.div>
+                  ))}
                 </div>
               </section>
 
-              <section className="mt-5 border border-[#5a3c30] bg-[#1c120e] p-4">
-                <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#c57e61]">
-                  07 / Evidence gap
-                </p>
-
-                <p className="mt-2 text-sm leading-7 text-[#e0b9a7]">
-                  {draft.evidenceGap}
-                </p>
+              <section className="mt-3 rounded-[16px] border border-amber-200/[0.08] bg-amber-200/[0.025] p-4">
+                <div className="flex gap-3">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,.35)]" />
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-amber-300">
+                      07 / Evidence gap
+                    </p>
+                    <p className="mt-2 text-[12px] leading-6 text-amber-100/75">
+                      {draft.evidenceGap}
+                    </p>
+                  </div>
+                </div>
               </section>
 
-              <section className="mt-5 border border-[#363226] bg-[#12110c] p-4">
-                <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#77705e]">
+              <section className="mt-3 rounded-[16px] border border-teal-100/[0.055] bg-black/[0.08] p-4">
+                <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-slate-500">
                   Graph provenance
                 </p>
-
-                <p className="mt-2 text-xs leading-6 text-[#918a77]">
+                <p className="mt-2 text-[11px] leading-6 text-slate-500">
                   {draft.provenance}
                 </p>
               </section>
             </div>
 
-            <footer className="flex flex-col gap-3 border-t border-[#383326] bg-[#16150f] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-md text-[10px] leading-5 text-[#7f7866]">
-                Research planning aid only. Graph relationships and
-                confidence values do not establish causality or clinical
-                validity.
-              </p>
+            <footer className="flex flex-col gap-3 border-t border-teal-100/[0.065] bg-[#081722]/95 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+              <div className="flex max-w-lg gap-2.5">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300" />
+                <p className="text-[10px] leading-5 text-slate-500">
+                  Research planning aid only. Graph relationships and confidence
+                  values do not establish causality or clinical validity.
+                </p>
+              </div>
 
               <button
                 type="button"
-                onClick={() => {
-                  void copyDraft();
-                }}
-                className="rounded-[11px] border border-[#d7c9a4]/30 bg-[#e8d9b5] px-4 py-2.5 font-mono text-[9px] font-black uppercase tracking-[0.14em] text-[#17150f] transition hover:brightness-110"
+                onClick={() => void copyDraft()}
+                className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#062029] shadow-[0_10px_26px_rgba(45,212,191,.11)] transition duration-300 hover:-translate-y-0.5"
               >
-                {copied
-                  ? "Copied"
-                  : "Copy research brief"}
+                <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
+                <span className="relative">{copied ? "Copied ✓" : "Copy research brief"}</span>
               </button>
             </footer>
           </motion.section>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function StatusMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[13px] border border-teal-100/[0.05] bg-black/[0.08] px-3 py-3">
+      <p className="text-[8px] font-bold uppercase tracking-[0.13em] text-slate-600">{label}</p>
+      <p className="mt-1.5 font-mono text-[12px] font-semibold text-teal-100">{value}</p>
+    </div>
   );
 }
 
@@ -527,26 +514,32 @@ function NotebookBlock({
   emphasized?: boolean;
 }) {
   return (
-    <section
-      className={`border p-4 ${
+    <motion.section
+      initial={{ opacity: 0, y: 7 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`mt-3 rounded-[16px] border p-4 transition duration-300 ${
         emphasized
-          ? "border-[#d7c9a4]/30 bg-[#1b1a12]"
-          : "border-[#39352a] bg-[#14130e]"
+          ? "border-teal-200/[0.13] bg-teal-200/[0.035] shadow-[0_12px_38px_rgba(45,212,191,.035)]"
+          : "border-teal-100/[0.055] bg-[#0a1b26]/46"
       }`}
     >
-      <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#77705e]">
-        {index} / {label}
-      </p>
+      <div className="flex items-center gap-2">
+        <span className={`font-mono text-[9px] font-bold ${emphasized ? "text-teal-300" : "text-slate-600"}`}>
+          {index}
+        </span>
+        <span className="h-px w-5 bg-teal-100/[0.08]" />
+        <p className={`text-[9px] font-bold uppercase tracking-[0.16em] ${emphasized ? "text-teal-300" : "text-slate-500"}`}>
+          {label}
+        </p>
+      </div>
 
-      <p
-        className={`mt-3 leading-7 ${
-          emphasized
-            ? "text-base font-medium text-[#f0ead7]"
-            : "text-sm text-[#aaa38f]"
-        }`}
-      >
+      <p className={`mt-3 leading-7 ${
+        emphasized
+          ? "text-[15px] font-medium text-[#effcf9]"
+          : "text-[12px] text-slate-400"
+      }`}>
         {text}
       </p>
-    </section>
+    </motion.section>
   );
 }

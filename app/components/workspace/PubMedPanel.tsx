@@ -13,6 +13,7 @@ import {
 
 import {
   motion,
+  useReducedMotion,
 } from "framer-motion";
 
 import type {
@@ -72,6 +73,11 @@ type EvidenceSummary = {
   contextual: number;
   unrelated: number;
 
+  // Candidates that were retrieved but not classified.
+  // Kept in sync with the canonical EvidenceSummary
+  // used by researchGraph.ts / page.tsx.
+  unclassified: number;
+
   strength:
     EvidenceStrength;
 };
@@ -100,6 +106,23 @@ type EvidenceApiResponse = {
   };
 
   error?: string;
+};
+
+type EvidenceAnalysisResult = {
+  assessments:
+    EvidenceAssessment[];
+
+  summary:
+    EvidenceSummary;
+
+  limitations:
+    string[];
+
+  provider: string;
+
+  model: string;
+
+  analyzedAt: string;
 };
 
 type PubMedPanelProps = {
@@ -160,6 +183,15 @@ type PubMedPanelProps = {
     string | null;
 
   sourceText?: string;
+
+  /*
+    Called after a successful evidence analysis.
+    The parent graph component can use this to
+    persist the result into the selected edge.
+  */
+  onEvidenceAnalyzed?: (
+    result: EvidenceAnalysisResult,
+  ) => void;
 };
 
 /* =========================================================
@@ -206,15 +238,15 @@ function classificationClass(
 
     case "contextual":
       return `
-        border-cyan-300/20
+        border-teal-200/[0.14]
         bg-cyan-300/[0.07]
-        text-cyan-200
+        text-teal-200
       `;
 
     case "unrelated":
       return `
-        border-white/[0.08]
-        bg-white/[0.025]
+        border-teal-100/[0.06]
+        bg-[#0a1b26]/46
         text-slate-500
       `;
   }
@@ -253,9 +285,9 @@ function strengthClass(
 
     case "moderate":
       return `
-        border-cyan-300/20
+        border-teal-200/[0.14]
         bg-cyan-300/[0.07]
-        text-cyan-200
+        text-teal-200
       `;
 
     case "strong":
@@ -267,8 +299,8 @@ function strengthClass(
 
     default:
       return `
-        border-white/[0.08]
-        bg-white/[0.025]
+        border-teal-100/[0.06]
+        bg-[#0a1b26]/46
         text-slate-500
       `;
   }
@@ -322,7 +354,11 @@ export default function PubMedPanel({
   pubMedQuery,
 
   sourceText = "",
+
+  onEvidenceAnalyzed,
 }: PubMedPanelProps) {
+  const reduceMotion = Boolean(useReducedMotion());
+
   const relationshipMode =
     mode ===
     "relationship";
@@ -644,10 +680,49 @@ export default function PubMedPanel({
           "",
       );
 
-      setEvidenceProvider(
+      const provider =
         result.meta?.provider ??
-          "",
+        "";
+
+      const model =
+        result.meta?.model ??
+        "";
+
+      setEvidenceProvider(
+        provider,
       );
+
+      if (
+        result.summary
+      ) {
+        onEvidenceAnalyzed?.({
+          assessments:
+            safeAssessments,
+
+          summary: {
+            ...result.summary,
+            unclassified:
+              Math.max(
+                0,
+                result.summary.totalCandidates -
+                  result.summary.analyzed,
+              ),
+          },
+
+          limitations:
+            Array.isArray(
+              result.limitations,
+            )
+              ? result.limitations
+              : [],
+
+          provider,
+          model,
+
+          analyzedAt:
+            new Date().toISOString(),
+        });
+      }
     } catch (
       error
     ) {
@@ -684,10 +759,14 @@ export default function PubMedPanel({
 
       {hasRelationship && (
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 8,
-          }}
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 8,
+                }
+          }
           animate={{
             opacity: 1,
             y: 0,
@@ -706,23 +785,23 @@ export default function PubMedPanel({
           className="
             mb-6
             overflow-hidden
-            rounded-[26px]
+            rounded-[15px]
             border
-            border-cyan-300/[0.12]
-            bg-cyan-300/[0.025]
+            border-teal-200/[0.10]
+            bg-teal-200/[0.02]
           "
         >
           {/* HEADER */}
 
-          <div className="border-b border-white/[0.06] px-5 py-4">
+          <div className="border-b border-teal-100/[0.045] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300/80">
                   Relationship
                   literature
                 </p>
 
-                <p className="mt-1 text-[10px] text-slate-600">
+                <p className="mt-1 text-[10px] text-slate-500">
                   Candidate PubMed
                   publications
                   retrieved for the
@@ -744,7 +823,7 @@ export default function PubMedPanel({
                     )}
                   `}
                 >
-                  <span className="text-[8px] font-bold uppercase tracking-[0.14em]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
                     {strengthLabel(
                       evidenceSummary.strength,
                     )}
@@ -752,7 +831,7 @@ export default function PubMedPanel({
                 </div>
               ) : (
                 <div className="rounded-full border border-amber-300/15 bg-amber-300/[0.055] px-3 py-1.5">
-                  <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-amber-200/80">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200/80">
                     Not yet
                     classified
                   </span>
@@ -764,8 +843,8 @@ export default function PubMedPanel({
           {/* SOURCE → RELATION → TARGET */}
 
           <div className="grid gap-3 p-5 md:grid-cols-[1fr_auto_1fr] md:items-center">
-            <div className="rounded-[18px] border border-white/[0.07] bg-black/20 p-4">
-              <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-600">
+            <div className="rounded-[15px] border border-teal-100/[0.05] bg-black/[0.10] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                 Source
               </p>
 
@@ -779,8 +858,8 @@ export default function PubMedPanel({
             <div className="flex items-center justify-center gap-2 px-2">
               <div className="h-px w-5 bg-gradient-to-r from-transparent to-cyan-300/40" />
 
-              <div className="rounded-full border border-cyan-300/15 bg-cyan-300/[0.06] px-3 py-2">
-                <span className="text-[8px] font-bold uppercase tracking-[0.13em] text-cyan-200">
+              <div className="rounded-full border border-teal-200/[0.11] bg-teal-200/[0.045] px-3 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.13em] text-teal-200">
                   {
                     normalizedRelation
                   }
@@ -790,8 +869,8 @@ export default function PubMedPanel({
               <div className="h-px w-5 bg-gradient-to-r from-cyan-300/40 to-transparent" />
             </div>
 
-            <div className="rounded-[18px] border border-white/[0.07] bg-black/20 p-4 md:text-right">
-              <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-600">
+            <div className="rounded-[15px] border border-teal-100/[0.05] bg-black/[0.10] p-4 md:text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                 Target
               </p>
 
@@ -806,13 +885,13 @@ export default function PubMedPanel({
           {/* QUERY */}
 
           {pubMedQuery && (
-            <div className="border-t border-white/[0.06] px-5 py-4">
+            <div className="border-t border-teal-100/[0.045] px-5 py-4">
               <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-                <span className="shrink-0 text-[8px] font-bold uppercase tracking-[0.18em] text-violet-300/65">
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-300/65">
                   Search query
                 </span>
 
-                <code className="overflow-hidden text-ellipsis whitespace-nowrap rounded-[9px] border border-violet-300/10 bg-violet-300/[0.035] px-3 py-2 font-mono text-[9px] text-slate-500">
+                <code className="overflow-hidden text-ellipsis whitespace-nowrap rounded-[9px] border border-sky-300/10 bg-sky-300/[0.035] px-3 py-2 font-mono text-[9px] text-slate-500">
                   {
                     pubMedQuery
                   }
@@ -823,10 +902,10 @@ export default function PubMedPanel({
 
           {/* ANALYSIS INFO */}
 
-          <div className="border-t border-white/[0.06] px-5 py-4">
+          <div className="border-t border-teal-100/[0.045] px-5 py-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[14px] border border-white/[0.06] bg-black/15 px-4 py-3">
-                <p className="text-[7px] font-bold uppercase tracking-[0.15em] text-slate-600">
+              <div className="rounded-[14px] border border-teal-100/[0.045] bg-black/[0.08] px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Loaded
                 </p>
 
@@ -838,20 +917,20 @@ export default function PubMedPanel({
                 </p>
               </div>
 
-              <div className="rounded-[14px] border border-cyan-300/10 bg-cyan-300/[0.025] px-4 py-3">
-                <p className="text-[7px] font-bold uppercase tracking-[0.15em] text-cyan-300/50">
+              <div className="rounded-[14px] border border-teal-200/[0.08] bg-teal-200/[0.02] px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-teal-300/50">
                   Abstracts
                 </p>
 
-                <p className="mt-1 text-sm font-semibold text-cyan-100">
+                <p className="mt-1 text-sm font-semibold text-teal-100">
                   {
                     loadedAbstractCount
                   }
                 </p>
               </div>
 
-              <div className="rounded-[14px] border border-white/[0.06] bg-black/15 px-4 py-3">
-                <p className="text-[7px] font-bold uppercase tracking-[0.15em] text-slate-600">
+              <div className="rounded-[14px] border border-teal-100/[0.045] bg-black/[0.08] px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Metadata only
                 </p>
 
@@ -871,15 +950,15 @@ export default function PubMedPanel({
 
           {/* ANALYZE */}
 
-          <div className="border-t border-white/[0.06] p-5">
+          <div className="border-t border-teal-100/[0.045] p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/70">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
                   Evidence
                   classification
                 </p>
 
-                <p className="mt-1 max-w-xl text-[9px] leading-5 text-slate-600">
+                <p className="mt-1 max-w-xl text-[11px] leading-5 text-slate-500">
                   BioLayers analyzes
                   PubMed abstracts when
                   available and falls
@@ -902,18 +981,18 @@ export default function PubMedPanel({
                 className="
                   rounded-[14px]
                   border
-                  border-cyan-300/20
-                  bg-cyan-300/[0.08]
+                  border-teal-200/[0.14]
+                  bg-teal-200/[0.06]
                   px-5
                   py-3
                   text-[10px]
                   font-bold
                   uppercase
                   tracking-[0.12em]
-                  text-cyan-100
+                  text-teal-100
                   transition
                   hover:border-cyan-300/35
-                  hover:bg-cyan-300/[0.12]
+                  hover:bg-teal-200/[0.08]
                   disabled:cursor-not-allowed
                   disabled:opacity-40
                 "
@@ -931,7 +1010,7 @@ export default function PubMedPanel({
 
             {evidenceError && (
               <div className="mt-4 rounded-[15px] border border-rose-300/15 bg-rose-300/[0.05] px-4 py-3">
-                <p className="text-[10px] leading-5 text-rose-200">
+                <p role="alert" aria-live="polite" className="text-[11px] leading-5 text-rose-200">
                   {
                     evidenceError
                   }
@@ -949,19 +1028,23 @@ export default function PubMedPanel({
       {relationshipMode &&
         evidenceSummary && (
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 8,
-            }}
+            initial={
+              reduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 8,
+                  }
+            }
             animate={{
               opacity: 1,
               y: 0,
             }}
-            className="mb-6 rounded-[26px] border border-white/[0.08] bg-white/[0.025] p-5"
+            className="mb-6 rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300/75">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300/75">
                   Evidence
                   classification
                 </p>
@@ -974,7 +1057,7 @@ export default function PubMedPanel({
                   analyzed
                 </h3>
 
-                <p className="mt-2 max-w-xl text-[10px] leading-5 text-slate-600">
+                <p className="mt-2 max-w-xl text-[11px] leading-5 text-slate-500">
                   Classification is
                   based on PubMed
                   abstracts when
@@ -997,7 +1080,7 @@ export default function PubMedPanel({
                   )}
                 `}
               >
-                <span className="text-[8px] font-bold uppercase tracking-[0.14em]">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
                   {
                     strengthLabel(
                       evidenceSummary.strength,
@@ -1011,19 +1094,19 @@ export default function PubMedPanel({
             {/* ABSTRACT COVERAGE */}
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[17px] border border-cyan-300/10 bg-cyan-300/[0.03] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-cyan-300/55">
+              <div className="rounded-[14px] border border-teal-200/[0.08] bg-teal-200/[0.025] p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-teal-300/55">
                   Abstract-based
                 </p>
 
-                <p className="mt-2 text-xl font-semibold text-cyan-100">
+                <p className="mt-2 text-xl font-semibold text-teal-100">
                   {evidenceSummary.withAbstract ??
                     loadedAbstractCount}
                 </p>
               </div>
 
-              <div className="rounded-[17px] border border-white/[0.07] bg-white/[0.02] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">
+              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a1b26]/40 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Without abstract
                 </p>
 
@@ -1041,8 +1124,8 @@ export default function PubMedPanel({
             {/* CLASSIFICATION COUNTERS */}
 
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <div className="rounded-[17px] border border-emerald-300/10 bg-emerald-300/[0.035] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-emerald-300/60">
+              <div className="rounded-[14px] border border-emerald-300/10 bg-emerald-300/[0.035] p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-300/60">
                   Supporting
                 </p>
 
@@ -1053,8 +1136,8 @@ export default function PubMedPanel({
                 </p>
               </div>
 
-              <div className="rounded-[17px] border border-rose-300/10 bg-rose-300/[0.035] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-rose-300/60">
+              <div className="rounded-[14px] border border-rose-300/10 bg-rose-300/[0.035] p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-rose-300/60">
                   Contradicting
                 </p>
 
@@ -1065,20 +1148,20 @@ export default function PubMedPanel({
                 </p>
               </div>
 
-              <div className="rounded-[17px] border border-cyan-300/10 bg-cyan-300/[0.035] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-cyan-300/60">
+              <div className="rounded-[14px] border border-teal-200/[0.08] bg-teal-200/[0.025] p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-teal-300/60">
                   Contextual
                 </p>
 
-                <p className="mt-2 text-2xl font-semibold text-cyan-100">
+                <p className="mt-2 text-2xl font-semibold text-teal-100">
                   {
                     evidenceSummary.contextual
                   }
                 </p>
               </div>
 
-              <div className="rounded-[17px] border border-white/[0.07] bg-white/[0.02] p-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">
+              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a1b26]/40 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Unrelated
                 </p>
 
@@ -1094,8 +1177,8 @@ export default function PubMedPanel({
 
             {evidenceLimitations.length >
               0 && (
-              <div className="mt-5 border-t border-white/[0.06] pt-4">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300/60">
+              <div className="mt-5 border-t border-teal-100/[0.045] pt-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300/60">
                   Limitations
                 </p>
 
@@ -1107,7 +1190,7 @@ export default function PubMedPanel({
                     ) => (
                       <p
                         key={`${limitation}-${index}`}
-                        className="text-[9px] leading-5 text-slate-600"
+                        className="text-[11px] leading-5 text-slate-500"
                       >
                         •{" "}
                         {
@@ -1122,7 +1205,7 @@ export default function PubMedPanel({
 
             {(evidenceModel ||
               evidenceProvider) && (
-              <p className="mt-4 font-mono text-[7px] uppercase tracking-[0.12em] text-slate-700">
+              <p className="mt-4 font-mono text-[7px] uppercase tracking-[0.12em] text-slate-500">
                 {evidenceProvider &&
                   `${evidenceProvider} · `}
 
@@ -1143,11 +1226,11 @@ export default function PubMedPanel({
       {!relationshipMode &&
         entityLabel && (
           <div className="mb-4 flex items-center gap-2">
-            <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-cyan-300/65">
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300/65">
               Entity literature
             </span>
 
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-slate-500">
               ·
             </span>
 
@@ -1163,7 +1246,7 @@ export default function PubMedPanel({
           RESULTS HEADER
           =================================================== */}
 
-      <div className="mb-6 flex flex-col gap-3 rounded-[22px] border border-white/[0.08] bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-3 rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold text-white">
@@ -1174,14 +1257,14 @@ export default function PubMedPanel({
             </p>
 
             {relationshipMode && (
-              <span className="rounded-full border border-violet-300/10 bg-violet-300/[0.04] px-2 py-1 text-[7px] font-bold uppercase tracking-[0.12em] text-violet-200/60">
+              <span className="rounded-full border border-sky-300/10 bg-teal-300/[0.04] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-teal-200/60">
                 Relationship
                 search
               </span>
             )}
           </div>
 
-          <p className="mt-1 text-[10px] text-slate-600">
+          <p className="mt-1 text-[10px] text-slate-500">
             {
               pubMedPapers.length
             }{" "}
@@ -1189,7 +1272,7 @@ export default function PubMedPanel({
           </p>
 
           {relationshipMode && (
-            <p className="mt-2 max-w-xl text-[9px] leading-4 text-slate-600">
+            <p className="mt-2 max-w-xl text-[10px] leading-5 text-slate-500">
               Candidate
               publications are
               retrieval results,
@@ -1204,6 +1287,7 @@ export default function PubMedPanel({
         <div className="flex gap-2">
           <button
             type="button"
+            aria-pressed={pubMedSort === "relevance"}
             onClick={() =>
               setPubMedSort(
                 "relevance",
@@ -1212,8 +1296,8 @@ export default function PubMedPanel({
             className={`rounded-[12px] px-3 py-2 text-[10px] ${
               pubMedSort ===
               "relevance"
-                ? "bg-cyan-300 text-slate-950"
-                : "border border-white/10 text-slate-400"
+                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] text-[#062029] shadow-[0_8px_20px_rgba(45,212,191,.12)]"
+                : "border border-teal-100/[0.07] bg-[#0a1b26]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
             }`}
           >
             Relevance
@@ -1221,6 +1305,7 @@ export default function PubMedPanel({
 
           <button
             type="button"
+            aria-pressed={pubMedSort === "date"}
             onClick={() =>
               setPubMedSort(
                 "date",
@@ -1229,8 +1314,8 @@ export default function PubMedPanel({
             className={`rounded-[12px] px-3 py-2 text-[10px] ${
               pubMedSort ===
               "date"
-                ? "bg-cyan-300 text-slate-950"
-                : "border border-white/10 text-slate-400"
+                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] text-[#062029] shadow-[0_8px_20px_rgba(45,212,191,.12)]"
+                : "border border-teal-100/[0.07] bg-[#0a1b26]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
             }`}
           >
             Newest
@@ -1244,14 +1329,14 @@ export default function PubMedPanel({
 
       {comparedPapers.length >
         0 && (
-        <div className="mb-6 grid gap-3 rounded-[22px] border border-violet-300/15 bg-violet-300/[0.04] p-4 md:grid-cols-2">
+        <div className="mb-6 grid gap-3 rounded-[15px] border border-teal-300/15 bg-teal-300/[0.04] p-4 md:grid-cols-2">
           {comparedPapers.map(
             (paper) => (
               <div
                 key={`compare-${paper.pmid}`}
-                className="rounded-[17px] border border-white/[0.07] bg-black/20 p-4"
+                className="rounded-[14px] border border-teal-100/[0.05] bg-black/[0.10] p-4"
               >
-                <p className="font-mono text-[8px] text-violet-300/65">
+                <p className="font-mono text-[8px] text-sky-300/65">
                   PMID{" "}
                   {
                     paper.pmid
@@ -1264,7 +1349,7 @@ export default function PubMedPanel({
                   }
                 </p>
 
-                <p className="mt-3 text-[10px] text-slate-600">
+                <p className="mt-3 text-[10px] text-slate-500">
                   {
                     paper.journal
                   }{" "}
@@ -1294,15 +1379,15 @@ export default function PubMedPanel({
             (item) => (
               <div
                 key={item}
-                className="animate-pulse rounded-[24px] border border-white/[0.07] bg-white/[0.025] p-5"
+                className={`${reduceMotion ? "" : "animate-pulse"} rounded-[20px] border border-teal-100/[0.05] bg-[#0a1b26]/46 p-5`}
               >
-                <div className="h-2.5 w-1/3 rounded-full bg-white/[0.08]" />
+                <div className="h-2.5 w-1/3 rounded-full bg-teal-100/[0.08]" />
 
-                <div className="mt-4 h-3 w-full rounded-full bg-white/[0.06]" />
+                <div className="mt-4 h-3 w-full rounded-full bg-teal-100/[0.06]" />
 
-                <div className="mt-2 h-3 w-4/5 rounded-full bg-white/[0.06]" />
+                <div className="mt-2 h-3 w-4/5 rounded-full bg-teal-100/[0.06]" />
 
-                <div className="mt-5 h-2 w-1/2 rounded-full bg-white/[0.05]" />
+                <div className="mt-5 h-2 w-1/2 rounded-full bg-teal-100/[0.05]" />
               </div>
             ),
           )}
@@ -1315,8 +1400,8 @@ export default function PubMedPanel({
 
       {!pubMedLoading &&
         pubMedError && (
-          <div className="rounded-[24px] border border-amber-300/15 bg-amber-300/[0.04] p-6">
-            <p className="text-sm leading-7 text-amber-200">
+          <div className="rounded-[20px] border border-amber-300/15 bg-amber-300/[0.04] p-6">
+            <p role="alert" aria-live="polite" className="text-sm leading-7 text-amber-200">
               {
                 pubMedError
               }
@@ -1332,7 +1417,7 @@ export default function PubMedPanel({
         !pubMedError &&
         pubMedPapers.length ===
           0 && (
-          <div className="rounded-[24px] border border-white/[0.07] bg-white/[0.025] p-8 text-center">
+          <div className="rounded-[20px] border border-teal-100/[0.05] bg-[#0a1b26]/46 p-8 text-center">
             <p className="text-sm text-slate-500">
               {
                 emptyMessage
@@ -1382,29 +1467,29 @@ export default function PubMedPanel({
                     }
                     className="
                       group
-                      rounded-[24px]
+                      rounded-[20px]
                       border
-                      border-white/[0.08]
-                      bg-white/[0.025]
+                      border-teal-100/[0.06]
+                      bg-[#0a1b26]/46
                       p-5
                       text-left
                       transition
                       hover:-translate-y-1
-                      hover:border-cyan-300/20
-                      hover:bg-cyan-300/[0.035]
+                      hover:border-teal-200/[0.14]
+                      hover:bg-teal-200/[0.025]
                     "
                   >
                     {/* PMID */}
 
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-300/65">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-teal-300/65">
                         PMID{" "}
                         {
                           paper.pmid
                         }
                       </p>
 
-                      <span className="text-[10px] font-semibold text-slate-600 transition group-hover:text-cyan-300">
+                      <span className="text-[10px] font-semibold text-slate-500 transition group-hover:text-teal-300">
                         Open ↗
                       </span>
                     </div>
@@ -1413,10 +1498,10 @@ export default function PubMedPanel({
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span
-                        className={`rounded-full border px-2 py-1 text-[7px] font-bold uppercase tracking-[0.1em] ${
+                        className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
                           hasAbstract
-                            ? "border-cyan-300/15 bg-cyan-300/[0.05] text-cyan-200/70"
-                            : "border-white/[0.07] bg-white/[0.02] text-slate-600"
+                            ? "border-teal-200/[0.11] bg-teal-200/[0.035] text-teal-200/70"
+                            : "border-teal-100/[0.05] bg-[#0a1b26]/40 text-slate-500"
                         }`}
                       >
                         {hasAbstract
@@ -1449,7 +1534,7 @@ export default function PubMedPanel({
                             }
                           </span>
 
-                          <span className="rounded-full border border-white/[0.07] bg-black/20 px-2 py-1 text-[7px] font-semibold text-white/40">
+                          <span className="rounded-full border border-teal-100/[0.05] bg-black/[0.10] px-2 py-1 text-[7px] font-semibold text-white/40">
                             {Math.round(
                               assessment.confidence *
                                 100,
@@ -1482,7 +1567,7 @@ export default function PubMedPanel({
 
                     {paper.authors.length >
                       0 && (
-                      <p className="mt-2 line-clamp-2 text-[10px] leading-5 text-slate-600">
+                      <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-slate-500">
                         {paper.authors.join(
                           ", ",
                         )}
@@ -1490,7 +1575,7 @@ export default function PubMedPanel({
                     )}
 
                     {paper.doi && (
-                      <p className="mt-4 truncate rounded-[10px] border border-violet-300/10 bg-violet-300/[0.035] px-3 py-2 font-mono text-[9px] text-violet-300/65">
+                      <p className="mt-4 truncate rounded-[10px] border border-sky-300/10 bg-sky-300/[0.035] px-3 py-2 font-mono text-[9px] text-sky-300/65">
                         DOI{" "}
                         {
                           paper.doi
@@ -1501,12 +1586,12 @@ export default function PubMedPanel({
                     {/* ABSTRACT PREVIEW */}
 
                     {hasAbstract && (
-                      <div className="mt-4 rounded-[15px] border border-cyan-300/[0.07] bg-cyan-300/[0.018] p-3">
-                        <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-cyan-300/45">
+                      <div className="mt-4 rounded-[15px] border border-sky-200/[0.07] bg-cyan-300/[0.018] p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-300/45">
                           Abstract
                         </p>
 
-                        <p className="mt-2 line-clamp-4 text-[9px] leading-5 text-slate-500">
+                        <p className="mt-2 line-clamp-4 text-[11px] leading-5 text-slate-500">
                           {
                             paper.abstract
                           }
@@ -1517,19 +1602,19 @@ export default function PubMedPanel({
                     {/* CLASSIFICATION RATIONALE */}
 
                     {assessment && (
-                      <div className="mt-4 rounded-[15px] border border-white/[0.06] bg-black/20 p-3">
-                        <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                      <div className="mt-4 rounded-[15px] border border-teal-100/[0.045] bg-black/[0.10] p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                           Classification
                           rationale
                         </p>
 
-                        <p className="mt-2 text-[9px] leading-5 text-slate-500">
+                        <p className="mt-2 text-[11px] leading-5 text-slate-500">
                           {
                             assessment.rationale
                           }
                         </p>
 
-                        <p className="mt-2 font-mono text-[7px] uppercase tracking-[0.1em] text-slate-700">
+                        <p className="mt-2 font-mono text-[7px] uppercase tracking-[0.1em] text-slate-500">
                           Basis ·{" "}
                           {
                             evidenceBasisLabel(
@@ -1554,8 +1639,8 @@ export default function PubMedPanel({
                       }}
                       className={`mt-4 block rounded-[11px] border px-3 py-2 text-center text-[9px] ${
                         selectedForComparison
-                          ? "border-violet-300/25 bg-violet-300/[0.09] text-violet-200"
-                          : "border-white/[0.08] text-slate-500"
+                          ? "border-teal-300/25 bg-teal-300/[0.09] text-teal-200"
+                          : "border-teal-100/[0.06] text-slate-500"
                       }`}
                     >
                       {selectedForComparison
@@ -1583,7 +1668,7 @@ export default function PubMedPanel({
             disabled={
               pubMedLoadingMore
             }
-            className="mx-auto mt-7 block rounded-[15px] border border-cyan-300/15 bg-cyan-300/[0.055] px-6 py-3 text-xs font-bold text-cyan-100 disabled:opacity-40"
+            className="mx-auto mt-7 block rounded-[15px] border border-teal-200/[0.11] bg-teal-200/[0.04] px-6 py-3 text-xs font-bold text-teal-100 disabled:opacity-40"
           >
             {pubMedLoadingMore
               ? "Loading more..."

@@ -158,6 +158,9 @@ export default function InteractiveMechanismDemoSection() {
         relative
         isolate
         overflow-hidden
+        border-t
+        border-teal-100/[0.04]
+        bg-[#06111a]
         px-6
         py-28
         md:px-10
@@ -182,7 +185,7 @@ export default function InteractiveMechanismDemoSection() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-purple-500/[0.045]
+          bg-teal-400/[0.04]
           blur-[200px]
         "
       />
@@ -197,7 +200,7 @@ export default function InteractiveMechanismDemoSection() {
           h-[520px]
           w-[520px]
           rounded-full
-          bg-cyan-500/[0.04]
+          bg-sky-400/[0.03]
           blur-[170px]
         "
       />
@@ -224,7 +227,7 @@ export default function InteractiveMechanismDemoSection() {
               font-medium
               uppercase
               tracking-[0.3em]
-              text-fuchsia-300/70
+              text-teal-200/75
             "
           >
             Interactive mechanism demo
@@ -249,9 +252,9 @@ export default function InteractiveMechanismDemoSection() {
                 mt-2
                 block
                 bg-gradient-to-r
-                from-cyan-300
-                via-purple-300
-                to-fuchsia-300
+                from-teal-200
+                via-teal-300
+                to-sky-300
                 bg-clip-text
                 text-transparent
               "
@@ -266,7 +269,7 @@ export default function InteractiveMechanismDemoSection() {
               max-w-4xl
               text-base
               leading-8
-              text-white/48
+              text-slate-300/80
               md:text-lg
               md:leading-9
             "
@@ -306,11 +309,11 @@ export default function InteractiveMechanismDemoSection() {
               relative
               min-w-0
               overflow-hidden
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-[#07080d]/90
-              backdrop-blur-xl
+              border-teal-100/[0.085]
+              bg-[#081722]/88
+              backdrop-blur-2xl
             "
           >
             {/* MAP HEADER */}
@@ -321,7 +324,7 @@ export default function InteractiveMechanismDemoSection() {
                 flex-col
                 gap-4
                 border-b
-                border-white/[0.07]
+                border-teal-100/[0.065]
                 px-6
                 py-5
                 md:flex-row
@@ -336,7 +339,7 @@ export default function InteractiveMechanismDemoSection() {
                     font-semibold
                     uppercase
                     tracking-[0.22em]
-                    text-white/26
+                    text-slate-500/85
                   "
                 >
                   Cancer mechanism map
@@ -347,7 +350,7 @@ export default function InteractiveMechanismDemoSection() {
                     mt-2
                     text-sm
                     font-medium
-                    text-white/75
+                    text-teal-50/80
                     md:text-base
                   "
                 >
@@ -403,7 +406,7 @@ export default function InteractiveMechanismDemoSection() {
                   -translate-x-1/2
                   -translate-y-1/2
                   rounded-full
-                  bg-cyan-400/[0.035]
+                  bg-teal-400/[0.035]
                   blur-[110px]
                 "
               />
@@ -456,8 +459,8 @@ export default function InteractiveMechanismDemoSection() {
 
                             ${
                               selected
-                                ? "border-cyan-300/30 bg-cyan-300/[0.07] shadow-[0_0_35px_rgba(34,211,238,0.06)]"
-                                : "border-white/[0.07] bg-white/[0.022] hover:border-white/[0.14] hover:bg-white/[0.04]"
+                                ? "border-teal-200/30 bg-teal-300/[0.075] shadow-[0_0_35px_rgba(45,212,191,0.07)]"
+                                : "border-teal-100/[0.065] bg-white/[0.022] hover:border-white/[0.14] hover:bg-white/[0.04]"
                             }
                           `}
                         >
@@ -480,8 +483,8 @@ export default function InteractiveMechanismDemoSection() {
 
                                 ${
                                   selected
-                                    ? "border-cyan-300/20 bg-cyan-300/[0.08]"
-                                    : "border-white/[0.07] bg-white/[0.02]"
+                                    ? "border-teal-200/20 bg-teal-300/[0.08]"
+                                    : "border-teal-100/[0.065] bg-teal-100/[0.02]"
                                 }
                               `}
                             >
@@ -491,8 +494,8 @@ export default function InteractiveMechanismDemoSection() {
                                   w-3.5
                                   ${
                                     selected
-                                      ? "text-cyan-200"
-                                      : "text-white/38"
+                                      ? "text-teal-100"
+                                      : "text-slate-400/85"
                                   }
                                 `}
                               />
@@ -504,7 +507,7 @@ export default function InteractiveMechanismDemoSection() {
                                 font-semibold
                                 uppercase
                                 tracking-[0.11em]
-                                text-white/22
+                                text-slate-500/75
                               "
                             >
                               {node.type}
@@ -520,7 +523,7 @@ export default function InteractiveMechanismDemoSection() {
                               ${
                                 selected
                                   ? "text-white"
-                                  : "text-white/62"
+                                  : "text-slate-300/80"
                               }
                             `}
                           >
@@ -538,7 +541,7 @@ export default function InteractiveMechanismDemoSection() {
                                 h-px
                                 bg-gradient-to-r
                                 from-transparent
-                                via-cyan-300
+                                via-teal-300
                                 to-transparent
                               "
                             />
@@ -564,7 +567,7 @@ export default function InteractiveMechanismDemoSection() {
                                 font-medium
                                 uppercase
                                 tracking-[0.1em]
-                                text-white/20
+                                text-slate-500/75
                               "
                             >
                               {relationships[index]}
@@ -576,8 +579,8 @@ export default function InteractiveMechanismDemoSection() {
                                   h-px
                                   flex-1
                                   bg-gradient-to-r
-                                  from-white/[0.04]
-                                  to-cyan-300/25
+                                  from-teal-100/[0.035]
+                                  to-teal-300/25
                                 "
                               />
 
@@ -586,7 +589,7 @@ export default function InteractiveMechanismDemoSection() {
                                   -ml-px
                                   h-3.5
                                   w-3.5
-                                  text-cyan-300/30
+                                  text-teal-300/35
                                 "
                               />
                             </div>
@@ -612,21 +615,21 @@ export default function InteractiveMechanismDemoSection() {
                   icon={GitBranch}
                   title="Directionality"
                   text="The relationship direction and biological action remain explicit."
-                  accent="text-cyan-300/65"
+                  accent="text-teal-200/70"
                 />
 
                 <InfoCard
                   icon={FlaskConical}
                   title="Context"
                   text="Experimental and disease context stay attached to each mechanism."
-                  accent="text-purple-300/65"
+                  accent="text-sky-200/70"
                 />
 
                 <InfoCard
                   icon={BookOpenText}
                   title="Provenance"
                   text="Every important connection can lead back to supporting evidence."
-                  accent="text-fuchsia-300/65"
+                  accent="text-indigo-200/70"
                 />
               </div>
             </div>
@@ -647,17 +650,17 @@ export default function InteractiveMechanismDemoSection() {
             }}
             className="
               overflow-hidden
-              rounded-[30px]
+              rounded-[26px]
               border
-              border-white/[0.09]
-              bg-[#07080d]/90
-              backdrop-blur-xl
+              border-teal-100/[0.085]
+              bg-[#081722]/88
+              backdrop-blur-2xl
             "
           >
             <div
               className="
                 border-b
-                border-white/[0.07]
+                border-teal-100/[0.065]
                 px-6
                 py-5
               "
@@ -668,7 +671,7 @@ export default function InteractiveMechanismDemoSection() {
                   font-semibold
                   uppercase
                   tracking-[0.22em]
-                  text-white/26
+                  text-slate-500/85
                 "
               >
                 Evidence inspector
@@ -705,7 +708,7 @@ export default function InteractiveMechanismDemoSection() {
                         font-semibold
                         uppercase
                         tracking-[0.15em]
-                        text-cyan-300/55
+                        text-teal-200/65
                       "
                     >
                       {selectedNode.type}
@@ -741,13 +744,13 @@ export default function InteractiveMechanismDemoSection() {
                     className="
                       rounded-full
                       border
-                      border-cyan-300/10
-                      bg-cyan-300/[0.04]
+                      border-teal-200/10
+                      bg-teal-300/[0.045]
                       px-3
                       py-1.5
                       text-xs
                       font-medium
-                      text-cyan-200/65
+                      text-teal-100/65
                     "
                   >
                     {selectedNode.confidence}%
@@ -806,8 +809,8 @@ export default function InteractiveMechanismDemoSection() {
                     mt-5
                     rounded-[18px]
                     border
-                    border-white/[0.07]
-                    bg-black/20
+                    border-teal-100/[0.065]
+                    bg-black/15
                     p-4
                   "
                 >
@@ -820,7 +823,7 @@ export default function InteractiveMechanismDemoSection() {
                       font-semibold
                       uppercase
                       tracking-[0.15em]
-                      text-white/25
+                      text-slate-500/80
                     "
                   >
                     <BookOpenText className="h-3.5 w-3.5" />
@@ -832,7 +835,7 @@ export default function InteractiveMechanismDemoSection() {
                       mt-3
                       text-xs
                       leading-5
-                      text-white/38
+                      text-slate-400/85
                     "
                   >
                     Demo metadata only. In the BioLayers workspace, this
@@ -855,17 +858,17 @@ export default function InteractiveMechanismDemoSection() {
                     gap-2
                     rounded-[16px]
                     border
-                    border-white/[0.1]
-                    bg-white/[0.045]
+                    border-teal-100/[0.10]
+                    bg-teal-100/[0.045]
                     px-5
                     py-3
                     text-sm
                     font-medium
-                    text-white/75
+                    text-teal-50/80
                     transition
                     duration-300
-                    hover:border-cyan-300/20
-                    hover:bg-cyan-300/[0.055]
+                    hover:border-teal-200/20
+                    hover:bg-teal-300/[0.06]
                     hover:text-white
                   "
                 >
@@ -910,7 +913,7 @@ export default function InteractiveMechanismDemoSection() {
             text-center
             text-xs
             leading-6
-            text-white/25
+            text-slate-500/80
           "
         >
           BioLayers is designed to expose the biological chain, the context
@@ -941,8 +944,8 @@ function InfoCard({
       className="
         rounded-[18px]
         border
-        border-white/[0.07]
-        bg-white/[0.018]
+        border-teal-100/[0.065]
+        bg-[#0a1b26]/44
         p-4
       "
     >
@@ -968,7 +971,7 @@ function InfoCard({
           mt-2
           text-xs
           leading-5
-          text-white/34
+          text-slate-400/85
         "
       >
         {text}
@@ -989,7 +992,7 @@ function InspectorBlock({
       className="
         mt-5
         border-t
-        border-white/[0.07]
+        border-teal-100/[0.065]
         pt-5
       "
     >
@@ -999,7 +1002,7 @@ function InspectorBlock({
           font-semibold
           uppercase
           tracking-[0.15em]
-          text-white/23
+          text-slate-500/80
         "
       >
         {label}
@@ -1010,7 +1013,7 @@ function InspectorBlock({
           mt-2
           text-xs
           leading-5
-          text-white/43
+          text-slate-400/90
         "
       >
         {value}
@@ -1032,8 +1035,8 @@ function MetaCard({
         min-w-0
         rounded-[15px]
         border
-        border-white/[0.07]
-        bg-white/[0.018]
+        border-teal-100/[0.065]
+        bg-[#0a1b26]/44
         p-3
       "
     >
@@ -1043,7 +1046,7 @@ function MetaCard({
           font-semibold
           uppercase
           tracking-[0.13em]
-          text-white/20
+          text-slate-500/75
         "
       >
         {label}
@@ -1055,7 +1058,7 @@ function MetaCard({
           truncate
           text-[11px]
           font-medium
-          text-white/50
+          text-slate-300/75
         "
       >
         {value}

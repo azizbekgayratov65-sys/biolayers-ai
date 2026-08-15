@@ -43,16 +43,37 @@ export type EvidenceStrength =
   | "moderate"
   | "strong";
 
+export type EvidenceBasis =
+  | "metadata_only"
+  | "abstract_and_metadata"
+  | "source_text_and_metadata"
+  | "source_text_abstract_and_metadata";
+
 export type EvidencePaperAssessment = {
   pmid: string;
 
   classification:
     EvidenceClassification;
 
+  /*
+    Confidence in the paper classification.
+    This is NOT confidence that the biological
+    relationship is universally true.
+  */
   confidence?: number;
 
   rationale?: string;
 
+  /*
+    What information the classifier actually used.
+  */
+  evidenceBasis?:
+    EvidenceBasis;
+
+  /*
+    Only populate this with real source text.
+    Never generate a quotation.
+  */
   evidenceQuote?: string;
 
   analyzedAt?: string;
@@ -61,6 +82,9 @@ export type EvidencePaperAssessment = {
 export type EvidenceSummary = {
   totalCandidates: number;
   analyzed: number;
+
+  withAbstract?: number;
+  withoutAbstract?: number;
 
   supporting: number;
   contradicting: number;
@@ -133,16 +157,21 @@ export type ResearchEdgeData = {
   literatureQuery?: string;
 
   /*
-    Paper-level classification results.
+    Paper-level PubMed evidence classification.
   */
   paperAssessments?:
     EvidencePaperAssessment[];
 
   /*
-    Aggregated classification statistics.
+    Aggregated PubMed evidence classification.
   */
   evidenceSummary?:
     EvidenceSummary;
+
+  /*
+    Timestamp of the latest evidence analysis.
+  */
+  evidenceAnalyzedAt?: string;
 };
 
 /* =========================================================

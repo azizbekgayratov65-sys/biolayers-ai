@@ -132,8 +132,8 @@ function getRelationshipVisual(
     normalized.includes("increase")
   ) {
     return {
-      color: "#22d3ee",
-      secondary: "#a5f3fc",
+      color: "#5eead4",
+      secondary: "#cffafe",
       particle: "signal",
       dash: "2 10",
       semantic: "activation",
@@ -149,8 +149,8 @@ function getRelationshipVisual(
     normalized.includes("remodel")
   ) {
     return {
-      color: "#60a5fa",
-      secondary: "#bfdbfe",
+      color: "#7dd3fc",
+      secondary: "#dbeafe",
       particle: "signal",
       dash: "4 10",
       semantic: "regulation",
@@ -162,8 +162,8 @@ function getRelationshipVisual(
      ======================================================= */
 
   return {
-    color: "#67e8f9",
-    secondary: "#c4b5fd",
+    color: "#7dd3fc",
+    secondary: "#c7d2fe",
     particle: "none",
     dash: "4 10",
     semantic: "association",
@@ -202,46 +202,77 @@ function normalizeConfidence(
 
 /* =========================================================
    LITERATURE / EVIDENCE STATUS
-
-   IMPORTANT:
-   evidenceCount currently represents retrieved candidate
-   literature. It must NOT automatically imply that a
-   biological relationship is established or supported.
-
-   True evidence classification will be added separately.
    ========================================================= */
 
 type EvidenceLevel =
+  | "STRONG"
+  | "SUPPORTED"
+  | "LIMITED"
+  | "MIXED"
+  | "CONTRADICTED"
+  | "REVIEWED"
   | "CANDIDATE"
   | "EXTRACTED"
   | "HYPOTHESIS"
   | "UNMAPPED";
 
 function getEvidenceLevel(
+  edgeData: ResearchEdgeData,
   evidenceCount: number,
   confidence: number | null,
   evidenceQuote: string,
 ): EvidenceLevel {
-  /*
-   * Direct evidence text attached to the extracted relation
-   * is different from PubMed retrieval volume.
-   */
+  const summary =
+    edgeData.evidenceSummary;
+
+  if (
+    summary &&
+    summary.analyzed > 0
+  ) {
+    if (
+      summary.contradicting >
+        summary.supporting &&
+      summary.contradicting > 0
+    ) {
+      return "CONTRADICTED";
+    }
+
+    if (
+      summary.supporting > 0 &&
+      summary.contradicting > 0
+    ) {
+      return "MIXED";
+    }
+
+    if (
+      summary.strength === "strong"
+    ) {
+      return "STRONG";
+    }
+
+    if (
+      summary.strength === "moderate"
+    ) {
+      return "SUPPORTED";
+    }
+
+    if (
+      summary.strength === "limited"
+    ) {
+      return "LIMITED";
+    }
+
+    return "REVIEWED";
+  }
+
   if (evidenceQuote.length > 0) {
     return "EXTRACTED";
   }
 
-  /*
-   * PubMed records are candidates until their abstracts/full
-   * text are actually classified.
-   */
   if (evidenceCount > 0) {
     return "CANDIDATE";
   }
 
-  /*
-   * A model confidence without literature evidence should
-   * never be presented as literature support.
-   */
   if (confidence !== null) {
     return "HYPOTHESIS";
   }
@@ -253,6 +284,48 @@ function getEvidenceBadgeClass(
   level: EvidenceLevel,
 ) {
   switch (level) {
+    case "STRONG":
+      return `
+        border-emerald-300/25
+        bg-emerald-300/[0.09]
+        text-emerald-200
+      `;
+
+    case "SUPPORTED":
+      return `
+        border-cyan-300/20
+        bg-cyan-300/[0.07]
+        text-cyan-200
+      `;
+
+    case "LIMITED":
+      return `
+        border-amber-300/20
+        bg-amber-300/[0.07]
+        text-amber-200
+      `;
+
+    case "MIXED":
+      return `
+        border-orange-300/20
+        bg-orange-300/[0.07]
+        text-orange-200
+      `;
+
+    case "CONTRADICTED":
+      return `
+        border-rose-300/20
+        bg-rose-300/[0.07]
+        text-rose-200
+      `;
+
+    case "REVIEWED":
+      return `
+        border-violet-300/15
+        bg-violet-300/[0.06]
+        text-violet-200/80
+      `;
+
     case "EXTRACTED":
       return `
         border-cyan-300/15
@@ -278,7 +351,7 @@ function getEvidenceBadgeClass(
       return `
         border-white/[0.08]
         bg-white/[0.025]
-        text-white/35
+        text-slate-400
       `;
   }
 }
@@ -354,6 +427,7 @@ export default function BiologicalEdge({
 
   const evidenceLevel =
     getEvidenceLevel(
+      edgeData,
       evidenceCount,
       confidence,
       evidenceQuote,
@@ -375,6 +449,14 @@ export default function BiologicalEdge({
     evidenceLevel ===
     "CANDIDATE";
 
+  const isContradicted =
+    evidenceLevel ===
+    "CONTRADICTED";
+
+  const isMixed =
+    evidenceLevel ===
+    "MIXED";
+
   const mainOpacity =
     isUnmapped
       ? 0.35
@@ -382,7 +464,11 @@ export default function BiologicalEdge({
         ? 0.55
         : isCandidate
           ? 0.78
-          : 1;
+          : isContradicted
+            ? 0.62
+            : isMixed
+              ? 0.86
+              : 1;
 
   /* =======================================================
      RENDER
@@ -403,12 +489,12 @@ export default function BiologicalEdge({
         strokeWidth={
           active
             ? 10
-            : 7
+            : 6
         }
         opacity={
           active
-            ? 0.12
-            : 0.04
+            ? 0.14
+            : 0.045
         }
         strokeLinecap="round"
         className="pointer-events-none"
@@ -445,7 +531,9 @@ export default function BiologicalEdge({
           strokeDasharray:
             isHypothesis ||
             isUnmapped ||
-            isCandidate
+            isCandidate ||
+            isContradicted ||
+            isMixed
               ? "7 8"
               : undefined,
 
@@ -459,7 +547,7 @@ export default function BiologicalEdge({
           filter:
             active
               ? `drop-shadow(0 0 8px ${relationship.color})`
-              : "drop-shadow(0 0 3px rgba(100,116,139,.25))",
+              : "drop-shadow(0 0 3px rgba(94,234,212,.14))",
         }}
       />
 
@@ -476,8 +564,8 @@ export default function BiologicalEdge({
           }
           strokeWidth={
             active
-              ? 1.7
-              : 0.85
+              ? 1.6
+              : 0.75
           }
           strokeDasharray={
             relationship.dash
@@ -485,8 +573,8 @@ export default function BiologicalEdge({
           strokeLinecap="round"
           opacity={
             active
-              ? 0.95
-              : 0.42
+              ? 0.9
+              : 0.32
           }
           className="pointer-events-none"
         >
@@ -496,8 +584,8 @@ export default function BiologicalEdge({
             to="0"
             dur={
               active
-                ? "0.72s"
-                : "1.75s"
+                ? "0.8s"
+                : "2.15s"
             }
             repeatCount="indefinite"
           />
@@ -518,7 +606,7 @@ export default function BiologicalEdge({
                   ? 5.2
                   : 3.3
               }
-              fill="rgba(2,6,23,.85)"
+              fill="rgba(7,24,35,.92)"
               stroke={
                 relationship.secondary
               }
@@ -704,12 +792,12 @@ export default function BiologicalEdge({
             className="
               pointer-events-none
               absolute
-              min-w-[116px]
-              rounded-[12px]
+              min-w-[128px]
+              rounded-[14px]
               border
-              bg-[#07111f]/94
-              px-3
-              py-2
+              bg-[#0a1b26]/96
+              px-3.5
+              py-2.5
               backdrop-blur-xl
             "
             style={{
@@ -717,12 +805,12 @@ export default function BiologicalEdge({
                 `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
 
               borderColor:
-                `${relationship.color}33`,
+                `${relationship.color}2b`,
 
               boxShadow:
                 active
                   ? `0 0 22px ${relationship.color}22`
-                  : "0 8px 24px rgba(0,0,0,.28)",
+                  : "0 12px 34px rgba(1,8,15,.34)",
             }}
           >
             {/* ============================================= */}
@@ -739,10 +827,10 @@ export default function BiologicalEdge({
             >
               <span
                 className="
-                  text-[10px]
+                  text-[11px]
                   font-bold
                   uppercase
-                  tracking-[0.08em]
+                  tracking-[0.07em]
                 "
                 style={{
                   color:
@@ -759,8 +847,8 @@ export default function BiologicalEdge({
                 "undirected" && (
                 <span
                   className="
-                    text-[8px]
-                    text-white/25
+                    text-[11px]
+                    text-slate-500
                   "
                 >
                   ↔
@@ -787,9 +875,9 @@ export default function BiologicalEdge({
                   border
                   px-1.5
                   py-0.5
-                  text-[7px]
+                  text-[10px]
                   font-bold
-                  tracking-[0.08em]
+                  tracking-[0.06em]
 
                   ${getEvidenceBadgeClass(
                     evidenceLevel,
@@ -805,13 +893,13 @@ export default function BiologicalEdge({
                   className="
                     rounded-full
                     border
-                    border-white/[0.07]
-                    bg-black/20
+                    border-teal-100/[0.07]
+                    bg-black/[0.12]
                     px-1.5
                     py-0.5
-                    text-[7px]
+                    text-[10px]
                     font-semibold
-                    text-white/35
+                    text-slate-400
                   "
                 >
                   AI {confidence}%
@@ -824,13 +912,13 @@ export default function BiologicalEdge({
                   className="
                     rounded-full
                     border
-                    border-white/[0.07]
-                    bg-black/20
+                    border-teal-100/[0.07]
+                    bg-black/[0.12]
                     px-1.5
                     py-0.5
-                    text-[7px]
+                    text-[10px]
                     font-semibold
-                    text-white/35
+                    text-slate-400
                   "
                 >
                   {evidenceCount}{" "}
@@ -838,6 +926,26 @@ export default function BiologicalEdge({
                   1
                     ? "paper"
                     : "papers"}
+                </span>
+              )}
+
+              {edgeData.evidenceSummary &&
+                edgeData.evidenceSummary.analyzed >
+                  0 && (
+                <span
+                  className="
+                    rounded-full
+                    border
+                    border-emerald-300/10
+                    bg-emerald-300/[0.035]
+                    px-1.5
+                    py-0.5
+                    text-[10px]
+                    font-semibold
+                    text-emerald-200/70
+                  "
+                >
+                  {edgeData.evidenceSummary.supporting} support
                 </span>
               )}
             </div>
@@ -850,10 +958,10 @@ export default function BiologicalEdge({
               <div
                 className="
                   mt-1.5
-                  text-[7px]
+                  text-[9px]
                   uppercase
-                  tracking-[0.1em]
-                  text-cyan-200/35
+                  tracking-[0.11em]
+                  text-teal-200/45
                 "
               >
                 Source quote linked
