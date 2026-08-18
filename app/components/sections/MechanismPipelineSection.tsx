@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import type React from "react";
+import { Fragment } from "react";
 import { motion } from "framer-motion";
 import {
   FileText,
@@ -527,7 +528,7 @@ export default function MechanismPipelineSection() {
                 "Invasion",
                 "Metastatic phenotype",
               ].map((node, index, array) => (
-                <React.Fragment key={node}>
+                <Fragment key={node}>
                   <motion.div
                     initial={{
                       opacity: 0,
@@ -572,7 +573,7 @@ export default function MechanismPipelineSection() {
                       "
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               ))}
             </div>
 

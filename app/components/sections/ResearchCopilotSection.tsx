@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import type React from "react";
+import { Fragment, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -103,7 +104,7 @@ const mechanism = [
 
 export default function ResearchCopilotSection() {
   const [selectedPromptId, setSelectedPromptId] =
-    React.useState("edge");
+    useState("edge");
 
   const selectedPrompt =
     prompts.find((prompt) => prompt.id === selectedPromptId) ??
@@ -326,7 +327,7 @@ export default function ResearchCopilotSection() {
 
             <div className="mt-6 space-y-2">
               {mechanism.map((node, index) => (
-                <React.Fragment key={node}>
+                <Fragment key={node}>
                   <motion.div
                     initial={{
                       opacity: 0,
@@ -398,7 +399,7 @@ export default function ResearchCopilotSection() {
                       "
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               ))}
             </div>
 

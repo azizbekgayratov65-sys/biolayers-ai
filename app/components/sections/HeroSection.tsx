@@ -1,9 +1,23 @@
 "use client";
 
-import CursorEnergyField from "../hero/CursorEnergyField";
+import dynamic from "next/dynamic";
 import HeroContent from "../hero/HeroContent";
 import HeroStageNarrative from "../hero/HeroStageNarrative";
-import HeroThreeScene from "../hero/HeroThreeScene";
+
+const CursorEnergyField = dynamic(
+  () => import("../hero/CursorEnergyField"),
+  { ssr: false },
+);
+
+const HeroThreeScene = dynamic(
+  () => import("../hero/HeroThreeScene"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(45,212,191,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(125,211,252,.035),transparent_26%)]" />
+    ),
+  },
+);
 
 export default function HeroSection() {
   return (

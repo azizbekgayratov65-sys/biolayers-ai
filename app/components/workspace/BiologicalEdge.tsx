@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -360,7 +361,7 @@ function getEvidenceBadgeClass(
    BIOLOGICAL EDGE
    ========================================================= */
 
-export default function BiologicalEdge({
+export default memo(function BiologicalEdge({
   id,
   sourceX,
   sourceY,
@@ -972,4 +973,4 @@ export default function BiologicalEdge({
       )}
     </>
   );
-}
+});

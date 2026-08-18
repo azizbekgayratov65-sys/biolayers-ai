@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import {
   Handle,
@@ -60,7 +61,7 @@ function getTypeTitle(type: ResearchEntityData["type"]) {
   }
 }
 
-export default function EntityNode({
+export default memo(function EntityNode({
   data,
   selected,
   sourcePosition = Position.Bottom,
@@ -316,4 +317,4 @@ export default function EntityNode({
       />
     </motion.div>
   );
-}
+});

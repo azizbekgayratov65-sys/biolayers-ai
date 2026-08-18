@@ -4693,8 +4693,8 @@ function Singularity({
           p,
           0.23,
           0.3,
-          0.91,
-          0.995,
+          0.85,
+          0.92,
         );
 
       group.visible =
@@ -4720,7 +4720,7 @@ function Singularity({
         ) *
         THREE.MathUtils.lerp(
           1,
-          5.5,
+          3.0,
           collapse,
         );
 
@@ -5339,40 +5339,70 @@ function JourneyCopy({
 }) {
   const earthOpacity = useTransform(
     progress,
-    [0.01, 0.045, 0.19, 0.235],
+    [0.01, 0.045, 0.18, 0.22],
     [0, 1, 1, 0],
+  );
+
+  const earthY = useTransform(
+    progress,
+    [0.01, 0.06],
+    [12, 0],
   );
 
   const transitionOpacity = useTransform(
     progress,
-    [0.205, 0.245, 0.315, 0.355],
+    [0.23, 0.265, 0.31, 0.345],
     [0, 1, 1, 0],
+  );
+
+  const transitionY = useTransform(
+    progress,
+    [0.23, 0.28],
+    [14, 0],
   );
 
   const cellularOpacity = useTransform(
     progress,
-    [0.305, 0.35, 0.425, 0.47],
+    [0.355, 0.39, 0.43, 0.465],
     [0, 1, 1, 0],
+  );
+
+  const cellularY = useTransform(
+    progress,
+    [0.355, 0.40],
+    [12, 0],
   );
 
   const molecularOpacity = useTransform(
     progress,
-    [0.46, 0.515, 0.635, 0.69],
+    [0.475, 0.52, 0.54, 0.58],
     [0, 1, 1, 0],
+  );
+
+  const molecularY = useTransform(
+    progress,
+    [0.475, 0.525],
+    [12, 0],
   );
 
   const genomicOpacity = useTransform(
     progress,
-    [0.655, 0.705, 0.805, 0.855],
+    [0.68, 0.72, 0.75, 0.79],
     [0, 1, 1, 0],
+  );
+
+  const genomicY = useTransform(
+    progress,
+    [0.68, 0.73],
+    [12, 0],
   );
 
   return (
     <>
       {/* PLANETARY SCALE */}
       <motion.div
-        style={{ opacity: earthOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[8vh] z-20 mx-auto max-w-5xl px-6 text-center"
+        style={{ opacity: earthOpacity, y: earthY }}
+        className="pointer-events-none absolute inset-x-0 top-[10vh] z-20 mx-auto max-w-5xl px-6 text-center"
       >
         <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-teal-200/65">
           From organism to mechanism
@@ -5424,8 +5454,8 @@ function JourneyCopy({
 
       {/* TRANSITION */}
       <motion.div
-        style={{ opacity: transitionOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
+        style={{ opacity: transitionOpacity, y: transitionY }}
+        className="pointer-events-none absolute inset-x-0 top-[42vh] z-20 px-6 text-center"
       >
         <p className="text-[8px] font-semibold uppercase tracking-[0.44em] text-teal-200/60">
           Scale transition
@@ -5439,8 +5469,8 @@ function JourneyCopy({
 
       {/* CELLULAR LAYER */}
       <motion.div
-        style={{ opacity: cellularOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[15vh] z-20 px-6 text-center"
+        style={{ opacity: cellularOpacity, y: cellularY }}
+        className="pointer-events-none absolute inset-x-0 top-[12vh] z-20 px-6 text-center"
       >
         <p className="text-[9px] font-semibold uppercase tracking-[0.44em] text-teal-200/60">
           Layer 01 / Cellular
@@ -5460,8 +5490,8 @@ function JourneyCopy({
 
       {/* MOLECULAR / PATHWAY LAYER */}
       <motion.div
-        style={{ opacity: molecularOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-[17vh] z-20 px-6 text-center"
+        style={{ opacity: molecularOpacity, y: molecularY }}
+        className="pointer-events-none absolute inset-x-0 top-[12vh] z-20 px-6 text-center"
       >
         <p className="text-[9px] font-semibold uppercase tracking-[0.42em] text-sky-200/65">
           Layer 02 / Molecular signaling
@@ -5481,8 +5511,8 @@ function JourneyCopy({
 
       {/* GENOMIC / PROTEIN LAYER */}
       <motion.div
-        style={{ opacity: genomicOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-[10vh] z-20 px-6 text-center"
+        style={{ opacity: genomicOpacity, y: genomicY }}
+        className="pointer-events-none absolute inset-x-0 top-[12vh] z-20 px-6 text-center"
       >
         <p className="text-[8px] font-semibold uppercase tracking-[0.44em] text-sky-200/65">
           Layer 03 / Genes & proteins
@@ -5619,7 +5649,7 @@ function CellDiveReticle({
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-white/75
+          bg-teal-200/90
           shadow-[0_0_18px_rgba(153,246,228,.65)]
         "
       />
@@ -5644,22 +5674,22 @@ function PaperGraphHUD({
   const opacity =
     useTransform(
       progress,
-      [0.47, 0.51, 0.66, 0.705],
+      [0.58, 0.62, 0.68, 0.72],
       [0, 1, 1, 0],
     );
 
   const y =
     useTransform(
       progress,
-      [0.47, 0.705],
-      [reduced ? 0 : 10, 0],
+      [0.58, 0.63],
+      [reduced ? 0 : 14, 0],
     );
 
   return (
     <motion.div
       aria-hidden="true"
       style={{ opacity, y }}
-      className="pointer-events-none absolute left-1/2 top-[13vh] z-[24] w-[min(92vw,720px)] -translate-x-1/2 text-center"
+      className="pointer-events-none absolute left-1/2 top-[12vh] z-[24] w-[min(92vw,720px)] -translate-x-1/2 text-center"
     >
       <div className="mx-auto w-fit rounded-full border border-teal-100/10 bg-[#06131d]/68 px-3 py-1.5 font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-teal-100/60 backdrop-blur-xl">
         Literature intelligence
@@ -5692,32 +5722,41 @@ function PaperGraphHUD({
 
 function EvidenceIntelligenceHUD({
   progress,
+  reduced,
 }: {
   progress: MotionValue<number>;
+  reduced: boolean;
 }) {
   const opacity =
     useTransform(
       progress,
-      [0.61, 0.655, 0.79, 0.835],
+      [0.72, 0.76, 0.82, 0.85],
       [0, 1, 1, 0],
+    );
+
+  const y =
+    useTransform(
+      progress,
+      [0.72, 0.77],
+      [reduced ? 0 : 14, 0],
     );
 
   const contradictionOpacity =
     useTransform(
       progress,
-      [0.695, 0.735, 0.79, 0.82],
+      [0.76, 0.80, 0.82, 0.84],
       [0, 1, 1, 0],
     );
 
   return (
     <motion.div
       aria-hidden="true"
-      style={{ opacity }}
+      style={{ opacity, y }}
       className="
         pointer-events-none
         absolute
         left-1/2
-        top-[11vh]
+        top-[12vh]
         z-[25]
         w-[min(92vw,760px)]
         -translate-x-1/2
@@ -5823,20 +5862,29 @@ function EvidenceIntelligenceHUD({
 
 function HypothesisBirthHUD({
   progress,
+  reduced,
 }: {
   progress: MotionValue<number>;
+  reduced: boolean;
 }) {
   const opacity =
     useTransform(
       progress,
-      [0.775, 0.815, 0.905, 0.95],
+      [0.82, 0.855, 0.91, 0.935],
       [0, 1, 1, 0],
+    );
+
+  const y =
+    useTransform(
+      progress,
+      [0.82, 0.86],
+      [reduced ? 0 : 14, 0],
     );
 
   const cardScale =
     useTransform(
       progress,
-      [0.8, 0.885],
+      [0.835, 0.91],
       [0.94, 1],
     );
 
@@ -5845,13 +5893,14 @@ function HypothesisBirthHUD({
       aria-hidden="true"
       style={{
         opacity,
+        y,
         scale: cardScale,
       }}
       className="
         pointer-events-none
         absolute
         left-1/2
-        bottom-[9vh]
+        top-[12vh]
         z-[26]
         w-[min(92vw,690px)]
         -translate-x-1/2
@@ -5969,20 +6018,29 @@ function HypothesisBirthHUD({
 
 function ResearchConstellationHUD({
   progress,
+  reduced,
 }: {
   progress: MotionValue<number>;
+  reduced: boolean;
 }) {
   const opacity =
     useTransform(
       progress,
-      [0.89, 0.925, 0.975, 1],
+      [0.92, 0.95, 0.975, 1],
       [0, 1, 1, 0],
+    );
+
+  const y =
+    useTransform(
+      progress,
+      [0.92, 0.96],
+      [reduced ? 0 : 14, 0],
     );
 
   return (
     <motion.div
       aria-hidden="true"
-      style={{ opacity }}
+      style={{ opacity, y }}
       className="
         pointer-events-none
         absolute
@@ -6070,8 +6128,8 @@ function ScaleDiveHUD({
     useTransform(
       progress,
       [
-        0.19,
-        0.225,
+        0.22,
+        0.26,
         0.435,
         0.49,
       ],
@@ -7013,8 +7071,8 @@ function DNAToGraphBridge({
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-white
-          shadow-[0_0_18px_rgba(255,255,255,.95),0_0_55px_rgba(167,139,250,.75),0_0_95px_rgba(34,211,238,.35)]
+          bg-teal-200
+          shadow-[0_0_18px_rgba(94,234,212,.95),0_0_55px_rgba(167,139,250,.75),0_0_95px_rgba(34,211,238,.35)]
         "
       />
     </motion.div>
@@ -7171,10 +7229,10 @@ function KnowledgeGraph({
     useTransform(
       progress,
       [
-        0.77,
-        0.815,
-        0.925,
-        0.985,
+        0.82,
+        0.86,
+        0.91,
+        0.94,
       ],
       [
         0,
@@ -7188,10 +7246,10 @@ function KnowledgeGraph({
     useTransform(
       progress,
       [
-        0.77,
-        0.835,
-        0.94,
-        0.99,
+        0.82,
+        0.88,
+        0.92,
+        0.95,
       ],
       [
         0.82,
@@ -7641,8 +7699,8 @@ function KnowledgeGraph({
                           h-1.5
                           w-1.5
                           rounded-full
-                          bg-white
-                          shadow-[0_0_12px_rgba(255,255,255,.8)]
+                           bg-teal-200
+                           shadow-[0_0_12px_rgba(94,234,212,.8)]
                         "
                       />
 
@@ -7939,9 +7997,9 @@ function AboutCollapse({
         -translate-y-1/2
         rounded-full
         border
-        border-white/25
-        bg-white/[0.04]
-        shadow-[0_0_40px_rgba(255,255,255,.35),0_0_100px_rgba(196,181,253,.45),0_0_220px_rgba(34,211,238,.16)]
+        border-teal-200/20
+        bg-teal-300/[0.03]
+        shadow-[0_0_40px_rgba(45,212,191,.25),0_0_100px_rgba(34,211,238,.18),0_0_220px_rgba(6,17,26,.12)]
       "
     />
   );
@@ -8059,7 +8117,7 @@ export default function BioJourney() {
         0.22,
         0,
         0,
-        0.26,
+        0,
         0,
       ],
     );
@@ -8188,6 +8246,7 @@ export default function BioJourney() {
             absolute
             inset-0
             z-[2]
+            bg-[#06111a]
           "
         >
           <Canvas
@@ -8210,7 +8269,7 @@ export default function BioJourney() {
                   ]
             }
             gl={{
-              alpha: true,
+              alpha: false,
               antialias: true,
               powerPreference:
                 "high-performance",
@@ -8219,8 +8278,8 @@ export default function BioJourney() {
               gl,
             }) => {
               gl.setClearColor(
-                0x000000,
-                0,
+                0x06111a,
+                1,
               );
 
               gl.outputColorSpace =
@@ -8265,17 +8324,26 @@ export default function BioJourney() {
           progress={
             progress
           }
+          reduced={
+            reduced
+          }
         />
 
         <HypothesisBirthHUD
           progress={
             progress
           }
+          reduced={
+            reduced
+          }
         />
 
         <ResearchConstellationHUD
           progress={
             progress
+          }
+          reduced={
+            reduced
           }
         />
 
@@ -8342,22 +8410,7 @@ export default function BioJourney() {
           }
         />
 
-        {/* FLASH */}
-
-        <motion.div
-          aria-hidden="true"
-          style={{
-            opacity:
-              flash,
-          }}
-          className="
-            pointer-events-none
-            absolute
-            inset-0
-            z-30
-            bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,.68)_0%,rgba(153,246,228,.18)_10%,rgba(125,211,252,.08)_26%,transparent_62%)]
-          "
-        />
+        {/* FLASH — removed */}
 
         {/* HUD */}
 

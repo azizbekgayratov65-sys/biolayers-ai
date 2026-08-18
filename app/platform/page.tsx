@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, FlaskConical } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import dynamic from "next/dynamic";
 
@@ -10,42 +10,74 @@ const SectionPlaceholder = ({ className = "" }: { className?: string }) => (
   <div className={`w-full animate-pulse ${className}`} />
 );
 
-const HeroSection = dynamic(() => import("./components/sections/HeroSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-screen" /> });
-const ProblemSection = dynamic(() => import("./components/sections/ProblemSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[60vh]" /> });
-const CapabilitiesSection = dynamic(() => import("./components/sections/CapabilitiesSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[80vh]" /> });
-const AboutSection = dynamic(() => import("./components/sections/AboutSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[50vh]" /> });
+const MechanismPipelineSection = dynamic(
+  () => import("../components/sections/MechanismPipelineSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
+const InteractiveMechanismDemoSection = dynamic(
+  () => import("../components/sections/InteractiveMechanismDemoSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[80vh]" /> },
+);
+const ScientificSourcesSection = dynamic(
+  () => import("../components/sections/ScientificSourcesSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
+const MultiPaperEvidenceSection = dynamic(
+  () => import("../components/sections/MultiPaperEvidenceSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
+const ResearchCopilotSection = dynamic(
+  () => import("../components/sections/ResearchCopilotSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
+const HypothesisBuilderSection = dynamic(
+  () => import("../components/sections/HypothesisBuilderSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
 
-export default function Home() {
+export default function PlatformPage() {
   const reduceMotion = Boolean(useReducedMotion());
 
   return (
     <>
       {/* ================================================= */}
-      {/* 01 — HERO                                        */}
+      {/* 01 — MECHANISM PIPELINE                          */}
       {/* ================================================= */}
 
-      <HeroSection />
+      <MechanismPipelineSection />
 
       {/* ================================================= */}
-      {/* 02 — RESEARCH PROBLEM                            */}
+      {/* 02 — INTERACTIVE MECHANISM DEMO                  */}
       {/* ================================================= */}
 
-      <ProblemSection />
+      <InteractiveMechanismDemoSection />
 
       {/* ================================================= */}
-      {/* 03 — CORE CAPABILITIES                           */}
+      {/* 03 — SCIENTIFIC DATA INFRASTRUCTURE              */}
       {/* ================================================= */}
 
-      <CapabilitiesSection />
+      <ScientificSourcesSection />
 
       {/* ================================================= */}
-      {/* 04 — ABOUT                                       */}
+      {/* 04 — MULTI-PAPER EVIDENCE SYNTHESIS              */}
       {/* ================================================= */}
 
-      <AboutSection />
+      <MultiPaperEvidenceSection />
 
       {/* ================================================= */}
-      {/* 05 — NEXT PAGE CTA                               */}
+      {/* 05 — MECHANISM-AWARE RESEARCH COPILOT            */}
+      {/* ================================================= */}
+
+      <ResearchCopilotSection />
+
+      {/* ================================================= */}
+      {/* 06 — HYPOTHESIS BUILDER                          */}
+      {/* ================================================= */}
+
+      <HypothesisBuilderSection />
+
+      {/* ================================================= */}
+      {/* 07 — PAGE NAVIGATION                             */}
       {/* ================================================= */}
 
       <section
@@ -87,19 +119,6 @@ export default function Home() {
             text-center
           "
         >
-          <span
-            className="
-              font-mono
-              text-[10px]
-              font-bold
-              uppercase
-              tracking-[0.25em]
-              text-teal-300/50
-            "
-          >
-            Explore the platform
-          </span>
-
           <h2
             className="
               text-3xl
@@ -109,20 +128,8 @@ export default function Home() {
               sm:text-4xl
             "
           >
-            See how BioLayers works
+            Continue exploring
           </h2>
-
-          <p
-            className="
-              max-w-xl
-              text-base
-              leading-relaxed
-              text-slate-400
-            "
-          >
-            Dive into the mechanism pipeline, interactive demos, scientific data
-            infrastructure, and the AI copilot that powers BioLayers research.
-          </p>
 
           <div
             className="
@@ -146,7 +153,7 @@ export default function Home() {
               }
             >
               <Link
-                href="/platform"
+                href="/"
                 className="
                   group
                   flex
@@ -154,21 +161,22 @@ export default function Home() {
                   gap-2.5
                   rounded-[14px]
                   border
-                  border-teal-200/25
-                  bg-teal-300/[0.08]
+                  border-white/10
+                  bg-white/[0.03]
                   px-6
                   py-3.5
                   text-sm
-                  font-bold
-                  text-teal-50
+                  font-semibold
+                  text-slate-300/80
                   transition
                   duration-300
-                  hover:border-teal-200/40
-                  hover:bg-teal-300/[0.14]
+                  hover:border-white/20
+                  hover:bg-white/[0.06]
+                  hover:text-white
                 "
               >
-                Platform
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                Home
               </Link>
             </motion.div>
 
@@ -193,22 +201,21 @@ export default function Home() {
                   gap-2.5
                   rounded-[14px]
                   border
-                  border-sky-200/12
-                  bg-sky-200/[0.035]
+                  border-teal-200/25
+                  bg-teal-300/[0.08]
                   px-6
                   py-3.5
                   text-sm
-                  font-semibold
-                  text-sky-100/80
+                  font-bold
+                  text-teal-50
                   transition
                   duration-300
-                  hover:border-sky-200/25
-                  hover:bg-sky-200/[0.07]
-                  hover:text-white
+                  hover:border-teal-200/40
+                  hover:bg-teal-300/[0.14]
                 "
               >
-                <FlaskConical className="h-4 w-4 text-sky-300/70" />
                 Journey
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
             </motion.div>
           </div>

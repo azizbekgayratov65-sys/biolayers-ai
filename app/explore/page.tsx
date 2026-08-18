@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { toPng } from "html-to-image";
 import {
   AnimatePresence,
   motion,
@@ -36,27 +35,17 @@ import type {
 } from "../lib/researchGraph";
 
 import { layoutGraph } from "../lib/layoutGraph";
+import dynamic from "next/dynamic";
 import WorkspaceReveal from "../components/workspace/WorkspaceReveal";
 import LivingWorkspaceAtmosphere from "../components/workspace/LivingWorkspaceAtmosphere";
-import CellAtlasPanel from "../components/workspace/CellAtlasPanel";
-import PubMedPanel from "../components/workspace/PubMedPanel";
-import EvidencePanel from "../components/workspace/EvidencePanel";
-import InspectorPanel from "../components/workspace/InspectorPanel";
-import EdgeInspectorPanel from "../components/workspace/EdgeInspectorPanel";
-import CopilotPanel from "../components/workspace/CopilotPanel";
-import PaperInspectorPanel from "../components/workspace/PaperInspectorPanel";
 import WorkspaceCanvas, {
   type WorkspaceFlowInstance,
 } from "../components/workspace/WorkspaceCanvas";
-import NarrativeOverlay from "../components/workspace/NarrativeOverlay";
-import DemoModeOverlay from "../components/workspace/DemoModeOverlay";
-import FocusExpandControls from "../components/workspace/FocusExpandControls";
 import WorkspaceHeader from "../components/workspace/WorkspaceHeader";
-import ProjectSidebar from "../components/workspace/ProjectSidebar";
 import GraphWorkspaceControls from "../components/workspace/GraphWorkspaceControls";
-import InspectorSidebar from "../components/workspace/InspectorSidebar";
+import FocusExpandControls from "../components/workspace/FocusExpandControls";
 import MobileWorkspaceControls from "../components/workspace/MobileWorkspaceControls";
-import TimelinePanel from "../components/workspace/TimelinePanel";
+import InspectorSidebar from "../components/workspace/InspectorSidebar";
 import usePubMed, {
   type PubMedPaper,
 } from "../hooks/usePubMed";
@@ -64,13 +53,23 @@ import useWorkspace from "../hooks/useWorkspace";
 import useCellOntology, {
   type CellOntologyTerm,
 } from "../hooks/useCellOntology";
-import ConnectBiologyPanel, {
-  type BiologicalPathResult,
-} from "../components/workspace/ConnectBiologyPanel";
-import EvidenceLensPanel, {
-  type EvidenceLensMode,
-} from "../components/workspace/EvidenceLensPanel";
-import HypothesisBuilderPanel from "../components/workspace/HypothesisBuilderPanel";
+import type { BiologicalPathResult } from "../components/workspace/ConnectBiologyPanel";
+import type { EvidenceLensMode } from "../components/workspace/EvidenceLensPanel";
+
+const CellAtlasPanel = dynamic(() => import("../components/workspace/CellAtlasPanel"), { ssr: false });
+const PubMedPanel = dynamic(() => import("../components/workspace/PubMedPanel"), { ssr: false });
+const EvidencePanel = dynamic(() => import("../components/workspace/EvidencePanel"), { ssr: false });
+const InspectorPanel = dynamic(() => import("../components/workspace/InspectorPanel"), { ssr: false });
+const EdgeInspectorPanel = dynamic(() => import("../components/workspace/EdgeInspectorPanel"), { ssr: false });
+const CopilotPanel = dynamic(() => import("../components/workspace/CopilotPanel"), { ssr: false });
+const PaperInspectorPanel = dynamic(() => import("../components/workspace/PaperInspectorPanel"), { ssr: false });
+const NarrativeOverlay = dynamic(() => import("../components/workspace/NarrativeOverlay"), { ssr: false });
+const DemoModeOverlay = dynamic(() => import("../components/workspace/DemoModeOverlay"), { ssr: false });
+const ProjectSidebar = dynamic(() => import("../components/workspace/ProjectSidebar"), { ssr: false });
+const TimelinePanel = dynamic(() => import("../components/workspace/TimelinePanel"), { ssr: false });
+const ConnectBiologyPanel = dynamic(() => import("../components/workspace/ConnectBiologyPanel"), { ssr: false });
+const EvidenceLensPanel = dynamic(() => import("../components/workspace/EvidenceLensPanel"), { ssr: false });
+const HypothesisBuilderPanel = dynamic(() => import("../components/workspace/HypothesisBuilderPanel"), { ssr: false });
 
 import {
   deleteBioLayersProject,
@@ -2327,6 +2326,7 @@ drug: true,
         setTimeout(resolve, 380),
       );
 
+      const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(
         graphContainerRef.current,
         {

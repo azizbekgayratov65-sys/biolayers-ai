@@ -588,11 +588,7 @@ function SurfaceFlag({
 
       undefined,
 
-      () => {
-        console.warn(
-          `Flag not found: ${flagUrl}`,
-        );
-      },
+      () => {},
     );
 
     return () => {
@@ -1452,12 +1448,6 @@ export default function CountryBorders({
                     /*
                      * Select country.
                      */
-
-                    console.log(
-                      "[CountryFocus] CLICK:",
-                      info.name,
-                      info.code,
-                    );
 
                     focusCountry({
                       code:

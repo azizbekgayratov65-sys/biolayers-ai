@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -21,13 +21,13 @@ function CountUp({
   value: number;
   duration?: number;
 }) {
-  const wrapperRef = React.useRef<HTMLSpanElement | null>(null);
-  const numberRef = React.useRef<HTMLSpanElement | null>(null);
+  const wrapperRef = useRef<HTMLSpanElement | null>(null);
+  const numberRef = useRef<HTMLSpanElement | null>(null);
 
-  const animationFrameRef = React.useRef<number | null>(null);
-  const hasAnimatedRef = React.useRef(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const hasAnimatedRef = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const wrapper = wrapperRef.current;
 
     if (!wrapper) return;

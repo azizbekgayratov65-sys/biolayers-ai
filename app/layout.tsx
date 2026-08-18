@@ -11,6 +11,8 @@ import {
 
 import "./globals.css";
 
+import Navbar from "./components/Navbar";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -110,8 +112,23 @@ export default function RootLayout({
           bg-[var(--background)]
           text-[var(--foreground)]
         "
+        suppressHydrationWarning
       >
-        {children}
+        <Navbar />
+
+        <main
+          className="
+            relative
+            min-h-screen
+            bg-[#06111a]
+            text-slate-100
+          "
+          style={{
+            overflowX: "clip",
+          }}
+        >
+          {children}
+        </main>
       </body>
     </html>
   );

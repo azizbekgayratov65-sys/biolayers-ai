@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import type React from "react";
+import { Fragment, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -147,7 +148,7 @@ const relationships = [
 ];
 
 export default function InteractiveMechanismDemoSection() {
-  const [selectedId, setSelectedId] = React.useState("smad");
+  const [selectedId, setSelectedId] = useState("smad");
 
   const selectedNode =
     nodes.find((node) => node.id === selectedId) ?? nodes[0];
@@ -435,7 +436,7 @@ export default function InteractiveMechanismDemoSection() {
                     const selected = node.id === selectedId;
 
                     return (
-                      <React.Fragment key={node.id}>
+                      <Fragment key={node.id}>
                         <motion.button
                           type="button"
                           onClick={() => setSelectedId(node.id)}
@@ -595,7 +596,7 @@ export default function InteractiveMechanismDemoSection() {
                             </div>
                           </div>
                         )}
-                      </React.Fragment>
+                      </Fragment>
                     );
                   })}
                 </div>

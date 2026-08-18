@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   AnimatePresence,
   motion,
@@ -20,29 +21,19 @@ import { useEffect, useState } from "react";
 
 const navItems = [
   {
-    href: "#capabilities",
-    label: "Product",
-    id: "capabilities",
+    href: "/",
+    label: "Home",
+    path: "/",
   },
   {
-    href: "#scientific-sources",
-    label: "Research",
-    id: "scientific-sources",
+    href: "/platform",
+    label: "Platform",
+    path: "/platform",
   },
   {
-    href: "#research-copilot",
-    label: "Copilot",
-    id: "research-copilot",
-  },
-  {
-    href: "#research-mentorship",
-    label: "Mentorship",
-    id: "research-mentorship",
-  },
-  {
-    href: "#about",
-    label: "About",
-    id: "about",
+    href: "/journey",
+    label: "Journey",
+    path: "/journey",
   },
 ] as const;
 
@@ -51,11 +42,11 @@ const navItems = [
    ========================================================= */
 
 export default function Navbar() {
+  const pathname = usePathname();
   const reduceMotion = Boolean(useReducedMotion());
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
 
   /* =======================================================
      SCROLL STATE
@@ -74,47 +65,6 @@ export default function Navbar() {
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  /* =======================================================
-     ACTIVE SECTION
-     ======================================================= */
-
-  useEffect(() => {
-    const elements = navItems
-      .map((item) => document.getElementById(item.id))
-      .filter((element): element is HTMLElement => Boolean(element));
-
-    if (!elements.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) =>
-              b.intersectionRatio - a.intersectionRatio,
-          );
-
-        if (visibleEntries.length > 0) {
-          setActiveSection(visibleEntries[0].target.id);
-        }
-      },
-      {
-        rootMargin: "-25% 0px -55% 0px",
-        threshold: [0.05, 0.15, 0.3, 0.5],
-      },
-    );
-
-    elements.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => {
-      observer.disconnect();
     };
   }, []);
 
@@ -174,6 +124,14 @@ export default function Navbar() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  /* =======================================================
+     SCROLL TO TOP ON ROUTE CHANGE
+     ======================================================= */
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   /* =======================================================
      RENDER
@@ -446,10 +404,10 @@ export default function Navbar() {
             >
               {navItems.map((item) => (
                 <DesktopNavItem
-                  key={item.id}
+                  key={item.path}
                   href={item.href}
                   label={item.label}
-                  active={activeSection === item.id}
+                  active={pathname === item.path}
                   reduceMotion={reduceMotion}
                 />
               ))}
@@ -696,11 +654,11 @@ export default function Navbar() {
                 className="space-y-1"
               >
                 {navItems.map((item, index) => {
-                  const active = activeSection === item.id;
+                  const active = pathname === item.path;
 
                   return (
-                    <a
-                      key={item.id}
+                    <Link
+                      key={item.path}
                       href={item.href}
                       onClick={() => {
                         setMobileOpen(false);
@@ -765,7 +723,7 @@ export default function Navbar() {
                           "
                         />
                       )}
-                    </a>
+                    </Link>
                   );
                 })}
               </nav>
@@ -904,15 +862,8 @@ function DesktopNavItem({
   reduceMotion: boolean;
 }) {
   return (
-    <motion.a
+    <Link
       href={href}
-      whileHover={
-        reduceMotion
-          ? undefined
-          : {
-              y: -1,
-            }
-      }
       className={`
         group
         relative
@@ -970,6 +921,6 @@ function DesktopNavItem({
           "
         />
       )}
-    </motion.a>
+    </Link>
   );
 }

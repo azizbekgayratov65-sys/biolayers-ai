@@ -3,7 +3,6 @@
 import {
   Bloom,
   EffectComposer,
-  Noise,
   Vignette,
 } from "@react-three/postprocessing";
 
@@ -21,7 +20,7 @@ import {
 
 import * as THREE from "three";
 
-const PARTICLE_COUNT = 11000;
+const PARTICLE_COUNT = 6500;
 const CYCLE_SECONDS = 15;
 
 function getCycleState(time: number) {
@@ -828,12 +827,12 @@ function StarField() {
     useMemo(() => {
       const positions =
         new Float32Array(
-          2200 * 3,
+          1200 * 3,
         );
 
       const colors =
         new Float32Array(
-          2200 * 3,
+          1200 * 3,
         );
 
       const cyan =
@@ -851,7 +850,7 @@ function StarField() {
 
       for (
         let index = 0;
-        index < 2200;
+        index < 1200;
         index += 1
       ) {
         const i = index * 3;
@@ -1047,7 +1046,7 @@ function PortalCore() {
           args={[
             2.72,
             3.42,
-            220,
+            120,
           ]}
         />
 
@@ -1072,7 +1071,7 @@ function PortalCore() {
           args={[
             2.92,
             3.035,
-            220,
+            120,
           ]}
         />
 
@@ -1104,7 +1103,7 @@ function PortalCore() {
           args={[
             3.08,
             3.13,
-            220,
+            120,
           ]}
         />
 
@@ -1391,7 +1390,7 @@ function EnergyTrails() {
 
   const geometry =
     useMemo(() => {
-      const streaks = 1200;
+      const streaks = 600;
 
       const positions =
         new Float32Array(
@@ -1857,13 +1856,11 @@ function PostFX() {
       enableNormalPass={false}
     >
       <Bloom
-        intensity={3.35}
-        luminanceThreshold={0.06}
+        intensity={2.5}
+        luminanceThreshold={0.1}
         luminanceSmoothing={0.9}
         mipmapBlur
       />
-
-      <Noise opacity={0.006} />
 
       <Vignette
         eskil={false}

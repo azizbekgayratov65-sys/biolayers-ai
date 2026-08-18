@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, FlaskConical } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import dynamic from "next/dynamic";
 
@@ -10,42 +10,34 @@ const SectionPlaceholder = ({ className = "" }: { className?: string }) => (
   <div className={`w-full animate-pulse ${className}`} />
 );
 
-const HeroSection = dynamic(() => import("./components/sections/HeroSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-screen" /> });
-const ProblemSection = dynamic(() => import("./components/sections/ProblemSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[60vh]" /> });
-const CapabilitiesSection = dynamic(() => import("./components/sections/CapabilitiesSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[80vh]" /> });
-const AboutSection = dynamic(() => import("./components/sections/AboutSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[50vh]" /> });
+const BioJourney = dynamic(
+  () => import("../components/journey/BioJourney"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[100vh]" /> },
+);
+const ResearchMentorshipSection = dynamic(
+  () => import("../components/sections/ResearchMentorshipSection"),
+  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[70vh]" /> },
+);
 
-export default function Home() {
+export default function JourneyPage() {
   const reduceMotion = Boolean(useReducedMotion());
 
   return (
     <>
       {/* ================================================= */}
-      {/* 01 — HERO                                        */}
+      {/* 01 — BIOLOGICAL JOURNEY                          */}
       {/* ================================================= */}
 
-      <HeroSection />
+      <BioJourney />
 
       {/* ================================================= */}
-      {/* 02 — RESEARCH PROBLEM                            */}
+      {/* 02 — RESEARCH MENTORSHIP                         */}
       {/* ================================================= */}
 
-      <ProblemSection />
+      <ResearchMentorshipSection />
 
       {/* ================================================= */}
-      {/* 03 — CORE CAPABILITIES                           */}
-      {/* ================================================= */}
-
-      <CapabilitiesSection />
-
-      {/* ================================================= */}
-      {/* 04 — ABOUT                                       */}
-      {/* ================================================= */}
-
-      <AboutSection />
-
-      {/* ================================================= */}
-      {/* 05 — NEXT PAGE CTA                               */}
+      {/* 03 — PAGE NAVIGATION                             */}
       {/* ================================================= */}
 
       <section
@@ -87,19 +79,6 @@ export default function Home() {
             text-center
           "
         >
-          <span
-            className="
-              font-mono
-              text-[10px]
-              font-bold
-              uppercase
-              tracking-[0.25em]
-              text-teal-300/50
-            "
-          >
-            Explore the platform
-          </span>
-
           <h2
             className="
               text-3xl
@@ -109,7 +88,7 @@ export default function Home() {
               sm:text-4xl
             "
           >
-            See how BioLayers works
+            You've reached the end
           </h2>
 
           <p
@@ -120,8 +99,8 @@ export default function Home() {
               text-slate-400
             "
           >
-            Dive into the mechanism pipeline, interactive demos, scientific data
-            infrastructure, and the AI copilot that powers BioLayers research.
+            You've explored the full BioLayers journey — from papers to
+            mechanisms to hypotheses. Ready to start building your own?
           </p>
 
           <div
@@ -146,7 +125,7 @@ export default function Home() {
               }
             >
               <Link
-                href="/platform"
+                href="/explore"
                 className="
                   group
                   flex
@@ -167,8 +146,7 @@ export default function Home() {
                   hover:bg-teal-300/[0.14]
                 "
               >
-                Platform
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                Open Workspace
               </Link>
             </motion.div>
 
@@ -185,7 +163,7 @@ export default function Home() {
               }
             >
               <Link
-                href="/journey"
+                href="/"
                 className="
                   group
                   flex
@@ -193,22 +171,22 @@ export default function Home() {
                   gap-2.5
                   rounded-[14px]
                   border
-                  border-sky-200/12
-                  bg-sky-200/[0.035]
+                  border-white/10
+                  bg-white/[0.03]
                   px-6
                   py-3.5
                   text-sm
                   font-semibold
-                  text-sky-100/80
+                  text-slate-300/80
                   transition
                   duration-300
-                  hover:border-sky-200/25
-                  hover:bg-sky-200/[0.07]
+                  hover:border-white/20
+                  hover:bg-white/[0.06]
                   hover:text-white
                 "
               >
-                <FlaskConical className="h-4 w-4 text-sky-300/70" />
-                Journey
+                <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                Back to Home
               </Link>
             </motion.div>
           </div>
