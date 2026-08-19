@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { createClient } from "../../lib/supabase/client";
 
@@ -51,13 +52,36 @@ export function AccountMenu({
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [menuPos, setMenuPos] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setOpen(false);
+    setMenuPos(null);
   }
+
+  const toggleMenu = () => {
+    if (!open) {
+      const rect =
+        buttonRef.current?.getBoundingClientRect();
+
+      if (rect) {
+        setMenuPos({
+          top: rect.bottom + 10,
+          right: window.innerWidth - rect.right,
+        });
+      }
+    }
+
+    setOpen((current) => !current);
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -121,17 +145,23 @@ export function AccountMenu({
     }
 
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
       if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
+        menuRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
       ) {
-        setOpen(false);
+        return;
       }
+
+      setOpen(false);
+      setMenuPos(null);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
+        setMenuPos(null);
       }
     };
 
@@ -208,8 +238,9 @@ export function AccountMenu({
   return (
     <div className="relative" ref={menuRef}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={toggleMenu}
         aria-haspopup="menu"
         aria-expanded={open}
         className="group flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.09] bg-white/[0.03] py-1 pl-1 pr-3 transition hover:border-white/[0.18] hover:bg-white/[0.05]"
@@ -232,11 +263,20 @@ export function AccountMenu({
         </span>
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-12 z-[110] w-72 overflow-hidden rounded-[20px] border border-white/[0.09] bg-[#08131c]/95 shadow-[0_30px_90px_rgba(0,0,0,.55)] backdrop-blur-2xl"
-        >
+      {open &&
+        menuPos &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            role="menu"
+            style={{
+              position: "fixed",
+              top: menuPos.top,
+              right: menuPos.right,
+              zIndex: 9999,
+            }}
+            className="w-72 overflow-hidden rounded-[20px] border border-white/[0.09] bg-[#08131c]/95 shadow-[0_30px_90px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+          >
           <div className="border-b border-white/[0.06] px-4 py-4">
             <div className="flex items-center gap-3">
               {user.avatarUrl ? (
@@ -291,8 +331,9 @@ export function AccountMenu({
               Sign Out
             </button>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
