@@ -35,6 +35,11 @@ const navItems = [
     label: "Journey",
     path: "/journey",
   },
+  {
+    href: "/mindmap",
+    label: "Mind Map",
+    path: "/mindmap",
+  },
 ] as const;
 
 /* =========================================================
