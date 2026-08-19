@@ -25,24 +25,12 @@ export const dynamic = "force-dynamic";
 const GEMINI_BASE =
   "https://generativelanguage.googleapis.com/v1beta";
 
-async function ensureDomMatrix(): Promise<void> {
-  if (
-    typeof globalThis.DOMMatrix !==
-    "undefined"
-  ) {
-    return;
-  }
+async function ensurePdfEnvironment(): Promise<void> {
+  await import("pdf-parse/worker");
 
-  const { DOMMatrix } = await import(
-    "@napi-rs/canvas"
+  await import(
+    "pdfjs-dist/legacy/build/pdf.worker.mjs"
   );
-
-  (
-    globalThis as Record<
-      string,
-      unknown
-    >
-  ).DOMMatrix = DOMMatrix;
 }
 
 const ALLOWED_EXTENSIONS: Record<
@@ -117,7 +105,7 @@ async function extractTextFromFile(
       "[mindmap] Parsing PDF with pdf-parse (local, no AI involved)…",
     );
 
-    await ensureDomMatrix();
+    await ensurePdfEnvironment();
 
     const { PDFParse } = await import(
       "pdf-parse"
