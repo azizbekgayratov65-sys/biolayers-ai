@@ -16,6 +16,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "^12.11.2",
     "fast-xml-parser": "^5.10.1",
     "flag-icons": "^7.5.0",
