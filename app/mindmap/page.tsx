@@ -9,8 +9,10 @@ import {
 import {
   Check,
   FileText,
+  KeyRound,
   Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 import type {
   MindMapResponse,
@@ -32,10 +34,21 @@ type ProgressStep = {
 };
 
 type ModelInfo = {
+  configured?: boolean;
   provider: string;
-  model: string;
+  model: string | null;
   preferred: string;
   fallback: string;
+};
+
+type StreamEvent = {
+  type: string;
+  step?: number;
+  label?: string;
+  message?: string;
+  ts?: number;
+  error?: string;
+  code?: string;
 };
 
 export default function MindMapPage() {
@@ -51,6 +64,8 @@ export default function MindMapPage() {
     useState<ProgressStep[]>([]);
   const [modelInfo, setModelInfo] =
     useState<ModelInfo | null>(null);
+  const [needsKey, setNeedsKey] =
+    useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +86,11 @@ export default function MindMapPage() {
         }
 
         setModelInfo(data);
+
+        if (data.configured === false) {
+          setNeedsKey(true);
+          return;
+        }
 
         if (data.model) {
           console.info(
@@ -159,14 +179,7 @@ export default function MindMapPage() {
 
             const event = JSON.parse(
               line,
-            ) as {
-              type: string;
-              step?: number;
-              label?: string;
-              message?: string;
-              ts?: number;
-              error?: string;
-            };
+            ) as StreamEvent;
 
             if (
               event.type ===
@@ -201,11 +214,26 @@ export default function MindMapPage() {
             if (
               event.type === "error"
             ) {
-              throw new Error(
-                event.error ||
-                  event.message ||
-                  "Could not generate the mind map.",
-              );
+              const streamError =
+                new Error(
+                  event.error ||
+                    event.message ||
+                    "Could not generate the mind map.",
+                );
+
+              if (
+                event.code ===
+                "GEMINI_KEY_REQUIRED"
+              ) {
+                (
+                  streamError as Error & {
+                    code?: string;
+                  }
+                ).code =
+                  "GEMINI_KEY_REQUIRED";
+              }
+
+              throw streamError;
             }
 
             if (
@@ -250,6 +278,17 @@ export default function MindMapPage() {
           caught instanceof Error
             ? caught.message
             : "Could not generate the mind map.";
+
+        const code =
+          (
+            caught as Error & {
+              code?: string;
+            }
+          )?.code;
+
+        if (code === "GEMINI_KEY_REQUIRED") {
+          setNeedsKey(true);
+        }
 
         console.error(
           `[mindmap] Failed: ${message}`,
@@ -315,6 +354,31 @@ export default function MindMapPage() {
               </p>
             </div>
 
+            {needsKey && (
+              <div className="mb-5 flex flex-col items-center justify-between gap-4 rounded-[20px] border border-amber-300/15 bg-amber-400/[0.05] px-5 py-4 sm:flex-row">
+                <div className="flex items-start gap-3">
+                  <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-amber-300/80" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-100">
+                      Connect your Gemini API key to use AI features.
+                    </p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-white/50">
+                      Your key powers the AI and is stored securely with
+                      your account.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/settings#ai"
+                  className="flex h-10 shrink-0 items-center gap-2 rounded-[13px] border border-amber-300/25 bg-amber-300/[0.09] px-4 text-xs font-bold text-amber-50 transition hover:border-amber-300/45 hover:bg-amber-300/[0.14]"
+                >
+                  <KeyRound className="h-3.5 w-3.5" />
+                  Open AI Settings
+                </Link>
+              </div>
+            )}
+
             <MindMapUploader
               busy={phase === "loading"}
               error={error}
@@ -344,8 +408,10 @@ export default function MindMapPage() {
               <CapacityCard
                 label="AI model"
                 value={
-                  modelInfo?.model ??
-                  "Checking…"
+                  needsKey
+                    ? "Connect key"
+                    : (modelInfo?.model ??
+                        "Checking…")
                 }
               />
             </div>

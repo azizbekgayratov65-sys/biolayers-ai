@@ -3,7 +3,6 @@ export type AiProvider = "gemini";
 export type AiTarget = {
   provider: AiProvider;
   model: string;
-  keyIndex: number;
 };
 
 export type AttemptOutcome =
@@ -25,10 +24,9 @@ export type AiFailureKind =
   | "error";
 
 /*
-  Ranked list of usable text-out models (verified 200 on both
-  keys). Models returning 404 for this account (gemini-2.5-flash,
-  gemini-3-flash, gemini-2.5-flash-lite) and 0/0-quota models are
-  intentionally excluded.
+  Ranked list of usable text-out models. The preferred model is
+  tried first for a user's own API key; if it fails, the next
+  model in the rank is attempted.
 */
 export const GEMINI_MODEL_RANK = [
   "gemini-3.6-flash",
@@ -38,117 +36,13 @@ export const GEMINI_MODEL_RANK = [
   "gemini-3.1-flash-lite",
 ];
 
-const GEMINI_BASE =
+export const GEMINI_BASE =
   "https://generativelanguage.googleapis.com/v1beta";
-
-const PROBE_CACHE_TTL_MS = 5 * 60 * 1000;
-const RATE_COOLDOWN_MS = 60_000;
-const HARD_COOLDOWN_MS = 5 * 60 * 1000;
-
-const cooldowns = new Map<string, number>();
-
-let cached:
-  | {
-      at: number;
-      target: AiTarget | null;
-    }
-  | null = null;
-
-function targetKey(
-  target: AiTarget,
-): string {
-  return `${target.provider}:${target.model}:${target.keyIndex}`;
-}
-
-export function getGeminiKeys(): string[] {
-  return [
-    process.env.GEMINI_API_KEY?.trim(),
-    process.env.GEMINI_API_KEY_2?.trim(),
-  ].filter(
-    (key): key is string =>
-      Boolean(key),
-  );
-}
 
 export function getPreferredModel(): string {
   return (
     process.env.GEMINI_MODEL?.trim() ||
     GEMINI_MODEL_RANK[0]
-  );
-}
-
-/*
-  Model-outer, key-inner ordering: each model is tried on every
-  API key before moving to the next model, so the best model is
-  kept for as long as possible while rotating keys.
-*/
-export function buildAiChain(): AiTarget[] {
-  const keys = getGeminiKeys();
-
-  if (keys.length === 0) {
-    return [];
-  }
-
-  const preferred =
-    getPreferredModel();
-
-  const rank = [
-    preferred,
-    ...GEMINI_MODEL_RANK.filter(
-      (model) =>
-        model !== preferred,
-    ),
-  ];
-
-  const chain: AiTarget[] = [];
-
-  for (const model of rank) {
-    keys.forEach(
-      (_, keyIndex) => {
-        chain.push({
-          provider: "gemini",
-          model,
-          keyIndex,
-        });
-      },
-    );
-  }
-
-  return chain;
-}
-
-export function isTargetCoolingDown(
-  target: AiTarget,
-): boolean {
-  const until = cooldowns.get(
-    targetKey(target),
-  );
-
-  return Boolean(
-    until && until > Date.now(),
-  );
-}
-
-export function markTargetFailure(
-  target: AiTarget,
-  kind: AiFailureKind,
-): void {
-  const milliseconds =
-    kind === "rate_limited"
-      ? RATE_COOLDOWN_MS
-      : HARD_COOLDOWN_MS;
-
-  cooldowns.set(
-    targetKey(target),
-    Date.now() + milliseconds,
-  );
-}
-
-export function clearTargetCooldown(
-  target: AiTarget,
-): void {
-  cooldowns.delete(
-    targetKey(target),
   );
 }
 
@@ -189,74 +83,66 @@ export function classifyAiFailure(
 export function describeTarget(
   target: AiTarget,
 ): string {
-  return `${target.model} (key ${target.keyIndex + 1})`;
+  return target.model;
 }
 
-export function getCachedEffectiveTarget(): AiTarget | null {
-  if (
-    cached &&
-    Date.now() - cached.at <
-      PROBE_CACHE_TTL_MS
-  ) {
-    return cached.target;
+/*
+  Calls the Gemini generateContent endpoint with a single user's
+  API key. Returns the trimmed output text on success or throws an
+  Error carrying a `status` and `rawMessage` for classification.
+*/
+export async function callGeminiGenerate({
+  apiKey,
+  model,
+  prompt,
+  responseSchema,
+  maxOutputTokens = 65_536,
+  controller,
+}: {
+  apiKey: string;
+  model: string;
+  prompt: string;
+  responseSchema?: unknown;
+  maxOutputTokens?: number;
+  controller?: AbortController;
+}): Promise<string> {
+  const generationConfig: Record<
+    string,
+    unknown
+  > = {
+    temperature: 0.2,
+    maxOutputTokens,
+  };
+
+  if (responseSchema) {
+    generationConfig.responseMimeType =
+      "application/json";
+    generationConfig.responseSchema =
+      responseSchema;
   }
 
-  return null;
-}
-
-async function geminiResponds(
-  model: string,
-  apiKey: string,
-): Promise<AiFailureKind | null> {
-  const controller =
-    new AbortController();
-
-  const timeout = setTimeout(
-    () => controller.abort(),
-    15_000,
+  const response = await fetch(
+    `${GEMINI_BASE}/models/${model}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+        "X-goog-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig,
+      }),
+      signal: controller?.signal,
+    },
   );
 
-  try {
-    const response = await fetch(
-      `${GEMINI_BASE}/models/${model}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-          "X-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: "OK" }],
-            },
-          ],
-          generationConfig: {
-            maxOutputTokens: 256,
-          },
-        }),
-        signal: controller.signal,
-      },
-    );
-
-    if (!response.ok) {
-      if (
-        response.status === 429 ||
-        response.status === 403
-      ) {
-        return "rate_limited";
-      }
-
-      if (
-        response.status === 404
-      ) {
-        return "unavailable";
-      }
-
-      return "error";
-    }
-
+  if (response.ok) {
     const data = (await response.json()) as {
       candidates?: Array<{
         content?: {
@@ -267,70 +153,47 @@ async function geminiResponds(
       }>;
     };
 
-    if (!data.candidates?.[0]?.content) {
-      return "error";
+    const outputText =
+      data.candidates?.[0]?.content
+        ?.parts?.[0]?.text;
+
+    if (outputText) {
+      return outputText.trim();
     }
-
-    return null;
-  } catch {
-    return "timeout";
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-export async function resolveEffectiveTarget(): Promise<AiTarget | null> {
-  const cachedTarget =
-    getCachedEffectiveTarget();
-
-  if (cachedTarget) {
-    return cachedTarget;
   }
 
-  const keys = getGeminiKeys();
+  const errorBody = await response.text();
 
-  if (keys.length === 0) {
-    return null;
-  }
+  let rawMessage =
+    "Gemini rejected the request.";
 
-  for (const target of buildAiChain()) {
-    if (isTargetCoolingDown(target)) {
-      continue;
-    }
-
-    const failure =
-      await geminiResponds(
-        target.model,
-        keys[target.keyIndex],
-      );
-
-    if (failure === null) {
-      cached = {
-        at: Date.now(),
-        target,
+  try {
+    const parsed = JSON.parse(
+      errorBody,
+    ) as {
+      error?: {
+        message?: string;
       };
+    };
 
-      console.info(
-        `[mindmap] Effective AI target resolved: ${describeTarget(target)}.`,
-      );
-
-      return target;
+    if (parsed.error?.message) {
+      rawMessage = parsed.error.message;
     }
-
-    markTargetFailure(
-      target,
-      failure,
-    );
-
-    console.warn(
-      `[mindmap] Probe failed for ${describeTarget(target)} (${failure}).`,
-    );
+  } catch {
+    // Keep the generic message.
   }
 
-  cached = {
-    at: Date.now(),
-    target: null,
-  };
+  const error = new Error(rawMessage);
 
-  return null;
+  (error as Error & {
+    status?: number;
+    rawMessage?: string;
+  }).status = response.status;
+
+  (error as Error & {
+    status?: number;
+    rawMessage?: string;
+  }).rawMessage = rawMessage;
+
+  throw error;
 }

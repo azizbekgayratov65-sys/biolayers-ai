@@ -121,6 +121,12 @@ export type MindMapResponse = {
     nodeCount: number;
     linkCount: number;
     characterCount: number;
+
+    /*
+      Id of the saved paper row in the authenticated user's library
+      (present when the paper was persisted server-side).
+    */
+    paperId?: string | null;
   };
 
   error?: string;

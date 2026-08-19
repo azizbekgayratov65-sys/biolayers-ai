@@ -2,87 +2,57 @@ import { NextResponse } from "next/server";
 
 import {
   GEMINI_MODEL_RANK,
-  buildAiChain,
-  getGeminiKeys,
   getPreferredModel,
-  resolveEffectiveTarget,
 } from "../../../lib/aiModels";
+import {
+  createApiClient,
+  getApiUserId,
+  unauthorizedJson,
+} from "../../../lib/auth/api-auth";
+import { getAiSettingsStatus } from "../../../lib/gemini/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/*
+  GET /api/mindmap/model
+  Reports whether the authenticated user has connected a Gemini API
+  key and which model will be used. Never probes the model or leaks
+  any key material.
+*/
 export async function GET() {
-  if (getGeminiKeys().length === 0) {
-    return NextResponse.json(
-      {
-        error:
-          "GEMINI_API_KEY is missing from the server environment.",
-      },
-      {
-        status: 503,
-        headers: {
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
-    );
+  const supabase = await createApiClient();
+  const userId = await getApiUserId(supabase);
+
+  if (!userId) {
+    return unauthorizedJson();
   }
 
-  try {
-    const target =
-      await resolveEffectiveTarget();
+  const status = await getAiSettingsStatus(
+    supabase,
+    userId,
+  );
 
-    const preferred =
-      getPreferredModel();
+  const preferred =
+    getPreferredModel();
 
-    return NextResponse.json(
-      {
-        provider:
-          target?.provider ??
-          "gemini",
-        model:
-          target?.model ??
-          preferred,
-        preferred,
-        fallback:
-          GEMINI_MODEL_RANK[1] ??
-          GEMINI_MODEL_RANK[0],
-        chain: buildAiChain().map(
-          (item) => ({
-            provider: item.provider,
-            model: item.model,
-            keyIndex: item.keyIndex,
-          }),
-        ),
+  return NextResponse.json(
+    {
+      configured: status.configured,
+      provider: "gemini",
+      model: status.configured
+        ? preferred
+        : null,
+      preferred,
+      fallback:
+        GEMINI_MODEL_RANK[1] ??
+        GEMINI_MODEL_RANK[0],
+    },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
-    );
-  } catch (error) {
-    console.error(
-      "[mindmap] Model resolution failed:",
-      error,
-    );
-
-    return NextResponse.json(
-      {
-        error:
-          "Could not resolve the available AI model.",
-        preferred:
-          getPreferredModel(),
-      },
-      {
-        status: 502,
-        headers: {
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
-    );
-  }
+    },
+  );
 }

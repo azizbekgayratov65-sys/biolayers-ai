@@ -9,11 +9,13 @@ import {
 } from "framer-motion";
 import {
   ArrowRight,
-  FlaskConical,
   Menu,
+  Workflow,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { AccountMenu } from "./auth/AccountMenu";
 
 /* =========================================================
    NAVIGATION
@@ -134,9 +136,13 @@ export default function Navbar() {
      SCROLL TO TOP ON ROUTE CHANGE
      ======================================================= */
 
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] =
+    useState(pathname);
+
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setMobileOpen(false);
-  }, [pathname]);
+  }
 
   /* =======================================================
      RENDER
@@ -413,7 +419,6 @@ export default function Navbar() {
                   href={item.href}
                   label={item.label}
                   active={pathname === item.path}
-                  reduceMotion={reduceMotion}
                 />
               ))}
             </nav>
@@ -431,43 +436,7 @@ export default function Navbar() {
                 lg:flex
               "
             >
-              {/* Research Lab */}
-
-              <Link
-                href="/lab"
-                className="
-                  group
-                  flex
-                  h-10
-                  items-center
-                  gap-2
-                  rounded-[13px]
-                  border
-                  border-sky-200/10
-                  bg-sky-200/[0.025]
-                  px-4
-                  text-xs
-                  font-semibold
-                  text-slate-300/75
-                  transition
-                  duration-300
-                  hover:border-sky-200/20
-                  hover:bg-sky-200/[0.05]
-                  hover:text-white/80
-                "
-              >
-                <FlaskConical
-                  className="
-                    h-3.5
-                    w-3.5
-                    text-sky-300/70
-                  "
-                />
-
-                Research Lab
-              </Link>
-
-              {/* Workspace */}
+              {/* Mind Map */}
 
               <motion.div
                 whileHover={
@@ -486,7 +455,7 @@ export default function Navbar() {
                 }
               >
                 <Link
-                  href="/explore"
+                  href="/mindmap"
                   className="
                     group
                     flex
@@ -507,7 +476,15 @@ export default function Navbar() {
                     hover:bg-teal-300/[0.11]
                   "
                 >
-                  Open Workspace
+                  <Workflow
+                    className="
+                      h-3.5
+                      w-3.5
+                      text-teal-300/80
+                    "
+                  />
+
+                  Mind Map
 
                   <ArrowRight
                     className="
@@ -520,6 +497,8 @@ export default function Navbar() {
                   />
                 </Link>
               </motion.div>
+
+              <AccountMenu />
             </div>
 
             {/* ================================================= */}
@@ -738,46 +717,13 @@ export default function Navbar() {
               <div
                 className="
                   mt-4
-                  grid
-                  gap-2
                   border-t
                   border-teal-100/[0.055]
                   pt-4
-                  sm:grid-cols-2
                 "
               >
                 <Link
-                  href="/lab"
-                  onClick={() => {
-                    setMobileOpen(false);
-                  }}
-                  className="
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-[16px]
-                    border
-                    border-sky-200/12
-                    bg-sky-200/[0.035]
-                    px-4
-                    py-3.5
-                    text-sm
-                    font-semibold
-                    text-sky-100/75
-                    transition
-                    hover:border-sky-200/25
-                    hover:bg-sky-200/[0.07]
-                    hover:text-white
-                  "
-                >
-                  <FlaskConical className="h-4 w-4" />
-
-                  Research Lab
-                </Link>
-
-                <Link
-                  href="/explore"
+                  href="/mindmap"
                   onClick={() => {
                     setMobileOpen(false);
                   }}
@@ -801,7 +747,9 @@ export default function Navbar() {
                     hover:bg-teal-300/[0.11]
                   "
                 >
-                  Open Workspace
+                  <Workflow className="h-4 w-4" />
+
+                  Mind Map
 
                   <ArrowRight
                     className="
@@ -812,6 +760,19 @@ export default function Navbar() {
                     "
                   />
                 </Link>
+              </div>
+
+              {/* Account / auth actions */}
+
+              <div
+                className="
+                  mt-3
+                  border-t
+                  border-teal-100/[0.055]
+                  pt-4
+                "
+              >
+                <AccountMenu variant="mobile" />
               </div>
 
               {/* Status */}
@@ -859,12 +820,10 @@ function DesktopNavItem({
   href,
   label,
   active,
-  reduceMotion,
 }: {
   href: string;
   label: string;
   active: boolean;
-  reduceMotion: boolean;
 }) {
   return (
     <Link

@@ -5,25 +5,25 @@ import {
 } from "../../lib/mindmapTypes";
 
 import {
-  buildAiChain,
+  GEMINI_MODEL_RANK,
+  callGeminiGenerate,
   classifyAiFailure,
-  clearTargetCooldown,
-  describeTarget,
-  getCachedEffectiveTarget,
-  getGeminiKeys,
   getPreferredModel,
-  isTargetCoolingDown,
-  markTargetFailure,
-  resolveEffectiveTarget,
   type AiAttempt,
   type AiTarget,
 } from "../../lib/aiModels";
 
+import {
+  createApiClient,
+  getApiUserId,
+  unauthorizedJson,
+} from "../../lib/auth/api-auth";
+import { checkRateLimit } from "../../lib/auth/rate-limit";
+import { getDecryptedGeminiKey } from "../../lib/gemini/store";
+import { savePaper } from "../../lib/papers/store";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const GEMINI_BASE =
-  "https://generativelanguage.googleapis.com/v1beta";
 
 async function ensurePdfEnvironment(): Promise<void> {
   await import("pdf-parse/worker");
@@ -302,7 +302,7 @@ function friendlyModelError(
     status === 401 ||
     status === 403
   ) {
-    return "The Gemini API key is invalid or lacks access to this model.";
+    return "The Gemini API key is invalid or lacks access to this model. Check your key in Settings → AI.";
   }
 
   if (status === 429) {
@@ -333,171 +333,66 @@ function friendlyModelError(
     return "The requested AI model is not available for this API key.";
   }
 
-  return rawMessage || "Gemini rejected the request.";
-}
-
-async function generateWithModel(
-  model: string,
-  prompt: string,
-  apiKey: string,
-  controller: AbortController,
-): Promise<string> {
-  const response = await fetch(
-    `${GEMINI_BASE}/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-        "X-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 65_536,
-          responseMimeType:
-            "application/json",
-          responseSchema:
-            getResponseSchema(),
-        },
-      }),
-      signal: controller.signal,
-    },
-  );
-
-  if (response.ok) {
-    const data = (await response.json()) as {
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{
-            text?: string;
-          }>;
-        };
-      }>;
-    };
-
-    const outputText =
-      data.candidates?.[0]?.content
-        ?.parts?.[0]?.text;
-
-    if (outputText) {
-      return outputText.trim();
-    }
+  if (
+    rawMessage.toLowerCase().includes(
+      "api key not valid",
+    ) ||
+    rawMessage.toLowerCase().includes(
+      "apikeyinvalid",
+    )
+  ) {
+    return "The Gemini API key is invalid. Reconnect your key in Settings → AI.";
   }
 
-  const errorBody =
-    await response.text();
-
-  let rawMessage =
-    "Gemini rejected the request.";
-
-  try {
-    const parsed = JSON.parse(
-      errorBody,
-    ) as {
-      error?: {
-        message?: string;
-      };
-    };
-
-    if (parsed.error?.message) {
-      rawMessage =
-        parsed.error.message;
-    }
-  } catch {
-    // Keep the generic message.
-  }
-
-  const error = new Error(
-    friendlyModelError(
-      response.status,
-      rawMessage,
-    ),
+  return (
+    rawMessage || "Gemini rejected the request."
   );
-
-  (error as Error & {
-    status?: number;
-    rawMessage?: string;
-  }).status = response.status;
-
-  (error as Error & {
-    status?: number;
-    rawMessage?: string;
-  }).rawMessage = rawMessage;
-
-  throw error;
 }
 
 async function callAiWithFallback(
   prompt: string,
   controller: AbortController,
+  apiKey: string,
 ): Promise<{
   text: string;
   target: AiTarget;
   attempts: AiAttempt[];
 }> {
-  const chain = buildAiChain();
+  const preferred =
+    getPreferredModel();
 
-  if (chain.length === 0) {
-    throw new Error(
-      "AI generation is not configured. Add GEMINI_API_KEY to .env.local and restart the server.",
-    );
-  }
-
-  const keys = getGeminiKeys();
-
-  const cachedTarget =
-    getCachedEffectiveTarget();
-
-  let ordered = chain;
-
-  if (cachedTarget) {
-    ordered = [
-      cachedTarget,
-      ...chain.filter(
-        (target) =>
-          target.model !==
-            cachedTarget.model ||
-          target.keyIndex !==
-            cachedTarget.keyIndex,
-      ),
-    ];
-  }
+  const rank = [
+    preferred,
+    ...GEMINI_MODEL_RANK.filter(
+      (model) => model !== preferred,
+    ),
+  ];
 
   const attempts: AiAttempt[] = [];
   let lastError: unknown =
     new Error("AI request failed.");
 
-  for (const target of ordered) {
-    if (
-      isTargetCoolingDown(target)
-    ) {
-      attempts.push({
-        ...target,
-        outcome: "skipped",
-      });
-      continue;
-    }
+  for (const model of rank) {
+    const target: AiTarget = {
+      provider: "gemini",
+      model,
+    };
 
     console.info(
-      `[mindmap] Calling Gemini model "${target.model}" (key ${target.keyIndex + 1})…`,
+      `[mindmap] Calling Gemini model "${model}"…`,
     );
 
     try {
       const text =
-        await generateWithModel(
-          target.model,
+        await callGeminiGenerate({
+          apiKey,
+          model,
           prompt,
-          keys[target.keyIndex],
+          responseSchema:
+            getResponseSchema(),
+          maxOutputTokens: 65_536,
           controller,
-        );
-
-      clearTargetCooldown(target);
+        });
 
       attempts.push({
         ...target,
@@ -520,32 +415,20 @@ async function callAiWithFallback(
         outcome: kind,
       });
 
-      markTargetFailure(
-        target,
-        kind,
-      );
-
       const details =
-        error as Error;
-
-      const remaining = ordered.filter(
-        (candidate) =>
-          candidate.model !==
-            target.model ||
-          candidate.keyIndex !==
-            target.keyIndex,
-      );
-
-      const next = remaining.find(
-        (candidate) =>
-          !isTargetCoolingDown(
-            candidate,
-          ),
-      );
+        error as Error & {
+          status?: number;
+        };
 
       console.warn(
-        `[mindmap] ${describeTarget(target)} failed (${kind}: ${details.message}).${next ? ` Trying ${describeTarget(next)}.` : ""}`,
+        `[mindmap] ${model} failed (${kind}: ${details.message}).`,
       );
+
+      // A 401 means the key itself is rejected — no point trying
+      // other models with the same key.
+      if (details.status === 401) {
+        break;
+      }
     }
   }
 
@@ -563,6 +446,50 @@ function jsonLine(
 export async function POST(
   request: Request,
 ) {
+  const supabase = await createApiClient();
+  const userId = await getApiUserId(supabase);
+
+  if (!userId) {
+    return unauthorizedJson();
+  }
+
+  const rateLimit = checkRateLimit(
+    `mindmap:${userId}`,
+    10,
+    5 * 60 * 1000,
+  );
+
+  if (!rateLimit.allowed) {
+    return new Response(
+      jsonLine({
+        type: "error",
+        code: "RATE_LIMITED",
+        message:
+          "You have reached the mind map generation limit. Please wait a few minutes and try again.",
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type":
+            "application/x-ndjson",
+          "Cache-Control":
+            "no-store, max-age=0",
+          "Retry-After": String(
+            Math.ceil(
+              rateLimit.retryAfterMs / 1000,
+            ),
+          ),
+        },
+      },
+    );
+  }
+
+  const geminiApiKey =
+    await getDecryptedGeminiKey(
+      supabase,
+      userId,
+    );
+
   let formData: FormData;
 
   try {
@@ -695,33 +622,12 @@ export async function POST(
           `${fileName} · ${(file.size / 1024 / 1024).toFixed(2)} MB`,
         );
 
-        const keys = getGeminiKeys();
-
-        if (keys.length === 0) {
-          console.error(
-            "[mindmap] No Gemini API key is configured in the server environment.",
-          );
-
+        if (!geminiApiKey) {
           send({
             type: "error",
+            code: "GEMINI_KEY_REQUIRED",
             message:
-              "AI generation is not configured. Add GEMINI_API_KEY to .env.local and restart the server.",
-          });
-          return;
-        }
-
-        const effective =
-          await resolveEffectiveTarget();
-
-        if (!effective) {
-          console.error(
-            "[mindmap] No usable AI model found for the configured keys.",
-          );
-
-          send({
-            type: "error",
-            message:
-              "No usable AI model is available for the configured API keys. Check the API key limits in Google AI Studio and try again later.",
+              "Connect your Gemini API key to use AI features.",
           });
           return;
         }
@@ -801,6 +707,7 @@ export async function POST(
         } = await callAiWithFallback(
           buildPrompt(paperText),
           controller,
+          geminiApiKey,
         );
 
         clearTimeout(timeout);
@@ -809,7 +716,7 @@ export async function POST(
           getPreferredModel();
 
         console.info(
-          `[mindmap] Gemini response received (model: ${describeTarget(target)}).`,
+          `[mindmap] Gemini response received (model: ${target.model}).`,
         );
 
         const failedAttempts =
@@ -825,13 +732,13 @@ export async function POST(
           4,
           "Mind map generated",
           failedAttempts.length === 0
-            ? `Model ${describeTarget(target)} returned the mind map`
+            ? `Model ${target.model} returned the mind map`
             : `${failedAttempts
                 .map(
                   (attempt) =>
-                    `${describeTarget(attempt)} ${attempt.outcome}`,
+                    `${attempt.model} ${attempt.outcome}`,
                 )
-                .join(" → ")} → ${describeTarget(target)}`,
+                .join(" → ")} → ${target.model}`,
         );
 
         let parsedValue: unknown;
@@ -871,6 +778,7 @@ export async function POST(
             await callAiWithFallback(
               retryPrompt,
               controller,
+              geminiApiKey,
             );
 
           parsedValue =
@@ -913,6 +821,19 @@ export async function POST(
           `${mindmap.nodes.length} ideas · ${mindmap.links.length} connections`,
         );
 
+        const paperId = await savePaper(
+          supabase,
+          userId,
+          {
+            fileName,
+            fileType,
+            title: mindmap.title,
+            mindmap,
+            characterCount:
+              paperText.length,
+          },
+        );
+
         send({
           type: "result",
           mindmap,
@@ -928,8 +849,7 @@ export async function POST(
                   attempt.provider,
                 model:
                   attempt.model,
-                keyIndex:
-                  attempt.keyIndex,
+                keyIndex: 0,
                 outcome:
                   attempt.outcome,
               }),
@@ -942,6 +862,7 @@ export async function POST(
               mindmap.links.length,
             characterCount:
               paperText.length,
+            paperId,
           },
         });
       } catch (error) {
@@ -950,12 +871,22 @@ export async function POST(
           error,
         );
 
+        const details =
+          error as Error & {
+            status?: number;
+            rawMessage?: string;
+          };
+
         const message =
           error instanceof Error &&
           error.name === "AbortError"
             ? "The AI request timed out. The paper may be too long."
             : error instanceof Error
-              ? error.message
+              ? friendlyModelError(
+                  details.status ?? 500,
+                  details.rawMessage ??
+                    details.message,
+                )
               : "Failed to generate the mind map.";
 
         send({

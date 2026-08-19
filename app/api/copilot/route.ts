@@ -1,6 +1,13 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
+import {
+  createApiClient,
+  getApiUserId,
+  unauthorizedJson,
+} from "../../lib/auth/api-auth";
+import { checkRateLimit } from "../../lib/auth/rate-limit";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -516,6 +523,38 @@ function getOpenAIError(
 export async function POST(
   request: Request,
 ) {
+  const supabase = await createApiClient();
+  const userId = await getApiUserId(supabase);
+
+  if (!userId) {
+    return unauthorizedJson();
+  }
+
+  const rateLimit = checkRateLimit(
+    `copilot:${userId}`,
+    30,
+    60 * 1000,
+  );
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          "Too many requests. Please wait a moment and try again.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(
+            Math.ceil(
+              rateLimit.retryAfterMs / 1000,
+            ),
+          ),
+        },
+      },
+    );
+  }
+
   try {
     let body: CopilotRequestBody;
 
