@@ -25,6 +25,26 @@ export const dynamic = "force-dynamic";
 const GEMINI_BASE =
   "https://generativelanguage.googleapis.com/v1beta";
 
+async function ensureDomMatrix(): Promise<void> {
+  if (
+    typeof globalThis.DOMMatrix !==
+    "undefined"
+  ) {
+    return;
+  }
+
+  const { DOMMatrix } = await import(
+    "@napi-rs/canvas"
+  );
+
+  (
+    globalThis as Record<
+      string,
+      unknown
+    >
+  ).DOMMatrix = DOMMatrix;
+}
+
 const ALLOWED_EXTENSIONS: Record<
   string,
   string
@@ -96,6 +116,8 @@ async function extractTextFromFile(
     console.info(
       "[mindmap] Parsing PDF with pdf-parse (local, no AI involved)…",
     );
+
+    await ensureDomMatrix();
 
     const { PDFParse } = await import(
       "pdf-parse"
