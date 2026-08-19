@@ -9,6 +9,8 @@ import {
   Manrope,
 } from "next/font/google";
 
+import { Analytics } from "@vercel/analytics/next";
+
 import "./globals.css";
 
 import Navbar from "./components/Navbar";
@@ -129,6 +131,8 @@ export default function RootLayout({
         >
           {children}
         </main>
+
+        <Analytics />
       </body>
     </html>
   );
