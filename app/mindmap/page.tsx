@@ -3,37 +3,21 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
-import {
-  useNodesState,
-} from "@xyflow/react";
-
-import "@xyflow/react/dist/style.css";
 
 import {
-  Bot,
   Check,
   FileText,
-  RefreshCcw,
   Sparkles,
-  Workflow,
 } from "lucide-react";
 
 import type {
   MindMapResponse,
 } from "../lib/mindmapTypes";
 
-import { radialMindMapLayout } from "../lib/radialMindMapLayout";
 import MindMapUploader from "../components/mindmap/MindMapUploader";
-import MindMapCanvas from "../components/mindmap/MindMapCanvas";
-import MindMapQuotePanel from "../components/mindmap/MindMapQuotePanel";
-import {
-  convertMindMapToFlow,
-  type MindMapFlowEdge,
-  type MindMapFlowNode,
-} from "../components/mindmap/mindMapFlow";
+import MindMapDocument from "../components/mindmap/MindMapDocument";
 
 type Phase =
   | "upload"
@@ -63,15 +47,6 @@ export default function MindMapPage() {
     useState("");
   const [response, setResponse] =
     useState<MindMapResponse | null>(null);
-  const [nodes, setNodes, onNodesChange] =
-    useNodesState<MindMapFlowNode>([]);
-  const [edges, setEdges] = useState<
-    MindMapFlowEdge[]
-  >([]);
-  const [selectedId, setSelectedId] =
-    useState<string | null>(null);
-  const [hoveredId, setHoveredId] =
-    useState<string | null>(null);
   const [progressSteps, setProgressSteps] =
     useState<ProgressStep[]>([]);
   const [modelInfo, setModelInfo] =
@@ -125,8 +100,6 @@ export default function MindMapPage() {
       setFileName(file.name);
       setPhase("loading");
       setProgressSteps([]);
-      setSelectedId(null);
-      setHoveredId(null);
 
       console.info(
         `[mindmap] Uploading "${file.name}" (${(file.size / 1024 / 1024).toFixed(2)} MB)…`,
@@ -270,19 +243,6 @@ export default function MindMapPage() {
           `[mindmap] Received mind map: ${result.mindmap.nodes.length} nodes, ${result.mindmap.links.length} links (${result.meta.provider} ${result.meta.model}).`,
         );
 
-        const { nodes: rawNodes, edges: rawEdges } =
-          convertMindMapToFlow(
-            result.mindmap,
-          );
-
-        const layoutedNodes =
-          radialMindMapLayout(
-            rawNodes,
-            rawEdges,
-          );
-
-        setNodes(layoutedNodes);
-        setEdges(rawEdges);
         setResponse(result);
         setPhase("ready");
       } catch (caught) {
@@ -299,39 +259,15 @@ export default function MindMapPage() {
         setPhase("upload");
       }
     },
-    [setNodes],
+    [],
   );
 
   const reset = useCallback(() => {
-    setNodes([]);
-    setEdges([]);
     setResponse(null);
-    setSelectedId(null);
-    setHoveredId(null);
     setError(null);
     setFileName("");
     setPhase("upload");
-  }, [setNodes]);
-
-  const selectedNode = useMemo(() => {
-    if (!selectedId) {
-      return null;
-    }
-
-    return (
-      nodes.find(
-        (node) => node.id === selectedId,
-      ) ?? null
-    );
-  }, [nodes, selectedId]);
-
-  const rootNode = useMemo(
-    () =>
-      nodes.find(
-        (node) => node.data.level === 1,
-      ) ?? null,
-    [nodes],
-  );
+  }, []);
 
   return (
     <div className="relative min-h-screen">
@@ -349,8 +285,7 @@ export default function MindMapPage() {
       />
 
       <div className="relative z-10 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
-        {(phase === "upload" ||
-          phase === "loading") && (
+        {phase !== "ready" && (
           <div className="mx-auto max-w-3xl">
             <div className="mb-10 text-center">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/15 bg-teal-300/[0.05] px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-200/80">
@@ -497,230 +432,13 @@ export default function MindMapPage() {
 
         {phase === "ready" &&
           response && (
-            <div className="flex h-[calc(100vh-96px)] flex-col overflow-hidden rounded-[22px] border border-teal-100/[0.08] bg-[#07151f]/80">
-              <div
-                className="
-                  flex
-                  shrink-0
-                  items-center
-                  justify-between
-                  gap-4
-                  border-b
-                  border-teal-100/[0.07]
-                  bg-[#081722]/95
-                  px-5
-                  py-3.5
-                "
-              >
-                <div className="min-w-0">
-                  <h1 className="truncate text-sm font-bold tracking-[-0.01em] text-white">
-                    {response.mindmap.title}
-                  </h1>
-
-                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <MetaChip
-                      icon={
-                        <FileText className="h-3 w-3" />
-                      }
-                      label={
-                        response.meta.fileName
-                      }
-                    />
-                    <MetaChip
-                      icon={
-                        <Workflow className="h-3 w-3" />
-                      }
-                      label={`${response.meta.nodeCount} ideas`}
-                    />
-                    <MetaChip
-                      icon={
-                        <Bot className="h-3 w-3" />
-                      }
-                      label={`${response.meta.characterCount.toLocaleString()} chars · ${response.meta.model}`}
-                    />
-                    {(() => {
-                      const hops =
-                        (response.meta.attempts ??
-                          []).filter(
-                          (attempt) =>
-                            attempt.outcome !==
-                              "ok" &&
-                            attempt.outcome !==
-                              "skipped",
-                        );
-
-                      if (
-                        hops.length ===
-                        0
-                      ) {
-                        return null;
-                      }
-
-                      const trail = [
-                        ...hops.map(
-                          (attempt) =>
-                            `${attempt.model} (key ${attempt.keyIndex + 1}) ${attempt.outcome}`,
-                        ),
-                        response.meta.model,
-                      ].join(" → ");
-
-                      return (
-                        <span
-                          className="
-                            inline-flex
-                            items-center
-                            gap-1.5
-                            rounded-full
-                            border
-                            border-amber-300/25
-                            bg-amber-300/[0.07]
-                            px-2.5
-                            py-0.5
-                            font-mono
-                            text-[9px]
-                            font-bold
-                            text-amber-200/90
-                          "
-                          title={trail}
-                        >
-                          {trail}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="
-                    flex
-                    shrink-0
-                    items-center
-                    gap-2
-                    rounded-xl
-                    border
-                    border-teal-200/20
-                    bg-teal-300/[0.07]
-                    px-3.5
-                    py-2
-                    text-xs
-                    font-bold
-                    text-teal-50
-                    transition
-                    hover:border-teal-200/35
-                    hover:bg-teal-300/[0.11]
-                  "
-                >
-                  <RefreshCcw className="h-3.5 w-3.5" />
-                  New paper
-                </button>
-              </div>
-
-              <div className="flex min-h-0 flex-1">
-                <div className="relative min-h-0 min-w-0 flex-1">
-                  <MindMapCanvas
-                    nodes={nodes}
-                    edges={edges}
-                    selectedId={selectedId}
-                    hoveredId={hoveredId}
-                    onSelectNode={(
-                      id: string,
-                    ) => setSelectedId(id)}
-                    onClearSelection={() => {
-                      setSelectedId(null);
-                    }}
-                    onNodeHover={(
-                      id: string | null,
-                    ) => setHoveredId(id)}
-                    onNodesChange={onNodesChange}
-                  />
-
-                  {response.mindmap.summary && (
-                    <div
-                      className="
-                        pointer-events-none
-                        absolute
-                        bottom-4
-                        left-1/2
-                        z-20
-                        w-[min(560px,86%)]
-                        -translate-x-1/2
-                      "
-                    >
-                      <div
-                        className="
-                          rounded-2xl
-                          border
-                          border-teal-100/[0.09]
-                          bg-[#081722]/85
-                          px-4
-                          py-3
-                          text-center
-                          backdrop-blur-md
-                        "
-                      >
-                        <p className="text-[11px] leading-relaxed text-slate-300">
-                          {response.mindmap.summary}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {rootNode && !selectedId && (
-                    <div
-                      className="
-                        pointer-events-none
-                        absolute
-                        left-4
-                        top-4
-                        z-20
-                      "
-                    >
-                      <span className="rounded-full border border-teal-200/15 bg-[#081722]/85 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 backdrop-blur-md">
-                        Drag nodes · hover to focus · click for source
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {selectedNode && (
-                  <div className="w-[380px] shrink-0 overflow-hidden">
-                    <MindMapQuotePanel
-                      node={selectedNode}
-                      extractedText={
-                        response.extractedText
-                      }
-                      onClose={() => {
-                        setSelectedId(null);
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            <MindMapDocument
+              response={response}
+              onReset={reset}
+            />
           )}
       </div>
     </div>
-  );
-}
-
-function MetaChip({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <span className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
-      <span className="text-teal-300/70">
-        {icon}
-      </span>
-      <span className="max-w-[220px] truncate">
-        {label}
-      </span>
-    </span>
   );
 }
 

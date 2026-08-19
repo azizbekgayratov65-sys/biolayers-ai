@@ -95,38 +95,42 @@ function findAnchorMatch(
   const quoteTokens =
     normalizedQuote.split(" ");
 
-  const anchors: string[] = [];
+  const anchors: Array<{
+    text: string;
+    tokenIndex: number;
+  }> = [];
 
-  const firstAnchor = quoteTokens
-    .slice(0, Math.min(5, quoteTokens.length))
-    .join(" ");
+  for (
+    let index = 0;
+    index < quoteTokens.length;
+    index += 1
+  ) {
+    const windowTokens =
+      quoteTokens.slice(
+        index,
+        index + 5,
+      );
 
-  anchors.push(firstAnchor);
-
-  const sentences =
-    normalizedQuote.split(/\.\s+/);
-
-  sentences.forEach((sentence) => {
-    const tokens =
-      sentence.split(" ");
-
-    if (tokens.length < 5) {
-      return;
+    if (windowTokens.length < 5) {
+      break;
     }
 
-    const sentenceAnchor =
-      tokens
-        .slice(0, 5)
-        .join(" ");
+    const windowAnchor =
+      windowTokens.join(" ");
 
     if (
-      !anchors.includes(
-        sentenceAnchor,
+      !anchors.some(
+        (anchor) =>
+          anchor.text ===
+          windowAnchor,
       )
     ) {
-      anchors.push(sentenceAnchor);
+      anchors.push({
+        text: windowAnchor,
+        tokenIndex: index,
+      });
     }
-  });
+  }
 
   let best:
     | {
@@ -142,7 +146,7 @@ function findAnchorMatch(
     while (true) {
       const index =
         normalizedFull.indexOf(
-          anchor,
+          anchor.text,
           searchFrom,
         );
 
@@ -150,33 +154,90 @@ function findAnchorMatch(
         break;
       }
 
-      let cursor = index;
-      let matched = 0;
+      let forwardCursor = index;
 
-      for (const token of quoteTokens) {
+      let forwardMatched = 0;
+
+      for (
+        let tokenIndex =
+          anchor.tokenIndex;
+        tokenIndex <
+        quoteTokens.length;
+        tokenIndex += 1
+      ) {
+        const token =
+          quoteTokens[
+            tokenIndex
+          ];
+
         const endIndex =
-          cursor + token.length;
+          forwardCursor +
+          token.length;
 
         if (
           normalizedFull.slice(
-            cursor,
+            forwardCursor,
             endIndex,
           ) === token
         ) {
-          matched += 1;
-          cursor = endIndex + 1;
+          forwardMatched += 1;
+          forwardCursor =
+            endIndex + 1;
         } else {
           break;
         }
       }
+
+      let backwardCursor =
+        index;
+
+      let backwardMatched = 0;
+
+      for (
+        let tokenIndex =
+          anchor.tokenIndex - 1;
+        tokenIndex >= 0;
+        tokenIndex -= 1
+      ) {
+        const token =
+          quoteTokens[
+            tokenIndex
+          ];
+
+        const startIndex =
+          backwardCursor -
+          token.length -
+          1;
+
+        if (
+          startIndex < 0 ||
+          normalizedFull.slice(
+            startIndex,
+            backwardCursor - 1,
+          ) !== token
+        ) {
+          break;
+        }
+
+        backwardMatched += 1;
+        backwardCursor =
+          startIndex;
+      }
+
+      const matched =
+        5 +
+        forwardMatched +
+        backwardMatched;
 
       if (
         !best ||
         matched > best.score
       ) {
         best = {
-          start: index,
-          end: cursor,
+          start:
+            backwardCursor,
+          end:
+            forwardCursor,
           score: matched,
         };
       }
@@ -185,7 +246,7 @@ function findAnchorMatch(
     }
   }
 
-  if (!best || best.score < 3) {
+  if (!best || best.score < 5) {
     return null;
   }
 

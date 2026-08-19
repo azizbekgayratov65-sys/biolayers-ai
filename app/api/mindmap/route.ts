@@ -175,6 +175,11 @@ STRUCTURE OF THE MIND MAP
 3. Idea nodes (level 3, kind "idea"): 3 to 6 concrete ideas, findings,
    mechanisms, methods, datasets, statistics or conclusions under each section
    node. Every idea node MUST have a "quote" and a "weight".
+4. ORDER IS IMPORTANT: emit section nodes and idea nodes in the order they
+   appear in the paper — introductory/background material first, then the
+   middle (methods, mechanisms, results), and closing/discussion material
+   last. The sections array and every section's idea list are rendered
+   top-to-bottom exactly in the order you provide.
 
 RULES
 - "label": a short NOUN-PHRASE claim, maximum 8 words (~60 characters), never
