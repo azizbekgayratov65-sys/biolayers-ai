@@ -52,7 +52,7 @@ const steps = [
     title: "Evidence",
     description:
       "Attach provenance and supporting evidence to each mechanistic connection.",
-    tags: ["PMID", "Sentence", "Model", "Confidence"],
+    tags: ["Source", "PMID", "Model", "Confidence"],
   },
   {
     number: "06",
@@ -638,8 +638,8 @@ export default function MechanismPipelineSection() {
                 </div>
 
                 <div className="mt-2 text-sm leading-6 text-slate-400/90">
-                  Every important connection can link back to its paper,
-                  evidence sentence and confidence.
+                  Every important connection links back to its source
+                  reference, evidence classification and confidence.
                 </div>
               </div>
             </div>

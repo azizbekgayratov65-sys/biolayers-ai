@@ -54,7 +54,7 @@ const capabilities: Capability[] = [
     eyebrow: "03",
     title: "Trace every claim",
     text:
-      "Preserve the path from biological relationships back to supporting papers, evidence sentences, PMID or DOI records, and experimental context.",
+      "Preserve the path from biological relationships back to the papers and source context that support them — so no claim stands without its evidence.",
     label: "EVIDENCE PROVENANCE",
     gradient: "from-teal-200 via-cyan-200 to-indigo-300",
     glow: "rgba(165, 180, 252, 0.10)",

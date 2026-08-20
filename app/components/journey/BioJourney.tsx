@@ -5933,6 +5933,7 @@ function HypothesisBirthHUD({
               text-teal-200/55
             ">
               Generated hypothesis
+              · illustrative
             </p>
 
             <h4 className="
@@ -7350,7 +7351,7 @@ function KnowledgeGraph({
             text-teal-200/60
           "
         >
-          Biological Layer Map
+          Biological Layer Map · illustrative
         </p>
 
         <h3

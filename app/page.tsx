@@ -120,8 +120,9 @@ export default function Home() {
               text-slate-400
             "
           >
-            Dive into the mechanism pipeline, interactive demos, scientific data
-            infrastructure, and the AI copilot that powers BioLayers research.
+            Dive into the mechanism pipeline, interactive demos, scientific
+            data infrastructure, and the AI copilot and evidence
+            classification built into the BioLayers workspace.
           </p>
 
           <div

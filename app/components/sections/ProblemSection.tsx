@@ -5,13 +5,12 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   FileText,
-  Dna,
-  Network,
-  ExternalLink,
+  ScanSearch,
+  Download,
 } from "lucide-react";
 
 /* =========================================================
-   SMOOTH 10-SECOND COUNT-UP
+   SMOOTH COUNT-UP
    ========================================================= */
 
 function CountUp({
@@ -119,38 +118,29 @@ function CountUp({
 const signals = [
   {
     icon: FileText,
-    value: 2647471,
-    label: "original cancer research papers",
+    value: 5,
+    label: "input formats",
     detail:
-      "identified in a PubMed-based cancer research corpus, 1999–2024",
-    source:
-      "PubMed-based cancer research study · 2026",
-    sourceUrl:
-      "https://pubmed.ncbi.nlm.nih.gov/41611528/",
+      "PDF, DOCX, TXT, Markdown, or pasted research text — parsed into a structured, evidence-linked mind map.",
+    source: "Live in the BioLayers workspace",
   },
 
   {
-    icon: Dna,
-    value: 19435,
-    label: "human protein-coding genes",
+    icon: ScanSearch,
+    value: 4,
+    label: "evidence tiers",
     detail:
-      "in the Human Proteome Project reference proteome",
-    source:
-      "Human Proteome Project · 2026",
-    sourceUrl:
-      "https://www.proteinatlas.org/news/2026-02-20/the-2025-hupo-hpp-report-on-the-human-proteome",
+      "Supporting, contradicting, contextual, and unrelated — computed per relationship from the papers retrieved for your research text.",
+    source: "Computed per relationship",
   },
 
   {
-    icon: Network,
-    value: 2883,
-    label: "curated human pathways",
+    icon: Download,
+    value: 3,
+    label: "graph exports",
     detail:
-      "organized across 16,423 human reactions",
-    source:
-      "Reactome v97 · 2026",
-    sourceUrl:
-      "https://reactome.org/",
+      "PNG, JSON, and GraphML — with layer-by-layer filtering across cells, proteins, pathways, processes, and disease states.",
+    source: "In the research workspace",
   },
 ];
 
@@ -366,11 +356,8 @@ export default function ProblemSection() {
             const Icon = item.icon;
 
             return (
-              <motion.a
+              <motion.div
                 key={item.label}
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 initial={{
                   opacity: 0,
                   y: 30,
@@ -476,17 +463,6 @@ export default function ProblemSection() {
                         "
                       />
                     </div>
-
-                    <ExternalLink
-                      className="
-                        h-4
-                        w-4
-                        text-slate-500/75
-                        transition
-                        duration-300
-                        group-hover:text-slate-300/80
-                      "
-                    />
                   </div>
 
                   {/* ================================================= */}
@@ -510,7 +486,7 @@ export default function ProblemSection() {
                   >
                     <CountUp
                       value={item.value}
-                      duration={10000}
+                      duration={1200}
                     />
                   </div>
 
@@ -570,7 +546,7 @@ export default function ProblemSection() {
                     {item.source}
                   </div>
                 </div>
-              </motion.a>
+              </motion.div>
             );
           })}
         </div>
@@ -753,10 +729,9 @@ export default function ProblemSection() {
             text-slate-500/75
           "
         >
-          Metrics represent distinct reference datasets
-          and illustrate the scale of modern biomedical
-          knowledge. They do not imply that every human
-          gene or Reactome pathway is cancer-specific.
+          These capabilities are built into the BioLayers workspace today.
+          Results are AI-generated and always returned with their source
+          evidence so you can verify what supports each relationship.
         </motion.p>
       </div>
     </section>
