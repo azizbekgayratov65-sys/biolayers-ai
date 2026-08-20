@@ -9,7 +9,9 @@ import {
 import {
   AnimatePresence,
   motion,
+  useMotionValue,
   useReducedMotion,
+  useSpring,
 } from "framer-motion";
 
 import {
@@ -38,9 +40,7 @@ import { layoutGraph } from "../lib/layoutGraph";
 import dynamic from "next/dynamic";
 import WorkspaceReveal from "../components/workspace/WorkspaceReveal";
 import LivingWorkspaceAtmosphere from "../components/workspace/LivingWorkspaceAtmosphere";
-import WorkspaceCanvas, {
-  type WorkspaceFlowInstance,
-} from "../components/workspace/WorkspaceCanvas";
+import type { WorkspaceFlowInstance } from "../components/workspace/WorkspaceCanvas";
 import WorkspaceHeader from "../components/workspace/WorkspaceHeader";
 import GraphWorkspaceControls from "../components/workspace/GraphWorkspaceControls";
 import FocusExpandControls from "../components/workspace/FocusExpandControls";
@@ -70,6 +70,7 @@ const TimelinePanel = dynamic(() => import("../components/workspace/TimelinePane
 const ConnectBiologyPanel = dynamic(() => import("../components/workspace/ConnectBiologyPanel"), { ssr: false });
 const EvidenceLensPanel = dynamic(() => import("../components/workspace/EvidenceLensPanel"), { ssr: false });
 const HypothesisBuilderPanel = dynamic(() => import("../components/workspace/HypothesisBuilderPanel"), { ssr: false });
+const WorkspaceCanvas = dynamic(() => import("../components/workspace/WorkspaceCanvas"), { ssr: false });
 
 import {
   deleteBioLayersProject,
@@ -479,13 +480,30 @@ export default function ExplorePage() {
     runCellSearch,
   } = useCellOntology();
 
-  const [
-    cursorPosition,
-    setCursorPosition,
-  ] = useState({
-    x: 50,
-    y: 50,
-  });
+  const cursorX = useMotionValue(50);
+  const cursorY = useMotionValue(50);
+
+  const cursorSpringX = useSpring(
+    cursorX,
+    reduceMotion
+      ? { duration: 0 }
+      : {
+          stiffness: 90,
+          damping: 24,
+          mass: 0.55,
+        },
+  );
+
+  const cursorSpringY = useSpring(
+    cursorY,
+    reduceMotion
+      ? { duration: 0 }
+      : {
+          stiffness: 90,
+          damping: 24,
+          mass: 0.55,
+        },
+  );
 
   const [demoMode, setDemoMode] =
     useState(false);
@@ -543,7 +561,9 @@ export default function ExplorePage() {
     useState(false);
 
   const [hasSavedProject, setHasSavedProject] =
-    useState(false);
+    useState<boolean>(() =>
+      hasSavedBioLayersProject(),
+    );
 
   const [saveMessage, setSaveMessage] =
     useState("");
@@ -608,12 +628,6 @@ export default function ExplorePage() {
       gene: true,
 drug: true,
     });
-
-  useEffect(() => {
-    setHasSavedProject(
-      hasSavedBioLayersProject(),
-    );
-  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -918,27 +932,40 @@ drug: true,
     demoMode,
   ]);
 
-  const selectedNode = nodes.find(
-    (node) => node.id === selectedId,
-  );
+  const {
+    selectedNode,
+    selectedEdge,
+    selectedEdgeSource,
+    selectedEdgeTarget,
+  } = useMemo(() => {
+    const node = nodes.find(
+      (item) => item.id === selectedId,
+    );
 
-  const selectedEdge = edges.find(
-    (edge) => edge.id === selectedEdgeId,
-  );
+    const edge = edges.find(
+      (item) => item.id === selectedEdgeId,
+    );
 
-  const selectedEdgeSource = selectedEdge
-    ? nodes.find(
-        (node) =>
-          node.id === selectedEdge.source,
-      )
-    : undefined;
-
-  const selectedEdgeTarget = selectedEdge
-    ? nodes.find(
-        (node) =>
-          node.id === selectedEdge.target,
-      )
-    : undefined;
+    return {
+      selectedNode: node,
+      selectedEdge: edge,
+      selectedEdgeSource: edge
+        ? nodes.find(
+            (item) => item.id === edge.source,
+          )
+        : undefined,
+      selectedEdgeTarget: edge
+        ? nodes.find(
+            (item) => item.id === edge.target,
+          )
+        : undefined,
+    };
+  }, [
+    nodes,
+    edges,
+    selectedId,
+    selectedEdgeId,
+  ]);
 
   const selectedEdgeLabel =
     selectedEdge &&
@@ -1006,11 +1033,22 @@ drug: true,
       return;
     }
 
-    setEdges((current) =>
-      current.map((edge) => {
+    setEdges((current) => {
+      let changed = false;
+
+      const next = current.map((edge) => {
         if (edge.id !== selectedEdgeId) {
           return edge;
         }
+
+        if (
+          edge.data?.evidenceCount ===
+          pubMedPapers.length
+        ) {
+          return edge;
+        }
+
+        changed = true;
 
         return {
           ...edge,
@@ -1019,8 +1057,10 @@ drug: true,
             evidenceCount: pubMedPapers.length,
           },
         };
-      }),
-    );
+      });
+
+      return changed ? next : current;
+    });
   }, [
     selectedEdgeId,
     pubMedPapers.length,
@@ -1784,7 +1824,7 @@ drug: true,
             },
             connections:
               relatedConnections,
-            papers: pubMedPapers,
+            papers: pubMedPapers.slice(0, 8),
           }),
         },
       );
@@ -2761,11 +2801,20 @@ ${edgeXml}
     setExpandingGraph(false);
   }
 
-  const evidenceProfile = getEvidenceProfile(
-    pubMedPapers.length,
-    pubMedLoading,
-    Boolean(pubMedError),
-    selectedEdge?.data?.evidenceSummary,
+  const evidenceProfile = useMemo(
+    () =>
+      getEvidenceProfile(
+        pubMedPapers.length,
+        pubMedLoading,
+        Boolean(pubMedError),
+        selectedEdge?.data?.evidenceSummary,
+      ),
+    [
+      pubMedPapers.length,
+      pubMedLoading,
+      pubMedError,
+      selectedEdge?.data?.evidenceSummary,
+    ],
   );
 
 
@@ -2932,18 +2981,19 @@ ${edgeXml}
               const bounds =
                 event.currentTarget.getBoundingClientRect();
 
-              setCursorPosition({
-                x:
-                  ((event.clientX -
-                    bounds.left) /
-                    bounds.width) *
+              cursorX.set(
+                ((event.clientX -
+                  bounds.left) /
+                  bounds.width) *
                   100,
-                y:
-                  ((event.clientY -
-                    bounds.top) /
-                    bounds.height) *
+              );
+
+              cursorY.set(
+                ((event.clientY -
+                  bounds.top) /
+                  bounds.height) *
                   100,
-              });
+              );
             }}
             className="relative min-h-0 min-w-0 overflow-hidden bg-[#070b10]"
           >
@@ -2951,32 +3001,10 @@ ${edgeXml}
               view={workspaceView}
             />
             <motion.div
-              animate={
-                reduceMotion
-                  ? undefined
-                  : {
-                      left: `${cursorPosition.x}%`,
-                      top: `${cursorPosition.y}%`,
-                    }
-              }
-              style={
-                reduceMotion
-                  ? {
-                      left: `${cursorPosition.x}%`,
-                      top: `${cursorPosition.y}%`,
-                    }
-                  : undefined
-              }
-              transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : {
-                      type: "spring",
-                      stiffness: 90,
-                      damping: 24,
-                      mass: 0.55,
-                    }
-              }
+              style={{
+                left: cursorSpringX,
+                top: cursorSpringY,
+              }}
               className="pointer-events-none absolute z-[2] h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(77,141,255,.10),rgba(141,178,255,.045)_38%,transparent_70%)] blur-[18px]"
             />
             {/* Scientific depth */}
@@ -3518,6 +3546,21 @@ ${edgeXml}
                   setHoveredId(null)
                 }
               />
+            )}
+
+            {generationMode === "loading" && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="absolute inset-0 z-[12] flex items-center justify-center bg-[#070b10]/35"
+              >
+                <div className="flex items-center gap-3 rounded-full border border-teal-200/[0.16] bg-[#0a1118]/85 px-5 py-3 shadow-[0_12px_40px_rgba(1,8,15,.35)] backdrop-blur-md">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-teal-300/25 border-t-teal-300" />
+                  <p className="text-xs font-medium text-slate-100">
+                    Building knowledge graph…
+                  </p>
+                </div>
+              </div>
             )}
 
             {workspaceView === "graph" && (

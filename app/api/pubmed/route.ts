@@ -996,7 +996,10 @@ export async function GET(
     );
 
     /* =====================================================
-       2 — ESUMMARY
+       2 — ESUMMARY + EFETCH (in parallel)
+       ESummary and EFetch both depend only on the ESearch
+       pmids, so a single gap before the pair keeps the NCBI
+       politeness window without serializing them.
        ===================================================== */
 
     const summaryUrl =
@@ -1015,34 +1018,6 @@ export async function GET(
         },
       ).toString()}`;
 
-    const summaryResponse =
-      await fetchNcbi(
-        summaryUrl,
-      );
-
-    if (
-      !summaryResponse.ok
-    ) {
-      throw new Error(
-        `PubMed summary failed with status ${summaryResponse.status}.`,
-      );
-    }
-
-    const summary =
-      (await summaryResponse.json()) as PubMedSummaryResponse;
-
-    /* =====================================================
-       GAP
-       ===================================================== */
-
-    await sleep(
-      NCBI_REQUEST_GAP_MS,
-    );
-
-    /* =====================================================
-       3 — EFETCH
-       ===================================================== */
-
     const fetchUrl =
       `${NCBI_BASE_URL}/efetch.fcgi?${paramsOf(
         {
@@ -1059,14 +1034,32 @@ export async function GET(
         },
       ).toString()}`;
 
-    const fetchResponse =
-      await fetchNcbi(
+    const [
+      summaryResponse,
+      fetchResponse,
+    ] = await Promise.all([
+      fetchNcbi(
+        summaryUrl,
+      ),
+      fetchNcbi(
         fetchUrl,
         {
           accept:
             "application/xml, text/xml;q=0.9, */*;q=0.8",
         },
+      ),
+    ]);
+
+    if (
+      !summaryResponse.ok
+    ) {
+      throw new Error(
+        `PubMed summary failed with status ${summaryResponse.status}.`,
       );
+    }
+
+    const summary =
+      (await summaryResponse.json()) as PubMedSummaryResponse;
 
     let abstractMap =
       new Map<

@@ -256,12 +256,66 @@ function findAnchorMatch(
   };
 }
 
+/*
+  Normalizing the full paper text costs O(length) per idea. All
+  ideas in a document share the same extractedText, so memoize
+  the normalized result per text and keep only a few around.
+*/
+const NORMALIZE_CACHE_LIMIT = 3;
+
+const normalizeCache = new Map<
+  string,
+  {
+    normalized: string;
+    mapping: number[];
+  }
+>();
+
+function getNormalized(
+  text: string,
+): {
+  normalized: string;
+  mapping: number[];
+} {
+  let entry =
+    normalizeCache.get(text);
+
+  if (!entry) {
+    entry = normalizeText(text);
+
+    normalizeCache.set(
+      text,
+      entry,
+    );
+
+    if (
+      normalizeCache.size >
+      NORMALIZE_CACHE_LIMIT
+    ) {
+      const oldest =
+        normalizeCache.keys()
+          .next().value;
+
+      if (
+        typeof oldest ===
+        "string"
+      ) {
+        normalizeCache.delete(
+          oldest,
+        );
+      }
+    }
+  }
+
+  return entry;
+}
+
 export function findQuoteInText(
   quote: string,
   fullText: string,
 ): QuoteMatch {
   const { normalized, mapping } =
-    normalizeText(fullText);
+    getNormalized(fullText);
 
   const normalizedQuote =
     quote

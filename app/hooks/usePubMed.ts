@@ -287,9 +287,20 @@ export default function usePubMed({
       }
     }
 
-    void loadPubMedPapers();
+    /*
+      Debounce rapid query changes (e.g. hovering across graph
+      nodes) so only the settled query triggers a PubMed request.
+    */
+    const debounceTimer =
+      window.setTimeout(() => {
+        void loadPubMedPapers();
+      }, 250);
 
     return () => {
+      window.clearTimeout(
+        debounceTimer,
+      );
+
       controller.abort();
     };
   }, [

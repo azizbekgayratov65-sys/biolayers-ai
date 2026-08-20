@@ -1050,19 +1050,37 @@ export async function POST(
     const batchResults:
       GroqResult[] = [];
 
+    /*
+      Run batches concurrently with a small concurrency limit so
+      large paper sets (up to 5 batches) finish in ~1 round instead
+      of serially, while staying polite to the Groq rate limits.
+    */
+    const BATCH_CONCURRENCY = 3;
+
     for (
-      const batch of batches
+      let start = 0;
+      start < batches.length;
+      start += BATCH_CONCURRENCY
     ) {
-      const batchResult =
-        await classifyEvidenceBatch({
-          groq,
-          model,
-          relationship,
-          papers: batch,
-        });
+      const slice = batches.slice(
+        start,
+        start + BATCH_CONCURRENCY,
+      );
+
+      const results =
+        await Promise.all(
+          slice.map((batch) =>
+            classifyEvidenceBatch({
+              groq,
+              model,
+              relationship,
+              papers: batch,
+            }),
+          ),
+        );
 
       batchResults.push(
-        batchResult,
+        ...results,
       );
     }
 

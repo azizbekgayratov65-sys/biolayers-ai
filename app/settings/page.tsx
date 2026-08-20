@@ -33,21 +33,25 @@ export default async function SettingsPage() {
       { onConflict: "id", ignoreDuplicates: true },
     );
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, created_at")
-    .eq("id", user.id)
-    .single();
-
-  const aiStatus = await getAiSettingsStatus(
-    supabase,
-    user.id,
-  );
-
-  const papers = await listPapers(
-    supabase,
-    user.id,
-  );
+  const [
+    { data: profile },
+    aiStatus,
+    papers,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, email, full_name, avatar_url, created_at")
+      .eq("id", user.id)
+      .single(),
+    getAiSettingsStatus(
+      supabase,
+      user.id,
+    ),
+    listPapers(
+      supabase,
+      user.id,
+    ),
+  ]);
 
   return (
     <div className="relative mx-auto w-full max-w-[1100px] px-4 pb-24 pt-28 sm:px-6">

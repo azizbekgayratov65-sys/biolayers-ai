@@ -151,7 +151,10 @@ export default function LoginForm({
   return (
     <div className="space-y-5">
       {error && (
-        <div className="rounded-xl border border-rose-300/15 bg-rose-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-rose-200/80">
+        <div
+          role="alert"
+          className="rounded-xl border border-rose-300/15 bg-rose-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-rose-200/80"
+        >
           {error}
         </div>
       )}

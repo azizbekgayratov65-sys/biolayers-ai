@@ -47,19 +47,31 @@ export default function MindMapDocument({
     useState(0);
 
   useEffect(() => {
-    const onScroll = () => {
-      const max =
-        document.documentElement
-          .scrollHeight -
-        window.innerHeight;
+    let frame: number | null = null;
 
-      setProgress(
-        max > 0
-          ? Math.min(
-              window.scrollY / max,
-              1,
-            )
-          : 0,
+    const onScroll = () => {
+      if (frame !== null) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(
+        () => {
+          frame = null;
+
+          const max =
+            document.documentElement
+              .scrollHeight -
+            window.innerHeight;
+
+          setProgress(
+            max > 0
+              ? Math.min(
+                  window.scrollY / max,
+                  1,
+                )
+              : 0,
+          );
+        },
       );
     };
 
@@ -76,6 +88,12 @@ export default function MindMapDocument({
         "scroll",
         onScroll,
       );
+
+      if (frame !== null) {
+        window.cancelAnimationFrame(
+          frame,
+        );
+      }
     };
   }, []);
 

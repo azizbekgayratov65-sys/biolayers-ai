@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeroContent from "../hero/HeroContent";
 import HeroStageNarrative from "../hero/HeroStageNarrative";
@@ -19,7 +20,29 @@ const HeroThreeScene = dynamic(
   },
 );
 
+function useAfterIdle(
+  timeoutMs = 2500,
+): boolean {
+  const [ready, setReady] =
+    useState(false);
+
+  useEffect(() => {
+    const handle = window.requestIdleCallback(
+      () => setReady(true),
+      { timeout: timeoutMs },
+    );
+
+    return () => {
+      window.cancelIdleCallback(handle);
+    };
+  }, [timeoutMs]);
+
+  return ready;
+}
+
 export default function HeroSection() {
+  const sceneReady = useAfterIdle();
+
   return (
     <>
       <section
@@ -35,10 +58,16 @@ export default function HeroSection() {
       >
         {/* ================================================= */}
         {/* DARK-FIELD SCENE — RACKED INTO FOCUS ON LOAD     */}
+        {/* Loaded after the browser is idle so the three.js  */}
+        {/* chunk never blocks the hero text from painting.  */}
         {/* ================================================= */}
 
         <div className="absolute inset-0 z-0 bl-focus-in">
-          <HeroThreeScene />
+          {sceneReady ? (
+            <HeroThreeScene />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(77,141,255,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(141,178,255,.035),transparent_26%)]" />
+          )}
         </div>
 
         {/* ================================================= */}
@@ -151,7 +180,7 @@ export default function HeroSection() {
       {/* CURSOR ENERGY FIELD                               */}
       {/* ================================================= */}
 
-      <CursorEnergyField />
+      {sceneReady && <CursorEnergyField />}
     </>
   );
 }

@@ -122,9 +122,35 @@ export default function RootLayout({
         "
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="
+            absolute
+            left-4
+            top-4
+            z-[200]
+            -translate-y-24
+            rounded-lg
+            border
+            border-teal-200/25
+            bg-[#0a1118]
+            px-4
+            py-2
+            text-sm
+            font-semibold
+            text-teal-50
+            transition-transform
+            focus:translate-y-0
+          "
+        >
+          Skip to content
+        </a>
+
         <Navbar />
 
         <main
+          id="main-content"
+          tabIndex={-1}
           className="
             relative
             min-h-screen
