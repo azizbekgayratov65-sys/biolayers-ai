@@ -142,7 +142,7 @@ export default function CancerEvolutionTimeline() {
         />
       </div>
 
-      <section className="relative z-10 mx-auto max-w-[1600px] px-6 pb-16 pt-10 lg:px-10">
+      <section className="relative z-10 mx-auto max-w-[1600px] px-6 pb-16 pt-32 lg:px-10">
         <header className="flex flex-col gap-6 border-b border-white/10 pb-8 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="mb-4 flex items-center gap-3">

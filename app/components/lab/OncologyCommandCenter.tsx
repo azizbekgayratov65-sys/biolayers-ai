@@ -133,7 +133,7 @@ export default function OncologyCommandCenter() {
     <main className="relative min-h-screen overflow-hidden bg-[#02040a] text-white">
       <Background />
 
-      <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-6 md:px-8">
+      <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-32 md:px-8">
         <header className="mb-6 flex flex-col gap-5 rounded-[30px] border border-white/[0.08] bg-white/[0.035] p-5 backdrop-blur-2xl md:flex-row md:items-center md:justify-between">
           <div>
             <div className="mb-2 flex items-center gap-2">

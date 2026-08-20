@@ -79,27 +79,28 @@ export default function HeroSection() {
           className="
             pointer-events-none
             absolute
-            left-5
-            top-[104px]
+            left-0
+            top-[100px]
             z-[3]
             hidden
             items-center
             gap-3
-            rounded-full
+            rounded-r-full
             border
+            border-l-0
             border-teal-100/[0.08]
             bg-[#0a0f14]/55
-            px-4
+            px-3
             py-2
             backdrop-blur-xl
             lg:flex
           "
         >
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-300/70">
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-300/70 [writing-mode:vertical-lr]">
             CH·DAPI 40× λ405nm
           </span>
           <span className="h-1 w-1 rounded-full bg-teal-300" />
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-slate-500">
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-slate-500 [writing-mode:vertical-lr]">
             Live field
           </span>
         </div>

@@ -102,7 +102,7 @@ export default function MolecularDive() {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#010309] px-4 py-8 text-white md:px-8">
+    <section className="relative min-h-screen overflow-hidden bg-[#010309] px-4 pb-8 pt-32 text-white md:px-8">
       <Background color={profile.color} />
 
       <div className="relative z-10 mx-auto max-w-[1720px]">

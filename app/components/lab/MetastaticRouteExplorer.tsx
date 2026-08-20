@@ -130,7 +130,7 @@ export default function MetastaticRouteExplorer() {
     <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background />
 
-      <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-8 md:px-8">
+      <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-32 md:px-8">
         <header className="mb-6 flex flex-col gap-6 rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-2xl xl:flex-row xl:items-center xl:justify-between">
           <div>
             <div className="flex items-center gap-3">
