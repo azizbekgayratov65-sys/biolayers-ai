@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  ArrowUpRight,
   FileText,
   Loader2,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export type SavedPaperListItem = {
@@ -92,14 +94,20 @@ export function SavedPapersPanel({
             {papers.map((paper) => (
               <li
                 key={paper.id}
-                className="group rounded-[16px] border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 transition hover:border-teal-200/15 hover:bg-white/[0.04]"
+                className="group relative rounded-[16px] border border-white/[0.06] bg-white/[0.02] transition hover:border-teal-200/15 hover:bg-white/[0.04]"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-white/85">
-                      {paper.title ||
-                        paper.fileName ||
-                        "Untitled paper"}
+                <Link
+                  href={`/mindmap/${paper.id}`}
+                  className="flex items-start justify-between gap-3 px-4 py-3.5"
+                >
+                  <div className="min-w-0 flex-1 pr-9">
+                    <div className="flex items-center gap-2">
+                      <div className="truncate text-sm font-semibold text-white/85 transition group-hover:text-teal-100">
+                        {paper.title ||
+                          paper.fileName ||
+                          "Untitled paper"}
+                      </div>
+                      <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-teal-300/0 transition group-hover:text-teal-300/80" />
                     </div>
                     <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-white/35">
                       {paper.fileType ?? "Document"} ·{" "}
@@ -111,22 +119,25 @@ export function SavedPapersPanel({
                         ? new Date(paper.createdAt).toLocaleDateString()
                         : ""}
                     </div>
+                    <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-teal-300/0 transition group-hover:text-teal-300/60">
+                      Open mind map
+                    </div>
                   </div>
+                </Link>
 
-                  <button
-                    type="button"
-                    onClick={() => void removePaper(paper.id)}
-                    disabled={busyId === paper.id}
-                    aria-label="Delete paper"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-rose-300/12 bg-rose-400/[0.04] text-rose-200/60 transition hover:border-rose-300/30 hover:bg-rose-400/[0.1] hover:text-rose-200 disabled:opacity-50"
-                  >
-                    {busyId === paper.id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-3.5 w-3.5" />
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => void removePaper(paper.id)}
+                  disabled={busyId === paper.id}
+                  aria-label="Delete paper"
+                  className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-[10px] border border-rose-300/12 bg-rose-400/[0.04] text-rose-200/60 transition hover:border-rose-300/30 hover:bg-rose-400/[0.1] hover:text-rose-200 disabled:opacity-50"
+                >
+                  {busyId === paper.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </button>
               </li>
             ))}
           </ul>

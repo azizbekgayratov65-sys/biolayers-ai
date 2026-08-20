@@ -453,6 +453,39 @@ export default function MultiPaperEvidenceSection() {
             accent="text-rose-300/65"
           />
         </motion.div>
+
+        <motion.p
+          initial={
+            reduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                }
+          }
+          whileInView={{
+            opacity: 1,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: 0.7,
+            delay: 0.12,
+          }}
+          className="
+            mx-auto
+            mt-8
+            max-w-3xl
+            text-center
+            text-xs
+            leading-6
+            text-slate-500/80
+          "
+        >
+          This homepage view is illustrative. In the workspace, evidence
+          status is computed from the papers actually retrieved for your
+          research text rather than a fixed example.
+        </motion.p>
       </div>
     </section>
   );

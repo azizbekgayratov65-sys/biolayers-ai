@@ -83,6 +83,44 @@ export async function listPapers(
   }));
 }
 
+export async function getPaper(
+  supabase: SupabaseClient,
+  userId: string,
+  paperId: string,
+): Promise<(SavedPaper & { mindmap: unknown }) | null> {
+  const { data, error } = await supabase
+    .from("papers")
+    .select(
+      "id, file_name, file_type, title, character_count, created_at, mindmap",
+    )
+    .eq("id", paperId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "[papers] Failed to get paper:",
+      error,
+    );
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id as string,
+    fileName: (data.file_name as string) ?? null,
+    fileType: (data.file_type as string) ?? null,
+    title: (data.title as string) ?? null,
+    characterCount:
+      (data.character_count as number) ?? null,
+    createdAt: (data.created_at as string) ?? "",
+    mindmap: data.mindmap,
+  };
+}
+
 export async function deletePaper(
   supabase: SupabaseClient,
   userId: string,

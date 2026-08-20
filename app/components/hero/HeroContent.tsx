@@ -522,7 +522,7 @@ export default function HeroContent() {
               "
             >
               AI-driven Computational
-              Oncology &amp; Precision Medicine
+              Oncology Research
             </span>
           </motion.div>
 

@@ -7934,7 +7934,7 @@ function ClinicalLoopHUD({
         text-slate-400/85
         sm:text-xs
       ">
-        From biological complexity to structured evidence, testable mechanisms and research questions that can move back toward the patient.
+        From biological complexity to structured evidence and testable mechanisms — organized so researchers can move from literature to hypothesis-driven experiments.
       </p>
     </motion.div>
   );

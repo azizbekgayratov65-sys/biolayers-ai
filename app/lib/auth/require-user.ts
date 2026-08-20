@@ -19,9 +19,11 @@ export type AuthenticatedContext = {
 
 /*
   For server components / server actions. Redirects unauthenticated
-  users to the login page.
+  users to the login page, preserving the intended destination.
 */
-export async function requireUser(): Promise<AuthenticatedContext> {
+export async function requireUser(
+  nextPath = "/settings",
+): Promise<AuthenticatedContext> {
   const supabase = await createSupabaseClient();
 
   const {
@@ -30,7 +32,7 @@ export async function requireUser(): Promise<AuthenticatedContext> {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    redirect("/login?next=/settings");
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
 
   return {

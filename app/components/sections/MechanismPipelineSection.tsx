@@ -18,8 +18,9 @@ const steps = [
     number: "01",
     icon: FileText,
     title: "Input",
-    description: "Start with a PMID, DOI, abstract, or research paper.",
-    tags: ["PMID", "DOI", "Abstract", "Paper"],
+    description:
+      "Start with a research paper, abstract, or pasted research text.",
+    tags: ["PDF", "DOCX", "TXT", "Abstract", "Text"],
   },
   {
     number: "02",

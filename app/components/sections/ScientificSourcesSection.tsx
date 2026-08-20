@@ -24,6 +24,7 @@ type SourceCard = {
   category: string;
   description: string;
   role: string;
+  status: "live" | "roadmap";
   icon: React.ComponentType<{
     className?: string;
   }>;
@@ -37,42 +38,57 @@ const sources: SourceCard[] = [
     description:
       "Peer-reviewed biomedical literature used to trace mechanistic claims back to source papers.",
     role: "Claims · evidence sentences · citations",
+    status: "live",
     icon: BookOpenText,
+  },
+  {
+    name: "Cell Ontology",
+    shortName: "CL",
+    category: "Cells",
+    description:
+      "Structured cell-type terms used to label and compare cell states mentioned in the literature.",
+    role: "Cell types · synonyms · identifiers",
+    status: "live",
+    icon: Network,
   },
   {
     name: "Reactome",
     shortName: "RX",
     category: "Pathways",
     description:
-      "Curated biological pathways used to contextualize signaling relationships and pathway-level mechanisms.",
+      "Curated biological pathways intended to contextualize signaling relationships and pathway-level mechanisms.",
     role: "Pathways · reactions · biological processes",
-    icon: Network,
+    status: "roadmap",
+    icon: Layers3,
   },
   {
     name: "UniProt",
     shortName: "UP",
     category: "Proteins",
     description:
-      "Protein-level annotation for names, functions, identifiers, and molecular context.",
+      "Protein-level annotation planned for names, functions, identifiers, and molecular context.",
     role: "Proteins · functions · identifiers",
-    icon: Layers3,
+    status: "roadmap",
+    icon: FileSearch,
   },
   {
     name: "Human Protein Atlas",
     shortName: "HPA",
     category: "Expression",
     description:
-      "Expression and tissue context used to connect molecular mechanisms with biological and disease environments.",
+      "Expression and tissue context planned to connect molecular mechanisms with biological and disease environments.",
     role: "Tissue · cell type · expression context",
-    icon: FileSearch,
+    status: "roadmap",
+    icon: Database,
   },
   {
     name: "NCBI Gene",
     shortName: "NG",
     category: "Genes",
     description:
-      "Gene-level reference information used to normalize entities and connect literature mentions to canonical genes.",
+      "Gene-level reference information planned to normalize entities and connect literature mentions to canonical genes.",
     role: "Genes · aliases · genomic context",
+    status: "roadmap",
     icon: Dna,
   },
 ];
@@ -274,13 +290,16 @@ export default function ScientificSourcesSection() {
               md:leading-9
             "
           >
-            BioLayers is designed to connect
+            BioLayers is built to connect
             mechanistic reasoning with
             biomedical literature and curated
             biological resources — so users can
             move from a relationship on the map
             back to the evidence and biological
-            context behind it.
+            context behind it. PubMed and cell
+            ontology lookups are live in the
+            workspace today; additional curated
+            resources are on the roadmap.
           </p>
         </motion.div>
 
@@ -294,7 +313,8 @@ export default function ScientificSourcesSection() {
             grid
             gap-4
             md:grid-cols-2
-            xl:grid-cols-5
+            lg:grid-cols-3
+            xl:grid-cols-6
           "
         >
           {sources.map(
@@ -399,32 +419,73 @@ export default function ScientificSourcesSection() {
                       <Icon className="h-4 w-4 text-teal-200/70" />
                     </div>
 
-                    <span
-                      className="
+                    <div
+                      className={`
+                        flex
+                        items-center
+                        gap-1.5
+                        rounded-full
+                        border
+                        px-2.5
+                        py-1
                         font-mono
-                        text-[9px]
+                        text-[8px]
                         font-bold
                         uppercase
-                        tracking-[0.18em]
-                        text-slate-500
-                      "
+                        tracking-[0.14em]
+
+                        ${
+                          source.status === "live"
+                            ? "border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-200/90"
+                            : "border-white/[0.08] bg-white/[0.03] text-slate-500"
+                        }
+                      `}
                     >
-                      {source.shortName}
-                    </span>
+                      <span
+                        className={
+                          source.status === "live"
+                            ? "h-1.5 w-1.5 rounded-full bg-emerald-300"
+                            : "h-1.5 w-1.5 rounded-full bg-slate-600"
+                        }
+                      />
+                      {source.status === "live"
+                        ? "Live"
+                        : "Roadmap"}
+                    </div>
                   </div>
 
                   <div className="relative mt-6">
-                    <p
+                    <div
                       className="
-                        text-[9px]
-                        font-bold
-                        uppercase
-                        tracking-[0.18em]
-                        text-teal-200/55
+                        flex
+                        items-center
+                        justify-between
+                        gap-2
                       "
                     >
-                      {source.category}
-                    </p>
+                      <p
+                        className="
+                          text-[9px]
+                          font-bold
+                          uppercase
+                          tracking-[0.18em]
+                          text-teal-200/55
+                        "
+                      >
+                        {source.category}
+                      </p>
+
+                      <span
+                        className="
+                          font-mono
+                          text-[9px]
+                          font-bold
+                          text-slate-500
+                        "
+                      >
+                        {source.shortName}
+                      </span>
+                    </div>
 
                     <h3
                       className="
