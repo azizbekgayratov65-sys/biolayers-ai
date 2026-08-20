@@ -189,9 +189,8 @@ export default function HeroContent() {
       >
         <div
           className="
-            w-full max-w-[760px]
-            lg:-translate-x-3
-            xl:-translate-x-7
+            mx-auto w-full
+            max-w-[760px] text-center
           "
         >
           {/* ============================================= */}
@@ -221,7 +220,7 @@ export default function HeroContent() {
             }}
             className="
               mb-7 flex
-              items-center gap-4
+              items-center justify-center gap-4
             "
           >
             {/* Logo */}
@@ -632,19 +631,19 @@ export default function HeroContent() {
               ],
             }}
             className="
-              mt-7 max-w-[650px]
+              mt-7 mx-auto max-w-[680px]
               text-[16px]
               leading-8
               text-slate-300/90
               sm:text-[18px]
             "
           >
-            BioLayers transforms fragmented
-            oncology literature into
-            evidence-linked maps of cells,
-            genes, proteins, pathways,
-            biological processes, and disease
-            mechanisms.
+            Upload a research paper and
+            BioLayers compresses it into a
+            compact, interactive mind map —
+            every idea preserved, every node
+            linked back to the exact source
+            text it came from.
           </motion.p>
 
           {/* ============================================= */}
@@ -674,7 +673,7 @@ export default function HeroContent() {
             }}
             className="
               mt-6 flex flex-wrap
-              gap-2
+              justify-center gap-2
             "
           >
             <Signal
@@ -726,7 +725,7 @@ export default function HeroContent() {
               ],
             }}
             className="
-              mt-8 w-full
+              mx-auto mt-8 w-full
               max-w-[650px]
             "
           >

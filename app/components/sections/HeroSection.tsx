@@ -84,13 +84,13 @@ export default function HeroSection() {
             z-[3]
             hidden
             items-center
-            gap-3
+            gap-2.5
             rounded-r-full
             border
             border-l-0
             border-teal-100/[0.08]
             bg-[#0a0f14]/55
-            px-3
+            px-2.5
             py-2
             backdrop-blur-xl
             lg:flex
