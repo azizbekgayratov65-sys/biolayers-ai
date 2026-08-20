@@ -272,7 +272,7 @@ export default function ResearchCopilotCommandCenter() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background />
 
       <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-8 md:px-8">
@@ -280,7 +280,7 @@ export default function ResearchCopilotCommandCenter() {
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,.9)]" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(161,92,255,.9)]" />
 
                 <span className="text-[10px] font-bold uppercase tracking-[0.34em] text-cyan-200/70">
                   BioLayers Research Intelligence
@@ -383,7 +383,7 @@ export default function ResearchCopilotCommandCenter() {
           >
             <section className="grid gap-6 xl:grid-cols-[0.78fr_1.15fr_.82fr]">
               <aside className="space-y-6">
-                <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+                <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
                   <PanelHeader eyebrow="Query context" title="Research Question" />
 
                   <div className="mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
@@ -400,7 +400,7 @@ export default function ResearchCopilotCommandCenter() {
                   </div>
                 </section>
 
-                <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+                <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
                   <PanelHeader eyebrow="Entity layer" title="Genes & Molecules" />
 
                   <div className="mt-5 flex flex-wrap gap-2">
@@ -426,7 +426,7 @@ export default function ResearchCopilotCommandCenter() {
                   </div>
                 </section>
 
-                <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+                <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
                   <PanelHeader eyebrow="Pathway layer" title="Biological Programs" />
 
                   <div className="mt-5 space-y-2">
@@ -629,7 +629,7 @@ export default function ResearchCopilotCommandCenter() {
               </section>
 
               <aside className="space-y-6">
-                <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+                <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
                   <PanelHeader eyebrow="Evidence layer" title="Evidence Stack" />
 
                   <div className="mt-5 space-y-3">
@@ -678,7 +678,7 @@ export default function ResearchCopilotCommandCenter() {
                   </div>
                 </section>
 
-                <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+                <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
                   <PanelHeader eyebrow="Next questions" title="Research Directions" />
 
                   <div className="mt-5 space-y-2">

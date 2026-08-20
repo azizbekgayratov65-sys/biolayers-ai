@@ -34,7 +34,7 @@ export default function PaperInspectorPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedPaper(null)}
-            className="fixed inset-0 z-[110] bg-[#020b12]/62 backdrop-blur-[5px]"
+            className="fixed inset-0 z-[110] bg-[#030507]/62 backdrop-blur-[5px]"
           />
 
           <motion.aside
@@ -60,7 +60,7 @@ export default function PaperInspectorPanel({
               duration: 0.36,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="fixed bottom-0 right-0 top-0 z-[120] flex w-full flex-col overflow-hidden border-l border-teal-100/[0.08] bg-[#081722]/98 shadow-[-34px_0_110px_rgba(1,8,15,.5)] backdrop-blur-3xl sm:w-[580px]"
+            className="fixed bottom-0 right-0 top-0 z-[120] flex w-full flex-col overflow-hidden border-l border-teal-100/[0.08] bg-[#070b10]/98 shadow-[-34px_0_110px_rgba(1,8,15,.5)] backdrop-blur-3xl sm:w-[580px]"
           >
             {/* Header */}
             <div className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-6">
@@ -72,7 +72,7 @@ export default function PaperInspectorPanel({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <motion.span
-                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.8)]"
                       animate={{
                         opacity: [0.55, 1, 0.55],
                         scale: [1, 1.2, 1],
@@ -125,7 +125,7 @@ export default function PaperInspectorPanel({
                     </span>
                   </div>
 
-                  <h2 className="mt-4 text-[25px] font-semibold leading-[1.24] tracking-[-0.038em] text-[#f0fbfa] sm:text-[29px]">
+                  <h2 className="mt-4 text-[25px] font-semibold leading-[1.24] tracking-[-0.038em] text-[#eef4ff] sm:text-[29px]">
                     {selectedPaper.title}
                   </h2>
 
@@ -280,7 +280,7 @@ export default function PaperInspectorPanel({
             </div>
 
             {/* Footer actions */}
-            <div className="grid grid-cols-2 gap-2.5 border-t border-teal-100/[0.065] bg-[#081722]/95 p-4 sm:px-6">
+            <div className="grid grid-cols-2 gap-2.5 border-t border-teal-100/[0.065] bg-[#070b10]/95 p-4 sm:px-6">
               <button
                 type="button"
                 onClick={() => setSelectedPaper(null)}
@@ -293,7 +293,7 @@ export default function PaperInspectorPanel({
                 href={selectedPaper.pubmedUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-4 py-3 text-center text-[11px] font-extrabold text-[#062029] shadow-[0_10px_26px_rgba(45,212,191,.11)] transition duration-300 hover:-translate-y-0.5"
+                className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-4 py-3 text-center text-[11px] font-extrabold text-[#04070a] shadow-[0_10px_26px_rgba(77,141,255,.11)] transition duration-300 hover:-translate-y-0.5"
               >
                 <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
                 <span className="relative">
@@ -346,7 +346,7 @@ function PaperSection({
   }[tone];
 
   return (
-    <section className="mt-4 rounded-[16px] border border-teal-100/[0.055] bg-[#0a1b26]/44 p-4">
+    <section className="mt-4 rounded-[16px] border border-teal-100/[0.055] bg-[#0a0f14]/44 p-4">
       <p className={`text-[10px] font-bold uppercase tracking-[0.16em] ${toneClass}`}>
         {eyebrow}
       </p>

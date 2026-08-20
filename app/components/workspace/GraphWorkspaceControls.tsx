@@ -74,7 +74,7 @@ export default function GraphWorkspaceControls({
             rounded-[16px]
             border
             border-teal-100/[0.075]
-            bg-[#0a1b26]/78
+            bg-[#0a0f14]/78
             px-3.5
             py-2.5
             shadow-[0_14px_42px_rgba(1,8,15,.24)]
@@ -88,7 +88,7 @@ export default function GraphWorkspaceControls({
                 w-1.5
                 rounded-full
                 bg-teal-300
-                shadow-[0_0_9px_rgba(94,234,212,.75)]
+                shadow-[0_0_9px_rgba(77,141,255,.75)]
               "
               animate={
                 reduceMotion
@@ -163,7 +163,7 @@ export default function GraphWorkspaceControls({
           className={`rounded-[12px] border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] shadow-[0_10px_30px_rgba(1,8,15,.18)] backdrop-blur-2xl transition duration-300 ${
             demoMode
               ? "border-rose-200/[0.18] bg-rose-200/[0.06] text-rose-100"
-              : "border-sky-200/[0.12] bg-[#0a1b26]/78 text-sky-100 hover:-translate-y-0.5 hover:bg-sky-200/[0.05]"
+              : "border-sky-200/[0.12] bg-[#0a0f14]/78 text-sky-100 hover:-translate-y-0.5 hover:bg-sky-200/[0.05]"
           }`}
         >
           {demoMode
@@ -186,7 +186,7 @@ export default function GraphWorkspaceControls({
             rounded-[12px]
             border
             border-teal-200/[0.13]
-            bg-[#0a1b26]/78
+            bg-[#0a0f14]/78
             px-3
             py-2
             text-[10px]
@@ -213,7 +213,7 @@ export default function GraphWorkspaceControls({
             rounded-[12px]
             border
             border-teal-100/[0.07]
-            bg-[#0a1b26]/78
+            bg-[#0a0f14]/78
             p-1
             shadow-[0_10px_30px_rgba(1,8,15,.18)]
             backdrop-blur-2xl
@@ -300,7 +300,7 @@ export default function GraphWorkspaceControls({
             rounded-[12px]
             border
             border-teal-100/[0.07]
-            bg-[#0a1b26]/78
+            bg-[#0a0f14]/78
             px-3
             py-2
             text-[10px]
@@ -369,7 +369,7 @@ export default function GraphWorkspaceControls({
             rounded-[17px]
             border
             border-teal-100/[0.09]
-            bg-[#0a1b26]/92
+            bg-[#0a0f14]/92
             p-1.5
             shadow-[0_22px_64px_rgba(1,8,15,.42)]
             backdrop-blur-2xl
@@ -440,13 +440,13 @@ export default function GraphWorkspaceControls({
               rounded-[11px]
               border
               border-teal-200/[0.18]
-              bg-[linear-gradient(135deg,#99f6e4,#67e8f9)]
+              bg-[linear-gradient(135deg,#8db2ff,#a15cff)]
               px-4
               py-2.5
               text-[11px]
               font-extrabold
-              text-[#062029]
-              shadow-[0_8px_22px_rgba(45,212,191,.13)]
+              text-[#04070a]
+              shadow-[0_8px_22px_rgba(77,141,255,.13)]
               transition
               duration-300
               hover:-translate-y-0.5

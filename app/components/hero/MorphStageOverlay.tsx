@@ -195,7 +195,7 @@ export default function MorphStageOverlay() {
           <motion.div
             animate={{ x: `${pointerProgress * 100}%` }}
             transition={{ type: "spring", stiffness: 110, damping: 22 }}
-            className="absolute bottom-0 left-0 h-px w-16 -translate-x-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_18px_rgba(103,232,249,0.9)]"
+            className="absolute bottom-0 left-0 h-px w-16 -translate-x-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_18px_rgba(161,92,255,0.9)]"
           />
         </div>
       </motion.div>

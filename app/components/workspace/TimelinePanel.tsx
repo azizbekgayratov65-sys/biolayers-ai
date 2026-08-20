@@ -68,7 +68,7 @@ export default function TimelinePanel({
         initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0 : 0.35 }}
-        className="relative overflow-hidden rounded-[22px] border border-teal-100/[0.07] bg-[#0a1b26]/52 p-5 shadow-[0_20px_60px_rgba(1,8,15,.18)]"
+        className="relative overflow-hidden rounded-[22px] border border-teal-100/[0.07] bg-[#0a0f14]/52 p-5 shadow-[0_20px_60px_rgba(1,8,15,.18)]"
       >
         {/* subtle background glow */}
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-teal-300/[0.035] blur-3xl" />
@@ -77,7 +77,7 @@ export default function TimelinePanel({
         <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
             <div className="flex items-center gap-2">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_10px_rgba(94,234,212,.8)]" />
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_10px_rgba(77,141,255,.8)]" />
 
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-teal-300">
                 Literature timeline
@@ -149,7 +149,7 @@ export default function TimelinePanel({
           initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: reduceMotion ? 0 : 0.3 }}
-          className="mt-6 rounded-[20px] border border-dashed border-teal-100/[0.08] bg-[#081722]/45 px-6 py-14 text-center"
+          className="mt-6 rounded-[20px] border border-dashed border-teal-100/[0.08] bg-[#070b10]/45 px-6 py-14 text-center"
         >
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-[14px] border border-teal-200/[0.09] bg-teal-200/[0.035]">
             <span className="text-lg text-teal-300">
@@ -219,7 +219,7 @@ export default function TimelinePanel({
               <div className="relative border-l border-teal-200/[0.10] pb-8 pl-5 md:pl-7">
                 {/* timeline node */}
 
-                <span aria-hidden="true" className="absolute -left-[5px] top-2 h-[9px] w-[9px] rounded-full border-2 border-[#081722] bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,.55)]" />
+                <span aria-hidden="true" className="absolute -left-[5px] top-2 h-[9px] w-[9px] rounded-full border-2 border-[#070b10] bg-teal-300 shadow-[0_0_12px_rgba(77,141,255,.55)]" />
 
                 {/* year pulse */}
 
@@ -259,7 +259,7 @@ export default function TimelinePanel({
                           ? undefined
                           : { y: -2 }
                       }
-                      className="group relative overflow-hidden rounded-[17px] border border-teal-100/[0.055] bg-[#0a1b26]/46 p-4 text-left shadow-[0_12px_32px_rgba(1,8,15,.12)] transition-colors duration-300 hover:border-teal-200/[0.13] hover:bg-[#0c202c]/62"
+                      className="group relative overflow-hidden rounded-[17px] border border-teal-100/[0.055] bg-[#0a0f14]/46 p-4 text-left shadow-[0_12px_32px_rgba(1,8,15,.12)] transition-colors duration-300 hover:border-teal-200/[0.13] hover:bg-[#0c202c]/62"
                     >
                       {/* hover light */}
 

@@ -301,7 +301,7 @@ export default function HeroContent() {
                     -translate-x-1/2
                     rounded-full
                     bg-teal-200
-                    shadow-[0_0_12px_rgba(153,246,228,.95)]
+                    shadow-[0_0_12px_rgba(141,178,255,.95)]
                   "
                 />
               </motion.div>
@@ -319,7 +319,7 @@ export default function HeroContent() {
                   border
                   border-teal-200/[0.15]
                   bg-[#06131d]/75
-                  shadow-[0_12px_38px_rgba(1,8,15,.32),0_0_30px_rgba(45,212,191,.08)]
+                  shadow-[0_12px_38px_rgba(1,8,15,.32),0_0_30px_rgba(77,141,255,.08)]
                   backdrop-blur-2xl
                 "
               >
@@ -347,7 +347,7 @@ export default function HeroContent() {
                     object-contain
                     brightness-125
                     contrast-125
-                    drop-shadow-[0_0_10px_rgba(153,246,228,.25)]
+                    drop-shadow-[0_0_10px_rgba(141,178,255,.25)]
                   "
                 />
 
@@ -387,7 +387,7 @@ export default function HeroContent() {
                       from-transparent
                       via-teal-100
                       to-transparent
-                      shadow-[0_0_9px_rgba(153,246,228,.9)]
+                      shadow-[0_0_9px_rgba(141,178,255,.9)]
                     "
                   />
                 )}
@@ -408,7 +408,7 @@ export default function HeroContent() {
                     text-[17px]
                     font-semibold
                     tracking-[-0.025em]
-                    text-[#f2fbfa]
+                    text-[#e8edf2]
                   "
                 >
                   BioLayers
@@ -483,7 +483,7 @@ export default function HeroContent() {
               rounded-full
               border
               border-teal-200/[0.14]
-              bg-[#0a1b26]/55
+              bg-[#0a0f14]/55
               px-4 py-2
               shadow-[0_10px_34px_rgba(1,8,15,.18)]
               backdrop-blur-2xl
@@ -507,7 +507,7 @@ export default function HeroContent() {
                   h-2 w-2
                   rounded-full
                   bg-teal-300
-                  shadow-[0_0_12px_rgba(94,234,212,.8)]
+                  shadow-[0_0_12px_rgba(77,141,255,.8)]
                 "
               />
             </span>
@@ -563,7 +563,7 @@ export default function HeroContent() {
               font-semibold
               leading-[0.93]
               tracking-[-0.062em]
-              text-[#f3fbfa]
+              text-[#e8edf2]
               sm:text-[66px]
               lg:text-[78px]
               xl:text-[88px]
@@ -575,9 +575,9 @@ export default function HeroContent() {
               className="
                 block
                 bg-gradient-to-r
-                from-teal-200
-                via-cyan-300
-                to-sky-300
+                from-[#2bff88]
+                via-[#8db2ff]
+                to-[#c095fd]
                 bg-clip-text
                 text-transparent
               "
@@ -771,14 +771,14 @@ export default function HeroContent() {
                 relative overflow-hidden
                 rounded-[24px]
                 border
-                bg-[#081722]/82
+                bg-[#070b10]/82
                 shadow-[0_28px_90px_rgba(1,8,15,.34)]
                 backdrop-blur-3xl
                 transition-all duration-300
 
                 ${
                   transitioning
-                    ? "border-teal-200/[0.24] shadow-[0_0_70px_rgba(45,212,191,.12)]"
+                    ? "border-teal-200/[0.24] shadow-[0_0_70px_rgba(77,141,255,.12)]"
                     : "border-teal-100/[0.08] hover:border-teal-200/[0.14]"
                 }
               `}
@@ -802,7 +802,7 @@ export default function HeroContent() {
                   px-6 pb-4 pt-6
                   text-[15px]
                   leading-7
-                  text-[#eefaf8]
+                  text-[#eef4ff]
                   outline-none
                   placeholder:text-slate-500
                   disabled:cursor-not-allowed
@@ -870,11 +870,11 @@ export default function HeroContent() {
                     boxShadow:
                       transitioning
                         ? [
-                            "0 12px 34px rgba(45,212,191,.10)",
-                            "0 0 48px rgba(103,232,249,.25)",
-                            "0 12px 34px rgba(45,212,191,.10)",
+                            "0 12px 34px rgba(77,141,255,.10)",
+                            "0 0 48px rgba(161,92,255,.25)",
+                            "0 12px 34px rgba(77,141,255,.10)",
                           ]
-                        : "0 12px 34px rgba(45,212,191,.10)",
+                        : "0 12px 34px rgba(77,141,255,.10)",
                   }}
                   transition={{
                     duration:
@@ -892,12 +892,12 @@ export default function HeroContent() {
                     rounded-[13px]
                     border
                     border-teal-100/[0.16]
-                    bg-[linear-gradient(135deg,#99f6e4_0%,#67e8f9_56%,#7dd3fc_100%)]
+                    bg-[linear-gradient(135deg,#8db2ff_0%,#a15cff_56%,#8db2ff_100%)]
                     px-6 py-3
                     text-[12px]
                     font-extrabold
-                    text-[#062029]
-                    shadow-[0_12px_30px_rgba(45,212,191,.14)]
+                    text-[#04070a]
+                    shadow-[0_12px_30px_rgba(77,141,255,.14)]
                     disabled:cursor-not-allowed
                     disabled:opacity-80
                   "
@@ -1116,7 +1116,7 @@ function Signal({
         gap-2 rounded-full
         border
         border-teal-100/[0.065]
-        bg-[#0a1b26]/42
+        bg-[#0a0f14]/42
         px-3 py-1.5
         text-[10px]
         font-semibold

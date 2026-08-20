@@ -81,8 +81,8 @@ function getCellAccent(
     normalized.includes("lymphocyte")
   ) {
     return {
-      from: "rgba(125,211,252,.12)",
-      via: "rgba(56,189,248,.07)",
+      from: "rgba(141,178,255,.12)",
+      via: "rgba(141,178,255,.07)",
       to: "rgba(8,47,73,.03)",
       text: "text-sky-200",
       border: "border-sky-200/[0.12]",
@@ -113,7 +113,7 @@ function getCellAccent(
   ) {
     return {
       from: "rgba(226,232,240,.10)",
-      via: "rgba(125,211,252,.055)",
+      via: "rgba(141,178,255,.055)",
       to: "rgba(30,41,59,.03)",
       text: "text-slate-100",
       border: "border-slate-200/[0.12]",
@@ -142,8 +142,8 @@ function getCellAccent(
     normalized.includes("stromal")
   ) {
     return {
-      from: "rgba(94,234,212,.13)",
-      via: "rgba(45,212,191,.06)",
+      from: "rgba(77,141,255,.13)",
+      via: "rgba(77,141,255,.06)",
       to: "rgba(4,47,46,.03)",
       text: "text-teal-200",
       border: "border-teal-200/[0.12]",
@@ -157,8 +157,8 @@ function getCellAccent(
     normalized.includes("progenitor")
   ) {
     return {
-      from: "rgba(103,232,249,.12)",
-      via: "rgba(56,189,248,.055)",
+      from: "rgba(161,92,255,.12)",
+      via: "rgba(141,178,255,.055)",
       to: "rgba(8,47,73,.03)",
       text: "text-cyan-200",
       border: "border-cyan-200/[0.12]",
@@ -168,8 +168,8 @@ function getCellAccent(
   }
 
   return {
-    from: "rgba(103,232,249,.11)",
-    via: "rgba(94,234,212,.055)",
+    from: "rgba(161,92,255,.11)",
+    via: "rgba(77,141,255,.055)",
     to: "rgba(8,47,73,.03)",
     text: "text-cyan-200",
     border: "border-cyan-200/[0.11]",
@@ -236,7 +236,7 @@ export default function CellAtlasPanel({
           duration: reduceMotion ? 0 : 0.38,
           ease: [0.16, 1, 0.3, 1],
         }}
-        className="relative overflow-hidden rounded-[24px] border border-teal-100/[0.075] bg-[#0a1b26]/58 p-5 shadow-[0_20px_60px_rgba(1,8,15,.18)] sm:p-6"
+        className="relative overflow-hidden rounded-[24px] border border-teal-100/[0.075] bg-[#0a0f14]/58 p-5 shadow-[0_20px_60px_rgba(1,8,15,.18)] sm:p-6"
       >
         <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-teal-300/[0.045] blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 left-[28%] h-56 w-56 rounded-full bg-sky-300/[0.025] blur-3xl" />
@@ -246,7 +246,7 @@ export default function CellAtlasPanel({
           <div className="max-w-3xl">
             <div className="flex items-center gap-2">
               <motion.span
-                className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.8)]"
                 animate={
                   reduceMotion
                     ? undefined
@@ -271,7 +271,7 @@ export default function CellAtlasPanel({
               </p>
             </div>
 
-            <h3 className="mt-3 max-w-2xl text-[27px] font-semibold tracking-[-0.04em] text-[#f0fbfa] sm:text-[32px]">
+            <h3 className="mt-3 max-w-2xl text-[27px] font-semibold tracking-[-0.04em] text-[#eef4ff] sm:text-[32px]">
               Explore standardized cellular identities.
             </h3>
 
@@ -316,7 +316,7 @@ export default function CellAtlasPanel({
                 }
               }}
               placeholder="Search fibroblast, osteoclast, T cell, endothelial cell..."
-              className="w-full rounded-[15px] border border-teal-100/[0.08] bg-black/[0.12] py-3.5 pl-11 pr-4 text-[13px] font-medium text-slate-100 outline-none transition duration-300 placeholder:text-slate-500 focus:border-teal-200/[0.2] focus:bg-teal-200/[0.025] focus:shadow-[0_0_0_3px_rgba(94,234,212,.03)]"
+              className="w-full rounded-[15px] border border-teal-100/[0.08] bg-black/[0.12] py-3.5 pl-11 pr-4 text-[13px] font-medium text-slate-100 outline-none transition duration-300 placeholder:text-slate-500 focus:border-teal-200/[0.2] focus:bg-teal-200/[0.025] focus:shadow-[0_0_0_3px_rgba(77,141,255,.03)]"
             />
           </div>
 
@@ -327,7 +327,7 @@ export default function CellAtlasPanel({
                 event.target.value as CellOntologyScope,
               )
             }
-            className="rounded-[15px] border border-teal-100/[0.08] bg-[#0b1d28] px-4 py-3.5 text-[12px] font-semibold text-slate-300 outline-none transition focus:border-teal-200/[0.18]"
+            className="rounded-[15px] border border-teal-100/[0.08] bg-[#0d141b] px-4 py-3.5 text-[12px] font-semibold text-slate-300 outline-none transition focus:border-teal-200/[0.18]"
           >
             <option value="cl">
               Cell Ontology
@@ -344,12 +344,12 @@ export default function CellAtlasPanel({
             type="button"
             onClick={() => void runCellSearch()}
             disabled={cellLoading}
-            className="group relative overflow-hidden rounded-[15px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-6 py-3.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#062029] shadow-[0_12px_30px_rgba(45,212,191,.13)] transition duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"
+            className="group relative overflow-hidden rounded-[15px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-6 py-3.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#04070a] shadow-[0_12px_30px_rgba(77,141,255,.13)] transition duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"
           >
             <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
             <span className="relative flex items-center justify-center gap-2">
               {cellLoading && (
-                <span className={`h-3.5 w-3.5 rounded-full border-2 border-[#062029]/20 border-t-[#062029] ${reduceMotion ? "" : "animate-spin"}`} />
+                <span className={`h-3.5 w-3.5 rounded-full border-2 border-[#04070a]/20 border-t-[#04070a] ${reduceMotion ? "" : "animate-spin"}`} />
               )}
 
               {cellLoading
@@ -421,11 +421,11 @@ export default function CellAtlasPanel({
                     preset.query,
                   )
                 }
-                className="group rounded-[16px] border border-teal-100/[0.055] bg-[#0a1b26]/42 p-3.5 text-left transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.025]"
+                className="group rounded-[16px] border border-teal-100/[0.055] bg-[#0a0f14]/42 p-3.5 text-left transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.025]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="flex h-7 w-7 items-center justify-center rounded-[9px] border border-teal-100/[0.055] bg-black/[0.1]">
-                    <span className="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.55)]" />
+                    <span className="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.55)]" />
                   </span>
 
                   <span className="text-[10px] text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-teal-300">
@@ -455,7 +455,7 @@ export default function CellAtlasPanel({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-7 rounded-[22px] border border-dashed border-teal-100/[0.08] bg-[#081722]/42 px-6 py-14 text-center"
+            className="mt-7 rounded-[22px] border border-dashed border-teal-100/[0.08] bg-[#070b10]/42 px-6 py-14 text-center"
           >
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[15px] border border-teal-200/[0.09] bg-teal-200/[0.035] text-xl text-teal-300">
               ◉
@@ -531,7 +531,7 @@ export default function CellAtlasPanel({
                   duration: reduceMotion ? 0 : 0.34,
                 }}
                 whileHover={reduceMotion ? undefined : { y: -4 }}
-                className={`group relative overflow-hidden rounded-[22px] border ${accent.border} bg-[#091a25]/78 p-2.5 shadow-[0_18px_52px_rgba(1,8,15,.22)] backdrop-blur-2xl transition duration-300 ${
+                className={`group relative overflow-hidden rounded-[22px] border ${accent.border} bg-[#0a0f14]/78 p-2.5 shadow-[0_18px_52px_rgba(1,8,15,.22)] backdrop-blur-2xl transition duration-300 ${
                   selected
                     ? "ring-1 ring-teal-200/[0.13]"
                     : ""
@@ -545,7 +545,7 @@ export default function CellAtlasPanel({
                 />
 
                 <div className="relative z-10">
-                  <div className="overflow-hidden rounded-[16px] border border-teal-100/[0.035] bg-[#06141e]/68">
+                  <div className="overflow-hidden rounded-[16px] border border-teal-100/[0.035] bg-[#070b10]/68">
                     <BiologicalArtwork
                       type="cell"
                       label={term.label}
@@ -568,7 +568,7 @@ export default function CellAtlasPanel({
                           </span>
                         </div>
 
-                        <h4 className="mt-2.5 text-[17px] font-semibold leading-[1.28] tracking-[-0.025em] text-[#f0fbfa]">
+                        <h4 className="mt-2.5 text-[17px] font-semibold leading-[1.28] tracking-[-0.025em] text-[#eef4ff]">
                           {term.label}
                         </h4>
                       </div>
@@ -709,7 +709,7 @@ export default function CellAtlasPanel({
                   null,
                 )
               }
-              className="fixed inset-0 z-[130] bg-[#020b12]/60 backdrop-blur-[5px]"
+              className="fixed inset-0 z-[130] bg-[#030507]/60 backdrop-blur-[5px]"
             />
 
             <motion.aside
@@ -740,15 +740,15 @@ export default function CellAtlasPanel({
                   1,
                 ],
               }}
-              className="fixed bottom-0 right-0 top-0 z-[140] flex w-full flex-col overflow-hidden border-l border-teal-100/[0.08] bg-[#081722]/98 shadow-[-30px_0_100px_rgba(1,8,15,.52)] backdrop-blur-3xl sm:w-[560px]"
+              className="fixed bottom-0 right-0 top-0 z-[140] flex w-full flex-col overflow-hidden border-l border-teal-100/[0.08] bg-[#070b10]/98 shadow-[-30px_0_100px_rgba(1,8,15,.52)] backdrop-blur-3xl sm:w-[560px]"
             >
               <div className="relative border-b border-teal-100/[0.065] px-5 py-5 sm:px-6">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[radial-gradient(circle_at_75%_0%,rgba(94,234,212,.05),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[radial-gradient(circle_at_75%_0%,rgba(77,141,255,.05),transparent_60%)]" />
 
                 <div className="relative flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(94,234,212,.7)]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,.7)]" />
 
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">
                         Cell atlas inspector
@@ -775,7 +775,7 @@ export default function CellAtlasPanel({
               </div>
 
               <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-                <div className="overflow-hidden rounded-[18px] border border-teal-100/[0.06] bg-[#06141e]/68">
+                <div className="overflow-hidden rounded-[18px] border border-teal-100/[0.06] bg-[#070b10]/68">
                   <BiologicalArtwork
                     type="cell"
                     label={
@@ -795,7 +795,7 @@ export default function CellAtlasPanel({
                   </span>
                 </div>
 
-                <h2 id="cell-atlas-inspector-title" className="mt-4 text-[29px] font-semibold leading-[1.12] tracking-[-0.045em] text-[#f0fbfa]">
+                <h2 id="cell-atlas-inspector-title" className="mt-4 text-[29px] font-semibold leading-[1.12] tracking-[-0.045em] text-[#eef4ff]">
                   {selectedAtlasTerm.label}
                 </h2>
 
@@ -880,7 +880,7 @@ export default function CellAtlasPanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 border-t border-teal-100/[0.065] bg-[#081722]/95 p-4 sm:px-6">
+              <div className="grid grid-cols-2 gap-2.5 border-t border-teal-100/[0.065] bg-[#070b10]/95 p-4 sm:px-6">
                 <button
                   type="button"
                   onClick={() =>
@@ -908,7 +908,7 @@ export default function CellAtlasPanel({
                       null,
                     );
                   }}
-                  className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-4 py-3 text-[11px] font-extrabold text-[#062029] shadow-[0_10px_26px_rgba(45,212,191,.11)] transition duration-300 hover:-translate-y-0.5"
+                  className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-4 py-3 text-[11px] font-extrabold text-[#04070a] shadow-[0_10px_26px_rgba(77,141,255,.11)] transition duration-300 hover:-translate-y-0.5"
                 >
                   <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
                   <span className="relative">
@@ -980,7 +980,7 @@ function InspectorSection({
   }[tone];
 
   return (
-    <section className="mt-5 rounded-[16px] border border-teal-100/[0.055] bg-[#0a1b26]/44 p-4">
+    <section className="mt-5 rounded-[16px] border border-teal-100/[0.055] bg-[#0a0f14]/44 p-4">
       <p className={`text-[10px] font-bold uppercase tracking-[0.16em] ${toneClass}`}>
         {eyebrow}
       </p>

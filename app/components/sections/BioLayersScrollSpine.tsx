@@ -191,7 +191,7 @@ export default function BioLayersScrollSpine({
           transformOrigin:
             "top",
         }}
-        className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-cyan-300 via-violet-300 via-60% to-fuchsia-300 shadow-[0_0_16px_rgba(103,232,249,.55)]"
+        className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-cyan-300 via-violet-300 via-60% to-fuchsia-300 shadow-[0_0_16px_rgba(161,92,255,.55)]"
       />
 
       {!reduceMotion &&
@@ -229,7 +229,7 @@ export default function BioLayersScrollSpine({
                   particle.delay,
                 ease: "linear",
               }}
-              className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-cyan-200 shadow-[0_0_10px_#67e8f9]"
+              className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-cyan-200 shadow-[0_0_10px_#a15cff]"
               style={{
                 width:
                   particle.size,
@@ -250,9 +250,9 @@ export default function BioLayersScrollSpine({
         }}
         className="absolute left-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2"
       >
-        <div className="absolute inset-0 rounded-full border border-cyan-200/55 shadow-[0_0_18px_#67e8f9,0_0_36px_rgba(139,92,246,.55)]" />
+        <div className="absolute inset-0 rounded-full border border-cyan-200/55 shadow-[0_0_18px_#a15cff,0_0_36px_rgba(161,92,255,.55)]" />
         <div className="absolute inset-[7px] rounded-full border border-violet-300/55" />
-        <div className="absolute inset-[14px] rounded-full bg-white shadow-[0_0_12px_white,0_0_24px_#67e8f9]" />
+        <div className="absolute inset-[14px] rounded-full bg-white shadow-[0_0_12px_white,0_0_24px_#a15cff]" />
 
         <motion.div
           animate={

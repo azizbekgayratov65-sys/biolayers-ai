@@ -2,49 +2,60 @@
 
 /* =========================================================
    BIOLAYERS AI — GLOBAL DESIGN SYSTEM
+   Dark-field fluorescence identity.
+
+   The app is a dark-field microscope: an unlit field, with
+   structures lit only by stain channels. Stains are semantic —
+   evidence classes and mechanism types, never decoration:
+
+     DAPI  blue    structure · selection · primary UI
+     FITC  green   activation · positive · primary CTA
+     RFP   red     inhibition · risk · negative
+     Cy5   violet  transport · processing · citations
+     YFP   amber   hypothesis · simulation · weak evidence
    ========================================================= */
 
 :root {
   color-scheme: dark;
 
-  --background: #06111a;
-  --background-deep: #040d14;
-  --background-elevated: #081722;
-  --background-panel: #0a1b26;
-  --background-panel-strong: #0b202c;
-  --background-soft: #0d2430;
+  --background: #04070a;
+  --background-deep: #030507;
+  --background-elevated: #070b10;
+  --background-panel: #0a0f14;
+  --background-panel-strong: #0d141b;
+  --background-soft: #10161d;
 
-  --foreground: #eaf7f5;
-  --foreground-strong: #f2fbfa;
-  --foreground-muted: #a8bac0;
-  --foreground-subtle: #71868e;
-  --foreground-faint: #53666e;
+  --foreground: #dbe4ea;
+  --foreground-strong: #e8edf2;
+  --foreground-muted: #93a4b0;
+  --foreground-subtle: #64798a;
+  --foreground-faint: #47586a;
 
-  --border: rgba(153, 246, 228, 0.08);
-  --border-soft: rgba(153, 246, 228, 0.055);
-  --border-strong: rgba(153, 246, 228, 0.16);
+  --border: rgba(141, 178, 255, 0.09);
+  --border-soft: rgba(141, 178, 255, 0.06);
+  --border-strong: rgba(141, 178, 255, 0.18);
 
-  --accent: #5eead4;
-  --accent-strong: #99f6e4;
-  --accent-soft: rgba(94, 234, 212, 0.08);
+  --accent: #4d8dff;
+  --accent-strong: #8db2ff;
+  --accent-soft: rgba(77, 141, 255, 0.09);
 
-  --cyan: #67e8f9;
-  --sky: #7dd3fc;
-  --violet: #a5b4fc;
+  --cyan: #a15cff;
+  --sky: #8db2ff;
+  --violet: #a15cff;
 
-  --emerald: #6ee7b7;
-  --amber: #fcd34d;
-  --rose: #fda4af;
-  --orange: #fdba74;
+  --emerald: #2bff88;
+  --amber: #ffc53d;
+  --rose: #ff3b5c;
+  --orange: #ffc53d;
 
   --shadow-panel:
-    0 18px 60px rgba(1, 8, 15, 0.2);
+    0 18px 60px rgba(0, 0, 0, 0.34);
 
   --shadow-floating:
-    0 28px 90px rgba(1, 8, 15, 0.38);
+    0 28px 90px rgba(0, 0, 0, 0.5);
 
   --shadow-accent:
-    0 0 38px rgba(45, 212, 191, 0.075);
+    0 0 38px rgba(77, 141, 255, 0.09);
 
   --radius-sm: 11px;
   --radius-md: 14px;
@@ -53,6 +64,180 @@
   --radius-2xl: 28px;
 
   --section-max: 1450px;
+}
+
+/* =========================================================
+   STAIN PALETTES (Tailwind v4 theme remap)
+   Legacy utilities (teal/sky/cyan/...) re-map onto the
+   fluorophore set so the entire app re-tones coherently.
+   ========================================================= */
+
+@theme {
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), "SFMono-Regular", Consolas,
+    "Liberation Mono", monospace;
+
+  /* DAPI — structural blue */
+  --color-teal-50: #eef4ff;
+  --color-teal-100: #dbe7ff;
+  --color-teal-200: #b7cfff;
+  --color-teal-300: #8db2ff;
+  --color-teal-400: #4d8dff;
+  --color-teal-500: #2f6ef5;
+  --color-teal-600: #1f54d8;
+  --color-teal-700: #1b44ac;
+  --color-teal-800: #193a87;
+  --color-teal-900: #16316d;
+  --color-teal-950: #0d1b3d;
+
+  --color-sky-50: #eef4ff;
+  --color-sky-100: #dbe7ff;
+  --color-sky-200: #b7cfff;
+  --color-sky-300: #8db2ff;
+  --color-sky-400: #4d8dff;
+  --color-sky-500: #2f6ef5;
+  --color-sky-600: #1f54d8;
+  --color-sky-700: #1b44ac;
+  --color-sky-800: #193a87;
+  --color-sky-900: #16316d;
+  --color-sky-950: #0d1b3d;
+
+  --color-indigo-50: #eef4ff;
+  --color-indigo-100: #dbe7ff;
+  --color-indigo-200: #b7cfff;
+  --color-indigo-300: #8db2ff;
+  --color-indigo-400: #4d8dff;
+  --color-indigo-500: #2f6ef5;
+  --color-indigo-600: #1f54d8;
+  --color-indigo-700: #1b44ac;
+  --color-indigo-800: #193a87;
+  --color-indigo-900: #16316d;
+  --color-indigo-950: #0d1b3d;
+
+  /* FITC — activation green */
+  --color-emerald-50: #e7fff0;
+  --color-emerald-100: #c5ffdd;
+  --color-emerald-200: #90ffc0;
+  --color-emerald-300: #57ffa0;
+  --color-emerald-400: #2bff88;
+  --color-emerald-500: #00e46e;
+  --color-emerald-600: #00b85a;
+  --color-emerald-700: #008f49;
+  --color-emerald-800: #006f3c;
+  --color-emerald-900: #005a34;
+  --color-emerald-950: #00331e;
+
+  --color-lime-50: #e7fff0;
+  --color-lime-100: #c5ffdd;
+  --color-lime-200: #90ffc0;
+  --color-lime-300: #57ffa0;
+  --color-lime-400: #2bff88;
+  --color-lime-500: #00e46e;
+  --color-lime-600: #00b85a;
+  --color-lime-700: #008f49;
+  --color-lime-800: #006f3c;
+  --color-lime-900: #005a34;
+  --color-lime-950: #00331e;
+
+  /* Cy5 — transport / processing violet */
+  --color-cyan-50: #f6f1ff;
+  --color-cyan-100: #ecdefe;
+  --color-cyan-200: #d9bdfe;
+  --color-cyan-300: #c095fd;
+  --color-cyan-400: #a15cff;
+  --color-cyan-500: #8c34f7;
+  --color-cyan-600: #771ad9;
+  --color-cyan-700: #6213af;
+  --color-cyan-800: #52128d;
+  --color-cyan-900: #43106d;
+  --color-cyan-950: #280647;
+
+  --color-violet-50: #f6f1ff;
+  --color-violet-100: #ecdefe;
+  --color-violet-200: #d9bdfe;
+  --color-violet-300: #c095fd;
+  --color-violet-400: #a15cff;
+  --color-violet-500: #8c34f7;
+  --color-violet-600: #771ad9;
+  --color-violet-700: #6213af;
+  --color-violet-800: #52128d;
+  --color-violet-900: #43106d;
+  --color-violet-950: #280647;
+
+  --color-fuchsia-50: #f6f1ff;
+  --color-fuchsia-100: #ecdefe;
+  --color-fuchsia-200: #d9bdfe;
+  --color-fuchsia-300: #c095fd;
+  --color-fuchsia-400: #a15cff;
+  --color-fuchsia-500: #8c34f7;
+  --color-fuchsia-600: #771ad9;
+  --color-fuchsia-700: #6213af;
+  --color-fuchsia-800: #52128d;
+  --color-fuchsia-900: #43106d;
+  --color-fuchsia-950: #280647;
+
+  /* RFP — inhibition red */
+  --color-rose-50: #fff1f4;
+  --color-rose-100: #ffdde5;
+  --color-rose-200: #ffc0ce;
+  --color-rose-300: #ff93aa;
+  --color-rose-400: #ff3b5c;
+  --color-rose-500: #f71943;
+  --color-rose-600: #d40938;
+  --color-rose-700: #b10637;
+  --color-rose-800: #930936;
+  --color-rose-900: #7d0a33;
+  --color-rose-950: #460215;
+
+  --color-red-50: #fff1f4;
+  --color-red-100: #ffdde5;
+  --color-red-200: #ffc0ce;
+  --color-red-300: #ff93aa;
+  --color-red-400: #ff3b5c;
+  --color-red-500: #f71943;
+  --color-red-600: #d40938;
+  --color-red-700: #b10637;
+  --color-red-800: #930936;
+  --color-red-900: #7d0a33;
+  --color-red-950: #460215;
+
+  /* YFP — hypothesis amber */
+  --color-amber-50: #fffbea;
+  --color-amber-100: #fff3c5;
+  --color-amber-200: #ffe685;
+  --color-amber-300: #ffd64a;
+  --color-amber-400: #ffc53d;
+  --color-amber-500: #f59f13;
+  --color-amber-600: #d97a09;
+  --color-amber-700: #b45b0c;
+  --color-amber-800: #8f4711;
+  --color-amber-900: #753b11;
+  --color-amber-950: #431d04;
+
+  --color-yellow-50: #fffbea;
+  --color-yellow-100: #fff3c5;
+  --color-yellow-200: #ffe685;
+  --color-yellow-300: #ffd64a;
+  --color-yellow-400: #ffc53d;
+  --color-yellow-500: #f59f13;
+  --color-yellow-600: #d97a09;
+  --color-yellow-700: #b45b0c;
+  --color-yellow-800: #8f4711;
+  --color-yellow-900: #753b11;
+  --color-yellow-950: #431d04;
+
+  --color-orange-50: #fffbea;
+  --color-orange-100: #fff3c5;
+  --color-orange-200: #ffe685;
+  --color-orange-300: #ffd64a;
+  --color-orange-400: #ffc53d;
+  --color-orange-500: #f59f13;
+  --color-orange-600: #d97a09;
+  --color-orange-700: #b45b0c;
+  --color-orange-800: #8f4711;
+  --color-orange-900: #753b11;
+  --color-orange-950: #431d04;
 }
 
 /* =========================================================
@@ -81,27 +266,26 @@ body {
   background:
     radial-gradient(
       circle at 16% -8%,
-      rgba(45, 212, 191, 0.075),
+      rgba(77, 141, 255, 0.06),
       transparent 31%
     ),
     radial-gradient(
       circle at 88% 34%,
-      rgba(56, 189, 248, 0.045),
+      rgba(161, 92, 255, 0.04),
       transparent 30%
     ),
     linear-gradient(
       145deg,
-      #07131f 0%,
-      #081722 46%,
-      #06111a 100%
+      #05080d 0%,
+      #060a10 46%,
+      #04070a 100%
     );
 
   color: var(--foreground);
 
   font-family:
-    var(--font-manrope),
-    var(--font-geist-sans),
-    Inter,
+    var(--font-instrument),
+    var(--font-plex-mono),
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -127,12 +311,12 @@ body::before {
 
   background-image:
     linear-gradient(
-      rgba(153, 246, 228, 0.018) 1px,
+      rgba(141, 178, 255, 0.022) 1px,
       transparent 1px
     ),
     linear-gradient(
       90deg,
-      rgba(153, 246, 228, 0.018) 1px,
+      rgba(141, 178, 255, 0.022) 1px,
       transparent 1px
     );
 
@@ -194,14 +378,14 @@ h6 {
   color: var(--foreground-strong);
 
   font-family:
-    var(--font-manrope),
-    var(--font-geist-sans),
-    ui-sans-serif,
-    system-ui,
-    sans-serif;
+    var(--font-spectral),
+    var(--font-instrument),
+    ui-serif,
+    Georgia,
+    serif;
 
-  font-weight: 650;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 strong,
@@ -215,7 +399,7 @@ kbd,
 samp,
 .font-mono {
   font-family:
-    var(--font-geist-mono),
+    var(--font-plex-mono),
     "SFMono-Regular",
     Consolas,
     "Liberation Mono",
@@ -269,7 +453,7 @@ small {
 }
 
 .text-white {
-  color: #f2fbfa !important;
+  color: #e8edf2 !important;
 }
 
 /* =========================================================
@@ -307,7 +491,7 @@ select {
 }
 
 select option {
-  background: #081722;
+  background: #070b10;
   color: #dce9e9;
 }
 
@@ -325,7 +509,7 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid rgba(94, 234, 212, 0.46);
+  outline: 2px solid rgba(77, 141, 255, 0.5);
   outline-offset: 2px;
 }
 
@@ -334,8 +518,8 @@ select:focus-visible,
    ========================================================= */
 
 ::selection {
-  background: rgba(94, 234, 212, 0.28);
-  color: #f5fffd;
+  background: rgba(77, 141, 255, 0.3);
+  color: #f4f8ff;
 }
 
 /* =========================================================
@@ -345,7 +529,7 @@ select:focus-visible,
 * {
   scrollbar-width: thin;
   scrollbar-color:
-    rgba(94, 234, 212, 0.18)
+    rgba(77, 141, 255, 0.2)
     rgba(255, 255, 255, 0.015);
 }
 
@@ -364,8 +548,8 @@ select:focus-visible,
 
   background:
     linear-gradient(
-      rgba(94, 234, 212, 0.2),
-      rgba(125, 211, 252, 0.13)
+      rgba(77, 141, 255, 0.24),
+      rgba(161, 92, 255, 0.16)
     )
     padding-box;
 }
@@ -373,8 +557,8 @@ select:focus-visible,
 *::-webkit-scrollbar-thumb:hover {
   background:
     linear-gradient(
-      rgba(94, 234, 212, 0.34),
-      rgba(125, 211, 252, 0.22)
+      rgba(77, 141, 255, 0.38),
+      rgba(161, 92, 255, 0.26)
     )
     padding-box;
 }
@@ -390,12 +574,12 @@ select:focus-visible,
   background:
     linear-gradient(
       145deg,
-      rgba(13, 36, 48, 0.78),
-      rgba(7, 24, 35, 0.78)
+      rgba(13, 20, 27, 0.85),
+      rgba(7, 11, 16, 0.85)
     );
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
     var(--shadow-panel);
 
   backdrop-filter: blur(22px);
@@ -408,12 +592,12 @@ select:focus-visible,
   background:
     linear-gradient(
       145deg,
-      rgba(13, 36, 48, 0.9),
-      rgba(7, 24, 35, 0.9)
+      rgba(13, 20, 27, 0.92),
+      rgba(7, 11, 16, 0.92)
     );
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.022),
+    inset 0 1px 0 rgba(255, 255, 255, 0.024),
     var(--shadow-floating);
 
   backdrop-filter: blur(28px);
@@ -429,11 +613,11 @@ select:focus-visible,
 
 .bl-surface-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(153, 246, 228, 0.14);
+  border-color: rgba(141, 178, 255, 0.16);
 
   box-shadow:
-    0 18px 50px rgba(1, 8, 15, 0.24),
-    0 0 28px rgba(45, 212, 191, 0.025);
+    0 18px 50px rgba(0, 0, 0, 0.34),
+    0 0 28px rgba(77, 141, 255, 0.03);
 }
 
 .bl-section-label {
@@ -474,12 +658,12 @@ select:focus-visible,
   background:
     radial-gradient(
       circle at 15% 15%,
-      rgba(45, 212, 191, 0.035),
+      rgba(77, 141, 255, 0.035),
       transparent 30%
     ),
     radial-gradient(
       circle at 85% 30%,
-      rgba(125, 211, 252, 0.025),
+      rgba(161, 92, 255, 0.03),
       transparent 28%
     );
 }
@@ -501,8 +685,8 @@ select:focus-visible,
     linear-gradient(
       90deg,
       transparent,
-      rgba(153, 246, 228, 0.11),
-      rgba(125, 211, 252, 0.08),
+      rgba(141, 178, 255, 0.13),
+      rgba(161, 92, 255, 0.1),
       transparent
     );
 }
@@ -518,7 +702,7 @@ select:focus-visible,
   background:
     linear-gradient(
       to bottom,
-      rgba(94, 234, 212, 0.02),
+      rgba(77, 141, 255, 0.022),
       transparent
     );
 }
@@ -540,8 +724,7 @@ select:focus-visible,
     linear-gradient(
       90deg,
       var(--accent-strong),
-      var(--cyan),
-      var(--sky)
+      var(--violet)
     );
 
   background-clip: text;
@@ -556,21 +739,68 @@ select:focus-visible,
     linear-gradient(
       90deg,
       transparent,
-      rgba(153, 246, 228, 0.16),
+      rgba(141, 178, 255, 0.18),
       transparent
     );
 }
 
 .bl-glow {
   box-shadow:
-    0 0 46px rgba(45, 212, 191, 0.075);
+    0 0 46px rgba(77, 141, 255, 0.09);
 }
 
 .bl-ring {
-  border: 1px solid rgba(153, 246, 228, 0.12);
+  border: 1px solid rgba(141, 178, 255, 0.14);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.012),
-    0 0 28px rgba(45, 212, 191, 0.025);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.014),
+    0 0 28px rgba(77, 141, 255, 0.03);
+}
+
+/* =========================================================
+   INSTRUMENT READOUT LABEL
+   Dark-field metadata: channel, wavelength, objective.
+   Encodes real content — each section is a channel view.
+   ========================================================= */
+
+.bl-readout {
+  font-family:
+    var(--font-plex-mono),
+    monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #64798a;
+}
+
+.bl-readout b {
+  color: #b7cfff;
+  font-weight: 700;
+}
+
+/* =========================================================
+   FOCUS TREATMENT
+   Racking the objective: out-of-focus glow, blur → sharp.
+   ========================================================= */
+
+@keyframes bl-focus {
+  0% {
+    filter: blur(7px) brightness(0.55);
+    opacity: 0.2;
+  }
+
+  60% {
+    filter: blur(2px) brightness(1.08);
+  }
+
+  100% {
+    filter: blur(0) brightness(1);
+    opacity: 1;
+  }
+}
+
+.bl-focus-in {
+  animation: bl-focus 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* =========================================================
@@ -579,8 +809,8 @@ select:focus-visible,
 
 .react-flow {
   font-family:
-    var(--font-manrope),
-    var(--font-geist-sans),
+    var(--font-instrument),
+    var(--font-plex-mono),
     ui-sans-serif,
     system-ui,
     sans-serif;
@@ -612,16 +842,16 @@ select:focus-visible,
 
   border:
     1px solid
-    rgba(153, 246, 228, 0.09) !important;
+    rgba(141, 178, 255, 0.1) !important;
 
   border-radius: 13px !important;
 
   background:
-    rgba(10, 27, 38, 0.88) !important;
+    rgba(10, 15, 20, 0.9) !important;
 
   box-shadow:
     0 14px 42px
-    rgba(1, 8, 15, 0.3) !important;
+    rgba(0, 0, 0, 0.4) !important;
 
   backdrop-filter: blur(18px);
 }
@@ -634,10 +864,10 @@ select:focus-visible,
 
   border-bottom:
     1px solid
-    rgba(153, 246, 228, 0.06) !important;
+    rgba(141, 178, 255, 0.07) !important;
 
   background: transparent !important;
-  color: #a9bbc1 !important;
+  color: #93a4b0 !important;
 
   transition:
     background-color 180ms ease,
@@ -646,9 +876,9 @@ select:focus-visible,
 
 .react-flow__controls-button:hover {
   background:
-    rgba(94, 234, 212, 0.06) !important;
+    rgba(77, 141, 255, 0.07) !important;
 
-  color: #ccfbf1 !important;
+  color: #dbe7ff !important;
 }
 
 .react-flow__controls-button svg {
@@ -681,18 +911,18 @@ input[type="range"] {
 [role="tooltip"] {
   border:
     1px solid
-    rgba(153, 246, 228, 0.08);
+    rgba(141, 178, 255, 0.09);
 
   border-radius: 10px;
 
   background:
-    rgba(8, 23, 34, 0.96);
+    rgba(7, 11, 16, 0.97);
 
-  color: #dbe8e8;
+  color: #dbe7ff;
 
   box-shadow:
     0 12px 34px
-    rgba(1, 8, 15, 0.34);
+    rgba(0, 0, 0, 0.45);
 
   backdrop-filter: blur(18px);
 }
@@ -836,7 +1066,8 @@ canvas {
   .bl-float,
   .bl-pulse-soft,
   .bl-grid-drift,
-  .bl-breathe {
+  .bl-breathe,
+  .bl-focus-in {
     animation: none !important;
   }
 }

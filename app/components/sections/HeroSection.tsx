@@ -14,7 +14,7 @@ const HeroThreeScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(45,212,191,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(125,211,252,.035),transparent_26%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(77,141,255,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(141,178,255,.035),transparent_26%)]" />
     ),
   },
 );
@@ -30,15 +30,49 @@ export default function HeroSection() {
           z-20
           min-h-screen
           overflow-hidden
-          bg-[#01030a]
+          bg-[#030507]
         "
       >
         {/* ================================================= */}
-        {/* 3D BIOLOGICAL ENVIRONMENT                        */}
+        {/* DARK-FIELD SCENE — RACKED INTO FOCUS ON LOAD     */}
         {/* ================================================= */}
 
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bl-focus-in">
           <HeroThreeScene />
+        </div>
+
+        {/* ================================================= */}
+        {/* OBJECTIVE RING READOUT                           */}
+        {/* ================================================= */}
+
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            left-5
+            top-[104px]
+            z-[3]
+            hidden
+            items-center
+            gap-3
+            rounded-full
+            border
+            border-teal-100/[0.08]
+            bg-[#0a0f14]/55
+            px-4
+            py-2
+            backdrop-blur-xl
+            lg:flex
+          "
+        >
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-300/70">
+            CH·DAPI 40× λ405nm
+          </span>
+          <span className="h-1 w-1 rounded-full bg-teal-300" />
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-slate-500">
+            Live field
+          </span>
         </div>
 
         {/* ================================================= */}
@@ -52,7 +86,7 @@ export default function HeroSection() {
             absolute
             inset-0
             z-[1]
-            bg-[linear-gradient(90deg,rgba(1,3,10,.92)_0%,rgba(1,3,10,.68)_30%,rgba(1,3,10,.20)_58%,rgba(1,3,10,.07)_100%)]
+            bg-[linear-gradient(90deg,rgba(3,5,7,.93)_0%,rgba(3,5,7,.72)_30%,rgba(3,5,7,.24)_58%,rgba(3,5,7,.08)_100%)]
           "
         />
 
@@ -71,7 +105,7 @@ export default function HeroSection() {
             h-[420px]
             w-[420px]
             rounded-full
-            bg-teal-300/[0.025]
+            bg-teal-300/[0.03]
             blur-[100px]
           "
         />

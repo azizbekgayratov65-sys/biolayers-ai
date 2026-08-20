@@ -50,10 +50,10 @@ const definitions: EvidenceDefinition[] = [
     code: "E4",
     description:
       "High-confidence relationships or connections supported by broad literature coverage.",
-    color: "#6ee7b7",
-    border: "rgba(110,231,183,.16)",
-    background: "rgba(110,231,183,.035)",
-    softGlow: "rgba(110,231,183,.10)",
+    color: "#2bff88",
+    border: "rgba(43,255,136,.16)",
+    background: "rgba(43,255,136,.035)",
+    softGlow: "rgba(43,255,136,.10)",
   },
   {
     id: "supported",
@@ -61,10 +61,10 @@ const definitions: EvidenceDefinition[] = [
     code: "E3",
     description:
       "Well-supported relationships with strong but not maximal evidence.",
-    color: "#67e8f9",
-    border: "rgba(103,232,249,.16)",
-    background: "rgba(103,232,249,.035)",
-    softGlow: "rgba(103,232,249,.10)",
+    color: "#8db2ff",
+    border: "rgba(141,178,255,.16)",
+    background: "rgba(141,178,255,.035)",
+    softGlow: "rgba(141,178,255,.10)",
   },
   {
     id: "emerging",
@@ -72,10 +72,10 @@ const definitions: EvidenceDefinition[] = [
     code: "E2",
     description:
       "Relationships with moderate support that may represent developing biological evidence.",
-    color: "#fcd34d",
-    border: "rgba(252,211,77,.16)",
-    background: "rgba(252,211,77,.035)",
-    softGlow: "rgba(252,211,77,.10)",
+    color: "#ffc53d",
+    border: "rgba(255,197,61,.16)",
+    background: "rgba(255,197,61,.035)",
+    softGlow: "rgba(255,197,61,.10)",
   },
   {
     id: "hypothesis",
@@ -83,10 +83,10 @@ const definitions: EvidenceDefinition[] = [
     code: "E1",
     description:
       "Low-confidence or exploratory relationships that should be interpreted cautiously.",
-    color: "#fda4af",
-    border: "rgba(253,164,175,.16)",
-    background: "rgba(253,164,175,.035)",
-    softGlow: "rgba(253,164,175,.10)",
+    color: "#a15cff",
+    border: "rgba(161,92,255,.16)",
+    background: "rgba(161,92,255,.035)",
+    softGlow: "rgba(161,92,255,.10)",
   },
 ];
 
@@ -169,7 +169,7 @@ export default function EvidenceLensPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[64] bg-[#020b12]/58 backdrop-blur-[5px]"
+            className="absolute inset-0 z-[64] bg-[#030507]/58 backdrop-blur-[5px]"
           />
 
           <motion.section
@@ -195,7 +195,7 @@ export default function EvidenceLensPanel({
               duration: 0.34,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="absolute bottom-5 right-5 top-5 z-[66] flex w-[min(520px,calc(100vw-40px))] flex-col overflow-hidden rounded-[24px] border border-teal-100/[0.08] bg-[#081722]/97 shadow-[0_30px_120px_rgba(1,8,15,.56)] backdrop-blur-3xl"
+            className="absolute bottom-5 right-5 top-5 z-[66] flex w-[min(520px,calc(100vw-40px))] flex-col overflow-hidden rounded-[24px] border border-teal-100/[0.08] bg-[#070b10]/97 shadow-[0_30px_120px_rgba(1,8,15,.56)] backdrop-blur-3xl"
           >
             <header className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-6">
               <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-teal-300/[0.04] blur-3xl" />
@@ -206,7 +206,7 @@ export default function EvidenceLensPanel({
                 <div>
                   <div className="flex items-center gap-2">
                     <motion.span
-                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.8)]"
                       animate={{
                         opacity: [0.55, 1, 0.55],
                         scale: [1, 1.22, 1],
@@ -223,7 +223,7 @@ export default function EvidenceLensPanel({
                     </p>
                   </div>
 
-                  <h2 className="mt-3 text-[25px] font-semibold tracking-[-0.038em] text-[#f0fbfa]">
+                  <h2 className="mt-3 text-[25px] font-semibold tracking-[-0.038em] text-[#eef4ff]">
                     Evidence Lens
                   </h2>
 
@@ -248,7 +248,7 @@ export default function EvidenceLensPanel({
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-[18px] border border-teal-100/[0.06] bg-[#0a1b26]/48 p-4"
+                className="rounded-[18px] border border-teal-100/[0.06] bg-[#0a0f14]/48 p-4"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -275,7 +275,7 @@ export default function EvidenceLensPanel({
                   <MiniMetric
                     label="E3"
                     value={counts.supported}
-                    color="#67e8f9"
+                    color="#a15cff"
                   />
                   <MiniMetric
                     label="E2"

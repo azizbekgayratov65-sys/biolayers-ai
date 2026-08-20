@@ -60,8 +60,8 @@ function getRelationshipVisual(
     normalized.includes("block")
   ) {
     return {
-      color: "#fb7185",
-      secondary: "#fecdd3",
+      color: "#ff3b5c",
+      secondary: "#ff93aa",
       particle: "signal",
       dash: "5 10",
       semantic: "inhibition",
@@ -79,8 +79,8 @@ function getRelationshipVisual(
     normalized.includes("produce")
   ) {
     return {
-      color: "#c084fc",
-      secondary: "#f0abfc",
+      color: "#a15cff",
+      secondary: "#c095fd",
       particle: "molecule",
       dash: "3 9",
       semantic: "transport",
@@ -97,8 +97,8 @@ function getRelationshipVisual(
     normalized.includes("infiltrat")
   ) {
     return {
-      color: "#2dd4bf",
-      secondary: "#99f6e4",
+      color: "#ffc53d",
+      secondary: "#ffd64a",
       particle: "cell",
       dash: "8 12",
       semantic: "movement",
@@ -114,8 +114,8 @@ function getRelationshipVisual(
     normalized.includes("spread")
   ) {
     return {
-      color: "#fb7185",
-      secondary: "#f9a8d4",
+      color: "#ff3b5c",
+      secondary: "#ffc0ce",
       particle: "cell",
       dash: "6 11",
       semantic: "metastasis",
@@ -133,8 +133,8 @@ function getRelationshipVisual(
     normalized.includes("increase")
   ) {
     return {
-      color: "#5eead4",
-      secondary: "#cffafe",
+      color: "#2bff88",
+      secondary: "#90ffc0",
       particle: "signal",
       dash: "2 10",
       semantic: "activation",
@@ -150,8 +150,8 @@ function getRelationshipVisual(
     normalized.includes("remodel")
   ) {
     return {
-      color: "#7dd3fc",
-      secondary: "#dbeafe",
+      color: "#4d8dff",
+      secondary: "#8db2ff",
       particle: "signal",
       dash: "4 10",
       semantic: "regulation",
@@ -163,8 +163,8 @@ function getRelationshipVisual(
      ======================================================= */
 
   return {
-    color: "#7dd3fc",
-    secondary: "#c7d2fe",
+    color: "#8db2ff",
+    secondary: "#b7cfff",
     particle: "none",
     dash: "4 10",
     semantic: "association",
@@ -548,7 +548,7 @@ export default memo(function BiologicalEdge({
           filter:
             active
               ? `drop-shadow(0 0 8px ${relationship.color})`
-              : "drop-shadow(0 0 3px rgba(94,234,212,.14))",
+              : "drop-shadow(0 0 3px rgba(77,141,255,.14))",
         }}
       />
 
@@ -796,7 +796,7 @@ export default memo(function BiologicalEdge({
               min-w-[128px]
               rounded-[14px]
               border
-              bg-[#0a1b26]/96
+              bg-[#0a0f14]/96
               px-3.5
               py-2.5
               backdrop-blur-xl

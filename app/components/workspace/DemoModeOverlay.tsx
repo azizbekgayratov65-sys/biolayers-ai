@@ -105,7 +105,7 @@ export default function DemoModeOverlay({
                             className={`rounded-[15px] px-2 py-3 text-[8px] font-bold uppercase tracking-[0.1em] transition sm:text-[10px] ${
                               demoScene ===
                               scene
-                                ? "bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 text-slate-950"
+                                ? "bg-gradient-to-r from-[#57ffa0] via-[#4d8dff] to-[#a15cff] text-slate-950"
                                 : "text-slate-500 hover:bg-white/[0.05] hover:text-white"
                             }`}
                           >

@@ -76,11 +76,11 @@ const miniMapColors: Record<
   EntityType,
   string
 > = {
-  cell: "#5eead4",
-  protein: "#67e8f9",
+  cell: "#4d8dff",
+  protein: "#a15cff",
   gene: "#6ee7b7",
   pathway: "#fcd34d",
-  process: "#7dd3fc",
+  process: "#8db2ff",
   disease: "#fda4af",
   drug: "#fdba74",
 };
@@ -103,7 +103,7 @@ export default function WorkspaceCanvas({
         h-full
         w-full
         overflow-hidden
-        bg-[#07151f]
+        bg-[#05080d]
       "
     >
       {/* ================================================= */}
@@ -117,7 +117,7 @@ export default function WorkspaceCanvas({
           absolute
           inset-0
           z-[0]
-          bg-[radial-gradient(circle_at_52%_44%,rgba(94,234,212,.04),transparent_35%)]
+          bg-[radial-gradient(circle_at_52%_44%,rgba(77,141,255,.04),transparent_35%)]
         "
       />
 
@@ -130,7 +130,7 @@ export default function WorkspaceCanvas({
           z-[0]
           opacity-[0.28]
           [mask-image:linear-gradient(to_bottom,black,transparent_88%)]
-          bg-[linear-gradient(rgba(153,246,228,.015)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.015)_1px,transparent_1px)]
+          bg-[linear-gradient(rgba(141,178,255,.015)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,.015)_1px,transparent_1px)]
           bg-[size:96px_96px]
         "
       />
@@ -203,7 +203,7 @@ export default function WorkspaceCanvas({
           markerEnd: {
             type:
               MarkerType.ArrowClosed,
-            color: "#7dd3fc",
+            color: "#8db2ff",
             width: 16,
             height: 16,
           },
@@ -220,7 +220,7 @@ export default function WorkspaceCanvas({
         <Background
           gap={42}
           size={1}
-          color="rgba(153,246,228,.095)"
+          color="rgba(141,178,255,.095)"
         />
 
         {/* ================================================= */}
@@ -252,7 +252,7 @@ export default function WorkspaceCanvas({
               "rgba(10,27,38,.90)",
 
             border:
-              "1px solid rgba(153,246,228,.10)",
+              "1px solid rgba(141,178,255,.10)",
 
             borderRadius: 16,
 
@@ -281,7 +281,7 @@ export default function WorkspaceCanvas({
             borderRadius: 13,
 
             border:
-              "1px solid rgba(153,246,228,.10)",
+              "1px solid rgba(141,178,255,.10)",
 
             background:
               "rgba(10,27,38,.92)",

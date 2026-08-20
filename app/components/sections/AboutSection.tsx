@@ -57,7 +57,7 @@ export default function AboutSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.05]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         sm:px-10
@@ -77,7 +77,7 @@ export default function AboutSection() {
           absolute
           inset-0
           -z-30
-          bg-[#06111a]
+          bg-[#04070a]
         "
       />
 
@@ -176,8 +176,8 @@ export default function AboutSection() {
         "
         style={{
           backgroundImage: `
-            linear-gradient(rgba(94,234,212,.14) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(125,211,252,.10) 1px, transparent 1px)
+            linear-gradient(rgba(77,141,255,.14) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(141,178,255,.10) 1px, transparent 1px)
           `,
           backgroundSize: "80px 80px",
         }}
@@ -245,7 +245,7 @@ export default function AboutSection() {
                   w-1.5
                   rounded-full
                   bg-teal-300
-                  shadow-[0_0_12px_rgba(94,234,212,.60)]
+                  shadow-[0_0_12px_rgba(77,141,255,.60)]
                 "
               />
 
@@ -460,7 +460,7 @@ export default function AboutSection() {
                   rounded-[26px]
                   border
                   border-teal-100/[0.065]
-                  bg-[#0a1b26]/44
+                  bg-[#0a0f14]/44
                   p-6
                   backdrop-blur-2xl
                   transition-colors
@@ -633,7 +633,7 @@ export default function AboutSection() {
             rounded-[28px]
             border
             border-teal-100/[0.07]
-            bg-[#0a1b26]/44
+            bg-[#0a0f14]/44
             px-6
             py-12
             backdrop-blur-2xl

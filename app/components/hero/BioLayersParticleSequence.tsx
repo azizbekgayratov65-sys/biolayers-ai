@@ -384,7 +384,7 @@ function drawCore(
     );
     gradient.addColorStop(
       0.72,
-      "rgba(139,92,246,.09)",
+      "rgba(161,92,255,.09)",
     );
     gradient.addColorStop(
       1,
@@ -408,11 +408,11 @@ function drawCore(
     ctx.globalCompositeOperation =
       "lighter";
     ctx.strokeStyle =
-      "rgba(103,232,249,.55)";
+      "rgba(161,92,255,.55)";
     ctx.lineWidth = 1.2;
     ctx.shadowBlur = 32;
     ctx.shadowColor =
-      "rgba(103,232,249,.85)";
+      "rgba(161,92,255,.85)";
     ctx.beginPath();
     ctx.ellipse(
       cx,
@@ -814,7 +814,7 @@ export default function BioLayersParticleSequence() {
               : 0.7;
           ctx.shadowBlur = 18;
           ctx.shadowColor =
-            "rgba(103,232,249,.65)";
+            "rgba(161,92,255,.65)";
 
           ctx.beginPath();
           ctx.moveTo(
@@ -878,9 +878,9 @@ export default function BioLayersParticleSequence() {
         className="absolute inset-0 h-full w-full opacity-95"
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,#01030a_0%,rgba(1,3,10,.94)_28%,rgba(1,3,10,.46)_54%,rgba(1,3,10,.08)_78%,rgba(1,3,10,.3)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,#030507_0%,rgba(1,3,10,.94)_28%,rgba(1,3,10,.46)_54%,rgba(1,3,10,.08)_78%,rgba(1,3,10,.3)_100%)]" />
 
-      <div className="absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-[#01030a] via-[#01030a]/65 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-[#030507] via-[#030507]/65 to-transparent" />
     </div>
   );
 }

@@ -48,11 +48,11 @@ type Palette = readonly [
 ];
 
 const PALETTES: readonly Palette[] = [
-  ["#5EEAD4", "#67E8F9", "#A7F3D0"],
-  ["#99F6E4", "#7DD3FC", "#E2FDF8"],
-  ["#67E8F9", "#A5B4FC", "#C4B5FD"],
-  ["#2DD4BF", "#7DD3FC", "#F8FAFC"],
-  ["#99F6E4", "#E6FFFB", "#A5B4FC"],
+  ["#4D8DFF", "#8DB2FF", "#C095FD"],
+  ["#2BFF88", "#57FFA0", "#E7FFF0"],
+  ["#FF3B5C", "#FF93AA", "#FFF1F4"],
+  ["#FFC53D", "#FFD64A", "#FFF3C5"],
+  ["#8DB2FF", "#E8EDF2", "#A15CFF"],
 ];
 
 function random(
@@ -1874,7 +1874,7 @@ function PostFX() {
 export default function HeroThreeScene() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(45,212,191,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(125,211,252,.035),transparent_26%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(77,141,255,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(141,178,255,.035),transparent_26%)]" />
 
       <Canvas
         camera={{
@@ -1927,7 +1927,7 @@ export default function HeroThreeScene() {
         <PostFX />
       </Canvas>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_48%,transparent_0%,rgba(6,17,26,.03)_42%,rgba(6,17,26,.52)_80%,#06111a_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_48%,transparent_0%,rgba(6,17,26,.03)_42%,rgba(6,17,26,.52)_80%,#04070a_100%)]" />
     </div>
   );
 }

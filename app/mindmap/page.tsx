@@ -319,7 +319,7 @@ export default function MindMapPage() {
           top-0
           z-0
           h-[520px]
-          bg-[radial-gradient(ellipse_at_top,rgba(94,234,212,.07),transparent_62%)]
+          bg-[radial-gradient(ellipse_at_top,rgba(77,141,255,.07),transparent_62%)]
         "
       />
 
@@ -418,7 +418,7 @@ export default function MindMapPage() {
 
             {phase === "loading" && (
               <div className="mx-auto mt-6 max-w-2xl">
-                <div className="overflow-hidden rounded-2xl border border-teal-100/[0.07] bg-[#0a1b26]/70">
+                <div className="overflow-hidden rounded-2xl border border-teal-100/[0.07] bg-[#0a0f14]/70">
                   <div className="flex items-center gap-2.5 border-b border-teal-100/[0.06] px-5 py-3.5">
                     <FileText className="h-4 w-4 shrink-0 text-teal-300/80" />
                     <span className="max-w-[260px] truncate text-xs font-semibold text-slate-200">
@@ -521,7 +521,7 @@ function CapacityCard({
         rounded-2xl
         border
         border-teal-100/[0.07]
-        bg-[#0a1b26]/70
+        bg-[#0a0f14]/70
         px-4
         py-3
         text-center

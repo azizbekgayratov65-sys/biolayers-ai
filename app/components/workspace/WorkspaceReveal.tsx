@@ -30,7 +30,7 @@ const ANALYSIS_STEPS: AnalysisStep[] = [
     label: "Reading research paragraph",
     description:
       "Parsing terminology and scientific context.",
-    accent: "#67e8f9",
+    accent: "#a15cff",
   },
   {
     label: "Extracting biological entities",
@@ -327,10 +327,10 @@ export default function WorkspaceReveal({
           1,
         ],
       }}
-      className="fixed inset-0 z-[200] overflow-hidden bg-[#01030a]"
+      className="fixed inset-0 z-[200] overflow-hidden bg-[#030507]"
     >
       {/* Space / lab background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_46%,rgba(34,211,238,.09),transparent_28%),radial-gradient(circle_at_72%_30%,rgba(139,92,246,.12),transparent_33%),radial-gradient(circle_at_25%_74%,rgba(236,72,153,.09),transparent_30%),linear-gradient(180deg,#01030a_0%,#030712_60%,#01030a_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_46%,rgba(34,211,238,.09),transparent_28%),radial-gradient(circle_at_72%_30%,rgba(161,92,255,.12),transparent_33%),radial-gradient(circle_at_25%_74%,rgba(236,72,153,.09),transparent_30%),linear-gradient(180deg,#030507_0%,#030712_60%,#030507_100%)]" />
 
       <motion.div
         animate={
@@ -400,7 +400,7 @@ export default function WorkspaceReveal({
             repeat: Infinity,
             ease: "linear",
           }}
-          className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_26px_rgba(103,232,249,.85)]"
+          className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_26px_rgba(161,92,255,.85)]"
         />
       )}
 
@@ -430,7 +430,7 @@ export default function WorkspaceReveal({
               transition={{
                 duration: 0.55,
               }}
-              className="relative w-full max-w-[480px] overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#07111f]/72 p-6 shadow-[0_28px_100px_rgba(0,0,0,.38)] backdrop-blur-xl"
+              className="relative w-full max-w-[480px] overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0a0f14]/72 p-6 shadow-[0_28px_100px_rgba(0,0,0,.38)] backdrop-blur-xl"
               style={{
                 transformStyle:
                   "preserve-3d",
@@ -551,7 +551,7 @@ export default function WorkspaceReveal({
                               index %
                                 3 ===
                               0
-                                ? "#67e8f9"
+                                ? "#a15cff"
                                 : index %
                                       3 ===
                                     1
@@ -656,7 +656,7 @@ export default function WorkspaceReveal({
                       width: `${length}%`,
                       transform: `rotate(${angle}deg)`,
                       boxShadow:
-                        "0 0 14px rgba(103,232,249,.28)",
+                        "0 0 14px rgba(161,92,255,.28)",
                     }}
                   >
                     {!reduceMotion && (
@@ -676,7 +676,7 @@ export default function WorkspaceReveal({
                             Infinity,
                           ease: "linear",
                         }}
-                        className="absolute -top-[2px] h-1 w-6 rounded-full bg-white shadow-[0_0_12px_white,0_0_18px_#67e8f9]"
+                        className="absolute -top-[2px] h-1 w-6 rounded-full bg-white shadow-[0_0_12px_white,0_0_18px_#a15cff]"
                       />
                     )}
                   </motion.div>
@@ -748,7 +748,7 @@ export default function WorkspaceReveal({
                         Infinity,
                       ease: "easeInOut",
                     }}
-                    className="flex min-w-[104px] items-center gap-2 rounded-[15px] border border-white/[0.12] bg-[#07111f]/90 px-3 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.34)] backdrop-blur-xl"
+                    className="flex min-w-[104px] items-center gap-2 rounded-[15px] border border-white/[0.12] bg-[#0a0f14]/90 px-3 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.34)] backdrop-blur-xl"
                   >
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -757,7 +757,7 @@ export default function WorkspaceReveal({
                           index %
                             3 ===
                           0
-                            ? "#67e8f9"
+                            ? "#a15cff"
                             : index %
                                   3 ===
                                 1
@@ -838,7 +838,7 @@ export default function WorkspaceReveal({
               className="absolute inset-3 rounded-full border border-violet-300/35"
             />
 
-            <div className="h-8 w-8 rounded-full bg-white shadow-[0_0_22px_white,0_0_54px_#67e8f9,0_0_90px_#8b5cf6]" />
+            <div className="h-8 w-8 rounded-full bg-white shadow-[0_0_22px_white,0_0_54px_#a15cff,0_0_90px_#8b5cf6]" />
           </motion.div>
 
           {/* Evidence badges */}
@@ -889,7 +889,7 @@ export default function WorkspaceReveal({
                 opacity: 1,
                 y: 0,
               }}
-              className="absolute inset-x-0 top-0 h-14 border-b border-white/[0.07] bg-[#050814]/68 backdrop-blur-xl"
+              className="absolute inset-x-0 top-0 h-14 border-b border-white/[0.07] bg-[#070b10]/68 backdrop-blur-xl"
             />
 
             <motion.div
@@ -901,7 +901,7 @@ export default function WorkspaceReveal({
                 opacity: 1,
                 x: 0,
               }}
-              className="absolute bottom-0 left-0 top-14 hidden w-20 border-r border-white/[0.07] bg-[#050814]/54 lg:block"
+              className="absolute bottom-0 left-0 top-14 hidden w-20 border-r border-white/[0.07] bg-[#070b10]/54 lg:block"
             />
 
             <motion.div
@@ -913,7 +913,7 @@ export default function WorkspaceReveal({
                 opacity: 1,
                 x: 0,
               }}
-              className="absolute bottom-0 right-0 top-14 hidden w-20 border-l border-white/[0.07] bg-[#050814]/54 lg:block"
+              className="absolute bottom-0 right-0 top-14 hidden w-20 border-l border-white/[0.07] bg-[#070b10]/54 lg:block"
             />
 
             <motion.div
@@ -937,7 +937,7 @@ export default function WorkspaceReveal({
                 duration: 0.8,
                 ease: "easeOut",
               }}
-              className="absolute left-1/2 top-1/2 h-[48vmin] w-[48vmin] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/45 shadow-[0_0_80px_rgba(103,232,249,.35)]"
+              className="absolute left-1/2 top-1/2 h-[48vmin] w-[48vmin] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/45 shadow-[0_0_80px_rgba(161,92,255,.35)]"
             />
           </>
         )}
@@ -945,7 +945,7 @@ export default function WorkspaceReveal({
 
       {/* Status UI */}
       <div className="absolute inset-x-0 bottom-7 z-20 px-6">
-        <div className="mx-auto max-w-3xl rounded-[22px] border border-white/[0.08] bg-[#050814]/66 p-4 shadow-[0_22px_70px_rgba(0,0,0,.3)] backdrop-blur-xl">
+        <div className="mx-auto max-w-3xl rounded-[22px] border border-white/[0.08] bg-[#070b10]/66 p-4 shadow-[0_22px_70px_rgba(0,0,0,.3)] backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[8px] font-bold uppercase tracking-[0.22em] text-cyan-300">
@@ -1022,7 +1022,7 @@ export default function WorkspaceReveal({
                 duration: 0.08,
                 ease: "linear",
               }}
-              className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 shadow-[0_0_18px_rgba(103,232,249,.7)]"
+              className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 shadow-[0_0_18px_rgba(161,92,255,.7)]"
             />
           </div>
 
@@ -1067,7 +1067,7 @@ export default function WorkspaceReveal({
                       }}
                       className={`mx-auto h-2 w-2 rounded-full border ${
                         completed
-                          ? "border-cyan-300 bg-cyan-300 shadow-[0_0_12px_#22d3ee]"
+                          ? "border-cyan-300 bg-cyan-300 shadow-[0_0_12px_#a15cff]"
                           : isActive
                             ? "border-white bg-white shadow-[0_0_15px_white,0_0_24px_#8b5cf6]"
                             : "border-white/15 bg-white/[0.03]"

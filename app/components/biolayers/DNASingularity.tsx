@@ -1533,7 +1533,7 @@ export default function DNASingularity() {
             from-cyan-200/10
             via-violet-100/80
             to-transparent
-            shadow-[0_0_14px_rgba(237,233,254,.85),0_0_48px_rgba(139,92,246,.55)]
+            shadow-[0_0_14px_rgba(237,233,254,.85),0_0_48px_rgba(161,92,255,.55)]
           "
         />
 
@@ -1658,7 +1658,7 @@ export default function DNASingularity() {
             absolute
             inset-0
             z-30
-            bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,.6)_0%,rgba(221,214,254,.18)_10%,rgba(139,92,246,.06)_28%,transparent_60%)]
+            bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,.6)_0%,rgba(221,214,254,.18)_10%,rgba(161,92,255,.06)_28%,transparent_60%)]
           "
         />
 

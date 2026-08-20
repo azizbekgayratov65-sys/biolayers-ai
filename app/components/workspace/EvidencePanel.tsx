@@ -174,14 +174,14 @@ export default function EvidencePanel({
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.05fr_.95fr]">
-        <section className="rounded-[24px] border border-teal-100/[0.07] bg-[#0a1b26]/52 p-5 shadow-[0_18px_52px_rgba(1,8,15,.12)] sm:p-6">
+        <section className="rounded-[24px] border border-teal-100/[0.07] bg-[#0a0f14]/52 p-5 shadow-[0_18px_52px_rgba(1,8,15,.12)] sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-teal-300">
                 Mechanistic network
               </p>
 
-              <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.025em] text-[#f0fbfa]">
+              <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.025em] text-[#eef4ff]">
                 Connected biological entities
               </h3>
             </div>
@@ -263,7 +263,7 @@ export default function EvidencePanel({
             Scientific interpretation
           </p>
 
-          <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.025em] text-[#f0fbfa]">
+          <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.025em] text-[#eef4ff]">
             Biological context
           </h3>
 
@@ -359,7 +359,7 @@ export default function EvidencePanel({
           <button
             type="button"
             onClick={showPubMed}
-            className="group relative mt-5 w-full overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-4 py-3 text-[11px] font-extrabold text-[#062029] shadow-[0_10px_28px_rgba(45,212,191,.12)] transition duration-300 hover:-translate-y-0.5"
+            className="group relative mt-5 w-full overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-4 py-3 text-[11px] font-extrabold text-[#04070a] shadow-[0_10px_28px_rgba(77,141,255,.12)] transition duration-300 hover:-translate-y-0.5"
           >
             <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
             <span className="relative">
@@ -386,13 +386,13 @@ function EvidenceMetricCard({
   return (
     <motion.div
       whileHover={reduceMotion ? undefined : { y: -3 }}
-      className="rounded-[18px] border border-teal-100/[0.06] bg-[#0a1b26]/45 p-4 transition duration-300 hover:border-teal-200/[0.11] hover:bg-teal-200/[0.02]"
+      className="rounded-[18px] border border-teal-100/[0.06] bg-[#0a0f14]/45 p-4 transition duration-300 hover:border-teal-200/[0.11] hover:bg-teal-200/[0.02]"
     >
       <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500">
         {eyebrow}
       </p>
 
-      <p className="mt-2 truncate text-[20px] font-semibold capitalize tracking-[-0.03em] text-[#f0fbfa]">
+      <p className="mt-2 truncate text-[20px] font-semibold capitalize tracking-[-0.03em] text-[#eef4ff]">
         {value}
       </p>
 

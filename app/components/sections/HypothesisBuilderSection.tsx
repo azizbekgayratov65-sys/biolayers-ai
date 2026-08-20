@@ -50,7 +50,7 @@ export default function HypothesisBuilderSection() {
     overflow-hidden
     border-t
     border-teal-100/[0.04]
-    bg-[#06111a]
+    bg-[#04070a]
     px-6
     py-28
     md:px-10
@@ -190,7 +190,7 @@ export default function HypothesisBuilderSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#0a1b26]/48
+              bg-[#0a0f14]/48
               p-6
               backdrop-blur-2xl
               md:p-8
@@ -408,7 +408,7 @@ export default function HypothesisBuilderSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#0a1b26]/48
+              bg-[#0a0f14]/48
               backdrop-blur-2xl
             "
           >

@@ -174,7 +174,7 @@ export default memo(function EntityNode({
           background:
             theme.accent,
           border:
-            "3px solid #081722",
+            "3px solid #070b10",
           boxShadow: `0 0 16px ${theme.glow}`,
           zIndex: 40,
         }}
@@ -200,7 +200,7 @@ export default memo(function EntityNode({
           }}
         />
 
-        <div className="relative overflow-hidden rounded-[20px] border border-white/[0.045] bg-[#06141e]/72">
+        <div className="relative overflow-hidden rounded-[20px] border border-white/[0.045] bg-[#070b10]/72">
           <BiologicalArtwork
             type={data.type}
             label={data.label}
@@ -310,7 +310,7 @@ export default memo(function EntityNode({
           background:
             theme.secondary,
           border:
-            "3px solid #081722",
+            "3px solid #070b10",
           boxShadow: `0 0 16px ${theme.glow}`,
           zIndex: 40,
         }}

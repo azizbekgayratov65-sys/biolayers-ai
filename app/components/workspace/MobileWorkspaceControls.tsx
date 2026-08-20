@@ -93,7 +93,7 @@ export default function MobileWorkspaceControls({
           rounded-[18px]
           border
           border-teal-100/[0.09]
-          bg-[#081722]/94
+          bg-[#070b10]/94
           p-1.5
           shadow-[0_20px_60px_rgba(1,8,15,.44)]
           backdrop-blur-2xl
@@ -160,7 +160,7 @@ export default function MobileWorkspaceControls({
                       rounded-[12px]
                       border
                       border-teal-200/[0.13]
-                      bg-[linear-gradient(145deg,rgba(45,212,191,.12),rgba(56,189,248,.05))]
+                      bg-[linear-gradient(145deg,rgba(77,141,255,.12),rgba(141,178,255,.05))]
                       shadow-[0_7px_20px_rgba(13,148,136,.08)]
                     "
                   />
@@ -211,7 +211,7 @@ export default function MobileWorkspaceControls({
           rounded-[18px]
           border
           border-teal-100/[0.09]
-          bg-[#081722]/94
+          bg-[#070b10]/94
           px-4
           py-3
           shadow-[0_20px_60px_rgba(1,8,15,.44)]

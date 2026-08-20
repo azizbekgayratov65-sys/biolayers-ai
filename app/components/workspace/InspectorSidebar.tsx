@@ -70,9 +70,9 @@ export default function InspectorSidebar({
     );
 
   return (
-    <aside className="relative hidden overflow-y-auto border-l border-teal-100/[0.075] bg-[#081722]/82 px-4 py-4 shadow-[-20px_0_55px_rgba(2,8,15,.09)] backdrop-blur-[28px] lg:block">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_70%_0%,rgba(56,189,248,.065),transparent_64%)]" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 bg-[radial-gradient(circle,rgba(45,212,191,.035),transparent_70%)]" />
+    <aside className="relative hidden overflow-y-auto border-l border-teal-100/[0.075] bg-[#070b10]/82 px-4 py-4 shadow-[-20px_0_55px_rgba(2,8,15,.09)] backdrop-blur-[28px] lg:block">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_70%_0%,rgba(141,178,255,.065),transparent_64%)]" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 bg-[radial-gradient(circle,rgba(77,141,255,.035),transparent_70%)]" />
 
       <div className="relative">
         <div className="flex items-start justify-between gap-3 border-b border-teal-100/[0.06] pb-3.5">
@@ -94,8 +94,8 @@ export default function InspectorSidebar({
             <motion.span
               className={`h-1.5 w-1.5 rounded-full ${
                 inspectingEdge
-                  ? "bg-sky-300 shadow-[0_0_8px_rgba(125,211,252,.75)]"
-                  : "bg-teal-300 shadow-[0_0_8px_rgba(94,234,212,.75)]"
+                  ? "bg-sky-300 shadow-[0_0_8px_rgba(141,178,255,.75)]"
+                  : "bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,.75)]"
               }`}
               animate={{
                 opacity: [0.65, 1, 0.65],

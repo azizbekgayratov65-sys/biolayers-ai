@@ -901,7 +901,7 @@ drug: true,
               : 0.22,
           filter:
             pathActive && onMechanisticPath
-              ? "drop-shadow(0 0 16px rgba(94,234,212,.20))"
+              ? "drop-shadow(0 0 16px rgba(77,141,255,.20))"
               : undefined,
           transition:
             "opacity 180ms ease, filter 180ms ease",
@@ -1201,17 +1201,17 @@ drug: true,
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: onMechanisticPath
-            ? "#5eead4"
+            ? "#4d8dff"
             : highlighted
-              ? "#7dd3fc"
+              ? "#8db2ff"
               : "#64748b",
         },
 
         style: {
           stroke: onMechanisticPath
-            ? "#5eead4"
+            ? "#4d8dff"
             : highlighted
-              ? "#7dd3fc"
+              ? "#8db2ff"
               : "#64748b",
           strokeWidth: onMechanisticPath
             ? 4.4
@@ -1228,15 +1228,15 @@ drug: true,
             : 1,
           cursor: "pointer",
           filter: onMechanisticPath
-            ? "drop-shadow(0 0 7px rgba(94,234,212,.50))"
+            ? "drop-shadow(0 0 7px rgba(77,141,255,.50))"
             : undefined,
         },
 
         labelStyle: {
           fill: onMechanisticPath
-            ? "#ccfbf1"
+            ? "#dbe7ff"
             : highlighted
-              ? "#cffafe"
+              ? "#d9bdfe"
               : "#94a3b8",
           fontSize:
             onMechanisticPath || isSelected
@@ -1246,7 +1246,7 @@ drug: true,
         },
 
         labelBgStyle: {
-          fill: "#081722",
+          fill: "#070b10",
           fillOpacity: shouldDim
             ? 0.12
             : 0.94,
@@ -2330,7 +2330,7 @@ drug: true,
       const dataUrl = await toPng(
         graphContainerRef.current,
         {
-          backgroundColor: "#081722",
+          backgroundColor: "#070b10",
           cacheBust: true,
           pixelRatio: 2,
           filter: (element) => {
@@ -2873,18 +2873,18 @@ ${edgeXml}
       </AnimatePresence>
 
       <main
-        className={`relative h-[100dvh] overflow-hidden bg-[#07131f] text-[#eaf7f5] transition-all duration-1000 ${
+        className={`relative h-[100dvh] overflow-hidden bg-[#05080d] text-[#eaf7f5] transition-all duration-1000 ${
           showWorkspaceReveal
             ? "scale-[1.025] opacity-0 blur-xl"
             : "scale-100 opacity-100 blur-0"
         }`}
       >
         {/* BioLayers scientific atmosphere */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,#07131f_0%,#091b27_42%,#071822_72%,#06111a_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_5%,rgba(45,212,191,.14),transparent_32%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_38%,rgba(56,189,248,.12),transparent_30%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_53%_48%,rgba(94,234,212,.055),transparent_34%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(153,246,228,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.5)_1px,transparent_1px)] [background-size:72px_72px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,#05080d_0%,#091b27_42%,#071822_72%,#04070a_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_5%,rgba(77,141,255,.14),transparent_32%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_38%,rgba(141,178,255,.12),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_53%_48%,rgba(77,141,255,.055),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(141,178,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,.5)_1px,transparent_1px)] [background-size:72px_72px]" />
         <div className="pointer-events-none absolute left-[15%] right-[15%] top-0 h-px bg-gradient-to-r from-transparent via-teal-300/30 to-transparent" />
 
         <WorkspaceHeader
@@ -2945,7 +2945,7 @@ ${edgeXml}
                   100,
               });
             }}
-            className="relative min-h-0 min-w-0 overflow-hidden bg-[#081722]"
+            className="relative min-h-0 min-w-0 overflow-hidden bg-[#070b10]"
           >
             <LivingWorkspaceAtmosphere
               view={workspaceView}
@@ -2977,16 +2977,16 @@ ${edgeXml}
                       mass: 0.55,
                     }
               }
-              className="pointer-events-none absolute z-[2] h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(94,234,212,.10),rgba(56,189,248,.045)_38%,transparent_70%)] blur-[18px]"
+              className="pointer-events-none absolute z-[2] h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(77,141,255,.10),rgba(141,178,255,.045)_38%,transparent_70%)] blur-[18px]"
             />
             {/* Scientific depth */}
-            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_45%,rgba(45,212,191,.07),transparent_31%),radial-gradient(circle_at_90%_12%,rgba(56,189,248,.065),transparent_28%),radial-gradient(circle_at_8%_90%,rgba(20,184,166,.05),transparent_26%)]" />
+            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_45%,rgba(77,141,255,.07),transparent_31%),radial-gradient(circle_at_90%_12%,rgba(141,178,255,.065),transparent_28%),radial-gradient(circle_at_8%_90%,rgba(20,184,166,.05),transparent_26%)]" />
 
             {/* Molecular dot field */}
-            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.18] [background-image:radial-gradient(circle,rgba(153,246,228,.55)_1px,transparent_1.4px)] [background-size:48px_48px]" />
+            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.18] [background-image:radial-gradient(circle,rgba(141,178,255,.55)_1px,transparent_1.4px)] [background-size:48px_48px]" />
 
             {/* Fine grid */}
-            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.035] [background-image:linear-gradient(rgba(153,246,228,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.6)_1px,transparent_1px)] [background-size:96px_96px]" />
+            <div className="pointer-events-none absolute inset-0 z-[1] opacity-[0.035] [background-image:linear-gradient(rgba(141,178,255,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,.6)_1px,transparent_1px)] [background-size:96px_96px]" />
 
             {/* Canvas vignette */}
             <div className="pointer-events-none absolute inset-0 z-[2] shadow-[inset_0_0_120px_rgba(2,12,18,.55)]" />
@@ -3011,7 +3011,7 @@ ${edgeXml}
                       ease: "linear",
                     }
               }
-              className="pointer-events-none absolute inset-0 z-[1] opacity-[0.09] [background-image:linear-gradient(115deg,transparent_42%,rgba(103,232,249,.4)_50%,transparent_58%)] [background-size:220px_220px]"
+              className="pointer-events-none absolute inset-0 z-[1] opacity-[0.09] [background-image:linear-gradient(115deg,transparent_42%,rgba(161,92,255,.4)_50%,transparent_58%)] [background-size:220px_220px]"
             />
 
             <motion.div
@@ -3041,7 +3041,7 @@ ${edgeXml}
                 data-export-ignore="true"
                 className="absolute left-4 top-20 z-[42] flex flex-col items-start gap-2"
               >
-                <div className="flex flex-col gap-1 rounded-[16px] border border-teal-100/[0.075] bg-[#0a1b26]/90 p-1.5 shadow-[0_18px_55px_rgba(1,8,15,.34)] backdrop-blur-2xl">
+                <div className="flex flex-col gap-1 rounded-[16px] border border-teal-100/[0.075] bg-[#0a0f14]/90 p-1.5 shadow-[0_18px_55px_rgba(1,8,15,.34)] backdrop-blur-2xl">
                   <button
                     type="button"
                     onClick={() =>
@@ -3050,7 +3050,7 @@ ${edgeXml}
                     className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-teal-100 transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.045]"
                     title="Trace a mechanistic path between two entities"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.65)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.65)]" />
                     Connect
                   </button>
 
@@ -3062,7 +3062,7 @@ ${edgeXml}
                     className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-sky-100 transition duration-300 hover:border-sky-200/[0.12] hover:bg-sky-200/[0.04]"
                     title="Filter the graph by evidence strength"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_9px_rgba(125,211,252,.6)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_9px_rgba(141,178,255,.6)]" />
                     Evidence
                   </button>
 
@@ -3074,7 +3074,7 @@ ${edgeXml}
                     className="group flex w-[154px] items-center gap-2.5 rounded-[11px] border border-transparent px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-cyan-100 transition duration-300 hover:border-cyan-200/[0.12] hover:bg-cyan-200/[0.04]"
                     title="Turn graph context into a testable hypothesis"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_9px_rgba(103,232,249,.55)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_9px_rgba(161,92,255,.55)]" />
                     Hypothesis
                   </button>
 
@@ -3199,7 +3199,7 @@ ${edgeXml}
                                   : "PubMed literature"}
                         </p>
 
-                        <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-[#f0fbfa] sm:text-[42px]">
+                        <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-[#eef4ff] sm:text-[42px]">
                           {selectedEntity.label}
                         </h2>
 
@@ -3279,13 +3279,13 @@ ${edgeXml}
                     ) : workspaceView ===
                       "citations" ? (
                       <section className="mt-7">
-                        <div className="rounded-[24px] border border-teal-100/[0.07] bg-[radial-gradient(circle_at_50%_26%,rgba(94,234,212,.055),transparent_34%),rgba(10,27,38,.44)] p-5 shadow-[0_18px_52px_rgba(1,8,15,.12)] sm:p-7">
+                        <div className="rounded-[24px] border border-teal-100/[0.07] bg-[radial-gradient(circle_at_50%_26%,rgba(77,141,255,.055),transparent_34%),rgba(10,27,38,.44)] p-5 shadow-[0_18px_52px_rgba(1,8,15,.12)] sm:p-7">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">
                                 Entity-to-paper map
                               </p>
-                              <h3 className="mt-2 text-[19px] font-semibold text-[#f0fbfa]">
+                              <h3 className="mt-2 text-[19px] font-semibold text-[#eef4ff]">
                                 Literature connected to {selectedEntity.label}
                               </h3>
                             </div>
@@ -3296,11 +3296,11 @@ ${edgeXml}
                           </div>
 
                           <div className="relative mt-8">
-                            <div className="mx-auto max-w-md rounded-[20px] border border-teal-200/[0.12] bg-[linear-gradient(145deg,rgba(94,234,212,.07),rgba(8,23,34,.92))] p-5 text-center shadow-[0_18px_48px_rgba(1,8,15,.22)]">
+                            <div className="mx-auto max-w-md rounded-[20px] border border-teal-200/[0.12] bg-[linear-gradient(145deg,rgba(77,141,255,.07),rgba(8,23,34,.92))] p-5 text-center shadow-[0_18px_48px_rgba(1,8,15,.22)]">
                               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-teal-300">
                                 {selectedEntity.type}
                               </p>
-                              <h4 className="mt-3 text-[22px] font-semibold text-[#f0fbfa]">
+                              <h4 className="mt-3 text-[22px] font-semibold text-[#eef4ff]">
                                 {selectedEntity.label}
                               </h4>
                               <p className="mx-auto mt-3 max-w-sm text-[11px] leading-6 text-slate-400">
@@ -3371,7 +3371,7 @@ ${edgeXml}
                                           paper,
                                         )
                                       }
-                                      className="group relative overflow-hidden rounded-[18px] border border-teal-100/[0.055] bg-[#0a1b26]/46 p-4 text-left shadow-[0_14px_40px_rgba(1,8,15,.14)] transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.025]"
+                                      className="group relative overflow-hidden rounded-[18px] border border-teal-100/[0.055] bg-[#0a0f14]/46 p-4 text-left shadow-[0_14px_40px_rgba(1,8,15,.14)] transition duration-300 hover:border-teal-200/[0.12] hover:bg-teal-200/[0.025]"
                                     >
                                       <div className="pointer-events-none absolute left-1/2 top-0 h-5 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-b from-teal-300/08 to-teal-300/45" />
                                       <div className="flex items-center justify-between gap-3">

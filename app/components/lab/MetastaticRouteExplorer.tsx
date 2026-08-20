@@ -48,7 +48,7 @@ const stages: Stage[] = [
       "Circulating tumor cells survive shear stress, immune pressure, and anoikis.",
     x: 46,
     y: 61,
-    color: "#22d3ee",
+    color: "#a15cff",
     metric: "Circulatory survival",
     details: ["Platelet shielding", "Immune evasion", "Stress adaptation"],
   },
@@ -82,7 +82,7 @@ const signals = [
   { label: "TGF-β", source: 0, target: 1, color: "#f59e0b" },
   { label: "VEGF", source: 0, target: 1, color: "#34d399" },
   { label: "CXCL12", source: 3, target: 4, color: "#a78bfa" },
-  { label: "CXCR4", source: 2, target: 3, color: "#22d3ee" },
+  { label: "CXCR4", source: 2, target: 3, color: "#a15cff" },
 ];
 
 export default function MetastaticRouteExplorer() {
@@ -127,7 +127,7 @@ export default function MetastaticRouteExplorer() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background />
 
       <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-8 md:px-8">
@@ -257,7 +257,7 @@ export default function MetastaticRouteExplorer() {
                   opacity: 0,
                   x: -12,
                 }}
-                className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-6 backdrop-blur-xl"
+                className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-6 backdrop-blur-xl"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -324,7 +324,7 @@ export default function MetastaticRouteExplorer() {
               </motion.section>
             </AnimatePresence>
 
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-6 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-6 backdrop-blur-xl">
               <div className="text-[10px] uppercase tracking-[0.28em] text-white/25">
                 Molecular signaling
               </div>

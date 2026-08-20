@@ -40,7 +40,7 @@ export default function FocusExpandControls({
         className={`rounded-[12px] border px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.09em] shadow-[0_12px_36px_rgba(1,8,15,.25)] backdrop-blur-2xl transition duration-300 ${
           cinematicFocus
             ? "border-rose-200/[0.15] bg-rose-200/[0.06] text-rose-100 hover:bg-rose-200/[0.09]"
-            : "border-teal-200/[0.12] bg-[#0a1b26]/86 text-teal-100 hover:-translate-y-0.5 hover:bg-teal-200/[0.05]"
+            : "border-teal-200/[0.12] bg-[#0a0f14]/86 text-teal-100 hover:-translate-y-0.5 hover:bg-teal-200/[0.05]"
         } disabled:cursor-not-allowed disabled:opacity-30`}
       >
         <span className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function FocusExpandControls({
             className={`h-1.5 w-1.5 rounded-full ${
               cinematicFocus
                 ? "bg-rose-300 shadow-[0_0_8px_rgba(253,164,175,.7)]"
-                : "bg-teal-300 shadow-[0_0_8px_rgba(94,234,212,.65)]"
+                : "bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,.65)]"
             }`}
           />
           {cinematicFocus ? "Exit focus" : "Cinematic focus"}
@@ -60,7 +60,7 @@ export default function FocusExpandControls({
         whileTap={{ scale: 0.97 }}
         onClick={() => void expandSelectedEntity()}
         disabled={!hasSelectedNode || expandingGraph}
-        className="rounded-[12px] border border-sky-200/[0.12] bg-[#0a1b26]/86 px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.09em] text-sky-100 shadow-[0_12px_36px_rgba(1,8,15,.25)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-sky-200/[0.05] disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-[12px] border border-sky-200/[0.12] bg-[#0a0f14]/86 px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.09em] text-sky-100 shadow-[0_12px_36px_rgba(1,8,15,.25)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-sky-200/[0.05] disabled:cursor-not-allowed disabled:opacity-30"
       >
         <span className="flex items-center gap-2">
           <motion.span

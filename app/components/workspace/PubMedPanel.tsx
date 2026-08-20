@@ -246,7 +246,7 @@ function classificationClass(
     case "unrelated":
       return `
         border-teal-100/[0.06]
-        bg-[#0a1b26]/46
+        bg-[#0a0f14]/46
         text-slate-500
       `;
   }
@@ -300,7 +300,7 @@ function strengthClass(
     default:
       return `
         border-teal-100/[0.06]
-        bg-[#0a1b26]/46
+        bg-[#0a0f14]/46
         text-slate-500
       `;
   }
@@ -1040,7 +1040,7 @@ export default function PubMedPanel({
               opacity: 1,
               y: 0,
             }}
-            className="mb-6 rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-5"
+            className="mb-6 rounded-[15px] border border-teal-100/[0.06] bg-[#0a0f14]/46 p-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -1105,7 +1105,7 @@ export default function PubMedPanel({
                 </p>
               </div>
 
-              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a1b26]/40 p-4">
+              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a0f14]/40 p-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Without abstract
                 </p>
@@ -1160,7 +1160,7 @@ export default function PubMedPanel({
                 </p>
               </div>
 
-              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a1b26]/40 p-4">
+              <div className="rounded-[14px] border border-teal-100/[0.05] bg-[#0a0f14]/40 p-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   Unrelated
                 </p>
@@ -1246,7 +1246,7 @@ export default function PubMedPanel({
           RESULTS HEADER
           =================================================== */}
 
-      <div className="mb-6 flex flex-col gap-3 rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-3 rounded-[15px] border border-teal-100/[0.06] bg-[#0a0f14]/46 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold text-white">
@@ -1296,8 +1296,8 @@ export default function PubMedPanel({
             className={`rounded-[12px] px-3 py-2 text-[10px] ${
               pubMedSort ===
               "relevance"
-                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] text-[#062029] shadow-[0_8px_20px_rgba(45,212,191,.12)]"
-                : "border border-teal-100/[0.07] bg-[#0a1b26]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
+                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] text-[#04070a] shadow-[0_8px_20px_rgba(77,141,255,.12)]"
+                : "border border-teal-100/[0.07] bg-[#0a0f14]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
             }`}
           >
             Relevance
@@ -1314,8 +1314,8 @@ export default function PubMedPanel({
             className={`rounded-[12px] px-3 py-2 text-[10px] ${
               pubMedSort ===
               "date"
-                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] text-[#062029] shadow-[0_8px_20px_rgba(45,212,191,.12)]"
-                : "border border-teal-100/[0.07] bg-[#0a1b26]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
+                ? "border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] text-[#04070a] shadow-[0_8px_20px_rgba(77,141,255,.12)]"
+                : "border border-teal-100/[0.07] bg-[#0a0f14]/40 text-slate-400 hover:bg-teal-100/[0.03] hover:text-slate-200"
             }`}
           >
             Newest
@@ -1379,7 +1379,7 @@ export default function PubMedPanel({
             (item) => (
               <div
                 key={item}
-                className={`${reduceMotion ? "" : "animate-pulse"} rounded-[20px] border border-teal-100/[0.05] bg-[#0a1b26]/46 p-5`}
+                className={`${reduceMotion ? "" : "animate-pulse"} rounded-[20px] border border-teal-100/[0.05] bg-[#0a0f14]/46 p-5`}
               >
                 <div className="h-2.5 w-1/3 rounded-full bg-teal-100/[0.08]" />
 
@@ -1417,7 +1417,7 @@ export default function PubMedPanel({
         !pubMedError &&
         pubMedPapers.length ===
           0 && (
-          <div className="rounded-[20px] border border-teal-100/[0.05] bg-[#0a1b26]/46 p-8 text-center">
+          <div className="rounded-[20px] border border-teal-100/[0.05] bg-[#0a0f14]/46 p-8 text-center">
             <p className="text-sm text-slate-500">
               {
                 emptyMessage
@@ -1470,7 +1470,7 @@ export default function PubMedPanel({
                       rounded-[20px]
                       border
                       border-teal-100/[0.06]
-                      bg-[#0a1b26]/46
+                      bg-[#0a0f14]/46
                       p-5
                       text-left
                       transition
@@ -1501,7 +1501,7 @@ export default function PubMedPanel({
                         className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
                           hasAbstract
                             ? "border-teal-200/[0.11] bg-teal-200/[0.035] text-teal-200/70"
-                            : "border-teal-100/[0.05] bg-[#0a1b26]/40 text-slate-500"
+                            : "border-teal-100/[0.05] bg-[#0a0f14]/40 text-slate-500"
                         }`}
                       >
                         {hasAbstract

@@ -29,7 +29,7 @@ export default function PromptBox() {
   }
 
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
+    <div className="rounded-[20px] border border-[#efe6d8]/25 bg-[#efe6d8] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
       <textarea
         value={text}
         onChange={(event) => {
@@ -37,14 +37,14 @@ export default function PromptBox() {
           setError("");
         }}
         placeholder="Paste a paragraph from a cancer research paper..."
-        className="min-h-44 w-full resize-none rounded-2xl bg-slate-50 p-5 text-base leading-7 text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-teal-500/30"
+        className="min-h-44 w-full resize-none rounded-2xl bg-[#f6f0e4] p-5 text-base leading-7 text-[#23272c] outline-none placeholder:text-[#8a8578] focus:ring-2 focus:ring-[#4d8dff]/50"
       />
 
       <div className="flex flex-col gap-3 px-2 pb-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={useExample}
-          className="text-sm text-slate-500 transition hover:text-slate-950"
+          className="text-sm text-[#6b665c] transition hover:text-[#23272c]"
         >
           Use an example
         </button>
@@ -52,14 +52,14 @@ export default function PromptBox() {
         <button
           type="button"
           onClick={generateMap}
-          className="rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-teal-700"
+          className="rounded-2xl bg-[#0b3d2a] px-6 py-3 text-sm font-semibold text-[#e7fff0] transition hover:-translate-y-0.5 hover:bg-[#005a34]"
         >
           Generate map →
         </button>
       </div>
 
       {error && (
-        <p className="px-2 pb-2 text-sm font-medium text-red-600">
+        <p className="px-2 pb-2 text-sm font-medium text-[#8f1a2b]">
           {error}
         </p>
       )}

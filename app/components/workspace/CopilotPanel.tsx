@@ -75,7 +75,7 @@ export default function CopilotPanel({
           onClick={() =>
             setCopilotOpen(true)
           }
-          className={`fixed bottom-5 right-5 z-[80] items-center gap-2 rounded-full ${demoMode ? "hidden" : "hidden lg:flex"} border border-teal-200/[0.16] bg-[linear-gradient(135deg,rgba(153,246,228,.94),rgba(103,232,249,.9))] px-4 py-3 text-[11px] font-extrabold text-[#062029] shadow-[0_16px_48px_rgba(45,212,191,.2)] transition duration-300 hover:-translate-y-1`}
+          className={`fixed bottom-5 right-5 z-[80] items-center gap-2 rounded-full ${demoMode ? "hidden" : "hidden lg:flex"} border border-teal-200/[0.16] bg-[linear-gradient(135deg,rgba(141,178,255,.94),rgba(161,92,255,.9))] px-4 py-3 text-[11px] font-extrabold text-[#04070a] shadow-[0_16px_48px_rgba(77,141,255,.2)] transition duration-300 hover:-translate-y-1`}
         >
           <span className="h-2 w-2 rounded-full bg-white shadow-[0_0_10px_white]" />
           Copilot
@@ -99,7 +99,7 @@ export default function CopilotPanel({
                 onClick={() =>
                   setCopilotOpen(false)
                 }
-                className="fixed inset-0 z-[90] bg-[#020b12]/55 backdrop-blur-[5px]"
+                className="fixed inset-0 z-[90] bg-[#030507]/55 backdrop-blur-[5px]"
               />
 
               <motion.aside
@@ -122,7 +122,7 @@ export default function CopilotPanel({
                   duration: 0.35,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="fixed bottom-0 right-0 top-0 z-[100] flex w-full flex-col border-l border-teal-100/[0.08] bg-[#081722]/97 shadow-[-30px_0_100px_rgba(1,8,15,.48)] backdrop-blur-3xl sm:w-[540px]"
+                className="fixed bottom-0 right-0 top-0 z-[100] flex w-full flex-col border-l border-teal-100/[0.08] bg-[#070b10]/97 shadow-[-30px_0_100px_rgba(1,8,15,.48)] backdrop-blur-3xl sm:w-[540px]"
               >
                 <div className="flex items-start justify-between border-b border-teal-100/[0.065] px-5 py-5">
                   <div>
@@ -216,7 +216,7 @@ export default function CopilotPanel({
                   {copilotMessages.length ===
                     0 &&
                     !copilotLoading && (
-                      <div className="rounded-[24px] border border-teal-100/[0.065] bg-[linear-gradient(145deg,rgba(139,92,246,.07),rgba(34,211,238,.035))] p-5">
+                      <div className="rounded-[24px] border border-teal-100/[0.065] bg-[linear-gradient(145deg,rgba(161,92,255,.07),rgba(34,211,238,.035))] p-5">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
                           Grounded context
                         </p>
@@ -253,7 +253,7 @@ export default function CopilotPanel({
                         "user" ? (
                           <div
                             key={message.id}
-                            className="ml-auto max-w-[86%] rounded-[20px] rounded-br-[6px] bg-gradient-to-r from-teal-300 to-sky-300 px-4 py-3 text-sm leading-6 text-slate-950 shadow-[0_12px_30px_rgba(139,92,246,.16)]"
+                            className="ml-auto max-w-[86%] rounded-[20px] rounded-br-[6px] bg-gradient-to-r from-[#57ffa0] to-[#4d8dff] px-4 py-3 text-sm leading-6 text-slate-950 shadow-[0_12px_30px_rgba(161,92,255,.16)]"
                           >
                             {
                               message.content
@@ -262,7 +262,7 @@ export default function CopilotPanel({
                         ) : (
                           <div
                             key={message.id}
-                            className="rounded-[22px] border border-teal-100/[0.065] bg-[#0a1b26]/52 p-5"
+                            className="rounded-[22px] border border-teal-100/[0.065] bg-[#0a0f14]/52 p-5"
                           >
                             {message.title && (
                               <h3 className="text-lg font-semibold tracking-[-0.025em] text-white">
@@ -298,7 +298,7 @@ export default function CopilotPanel({
                                           key={`${message.id}-point-${index}`}
                                           className="flex gap-3 rounded-[14px] border border-teal-100/[0.045] bg-black/[0.10] p-3"
                                         >
-                                          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_8px_#67e8f9]" />
+                                          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_8px_#a15cff]" />
                                           <p className="text-[11px] leading-5 text-slate-400">
                                             {
                                               point

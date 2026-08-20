@@ -73,7 +73,7 @@ export default function MechanismPipelineSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.04]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         md:px-10
@@ -287,14 +287,14 @@ export default function MechanismPipelineSection() {
                     rounded-[24px]
                     border
                     border-teal-100/[0.075]
-                    bg-[#0a1b26]/48
+                    bg-[#0a0f14]/48
                     p-7
                     backdrop-blur-2xl
                     transition
                     duration-500
                     hover:-translate-y-1
                     hover:border-teal-100/[0.16]
-                    hover:bg-[#0d2430]/68
+                    hover:bg-[#10161d]/68
                     md:p-8
                   "
                 >
@@ -591,7 +591,7 @@ export default function MechanismPipelineSection() {
                   rounded-2xl
                   border
                   border-teal-100/[0.065]
-                  bg-[#0a1b26]/42
+                  bg-[#0a0f14]/42
                   p-5
                 "
               >
@@ -610,7 +610,7 @@ export default function MechanismPipelineSection() {
                   rounded-2xl
                   border
                   border-teal-100/[0.065]
-                  bg-[#0a1b26]/42
+                  bg-[#0a0f14]/42
                   p-5
                 "
               >
@@ -629,7 +629,7 @@ export default function MechanismPipelineSection() {
                   rounded-2xl
                   border
                   border-teal-100/[0.065]
-                  bg-[#0a1b26]/42
+                  bg-[#0a0f14]/42
                   p-5
                 "
               >

@@ -15,11 +15,11 @@ export const entityVisualTheme: Record<
   }
 > = {
   cell: {
-    accent: "#2dd4bf",
-    accentSoft: "rgba(45,212,191,.18)",
-    secondary: "#67e8f9",
-    border: "rgba(94,234,212,.42)",
-    glow: "rgba(45,212,191,.36)",
+    accent: "#2f6ef5",
+    accentSoft: "rgba(77,141,255,.18)",
+    secondary: "#a15cff",
+    border: "rgba(77,141,255,.42)",
+    glow: "rgba(77,141,255,.36)",
     label: "Living cell",
   },
   protein: {
@@ -41,7 +41,7 @@ export const entityVisualTheme: Record<
   process: {
     accent: "#60a5fa",
     accentSoft: "rgba(96,165,250,.18)",
-    secondary: "#22d3ee",
+    secondary: "#a15cff",
     border: "rgba(147,197,253,.42)",
     glow: "rgba(96,165,250,.35)",
     label: "Biological process",
@@ -57,7 +57,7 @@ export const entityVisualTheme: Record<
   gene: {
     accent: "#34d399",
     accentSoft: "rgba(52,211,153,.18)",
-    secondary: "#22d3ee",
+    secondary: "#a15cff",
     border: "rgba(110,231,183,.42)",
     glow: "rgba(52,211,153,.36)",
     label: "Gene",

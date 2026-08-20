@@ -18,12 +18,12 @@ type Particle = {
 };
 
 const PORTAL_COLORS = [
-  "#67e8f9",
-  "#38bdf8",
-  "#818cf8",
-  "#a78bfa",
-  "#e879f9",
-  "#f472b6",
+  "#a15cff",
+  "#4d8dff",
+  "#4d8dff",
+  "#a15cff",
+  "#a15cff",
+  "#ff5c7e",
   "#ffffff",
 ];
 
@@ -83,7 +83,7 @@ export default function PortalTransition({
       transition={{
         duration: 0.12,
       }}
-      className="pointer-events-none fixed inset-0 z-[200] overflow-hidden bg-[#01030b]"
+      className="pointer-events-none fixed inset-0 z-[200] overflow-hidden bg-[#030507]"
     >
       {/* Deep-space background */}
       <motion.div
@@ -100,7 +100,7 @@ export default function PortalTransition({
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(30,41,90,.34) 0%, rgba(2,6,23,.88) 42%, #01030b 78%)",
+            "radial-gradient(circle at 50% 50%, rgba(13,27,61,.34) 0%, rgba(3,5,7,.88) 42%, #030507 78%)",
         }}
       />
 
@@ -122,7 +122,7 @@ export default function PortalTransition({
         className="absolute left-1/2 top-1/2 h-[78vmin] w-[78vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[85px]"
         style={{
           background:
-            "conic-gradient(from 0deg, rgba(34,211,238,.8), rgba(99,102,241,.72), rgba(217,70,239,.72), rgba(244,63,94,.55), rgba(34,211,238,.8))",
+            "conic-gradient(from 0deg, rgba(77,141,255,.8), rgba(77,141,255,.72), rgba(161,92,255,.72), rgba(255,59,92,.55), rgba(77,141,255,.8))",
         }}
       />
 
@@ -219,9 +219,9 @@ export default function PortalTransition({
         className="absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-72 sm:w-72"
         style={{
           background:
-            "radial-gradient(circle at 42% 38%, #ffffff 0%, #cffafe 7%, #67e8f9 18%, #6366f1 43%, #a855f7 61%, rgba(236,72,153,.45) 72%, transparent 78%)",
+            "radial-gradient(circle at 42% 38%, #ffffff 0%, #d9bdfe 7%, #a15cff 18%, #4d8dff 43%, #a15cff 61%, rgba(255,59,92,.45) 72%, transparent 78%)",
           boxShadow:
-            "0 0 45px rgba(255,255,255,.92), 0 0 110px rgba(34,211,238,.82), 0 0 220px rgba(99,102,241,.65), 0 0 320px rgba(217,70,239,.38)",
+            "0 0 45px rgba(255,255,255,.92), 0 0 110px rgba(77,141,255,.82), 0 0 220px rgba(77,141,255,.65), 0 0 320px rgba(161,92,255,.38)",
         }}
       >
         <motion.div
@@ -326,12 +326,12 @@ export default function PortalTransition({
                   top: `${y}%`,
                   background:
                     index % 2 === 0
-                      ? "#67e8f9"
-                      : "#a78bfa",
+                      ? "#a15cff"
+                      : "#a15cff",
                   boxShadow:
                     index % 2 === 0
-                      ? "0 0 18px #22d3ee"
-                      : "0 0 18px #8b5cf6",
+                      ? "0 0 18px #a15cff"
+                      : "0 0 18px #a15cff",
                 }}
               />
 
@@ -361,11 +361,11 @@ export default function PortalTransition({
                   top: `${y}%`,
                   background:
                     index % 2 === 0
-                      ? "#f472b6"
+                      ? "#ff5c7e"
                       : "#ffffff",
                   boxShadow:
                     index % 2 === 0
-                      ? "0 0 18px #ec4899"
+                      ? "0 0 18px #ff3b5c"
                       : "0 0 18px #ffffff",
                 }}
               />
@@ -441,10 +441,10 @@ export default function PortalTransition({
               top: `${20 + line * 15}%`,
               background:
                 line % 2 === 0
-                  ? "linear-gradient(90deg, transparent, #67e8f9, #ffffff, #8b5cf6, transparent)"
-                  : "linear-gradient(90deg, transparent, #ec4899, #ffffff, #22d3ee, transparent)",
+                  ? "linear-gradient(90deg, transparent, #a15cff, #ffffff, #a15cff, transparent)"
+                  : "linear-gradient(90deg, transparent, #ff3b5c, #ffffff, #a15cff, transparent)",
               boxShadow:
-                "0 0 16px rgba(103,232,249,.95)",
+                "0 0 16px rgba(161,92,255,.95)",
             }}
           />
         ))}
@@ -494,10 +494,10 @@ export default function PortalTransition({
               rotate: `${line.rotate}deg`,
               background:
                 line.id % 3 === 0
-                  ? "linear-gradient(90deg, #ffffff, #67e8f9, transparent)"
+                  ? "linear-gradient(90deg, #ffffff, #a15cff, transparent)"
                   : line.id % 3 === 1
-                    ? "linear-gradient(90deg, #ffffff, #a78bfa, transparent)"
-                    : "linear-gradient(90deg, #ffffff, #f472b6, transparent)",
+                    ? "linear-gradient(90deg, #ffffff, #a15cff, transparent)"
+                    : "linear-gradient(90deg, #ffffff, #ff5c7e, transparent)",
               boxShadow:
                 "0 0 12px rgba(255,255,255,.9)",
             }}
@@ -526,10 +526,10 @@ export default function PortalTransition({
         className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-96 sm:w-96"
         style={{
           background:
-            "conic-gradient(from 20deg, transparent 0deg, #22d3ee 42deg, transparent 82deg, #8b5cf6 128deg, transparent 177deg, #ec4899 230deg, transparent 276deg, #ffffff 318deg, transparent 360deg)",
+            "conic-gradient(from 20deg, transparent 0deg, #a15cff 42deg, transparent 82deg, #a15cff 128deg, transparent 177deg, #ff3b5c 230deg, transparent 276deg, #ffffff 318deg, transparent 360deg)",
           filter: "blur(3px)",
           boxShadow:
-            "0 0 70px rgba(34,211,238,.5), 0 0 150px rgba(139,92,246,.45)",
+            "0 0 70px rgba(77,141,255,.5), 0 0 150px rgba(161,92,255,.45)",
         }}
       >
         <div className="absolute inset-[18%] rounded-full bg-[#000107] shadow-[0_0_55px_22px_rgba(0,0,0,1),inset_0_0_30px_rgba(255,255,255,.08)]" />
@@ -602,7 +602,7 @@ export default function PortalTransition({
         className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
         style={{
           boxShadow:
-            "0 0 70px rgba(255,255,255,1), 0 0 150px rgba(103,232,249,.9), 0 0 300px rgba(139,92,246,.8)",
+            "0 0 70px rgba(255,255,255,1), 0 0 150px rgba(161,92,255,.9), 0 0 300px rgba(161,92,255,.8)",
         }}
       />
 

@@ -184,7 +184,7 @@ export default function EdgeInspectorPanel({
               AI {aiConfidence}%
             </span>
           ) : (
-            <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_#67e8f9]" />
+            <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_#a15cff]" />
           )}
         </div>
 
@@ -201,7 +201,7 @@ export default function EdgeInspectorPanel({
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
               Source
             </p>
-            <p className="mt-2 text-[17px] font-semibold text-[#f0fbfa] transition hover:text-teal-200">
+            <p className="mt-2 text-[17px] font-semibold text-[#eef4ff] transition hover:text-teal-200">
               {
                 selectedEdgeSource
                   .data.label
@@ -235,7 +235,7 @@ export default function EdgeInspectorPanel({
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
               Target
             </p>
-            <p className="mt-2 text-[17px] font-semibold text-[#f0fbfa] transition hover:text-violet-200">
+            <p className="mt-2 text-[17px] font-semibold text-[#eef4ff] transition hover:text-violet-200">
               {
                 selectedEdgeTarget
                   .data.label
@@ -316,7 +316,7 @@ export default function EdgeInspectorPanel({
         </div>
       )}
 
-      <div className="mt-6 rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-4">
+      <div className="mt-6 rounded-[15px] border border-teal-100/[0.06] bg-[#0a0f14]/46 p-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300">
           Mechanistic interpretation
         </p>
@@ -568,8 +568,8 @@ function EdgeMetric({
   label: string;
 }) {
   return (
-    <div className="rounded-[15px] border border-teal-100/[0.06] bg-[#0a1b26]/46 p-4">
-      <p className="truncate text-[15px] font-semibold capitalize text-[#f0fbfa]">
+    <div className="rounded-[15px] border border-teal-100/[0.06] bg-[#0a0f14]/46 p-4">
+      <p className="truncate text-[15px] font-semibold capitalize text-[#eef4ff]">
         {value}
       </p>
       <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">

@@ -217,9 +217,9 @@ export default function MindMapIdea({
                   "
                   style={{
                     backgroundColor:
-                      "rgba(94,234,212,0.20)",
+                      "rgba(77,141,255,0.20)",
                     boxShadow:
-                      "0 0 0 1px rgba(94,234,212,0.30)",
+                      "0 0 0 1px rgba(77,141,255,0.30)",
                   }}
                 >
                   {extractedText.slice(

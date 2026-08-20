@@ -74,9 +74,9 @@ export default function BioScanLayer() {
         className="absolute left-0 top-0 h-px w-full"
         style={{
           background:
-            "linear-gradient(90deg, transparent, rgba(103,232,249,0.85), rgba(216,180,254,0.95), transparent)",
+            "linear-gradient(90deg, transparent, rgba(161,92,255,0.85), rgba(216,180,254,0.95), transparent)",
           boxShadow:
-            "0 0 22px rgba(103,232,249,0.7), 0 0 45px rgba(168,85,247,0.35)",
+            "0 0 22px rgba(161,92,255,0.7), 0 0 45px rgba(168,85,247,0.35)",
         }}
       />
 
@@ -115,7 +115,7 @@ export default function BioScanLayer() {
         className="absolute left-0 top-0 h-[520px] w-[520px] rounded-full opacity-50"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(103,232,249,0.12) 1px, transparent 1px),
+            linear-gradient(rgba(161,92,255,0.12) 1px, transparent 1px),
             linear-gradient(90deg, rgba(167,139,250,0.12) 1px, transparent 1px)
           `,
           backgroundSize: "34px 34px",
@@ -141,7 +141,7 @@ export default function BioScanLayer() {
         className="absolute top-0 h-full w-px opacity-25"
         style={{
           background:
-            "linear-gradient(180deg, transparent, rgba(103,232,249,0.65), transparent)",
+            "linear-gradient(180deg, transparent, rgba(161,92,255,0.65), transparent)",
         }}
       />
 

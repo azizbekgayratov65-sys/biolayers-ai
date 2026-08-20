@@ -62,13 +62,13 @@ type WorldEdge = {
 };
 
 const NODE_COLORS: Record<EntityType, string> = {
-  cell: "#2dd4bf",
-  protein: "#a78bfa",
-  gene: "#22d3ee",
-  drug: "#f472b6",
-  pathway: "#fbbf24",
-  process: "#60a5fa",
-  disease: "#fb7185",
+  cell: "#4d8dff",
+  protein: "#a15cff",
+  gene: "#2bff88",
+  drug: "#ff3b5c",
+  pathway: "#ffc53d",
+  process: "#8db2ff",
+  disease: "#ff3b5c",
 };
 
 function normalizeGraph(
@@ -581,7 +581,7 @@ function EvidencePulse({
       />
 
       <meshBasicMaterial
-        color="#e0f2fe"
+        color="#8db2ff"
         transparent
         opacity={0.95}
         blending={
@@ -672,7 +672,7 @@ function Scene({
           8,
         ]}
         intensity={24}
-        color="#67e8f9"
+        color="#a15cff"
         distance={30}
       />
 
@@ -683,7 +683,7 @@ function Scene({
           6,
         ]}
         intensity={18}
-        color="#a78bfa"
+        color="#4d8dff"
         distance={30}
       />
 
@@ -835,7 +835,7 @@ export default function KnowledgeGraph3D({
     );
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#020617]">
+    <div className="relative h-full w-full overflow-hidden bg-[#030507]">
       <Canvas
         camera={{
           position: [
@@ -858,14 +858,14 @@ export default function KnowledgeGraph3D({
         <color
           attach="background"
           args={[
-            "#020617",
+            "#030507",
           ]}
         />
 
         <fog
           attach="fog"
           args={[
-            "#020617",
+            "#030507",
             12,
             30,
           ]}
@@ -911,10 +911,10 @@ export default function KnowledgeGraph3D({
         />
       </Canvas>
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(2,6,23,.08)_46%,rgba(2,6,23,.7)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(3,5,7,.08)_46%,rgba(3,5,7,.7)_100%)]" />
 
-      <div className="pointer-events-none absolute left-5 top-5 rounded-[16px] border border-white/[0.08] bg-[#050814]/72 px-4 py-3 backdrop-blur-xl">
-        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+      <div className="pointer-events-none absolute left-5 top-5 rounded-[16px] border border-white/[0.08] bg-[#0a0f14]/72 px-4 py-3 backdrop-blur-xl">
+        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-teal-300">
           3D Knowledge Graph
         </p>
 
@@ -924,7 +924,7 @@ export default function KnowledgeGraph3D({
       </div>
 
       {hoveredLabel && (
-        <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-white/[0.08] bg-[#050814]/86 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_35px_rgba(0,0,0,.35)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-white/[0.08] bg-[#0a0f14]/86 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_35px_rgba(0,0,0,.35)] backdrop-blur-xl">
           {hoveredLabel}
         </div>
       )}

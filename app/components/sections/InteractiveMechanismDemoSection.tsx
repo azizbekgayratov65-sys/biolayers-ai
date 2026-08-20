@@ -161,7 +161,7 @@ export default function InteractiveMechanismDemoSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.04]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         md:px-10
@@ -313,7 +313,7 @@ export default function InteractiveMechanismDemoSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#081722]/88
+              bg-[#070b10]/88
               backdrop-blur-2xl
             "
           >
@@ -460,7 +460,7 @@ export default function InteractiveMechanismDemoSection() {
 
                             ${
                               selected
-                                ? "border-teal-200/30 bg-teal-300/[0.075] shadow-[0_0_35px_rgba(45,212,191,0.07)]"
+                                ? "border-teal-200/30 bg-teal-300/[0.075] shadow-[0_0_35px_rgba(77,141,255,0.07)]"
                                 : "border-teal-100/[0.065] bg-white/[0.022] hover:border-white/[0.14] hover:bg-white/[0.04]"
                             }
                           `}
@@ -654,7 +654,7 @@ export default function InteractiveMechanismDemoSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#081722]/88
+              bg-[#070b10]/88
               backdrop-blur-2xl
             "
           >
@@ -946,7 +946,7 @@ function InfoCard({
         rounded-[18px]
         border
         border-teal-100/[0.065]
-        bg-[#0a1b26]/44
+        bg-[#0a0f14]/44
         p-4
       "
     >
@@ -1037,7 +1037,7 @@ function MetaCard({
         rounded-[15px]
         border
         border-teal-100/[0.065]
-        bg-[#0a1b26]/44
+        bg-[#0a0f14]/44
         p-3
       "
     >

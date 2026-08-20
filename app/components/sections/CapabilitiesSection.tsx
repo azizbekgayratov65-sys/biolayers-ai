@@ -77,7 +77,7 @@ export default function CapabilitiesSection() {
         overflow-hidden
         border-y
         border-teal-100/[0.055]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-24
         sm:px-10
@@ -95,7 +95,7 @@ export default function CapabilitiesSection() {
           pointer-events-none
           absolute
           inset-0
-          bg-[radial-gradient(circle_at_10%_20%,rgba(45,212,191,.075),transparent_30%),radial-gradient(circle_at_90%_30%,rgba(125,211,252,.06),transparent_31%),radial-gradient(circle_at_50%_120%,rgba(165,180,252,.035),transparent_42%)]
+          bg-[radial-gradient(circle_at_10%_20%,rgba(77,141,255,.075),transparent_30%),radial-gradient(circle_at_90%_30%,rgba(141,178,255,.06),transparent_31%),radial-gradient(circle_at_50%_120%,rgba(165,180,252,.035),transparent_42%)]
         "
       />
 
@@ -123,8 +123,8 @@ export default function CapabilitiesSection() {
         "
         style={{
           backgroundImage: `
-            linear-gradient(rgba(94,234,212,.11) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(125,211,252,.08) 1px, transparent 1px)
+            linear-gradient(rgba(77,141,255,.11) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(141,178,255,.08) 1px, transparent 1px)
           `,
           backgroundSize: "72px 72px",
         }}
@@ -254,7 +254,7 @@ export default function CapabilitiesSection() {
                   w-1.5
                   rounded-full
                   bg-teal-300
-                  shadow-[0_0_12px_rgba(94,234,212,.7)]
+                  shadow-[0_0_12px_rgba(77,141,255,.7)]
                 "
               />
 
@@ -368,7 +368,7 @@ export default function CapabilitiesSection() {
             rounded-[24px]
             border
             border-teal-100/[0.065]
-            bg-[#0a1b26]/42
+            bg-[#0a0f14]/42
             p-5
             backdrop-blur-xl
             sm:p-6
@@ -484,7 +484,7 @@ function CapabilityCard({
         rounded-[26px]
         border
         border-teal-100/[0.08]
-        bg-[#081722]/72
+        bg-[#070b10]/72
         p-7
         backdrop-blur-2xl
         sm:p-8
@@ -779,7 +779,7 @@ function FlowNode({
         rounded-[16px]
         border
         border-teal-100/[0.065]
-        bg-[#0a1b26]/42
+        bg-[#0a0f14]/42
         px-4
         py-3
         text-center

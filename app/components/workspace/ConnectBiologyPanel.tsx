@@ -45,12 +45,12 @@ type ConnectBiologyPanelProps = {
 };
 
 const typeColors: Record<EntityType, string> = {
-  cell: "#5eead4",
+  cell: "#4d8dff",
   protein: "#c4b5fd",
   gene: "#6ee7b7",
   drug: "#fdba74",
   pathway: "#fcd34d",
-  process: "#7dd3fc",
+  process: "#8db2ff",
   disease: "#fda4af",
 };
 
@@ -247,7 +247,7 @@ export default function ConnectBiologyPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[64] bg-[#020b12]/58 backdrop-blur-[5px]"
+            className="absolute inset-0 z-[64] bg-[#030507]/58 backdrop-blur-[5px]"
           />
 
           <motion.section
@@ -273,7 +273,7 @@ export default function ConnectBiologyPanel({
               duration: 0.34,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="absolute bottom-5 right-5 top-5 z-[65] flex w-[min(560px,calc(100vw-40px))] flex-col overflow-hidden rounded-[24px] border border-teal-100/[0.08] bg-[#081722]/97 shadow-[0_30px_120px_rgba(1,8,15,.56)] backdrop-blur-3xl"
+            className="absolute bottom-5 right-5 top-5 z-[65] flex w-[min(560px,calc(100vw-40px))] flex-col overflow-hidden rounded-[24px] border border-teal-100/[0.08] bg-[#070b10]/97 shadow-[0_30px_120px_rgba(1,8,15,.56)] backdrop-blur-3xl"
           >
             {/* Header */}
             <header className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-6">
@@ -284,7 +284,7 @@ export default function ConnectBiologyPanel({
                 <div>
                   <div className="flex items-center gap-2">
                     <motion.span
-                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.8)]"
                       animate={{
                         opacity: [0.55, 1, 0.55],
                         scale: [1, 1.22, 1],
@@ -301,7 +301,7 @@ export default function ConnectBiologyPanel({
                     </p>
                   </div>
 
-                  <h2 className="mt-3 text-[25px] font-semibold tracking-[-0.038em] text-[#f0fbfa]">
+                  <h2 className="mt-3 text-[25px] font-semibold tracking-[-0.038em] text-[#eef4ff]">
                     Connect the Biology
                   </h2>
 
@@ -342,7 +342,7 @@ export default function ConnectBiologyPanel({
                   whileHover={{ rotate: 180, scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ duration: 0.25 }}
-                  className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-teal-100/[0.07] bg-[#0a1b26]/72 text-[13px] text-slate-400 shadow-[0_8px_20px_rgba(1,8,15,.16)] transition hover:border-teal-200/[0.15] hover:text-teal-200"
+                  className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-teal-100/[0.07] bg-[#0a0f14]/72 text-[13px] text-slate-400 shadow-[0_8px_20px_rgba(1,8,15,.16)] transition hover:border-teal-200/[0.15] hover:text-teal-200"
                 >
                   ⇅
                 </motion.button>
@@ -363,7 +363,7 @@ export default function ConnectBiologyPanel({
                 <button
                   type="button"
                   onClick={connectBiology}
-                  className="group relative flex-1 overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.09em] text-[#062029] shadow-[0_12px_28px_rgba(45,212,191,.12)] transition duration-300 hover:-translate-y-0.5"
+                  className="group relative flex-1 overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.09em] text-[#04070a] shadow-[0_12px_28px_rgba(77,141,255,.12)] transition duration-300 hover:-translate-y-0.5"
                 >
                   <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
                   <span className="relative">
@@ -406,7 +406,7 @@ export default function ConnectBiologyPanel({
                           Mechanistic bridge
                         </p>
 
-                        <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.025em] text-[#f0fbfa]">
+                        <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.025em] text-[#eef4ff]">
                           {sourceNode?.data.label ?? "Source"}{" "}
                           <span className="text-teal-300/60">→</span>{" "}
                           {targetNode?.data.label ?? "Target"}
@@ -432,7 +432,7 @@ export default function ConnectBiologyPanel({
                                   transition={{
                                     delay: index * 0.04,
                                   }}
-                                  className="h-3 w-3 shrink-0 rounded-full border-2 border-[#081722]"
+                                  className="h-3 w-3 shrink-0 rounded-full border-2 border-[#070b10]"
                                   style={{
                                     backgroundColor:
                                       typeColors[pathNode.type],
@@ -560,7 +560,7 @@ function EntitySelector({
   const selected = nodes.find((node) => node.id === value);
 
   return (
-    <label className="block rounded-[16px] border border-teal-100/[0.06] bg-[#0a1b26]/48 p-4 transition duration-300 focus-within:border-teal-200/[0.14] focus-within:bg-teal-200/[0.02]">
+    <label className="block rounded-[16px] border border-teal-100/[0.06] bg-[#0a0f14]/48 p-4 transition duration-300 focus-within:border-teal-200/[0.14] focus-within:bg-teal-200/[0.02]">
       <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">
         {label}
       </span>
@@ -583,7 +583,7 @@ function EntitySelector({
           onChange={(event) => onChange(event.target.value)}
           className="min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-slate-100 outline-none"
         >
-          <option value="" className="bg-[#081722]">
+          <option value="" className="bg-[#070b10]">
             Choose entity...
           </option>
 
@@ -591,7 +591,7 @@ function EntitySelector({
             <option
               key={node.id}
               value={node.id}
-              className="bg-[#081722]"
+              className="bg-[#070b10]"
             >
               {node.data.label} — {node.data.type}
             </option>

@@ -1242,7 +1242,7 @@ export default function GeneDataStorm() {
             min-w-[480px]
             -translate-x-1/2
             rounded-full
-            bg-[radial-gradient(circle,rgba(139,92,246,.14)_0%,rgba(126,34,206,.065)_28%,transparent_68%)]
+            bg-[radial-gradient(circle,rgba(161,92,255,.14)_0%,rgba(126,34,206,.065)_28%,transparent_68%)]
             blur-[90px]
           "
         />

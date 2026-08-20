@@ -631,7 +631,7 @@ function PlanetMolecularBridge({
           from-transparent
           via-violet-300/22
           to-transparent
-          shadow-[0_0_24px_rgba(139,92,246,.22)]
+          shadow-[0_0_24px_rgba(161,92,255,.22)]
         "
       />
 
@@ -695,7 +695,7 @@ function DataStormStage({
           from-transparent
           via-violet-400/30
           to-transparent
-          shadow-[0_0_20px_rgba(139,92,246,.2)]
+          shadow-[0_0_20px_rgba(161,92,255,.2)]
         "
       />
 

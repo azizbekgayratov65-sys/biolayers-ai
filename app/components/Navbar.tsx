@@ -181,14 +181,14 @@ export default function Navbar() {
         <motion.div
           animate={{
             backgroundColor: scrolled
-              ? "rgba(6, 17, 26, 0.93)"
-              : "rgba(6, 17, 26, 0.34)",
+              ? "rgba(4, 7, 10, 0.94)"
+              : "rgba(4, 7, 10, 0.38)",
             borderColor: scrolled
-              ? "rgba(153,246,228,0.13)"
-              : "rgba(94,234,212,0.07)",
+              ? "rgba(141,178,255,0.14)"
+              : "rgba(77,141,255,0.08)",
             boxShadow: scrolled
-              ? "0 22px 70px rgba(0,0,0,.30)"
-              : "0 12px 42px rgba(0,0,0,.14)",
+              ? "0 22px 70px rgba(0,0,0,.4)"
+              : "0 12px 42px rgba(0,0,0,.18)",
           }}
           transition={{
             duration: 0.32,
@@ -464,23 +464,23 @@ export default function Navbar() {
                     gap-2
                     rounded-[13px]
                     border
-                    border-teal-200/20
-                    bg-teal-300/[0.07]
+                    border-emerald-200/25
+                    bg-emerald-300/[0.08]
                     px-4
                     text-xs
                     font-bold
-                    text-teal-50
+                    text-emerald-50
                     transition
                     duration-300
-                    hover:border-teal-200/35
-                    hover:bg-teal-300/[0.11]
+                    hover:border-emerald-200/40
+                    hover:bg-emerald-300/[0.14]
                   "
                 >
                   <Workflow
                     className="
                       h-3.5
                       w-3.5
-                      text-teal-300/80
+                      text-emerald-300/90
                     "
                   />
 
@@ -571,7 +571,7 @@ export default function Navbar() {
               fixed
               inset-0
               z-[90]
-              bg-[#06111a]/96
+              bg-[#04070a]/96
               px-4
               pb-6
               pt-[100px]
@@ -626,7 +626,7 @@ export default function Navbar() {
                 rounded-[26px]
                 border
                 border-teal-100/[0.08]
-                bg-[#0a1b26]/58
+                bg-[#0a0f14]/72
                 p-4
                 shadow-[0_30px_100px_rgba(0,0,0,.4)]
               "
@@ -703,7 +703,7 @@ export default function Navbar() {
                             w-1.5
                             rounded-full
                             bg-teal-300
-                            shadow-[0_0_10px_rgba(94,234,212,.75)]
+                            shadow-[0_0_10px_rgba(77,141,255,.75)]
                           "
                         />
                       )}
@@ -735,16 +735,16 @@ export default function Navbar() {
                     gap-2
                     rounded-[16px]
                     border
-                    border-teal-200/20
-                    bg-teal-300/[0.065]
+                    border-emerald-200/25
+                    bg-emerald-300/[0.08]
                     px-4
                     py-3.5
                     text-sm
                     font-bold
-                    text-teal-50
+                    text-emerald-50
                     transition
-                    hover:border-teal-200/35
-                    hover:bg-teal-300/[0.11]
+                    hover:border-emerald-200/40
+                    hover:bg-emerald-300/[0.14]
                   "
                 >
                   <Workflow className="h-4 w-4" />
@@ -881,7 +881,7 @@ function DesktopNavItem({
             -translate-x-1/2
             rounded-full
             bg-teal-300
-            shadow-[0_0_8px_rgba(94,234,212,.65)]
+            shadow-[0_0_8px_rgba(77,141,255,.65)]
           "
         />
       )}

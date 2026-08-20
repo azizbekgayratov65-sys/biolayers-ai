@@ -130,7 +130,7 @@ export default function ScientificSourcesSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.04]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         md:px-10
@@ -186,7 +186,7 @@ export default function ScientificSourcesSection() {
           -z-20
           opacity-[0.28]
           [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]
-          bg-[linear-gradient(rgba(153,246,228,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.018)_1px,transparent_1px)]
+          bg-[linear-gradient(rgba(141,178,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,.018)_1px,transparent_1px)]
           bg-[size:84px_84px]
         "
       />
@@ -366,14 +366,14 @@ export default function ScientificSourcesSection() {
                     rounded-[24px]
                     border
                     border-teal-100/[0.07]
-                    bg-[#0a1b26]/50
+                    bg-[#0a0f14]/50
                     p-5
                     shadow-[0_18px_55px_rgba(1,8,15,.16)]
                     backdrop-blur-2xl
                     transition-colors
                     duration-300
                     hover:border-teal-100/[0.14]
-                    hover:bg-[#0d2430]/62
+                    hover:bg-[#10161d]/62
                   "
                 >
                   <div
@@ -574,7 +574,7 @@ export default function ScientificSourcesSection() {
             rounded-[28px]
             border
             border-teal-100/[0.08]
-            bg-[#0a1b26]/48
+            bg-[#0a0f14]/48
             p-6
             backdrop-blur-2xl
             md:p-8
@@ -786,7 +786,7 @@ export default function ScientificSourcesSection() {
               rounded-[24px]
               border
               border-teal-100/[0.065]
-              bg-[#0a1b26]/42
+              bg-[#0a0f14]/42
               p-6
               backdrop-blur-2xl
             "
@@ -847,7 +847,7 @@ export default function ScientificSourcesSection() {
               rounded-[24px]
               border
               border-teal-100/[0.065]
-              bg-[#0a1b26]/42
+              bg-[#0a0f14]/42
               p-6
               backdrop-blur-2xl
             "

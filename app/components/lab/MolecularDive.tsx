@@ -44,7 +44,7 @@ const genes: GeneProfile[] = [
     impact: 91,
     evidence: 96,
     color: "#34d399",
-    secondary: "#22d3ee",
+    secondary: "#a15cff",
     description:
       "BRCA2 disruption may impair homologous recombination repair and produce a therapeutically relevant DNA-repair vulnerability.",
     downstream: ["RAD51", "PARP", "HRR", "Replication Fork"],
@@ -73,8 +73,8 @@ const genes: GeneProfile[] = [
     pathway: "Androgen Receptor",
     impact: 85,
     evidence: 93,
-    color: "#22d3ee",
-    secondary: "#38bdf8",
+    color: "#a15cff",
+    secondary: "#4d8dff",
     description:
       "AR amplification can increase androgen-receptor signaling and is a recurrent molecular event in advanced prostate cancer.",
     downstream: ["KLK3", "TMPRSS2", "FOXA1", "Cell Growth"],

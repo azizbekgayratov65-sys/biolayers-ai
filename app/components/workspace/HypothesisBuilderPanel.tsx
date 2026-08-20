@@ -343,7 +343,7 @@ export default function HypothesisBuilderPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[64] bg-[#020b12]/62 backdrop-blur-[6px]"
+            className="absolute inset-0 z-[64] bg-[#030507]/62 backdrop-blur-[6px]"
           />
 
           <motion.section
@@ -351,7 +351,7 @@ export default function HypothesisBuilderPanel({
             animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: 34, scale: 0.985, filter: "blur(8px)" }}
             transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-5 left-1/2 top-5 z-[67] flex w-[min(820px,calc(100vw-40px))] -translate-x-1/2 flex-col overflow-hidden rounded-[26px] border border-teal-100/[0.08] bg-[#081722]/98 shadow-[0_34px_130px_rgba(1,8,15,.64)] backdrop-blur-3xl"
+            className="absolute bottom-5 left-1/2 top-5 z-[67] flex w-[min(820px,calc(100vw-40px))] -translate-x-1/2 flex-col overflow-hidden rounded-[26px] border border-teal-100/[0.08] bg-[#070b10]/98 shadow-[0_34px_130px_rgba(1,8,15,.64)] backdrop-blur-3xl"
           >
             <header className="relative overflow-hidden border-b border-teal-100/[0.065] px-5 py-5 sm:px-7">
               <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-teal-300/[0.045] blur-3xl" />
@@ -362,7 +362,7 @@ export default function HypothesisBuilderPanel({
                 <div>
                   <div className="flex items-center gap-2">
                     <motion.span
-                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(94,234,212,.8)]"
+                      className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_9px_rgba(77,141,255,.8)]"
                       animate={{ opacity: [0.55, 1, 0.55], scale: [1, 1.22, 1] }}
                       transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                     />
@@ -371,7 +371,7 @@ export default function HypothesisBuilderPanel({
                     </p>
                   </div>
 
-                  <h2 className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-[#f0fbfa] sm:text-[30px]">
+                  <h2 className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-[#eef4ff] sm:text-[30px]">
                     Hypothesis Builder
                   </h2>
 
@@ -409,7 +409,7 @@ export default function HypothesisBuilderPanel({
                 <NotebookBlock index="05" label="Falsification criterion" text={draft.falsification} />
               </div>
 
-              <section className="mt-3 overflow-hidden rounded-[16px] border border-teal-100/[0.055] bg-[#0a1b26]/46">
+              <section className="mt-3 overflow-hidden rounded-[16px] border border-teal-100/[0.055] bg-[#0a0f14]/46">
                 <div className="flex items-center justify-between border-b border-teal-100/[0.05] px-4 py-3.5">
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-sky-300">
@@ -468,7 +468,7 @@ export default function HypothesisBuilderPanel({
               </section>
             </div>
 
-            <footer className="flex flex-col gap-3 border-t border-teal-100/[0.065] bg-[#081722]/95 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+            <footer className="flex flex-col gap-3 border-t border-teal-100/[0.065] bg-[#070b10]/95 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
               <div className="flex max-w-lg gap-2.5">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300" />
                 <p className="text-[10px] leading-5 text-slate-500">
@@ -480,7 +480,7 @@ export default function HypothesisBuilderPanel({
               <button
                 type="button"
                 onClick={() => void copyDraft()}
-                className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#99f6e4,#67e8f9)] px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#062029] shadow-[0_10px_26px_rgba(45,212,191,.11)] transition duration-300 hover:-translate-y-0.5"
+                className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.16] bg-[linear-gradient(135deg,#8db2ff,#a15cff)] px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#04070a] shadow-[0_10px_26px_rgba(77,141,255,.11)] transition duration-300 hover:-translate-y-0.5"
               >
                 <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.34)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
                 <span className="relative">{copied ? "Copied ✓" : "Copy research brief"}</span>
@@ -519,8 +519,8 @@ function NotebookBlock({
       animate={{ opacity: 1, y: 0 }}
       className={`mt-3 rounded-[16px] border p-4 transition duration-300 ${
         emphasized
-          ? "border-teal-200/[0.13] bg-teal-200/[0.035] shadow-[0_12px_38px_rgba(45,212,191,.035)]"
-          : "border-teal-100/[0.055] bg-[#0a1b26]/46"
+          ? "border-teal-200/[0.13] bg-teal-200/[0.035] shadow-[0_12px_38px_rgba(77,141,255,.035)]"
+          : "border-teal-100/[0.055] bg-[#0a0f14]/46"
       }`}
     >
       <div className="flex items-center gap-2">

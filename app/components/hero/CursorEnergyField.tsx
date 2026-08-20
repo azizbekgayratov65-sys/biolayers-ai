@@ -28,7 +28,7 @@ const STAGE_COLORS = [
   {
     primary: "#8b5cf6",
     secondary: "#5de8ff",
-    glow: "rgba(139,92,246,0.38)",
+    glow: "rgba(161,92,255,0.38)",
   },
   {
     primary: "#2563ff",

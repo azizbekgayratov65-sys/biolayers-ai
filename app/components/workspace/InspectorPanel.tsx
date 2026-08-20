@@ -115,7 +115,7 @@ export default function InspectorPanel({
                   />
                 </div>
 
-                <div className="mt-4 rounded-[22px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
+                <div className="mt-4 rounded-[22px] border border-teal-100/[0.08] bg-[#0a0f14]/48 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-300">
@@ -154,7 +154,7 @@ export default function InspectorPanel({
                   />
                 </div>
 
-                <div className="mt-6 rounded-[22px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
+                <div className="mt-6 rounded-[22px] border border-teal-100/[0.08] bg-[#0a0f14]/48 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300">
@@ -363,7 +363,7 @@ function InspectorMetric({
   label: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-teal-100/[0.08] bg-[#0a1b26]/48 p-4">
+    <div className="rounded-[18px] border border-teal-100/[0.08] bg-[#0a0f14]/48 p-4">
       <p className="truncate text-lg font-semibold capitalize text-white">
         {value}
       </p>
@@ -404,7 +404,7 @@ function RoleCard({
       whileHover={{
         y: -3,
       }}
-      className="rounded-[20px] border border-teal-100/[0.08] bg-[#0a1b26]/52 p-4 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.035]"
+      className="rounded-[20px] border border-teal-100/[0.08] bg-[#0a0f14]/52 p-4 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.035]"
     >
       <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-cyan-300/55">
         {code}

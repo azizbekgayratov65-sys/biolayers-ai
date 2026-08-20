@@ -243,7 +243,7 @@ export default function HeroStageNarrative() {
             rounded-[24px]
             border
             border-teal-100/[0.08]
-            bg-[#081722]/58
+            bg-[#070b10]/58
             p-4
             shadow-[0_28px_90px_rgba(1,8,15,.32)]
             backdrop-blur-2xl
@@ -414,7 +414,7 @@ export default function HeroStageNarrative() {
                     text-xl
                     font-semibold
                     tracking-[-0.035em]
-                    text-[#f0fbfa]
+                    text-[#eef4ff]
                     sm:text-2xl
                   "
                 >

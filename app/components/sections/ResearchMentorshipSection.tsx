@@ -27,7 +27,7 @@ export default function ResearchMentorshipSection() {
     <section
       id="research-mentorship"
       aria-labelledby="research-mentorship-heading"
-      className="relative isolate overflow-hidden border-t border-teal-100/[0.05] bg-[#06111a] px-6 py-28 sm:px-8 lg:px-10 lg:py-36"
+      className="relative isolate overflow-hidden border-t border-teal-100/[0.05] bg-[#04070a] px-6 py-28 sm:px-8 lg:px-10 lg:py-36"
     >
       <div
         aria-hidden="true"
@@ -37,7 +37,7 @@ export default function ResearchMentorshipSection() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[10%] top-[8%] h-[420px] w-[420px] rounded-full bg-teal-400/[0.055] blur-[130px]" />
         <div className="absolute right-[8%] top-[18%] h-[380px] w-[380px] rounded-full bg-sky-400/[0.045] blur-[130px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(153,246,228,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,0.025)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(141,178,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,0.025)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       </div>
 
       <div className="relative mx-auto max-w-[1440px]">
@@ -49,7 +49,7 @@ export default function ResearchMentorshipSection() {
           className="mx-auto max-w-4xl text-center"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/15 bg-teal-300/[0.045] px-4 py-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,.7)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(77,141,255,.7)]" />
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-teal-100/75">
               Scientific mentorship
             </span>
@@ -89,9 +89,9 @@ export default function ResearchMentorshipSection() {
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.25, duration: 0.6 }}
-              className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full border border-teal-100/15 bg-[#0a1b26] shadow-[0_0_45px_rgba(94,234,212,.12)]"
+              className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full border border-teal-100/15 bg-[#0a0f14] shadow-[0_0_45px_rgba(77,141,255,.12)]"
             >
-              <div className="h-2.5 w-2.5 rounded-full bg-teal-200 shadow-[0_0_18px_rgba(94,234,212,.85)]" />
+              <div className="h-2.5 w-2.5 rounded-full bg-teal-200 shadow-[0_0_18px_rgba(77,141,255,.85)]" />
               {!reduceMotion && (
                 <span className="absolute h-9 w-9 animate-ping rounded-full border border-teal-200/15" />
               )}
@@ -103,7 +103,7 @@ export default function ResearchMentorshipSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, delay: 0.08 }}
-            className="overflow-hidden rounded-[28px] border border-teal-100/[0.08] bg-[#0a1b26]/68 shadow-[0_30px_100px_rgba(0,0,0,.22)] backdrop-blur-2xl"
+            className="overflow-hidden rounded-[28px] border border-teal-100/[0.08] bg-[#0a0f14]/68 shadow-[0_30px_100px_rgba(0,0,0,.22)] backdrop-blur-2xl"
           >
             <div className="grid min-h-full md:grid-cols-[0.82fr_1.18fr]">
               <div className="relative min-h-[390px] overflow-hidden md:min-h-full">
@@ -115,7 +115,7 @@ export default function ResearchMentorshipSection() {
                   className="object-cover object-center"
                   priority={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#081722] via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-[#0a1b26]/35" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#070b10] via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-[#0a0f14]/35" />
               </div>
 
               <div className="flex flex-col p-6 sm:p-8">
@@ -185,7 +185,7 @@ export default function ResearchMentorshipSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.15, duration: 0.65 }}
-          className="mt-6 rounded-[24px] border border-teal-100/[0.065] bg-[#0a1b26]/50 p-6 backdrop-blur-2xl sm:p-8"
+          className="mt-6 rounded-[24px] border border-teal-100/[0.065] bg-[#0a0f14]/50 p-6 backdrop-blur-2xl sm:p-8"
         >
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
             <div>
@@ -253,7 +253,7 @@ function ProfileCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.7 }}
-      className="overflow-hidden rounded-[28px] border border-teal-100/[0.08] bg-[#0a1b26]/68 shadow-[0_30px_100px_rgba(0,0,0,.22)] backdrop-blur-2xl"
+      className="overflow-hidden rounded-[28px] border border-teal-100/[0.08] bg-[#0a0f14]/68 shadow-[0_30px_100px_rgba(0,0,0,.22)] backdrop-blur-2xl"
     >
       <div className="relative aspect-[1.08/1] overflow-hidden">
         <Image
@@ -264,7 +264,7 @@ function ProfileCard({
           className="object-cover object-center"
           priority={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a1b26] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f14] via-transparent to-transparent" />
       </div>
 
       <div className="p-6 sm:p-8">

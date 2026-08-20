@@ -8,7 +8,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#06111a] px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#04070a] px-6 text-center">
       <div className="max-w-md space-y-6">
         <div className="mx-auto h-12 w-12 rounded-full border border-rose-400/20 bg-rose-400/10 p-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-6 w-6 text-rose-400">

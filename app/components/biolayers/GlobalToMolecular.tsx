@@ -1508,7 +1508,7 @@ export default function GlobalToMolecular() {
             absolute
             inset-0
             z-30
-            bg-[radial-gradient(circle_at_50%_52%,rgba(255,255,255,.64)_0%,rgba(196,181,253,.18)_10%,rgba(34,211,238,.08)_22%,rgba(139,92,246,.05)_38%,transparent_62%)]
+            bg-[radial-gradient(circle_at_50%_52%,rgba(255,255,255,.64)_0%,rgba(196,181,253,.18)_10%,rgba(34,211,238,.08)_22%,rgba(161,92,255,.05)_38%,transparent_62%)]
           "
         />
 

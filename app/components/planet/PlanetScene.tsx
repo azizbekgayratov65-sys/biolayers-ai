@@ -1344,7 +1344,7 @@ export default function PlanetScene() {
             via-cyan-300/10
             via-50%
             to-transparent
-            shadow-[0_0_35px_rgba(139,92,246,.3)]
+            shadow-[0_0_35px_rgba(161,92,255,.3)]
           "
         />
 
@@ -1375,7 +1375,7 @@ export default function PlanetScene() {
             from-fuchsia-300/10
             via-violet-200/80
             to-transparent
-            shadow-[0_0_12px_rgba(196,181,253,.85),0_0_40px_rgba(139,92,246,.55)]
+            shadow-[0_0_12px_rgba(196,181,253,.85),0_0_40px_rgba(161,92,255,.55)]
           "
         />
 
@@ -1406,7 +1406,7 @@ export default function PlanetScene() {
             border
             border-violet-200/25
             bg-white/[0.025]
-            shadow-[0_0_35px_rgba(255,255,255,.2),0_0_85px_rgba(139,92,246,.35),0_0_180px_rgba(217,70,239,.18)]
+            shadow-[0_0_35px_rgba(255,255,255,.2),0_0_85px_rgba(161,92,255,.35),0_0_180px_rgba(217,70,239,.18)]
             backdrop-blur-xl
           "
         >
@@ -1498,7 +1498,7 @@ export default function PlanetScene() {
             rounded-full
             border
             border-violet-300/20
-            shadow-[0_0_40px_rgba(139,92,246,.14)]
+            shadow-[0_0_40px_rgba(161,92,255,.14)]
           "
         />
 
@@ -1556,7 +1556,7 @@ export default function PlanetScene() {
             rounded-[50%]
             border
             border-violet-200/25
-            bg-[radial-gradient(ellipse,rgba(196,181,253,.18)_0%,rgba(139,92,246,.12)_24%,rgba(217,70,239,.055)_44%,transparent_72%)]
+            bg-[radial-gradient(ellipse,rgba(196,181,253,.18)_0%,rgba(161,92,255,.12)_24%,rgba(217,70,239,.055)_44%,transparent_72%)]
             shadow-[0_0_45px_rgba(167,139,250,.3),0_0_120px_rgba(126,34,206,.22)]
             blur-[0.2px]
           "

@@ -51,52 +51,52 @@ const palettes: Record<
   }
 > = {
   idle: {
-    core: "#67e8f9",
-    core2: "#8b5cf6",
-    signal: "#22d3ee",
-    accent: "#f472b6",
+    core: "#4d8dff",
+    core2: "#a15cff",
+    signal: "#a15cff",
+    accent: "#c095fd",
   },
   route: {
-    core: "#ffffff",
-    core2: "#67e8f9",
-    signal: "#c4b5fd",
-    accent: "#f0abfc",
+    core: "#e8edf2",
+    core2: "#a15cff",
+    signal: "#c095fd",
+    accent: "#c095fd",
   },
   connect: {
-    core: "#d9f99d",
-    core2: "#22d3ee",
-    signal: "#d6ff4b",
-    accent: "#67e8f9",
+    core: "#57ffa0",
+    core2: "#a15cff",
+    signal: "#57ffa0",
+    accent: "#a15cff",
   },
   evidence: {
-    core: "#fed7aa",
-    core2: "#fb7185",
-    signal: "#fb923c",
-    accent: "#f472b6",
+    core: "#ffc53d",
+    core2: "#ff3b5c",
+    signal: "#ffc53d",
+    accent: "#ff3b5c",
   },
   hypothesis: {
-    core: "#fef3c7",
-    core2: "#c4b5fd",
-    signal: "#fde68a",
-    accent: "#a78bfa",
+    core: "#ffd64a",
+    core2: "#a15cff",
+    signal: "#ffc53d",
+    accent: "#c095fd",
   },
   research: {
-    core: "#a7f3d0",
-    core2: "#22d3ee",
-    signal: "#34d399",
-    accent: "#60a5fa",
+    core: "#90ffc0",
+    core2: "#4d8dff",
+    signal: "#2bff88",
+    accent: "#8db2ff",
   },
   success: {
-    core: "#d9f99d",
-    core2: "#34d399",
-    signal: "#86efac",
-    accent: "#22d3ee",
+    core: "#57ffa0",
+    core2: "#2bff88",
+    signal: "#90ffc0",
+    accent: "#a15cff",
   },
   warning: {
-    core: "#fecaca",
-    core2: "#fb7185",
-    signal: "#fb7185",
-    accent: "#f97316",
+    core: "#ff93aa",
+    core2: "#ff3b5c",
+    signal: "#ff3b5c",
+    accent: "#ffc53d",
   },
 };
 
@@ -564,7 +564,7 @@ function PortalTransition() {
       exit={{
         opacity: 0,
       }}
-      className="pointer-events-none fixed inset-0 z-[205] overflow-hidden bg-[#01030a]/15"
+      className="pointer-events-none fixed inset-0 z-[205] overflow-hidden bg-[#030507]/15"
     >
       {/* 1. NODE launches from the resting corner */}
       <motion.div
@@ -699,11 +699,11 @@ function PortalTransition() {
         className="absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           background:
-            "conic-gradient(from 0deg, transparent 0deg, rgba(34,211,238,.95) 28deg, rgba(167,139,250,.88) 72deg, rgba(244,114,182,.72) 118deg, transparent 160deg, rgba(34,211,238,.7) 210deg, transparent 250deg, rgba(167,139,250,.82) 300deg, transparent 360deg)",
+            "conic-gradient(from 0deg, transparent 0deg, rgba(77,141,255,.95) 28deg, rgba(161,92,255,.88) 72deg, rgba(255,59,92,.72) 118deg, transparent 160deg, rgba(77,141,255,.7) 210deg, transparent 250deg, rgba(161,92,255,.82) 300deg, transparent 360deg)",
           filter:
             "blur(1px)",
           boxShadow:
-            "0 0 55px rgba(34,211,238,.3), 0 0 120px rgba(139,92,246,.24)",
+            "0 0 55px rgba(77,141,255,.3), 0 0 120px rgba(161,92,255,.24)",
           maskImage:
             "radial-gradient(circle, transparent 47%, black 51%)",
           WebkitMaskImage:
@@ -758,7 +758,7 @@ function PortalTransition() {
         className="absolute left-1/2 top-1/2 h-[55vmax] w-[55vmax] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(255,255,255,.92) 0%, rgba(103,232,249,.58) 8%, rgba(139,92,246,.32) 18%, rgba(244,114,182,.12) 30%, rgba(2,6,23,.94) 48%, rgba(1,3,10,1) 68%, rgba(1,3,10,0) 82%)",
+            "radial-gradient(circle, rgba(232,237,242,.92) 0%, rgba(161,92,255,.58) 8%, rgba(161,92,255,.32) 18%, rgba(255,59,92,.12) 30%, rgba(2,6,23,.94) 48%, rgba(1,3,10,1) 68%, rgba(1,3,10,0) 82%)",
           filter:
             "blur(12px)",
         }}
@@ -809,10 +809,10 @@ function PortalTransition() {
                 background:
                   index % 2 ===
                   0
-                    ? "linear-gradient(90deg, rgba(34,211,238,.88), rgba(34,211,238,.04), transparent)"
-                    : "linear-gradient(90deg, rgba(167,139,250,.8), rgba(244,114,182,.04), transparent)",
+                    ? "linear-gradient(90deg, rgba(77,141,255,.88), rgba(77,141,255,.04), transparent)"
+                    : "linear-gradient(90deg, rgba(161,92,255,.8), rgba(255,59,92,.04), transparent)",
                 boxShadow:
-                  "0 0 12px rgba(34,211,238,.22)",
+                  "0 0 12px rgba(77,141,255,.22)",
               }}
             />
           );
@@ -898,19 +898,19 @@ function PortalTransition() {
               background:
                 index % 3 ===
                 0
-                  ? "#67e8f9"
+                  ? "#a15cff"
                   : index % 3 ===
                       1
-                    ? "#a78bfa"
-                    : "#f472b6",
+                    ? "#a15cff"
+                    : "#a15cff",
               boxShadow:
                 index % 3 ===
                 0
-                  ? "0 0 12px #67e8f9"
+                  ? "0 0 12px #a15cff"
                   : index % 3 ===
                       1
-                    ? "0 0 12px #a78bfa"
-                    : "0 0 12px #f472b6",
+                    ? "0 0 12px #a15cff"
+                    : "0 0 12px #a15cff",
             }}
           />
         ),
@@ -1043,7 +1043,7 @@ function PortalTransition() {
             1,
           ],
         }}
-        className="absolute bottom-[23px] right-[23px] h-[104px] w-[104px] rounded-full border border-cyan-100/55 shadow-[0_0_35px_rgba(34,211,238,.32),0_0_95px_rgba(139,92,246,.22)]"
+        className="absolute bottom-[23px] right-[23px] h-[104px] w-[104px] rounded-full border border-cyan-100/55 shadow-[0_0_35px_rgba(77,141,255,.32),0_0_95px_rgba(161,92,255,.22)]"
       />
     </motion.div>
   );
@@ -1073,7 +1073,7 @@ function NodeFlightTail() {
         className="absolute right-[68%] top-1/2 h-[3px] w-[185px] origin-right -translate-y-1/2 bg-gradient-to-l from-cyan-100 via-cyan-300/75 to-transparent"
         style={{
           boxShadow:
-            "0 0 12px rgba(34,211,238,.6)",
+            "0 0 12px rgba(77,141,255,.6)",
         }}
       />
 
@@ -1415,7 +1415,7 @@ function LivingNode({
               exit={{
                 opacity: 0,
               }}
-              className="absolute left-[-42px] top-1/2 h-px w-[75px] origin-right bg-gradient-to-l from-[#d6ff4b] to-transparent shadow-[0_0_12px_rgba(214,255,75,.6)]"
+              className="absolute left-[-42px] top-1/2 h-px w-[75px] origin-right bg-gradient-to-l from-[#57ffa0] to-transparent shadow-[0_0_12px_rgba(87,255,160,.6)]"
             />
 
             <motion.div
@@ -1434,7 +1434,7 @@ function LivingNode({
               exit={{
                 opacity: 0,
               }}
-              className="absolute right-[-42px] top-1/2 h-px w-[75px] origin-left bg-gradient-to-r from-[#d6ff4b] to-transparent shadow-[0_0_12px_rgba(214,255,75,.6)]"
+              className="absolute right-[-42px] top-1/2 h-px w-[75px] origin-left bg-gradient-to-r from-[#57ffa0] to-transparent shadow-[0_0_12px_rgba(87,255,160,.6)]"
             />
           </>
         )}

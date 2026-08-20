@@ -111,7 +111,7 @@ export default function CancerEvolutionTimeline() {
   }, [activeStage]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[-15%] top-[-20%] h-[620px] w-[620px] rounded-full bg-cyan-500/10 blur-[160px]" />
         <div className="absolute bottom-[-25%] right-[-10%] h-[720px] w-[720px] rounded-full bg-violet-600/10 blur-[180px]" />
@@ -194,7 +194,7 @@ export default function CancerEvolutionTimeline() {
                     }`}
                   >
                     {active && (
-                      <div className="absolute inset-y-0 left-0 w-[2px] bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,.8)]" />
+                      <div className="absolute inset-y-0 left-0 w-[2px] bg-cyan-300 shadow-[0_0_16px_rgba(161,92,255,.8)]" />
                     )}
 
                     <div className="flex items-start gap-4">
@@ -258,7 +258,7 @@ export default function CancerEvolutionTimeline() {
 
                 <div className="absolute inset-[18%] rounded-full bg-gradient-to-br from-cyan-400/[0.08] via-violet-500/[0.08] to-rose-500/[0.09] blur-xl" />
 
-                <div className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-white/[0.025] shadow-[0_0_90px_rgba(139,92,246,.12)]">
+                <div className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-white/[0.025] shadow-[0_0_90px_rgba(161,92,255,.12)]">
                   <div className="absolute inset-[22%] rounded-full border border-rose-300/20 bg-rose-400/[0.06] shadow-[0_0_45px_rgba(251,113,133,.12)]" />
                   <div className="absolute inset-[40%] rounded-full bg-white/70 shadow-[0_0_30px_rgba(255,255,255,.5)]" />
                 </div>
@@ -269,7 +269,7 @@ export default function CancerEvolutionTimeline() {
                     className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all duration-500 hover:scale-150 ${
                       clone.resistant
                         ? "border-rose-300/60 bg-rose-400/30 shadow-[0_0_18px_rgba(251,113,133,.5)]"
-                        : "border-cyan-200/40 bg-cyan-300/20 shadow-[0_0_14px_rgba(103,232,249,.25)]"
+                        : "border-cyan-200/40 bg-cyan-300/20 shadow-[0_0_14px_rgba(161,92,255,.25)]"
                     }`}
                     style={{
                       left: `${clone.x}%`,
@@ -412,7 +412,7 @@ export default function CancerEvolutionTimeline() {
                     <span
                       className={`flex h-10 w-10 items-center justify-center rounded-full border text-[10px] font-bold transition-all ${
                         active
-                          ? "scale-110 border-cyan-200 bg-cyan-300 text-black shadow-[0_0_25px_rgba(103,232,249,.45)]"
+                          ? "scale-110 border-cyan-200 bg-cyan-300 text-black shadow-[0_0_25px_rgba(161,92,255,.45)]"
                           : passed
                           ? "border-violet-300/40 bg-violet-400/15 text-violet-100"
                           : "border-white/10 bg-[#070a11] text-white/30"

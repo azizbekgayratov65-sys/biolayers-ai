@@ -24,7 +24,7 @@ export default function LivingWorkspaceAtmosphere({
         }
       : view === "citations"
         ? {
-            a: "rgba(139,92,246,.18)",
+            a: "rgba(161,92,255,.18)",
             b: "rgba(236,72,153,.12)",
             c: "rgba(34,211,238,.09)",
           }
@@ -32,7 +32,7 @@ export default function LivingWorkspaceAtmosphere({
           ? {
               a: "rgba(245,158,11,.16)",
               b: "rgba(251,113,133,.1)",
-              c: "rgba(139,92,246,.09)",
+              c: "rgba(161,92,255,.09)",
             }
           : view === "cells"
             ? {
@@ -43,12 +43,12 @@ export default function LivingWorkspaceAtmosphere({
             : view === "pubmed"
               ? {
                   a: "rgba(59,130,246,.16)",
-                  b: "rgba(139,92,246,.12)",
+                  b: "rgba(161,92,255,.12)",
                   c: "rgba(236,72,153,.08)",
                 }
               : {
                   a: "rgba(34,211,238,.13)",
-                  b: "rgba(139,92,246,.11)",
+                  b: "rgba(161,92,255,.11)",
                   c: "rgba(236,72,153,.07)",
                 };
 

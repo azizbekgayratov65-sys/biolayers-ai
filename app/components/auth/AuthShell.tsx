@@ -31,7 +31,7 @@ export default function AuthShell({
       />
 
       <div className="relative w-full max-w-md">
-        <div className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#050914]/85 p-6 shadow-[0_30px_100px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-8">
+        <div className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/85 p-6 shadow-[0_30px_100px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-8">
           <div className="mb-8 text-center">
             <Link
               href="/"

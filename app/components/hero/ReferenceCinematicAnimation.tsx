@@ -187,14 +187,14 @@ function drawWave(
     const g = ctx.createLinearGradient(0, 0, w, 0);
     g.addColorStop(0, "rgba(34,211,238,0)");
     g.addColorStop(0.18, "rgba(34,211,238,.45)");
-    g.addColorStop(0.48, "rgba(139,92,246,.58)");
+    g.addColorStop(0.48, "rgba(161,92,255,.58)");
     g.addColorStop(0.77, "rgba(244,63,94,.52)");
     g.addColorStop(1, "rgba(244,63,94,0)");
 
     ctx.strokeStyle = g;
     ctx.lineWidth = j === 6 ? 1.8 : 0.75;
     ctx.shadowBlur = 18;
-    ctx.shadowColor = "rgba(103,232,249,.65)";
+    ctx.shadowColor = "rgba(161,92,255,.65)";
 
     ctx.beginPath();
     for (let x = 0; x <= w; x += 12) {
@@ -236,7 +236,7 @@ function drawGalaxyCore(
   );
   glow.addColorStop(0, "rgba(255,255,255,.98)");
   glow.addColorStop(0.08, "rgba(244,114,182,.85)");
-  glow.addColorStop(0.22, "rgba(139,92,246,.48)");
+  glow.addColorStop(0.22, "rgba(161,92,255,.48)");
   glow.addColorStop(0.48, "rgba(59,130,246,.16)");
   glow.addColorStop(1, "rgba(0,0,0,0)");
 
@@ -317,7 +317,7 @@ export default function ReferenceCinematicAnimation() {
         const x = seeded(i * 11 + 1) * w;
         const y = seeded(i * 13 + 2) * h;
         const twinkle = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(now * 0.0015 + i));
-        context.fillStyle = `rgba(125,211,252,${0.05 * twinkle})`;
+        context.fillStyle = `rgba(141,178,255,${0.05 * twinkle})`;
         context.fillRect(x, y, 1, 1);
       }
       context.restore();
@@ -368,12 +368,12 @@ export default function ReferenceCinematicAnimation() {
           const radius = s * (0.315 + j * 0.006);
           const grad = context.createLinearGradient(cx - radius, cy, cx + radius, cy);
           grad.addColorStop(0, "rgba(34,211,238,.95)");
-          grad.addColorStop(0.45, "rgba(139,92,246,.9)");
+          grad.addColorStop(0.45, "rgba(161,92,255,.9)");
           grad.addColorStop(1, "rgba(244,63,94,.95)");
           context.strokeStyle = grad;
           context.lineWidth = j === 3 ? 2.2 : 0.8;
           context.shadowBlur = 24;
-          context.shadowColor = "rgba(139,92,246,.8)";
+          context.shadowColor = "rgba(161,92,255,.8)";
           context.beginPath();
           context.ellipse(
             cx,
@@ -403,7 +403,7 @@ export default function ReferenceCinematicAnimation() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <canvas ref={ref} className="absolute inset-0 h-full w-full" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(1,3,10,.08)_46%,rgba(1,3,10,.72)_78%,#01030a_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(1,3,10,.08)_46%,rgba(1,3,10,.72)_78%,#030507_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(1,3,10,.05),rgba(1,3,10,0)_55%,rgba(1,3,10,.65))]" />
     </div>
   );

@@ -120,7 +120,7 @@ export default function ResearchCopilotSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.04]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         md:px-10
@@ -303,7 +303,7 @@ export default function ResearchCopilotSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#0a1b26]/50
+              bg-[#0a0f14]/50
               p-6
               backdrop-blur-2xl
             "
@@ -474,7 +474,7 @@ export default function ResearchCopilotSection() {
               rounded-[26px]
               border
               border-teal-100/[0.085]
-              bg-[#0a1b26]/50
+              bg-[#0a0f14]/50
               backdrop-blur-2xl
             "
           >
@@ -881,7 +881,7 @@ function CopilotBlock({
         rounded-[16px]
         border
         border-teal-100/[0.065]
-        bg-[#0a1b26]/42
+        bg-[#0a0f14]/42
         p-5
       "
     >

@@ -78,7 +78,7 @@ export default function BrandIntro() {
               absolute
               inset-0
 
-              bg-[radial-gradient(circle_at_50%_48%,rgba(45,212,191,.12),transparent_26%),radial-gradient(circle_at_50%_52%,rgba(56,189,248,.06),transparent_42%)]
+              bg-[radial-gradient(circle_at_50%_48%,rgba(77,141,255,.12),transparent_26%),radial-gradient(circle_at_50%_52%,rgba(141,178,255,.06),transparent_42%)]
             "
           />
 
@@ -93,7 +93,7 @@ export default function BrandIntro() {
 
               opacity-[0.14]
 
-              [background-image:linear-gradient(rgba(153,246,228,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(153,246,228,.035)_1px,transparent_1px)]
+              [background-image:linear-gradient(rgba(141,178,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(141,178,255,.035)_1px,transparent_1px)]
 
               [background-size:72px_72px]
 
@@ -241,7 +241,7 @@ export default function BrandIntro() {
                 className="
                   object-contain
 
-                  drop-shadow-[0_0_22px_rgba(153,246,228,.28)]
+                  drop-shadow-[0_0_22px_rgba(141,178,255,.28)]
                 "
               />
 
@@ -285,7 +285,7 @@ export default function BrandIntro() {
                     via-white
                     to-transparent
 
-                    shadow-[0_0_14px_rgba(153,246,228,.9)]
+                    shadow-[0_0_14px_rgba(141,178,255,.9)]
                   "
                 />
               )}
@@ -421,7 +421,7 @@ export default function BrandIntro() {
                 absolute
                 inset-0
 
-                bg-[radial-gradient(circle_at_center,rgba(153,246,228,.12),transparent_15%)]
+                bg-[radial-gradient(circle_at_center,rgba(141,178,255,.12),transparent_15%)]
               "
             />
           )}

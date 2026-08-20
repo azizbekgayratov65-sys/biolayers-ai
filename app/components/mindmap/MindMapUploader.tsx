@@ -62,7 +62,7 @@ export default function MindMapUploader({
         max-w-2xl
         rounded-[24px]
         border
-        bg-[#0a1b26]/70
+        bg-[#0a0f14]/70
         p-1
         transition-colors
         duration-200

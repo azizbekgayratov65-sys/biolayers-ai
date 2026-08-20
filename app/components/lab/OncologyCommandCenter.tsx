@@ -96,7 +96,7 @@ const therapies: Therapy[] = [
 ];
 
 const networkNodes = [
-  { id: "AR", x: 17, y: 50, color: "#22d3ee" },
+  { id: "AR", x: 17, y: 50, color: "#a15cff" },
   { id: "PI3K", x: 34, y: 27, color: "#8b5cf6" },
   { id: "AKT", x: 53, y: 42, color: "#a78bfa" },
   { id: "DNA", x: 35, y: 75, color: "#34d399" },
@@ -203,7 +203,7 @@ export default function OncologyCommandCenter() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.18fr_.82fr]">
-          <section className="relative min-h-[700px] overflow-hidden rounded-[34px] border border-white/[0.08] bg-[#050914]/80 shadow-2xl shadow-black/40 backdrop-blur-xl">
+          <section className="relative min-h-[700px] overflow-hidden rounded-[34px] border border-white/[0.08] bg-[#070b10]/80 shadow-2xl shadow-black/40 backdrop-blur-xl">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.07] px-6 py-5">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">
@@ -302,7 +302,7 @@ export default function OncologyCommandCenter() {
           </section>
 
           <div className="space-y-6">
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/80 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/80 p-5 backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/30">
@@ -414,7 +414,7 @@ export default function OncologyCommandCenter() {
                   opacity: 0,
                   y: -8,
                 }}
-                className="rounded-[30px] border border-white/[0.08] bg-[#050914]/80 p-5 backdrop-blur-xl"
+                className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/80 p-5 backdrop-blur-xl"
               >
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/30">
                   Biological interpretation
@@ -462,7 +462,7 @@ export default function OncologyCommandCenter() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[34px] border border-white/[0.08] bg-[#050914]/80 p-6 backdrop-blur-xl">
+        <section className="mt-6 rounded-[34px] border border-white/[0.08] bg-[#070b10]/80 p-6 backdrop-blur-xl">
           <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-end">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">
@@ -772,7 +772,7 @@ function PathwayNetwork({
             y2={to.y}
             stroke={
               activeLayer === "pathways"
-                ? "rgba(103,232,249,.3)"
+                ? "rgba(161,92,255,.3)"
                 : "rgba(255,255,255,.11)"
             }
             strokeWidth={activeLayer === "pathways" ? 0.34 : 0.22}

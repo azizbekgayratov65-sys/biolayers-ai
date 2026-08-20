@@ -61,7 +61,7 @@ function statusStyles(mode: GenerationMode) {
   if (mode === "loading") {
     return {
       dot: "bg-cyan-300",
-      glow: "shadow-[0_0_14px_rgba(103,232,249,.9)]",
+      glow: "shadow-[0_0_14px_rgba(161,92,255,.9)]",
       text: "text-cyan-200",
       label: "Processing",
     };
@@ -70,7 +70,7 @@ function statusStyles(mode: GenerationMode) {
   if (mode === "saved") {
     return {
       dot: "bg-sky-300",
-      glow: "shadow-[0_0_14px_rgba(125,211,252,.85)]",
+      glow: "shadow-[0_0_14px_rgba(141,178,255,.85)]",
       text: "text-sky-200",
       label: "Saved",
     };
@@ -111,7 +111,7 @@ export default function WorkspaceHeader({
 
   return (
     <header
-      className={`relative z-40 items-center justify-between border-b border-teal-100/[0.09] bg-[#081722]/82 px-3 shadow-[0_14px_40px_rgba(2,8,15,.18)] backdrop-blur-[26px] sm:px-5 ${
+      className={`relative z-40 items-center justify-between border-b border-teal-100/[0.09] bg-[#070b10]/82 px-3 shadow-[0_14px_40px_rgba(2,8,15,.18)] backdrop-blur-[26px] sm:px-5 ${
         demoMode ? "hidden" : "flex h-[72px]"
       }`}
     >
@@ -121,10 +121,10 @@ export default function WorkspaceHeader({
       <div className="flex min-w-0 items-center gap-3.5">
         <Link
           href="/"
-          className="group relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[15px] border border-teal-200/[0.16] bg-[linear-gradient(145deg,rgba(45,212,191,.12),rgba(14,116,144,.08))] text-[13px] font-black tracking-[-0.05em] text-teal-50 shadow-[0_12px_34px_rgba(13,148,136,.12)] transition duration-300 hover:-translate-y-0.5 hover:border-teal-200/30 hover:shadow-[0_16px_38px_rgba(20,184,166,.18)]"
+          className="group relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[15px] border border-teal-200/[0.16] bg-[linear-gradient(145deg,rgba(77,141,255,.12),rgba(14,116,144,.08))] text-[13px] font-black tracking-[-0.05em] text-teal-50 shadow-[0_12px_34px_rgba(13,148,136,.12)] transition duration-300 hover:-translate-y-0.5 hover:border-teal-200/30 hover:shadow-[0_16px_38px_rgba(20,184,166,.18)]"
         >
           <motion.span
-            className="absolute inset-0 bg-[radial-gradient(circle_at_28%_20%,rgba(153,246,228,.22),transparent_36%),linear-gradient(135deg,transparent,rgba(56,189,248,.1))]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_28%_20%,rgba(141,178,255,.22),transparent_36%),linear-gradient(135deg,transparent,rgba(141,178,255,.1))]"
             animate={{
               opacity: [0.45, 0.8, 0.45],
             }}
@@ -139,7 +139,7 @@ export default function WorkspaceHeader({
 
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2.5">
-            <p className="truncate text-[15px] font-semibold tracking-[-0.025em] text-[#f0fbfa] sm:text-[16px]">
+            <p className="truncate text-[15px] font-semibold tracking-[-0.025em] text-[#eef4ff] sm:text-[16px]">
               BioLayers AI
             </p>
 
@@ -188,7 +188,7 @@ export default function WorkspaceHeader({
         </div>
       </div>
 
-      <nav className="hidden items-center rounded-[15px] border border-teal-100/[0.075] bg-[#0a1b26]/74 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.025),0_10px_30px_rgba(2,8,15,.16)] backdrop-blur-xl lg:flex">
+      <nav className="hidden items-center rounded-[15px] border border-teal-100/[0.075] bg-[#0a0f14]/74 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.025),0_10px_30px_rgba(2,8,15,.16)] backdrop-blur-xl lg:flex">
         {workspaceTabs.map((tab) => {
           const active = workspaceView === tab.key;
 
@@ -211,7 +211,7 @@ export default function WorkspaceHeader({
                     stiffness: 440,
                     damping: 34,
                   }}
-                  className="absolute inset-0 rounded-[11px] border border-teal-200/[0.13] bg-[linear-gradient(145deg,rgba(45,212,191,.1),rgba(56,189,248,.045))] shadow-[0_8px_24px_rgba(13,148,136,.08)]"
+                  className="absolute inset-0 rounded-[11px] border border-teal-200/[0.13] bg-[linear-gradient(145deg,rgba(77,141,255,.1),rgba(141,178,255,.045))] shadow-[0_8px_24px_rgba(13,148,136,.08)]"
                 />
               )}
 
@@ -257,7 +257,7 @@ export default function WorkspaceHeader({
               setExportMenuOpen((current) => !current)
             }
             disabled={exporting}
-            className="group relative overflow-hidden rounded-[12px] border border-teal-200/[0.22] bg-[linear-gradient(135deg,#8ef0df_0%,#67e8f9_48%,#7dd3fc_100%)] px-4 py-2.5 text-[12px] font-extrabold text-[#062029] shadow-[0_12px_30px_rgba(45,212,191,.17)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_38px_rgba(45,212,191,.24)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative overflow-hidden rounded-[12px] border border-teal-200/[0.22] bg-[linear-gradient(135deg,#57ffa0_0%,#4d8dff_52%,#a15cff_100%)] px-4 py-2.5 text-[12px] font-extrabold text-[#04070a] shadow-[0_12px_30px_rgba(77,141,255,.17)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_38px_rgba(77,141,255,.24)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.38)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
             <span className="relative">
@@ -293,7 +293,7 @@ export default function WorkspaceHeader({
                   duration: 0.22,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="absolute right-0 top-[calc(100%+10px)] z-[120] w-56 overflow-hidden rounded-[18px] border border-teal-100/[0.1] bg-[#0a1b26]/98 p-2 shadow-[0_24px_80px_rgba(1,8,15,.58)] backdrop-blur-3xl"
+                className="absolute right-0 top-[calc(100%+10px)] z-[120] w-56 overflow-hidden rounded-[18px] border border-teal-100/[0.1] bg-[#0a0f14]/98 p-2 shadow-[0_24px_80px_rgba(1,8,15,.58)] backdrop-blur-3xl"
               >
                 <div className="mb-1 px-3 pb-2 pt-2">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">

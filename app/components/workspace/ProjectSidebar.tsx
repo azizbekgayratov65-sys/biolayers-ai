@@ -75,13 +75,13 @@ const entityVisuals: Record<
 > = {
   cell: {
     dot: "bg-teal-300",
-    glow: "shadow-[0_0_12px_rgba(94,234,212,.75)]",
+    glow: "shadow-[0_0_12px_rgba(77,141,255,.75)]",
     activeBorder: "border-teal-200/[0.14]",
     activeBg: "bg-teal-200/[0.045]",
   },
   protein: {
     dot: "bg-cyan-300",
-    glow: "shadow-[0_0_12px_rgba(103,232,249,.7)]",
+    glow: "shadow-[0_0_12px_rgba(161,92,255,.7)]",
     activeBorder: "border-cyan-200/[0.13]",
     activeBg: "bg-cyan-200/[0.04]",
   },
@@ -99,7 +99,7 @@ const entityVisuals: Record<
   },
   process: {
     dot: "bg-sky-300",
-    glow: "shadow-[0_0_12px_rgba(125,211,252,.72)]",
+    glow: "shadow-[0_0_12px_rgba(141,178,255,.72)]",
     activeBorder: "border-sky-200/[0.13]",
     activeBg: "bg-sky-200/[0.04]",
   },
@@ -136,12 +136,12 @@ export default function ProjectSidebar({
 
   return (
     <aside
-      className={`relative overflow-y-auto border-r border-teal-100/[0.075] bg-[#081722]/76 px-3.5 py-4 shadow-[18px_0_50px_rgba(2,8,15,.08)] backdrop-blur-[28px] ${
+      className={`relative overflow-y-auto border-r border-teal-100/[0.075] bg-[#070b10]/76 px-3.5 py-4 shadow-[18px_0_50px_rgba(2,8,15,.08)] backdrop-blur-[28px] ${
         demoMode ? "hidden" : "hidden lg:block"
       }`}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_30%_0%,rgba(45,212,191,.07),transparent_62%)]" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 bg-[radial-gradient(circle,rgba(56,189,248,.035),transparent_68%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_30%_0%,rgba(77,141,255,.07),transparent_62%)]" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 bg-[radial-gradient(circle,rgba(141,178,255,.035),transparent_68%)]" />
 
       <div className="relative">
         <WorkspaceSectionLabel>Project</WorkspaceSectionLabel>
@@ -206,7 +206,7 @@ export default function ProjectSidebar({
           Source
         </WorkspaceSectionLabel>
 
-        <div className="mt-3 rounded-[19px] border border-teal-100/[0.07] bg-[#0a1b26]/58 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,.02)]">
+        <div className="mt-3 rounded-[19px] border border-teal-100/[0.07] bg-[#0a0f14]/58 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,.02)]">
           <div className="mb-2.5 flex items-center justify-between gap-3">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-teal-300">
               Research paragraph
@@ -299,7 +299,7 @@ export default function ProjectSidebar({
                     }
                     className={`absolute top-[3px] h-[10px] w-[10px] rounded-full ${
                       active
-                        ? "bg-teal-200 shadow-[0_0_8px_rgba(153,246,228,.65)]"
+                        ? "bg-teal-200 shadow-[0_0_8px_rgba(141,178,255,.65)]"
                         : "bg-slate-600"
                     }`}
                   />
@@ -317,7 +317,7 @@ export default function ProjectSidebar({
           <button
             type="button"
             onClick={saveCurrentProject}
-            className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.18] bg-[linear-gradient(135deg,rgba(94,234,212,.9),rgba(103,232,249,.88))] px-3 py-2.5 text-[11px] font-extrabold text-[#062029] shadow-[0_10px_26px_rgba(45,212,191,.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_13px_30px_rgba(45,212,191,.18)]"
+            className="group relative overflow-hidden rounded-[13px] border border-teal-200/[0.18] bg-[linear-gradient(135deg,rgba(77,141,255,.9),rgba(161,92,255,.88))] px-3 py-2.5 text-[11px] font-extrabold text-[#04070a] shadow-[0_10px_26px_rgba(77,141,255,.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_13px_30px_rgba(77,141,255,.18)]"
           >
             <span className="absolute inset-0 translate-x-[-120%] bg-[linear-gradient(110deg,transparent_35%,rgba(255,255,255,.35)_50%,transparent_65%)] transition-transform duration-700 group-hover:translate-x-[120%]" />
             <span className="relative">Save</span>

@@ -97,7 +97,7 @@ function palette(
     return {
       primary: "#B8F6FF",
       secondary: "#67E8F9",
-      border: "rgba(103,232,249,.42)",
+      border: "rgba(161,92,255,.42)",
       background:
         "rgba(3,17,29,.84)",
     };

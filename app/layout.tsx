@@ -4,9 +4,9 @@ import type {
 } from "next";
 
 import {
-  Geist,
-  Geist_Mono,
-  Manrope,
+  Instrument_Sans,
+  Spectral,
+  IBM_Plex_Mono,
 } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -16,24 +16,27 @@ import "./globals.css";
 
 import Navbar from "./components/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spectral = Spectral({
+  variable: "--font-spectral",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
   preload: false,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
   display: "swap",
-  preload: false,
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -88,7 +91,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "dark",
-  themeColor: "#06111a",
+  themeColor: "#04070a",
   width: "device-width",
   initialScale: 1,
 };
@@ -102,11 +105,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`
-        ${geistSans.variable}
-        ${geistMono.variable}
-        ${manrope.variable}
+        ${spectral.variable}
+        ${instrument.variable}
+        ${plexMono.variable}
         h-full
-        bg-[#06111a]
+        bg-[#04070a]
         antialiased
       `}
       suppressHydrationWarning
@@ -125,7 +128,7 @@ export default function RootLayout({
           className="
             relative
             min-h-screen
-            bg-[#06111a]
+            bg-[#04070a]
             text-slate-100
           "
           style={{

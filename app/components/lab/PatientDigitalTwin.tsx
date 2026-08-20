@@ -56,7 +56,7 @@ const therapies: TherapyOption[] = [
     response: 69,
     resistance: 58,
     toxicity: 22,
-    color: "#22d3ee",
+    color: "#a15cff",
     rationale:
       "AR amplification suggests persistent androgen receptor signaling but also elevated evolutionary pressure toward resistance.",
   },
@@ -101,7 +101,7 @@ const molecularEvents: MolecularEvent[] = [
     alteration: "Amplification",
     type: "Resistance",
     impact: 84,
-    color: "#22d3ee",
+    color: "#a15cff",
   },
 ];
 
@@ -153,14 +153,14 @@ export default function PatientDigitalTwin() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background selectedColor={selectedTherapy.color} />
 
       <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-8 md:px-8">
         <header className="mb-6 flex flex-col gap-6 rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-2xl xl:flex-row xl:items-center xl:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,.9)]" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(161,92,255,.9)]" />
 
               <span className="text-[10px] font-bold uppercase tracking-[0.34em] text-cyan-200/70">
                 BioLayers Digital Twin Engine
@@ -186,7 +186,7 @@ export default function PatientDigitalTwin() {
 
         <section className="grid gap-6 xl:grid-cols-[0.72fr_1.2fr_.82fr]">
           <aside className="space-y-6">
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <SectionHeader
                 eyebrow="Patient profile"
                 title="Clinical Context"
@@ -202,7 +202,7 @@ export default function PatientDigitalTwin() {
               </div>
             </section>
 
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <SectionHeader
                 eyebrow="Molecular layer"
                 title="Priority Alterations"
@@ -367,7 +367,7 @@ export default function PatientDigitalTwin() {
           </section>
 
           <aside className="space-y-6">
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <SectionHeader
                 eyebrow="Therapy simulator"
                 title="Intervention Strategy"
@@ -469,7 +469,7 @@ export default function PatientDigitalTwin() {
                   opacity: 0,
                   y: -10,
                 }}
-                className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl"
+                className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl"
               >
                 <SectionHeader
                   eyebrow="Predicted scenario"
@@ -505,7 +505,7 @@ export default function PatientDigitalTwin() {
             <section className="rounded-[30px] border border-cyan-300/[0.12] bg-cyan-300/[0.035] p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.08]">
-                  <span className="h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_14px_rgba(165,243,252,.9)]" />
+                  <span className="h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_14px_rgba(161,92,255,.9)]" />
                 </div>
 
                 <div>
@@ -756,7 +756,7 @@ function DigitalTumor({
             repeat: Infinity,
           }}
           style={{
-            background: `radial-gradient(circle, ${color}33, rgba(139,92,246,.12), transparent 70%)`,
+            background: `radial-gradient(circle, ${color}33, rgba(161,92,255,.12), transparent 70%)`,
           }}
         />
 

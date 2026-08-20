@@ -65,7 +65,7 @@ export function SavedPapersPanel({
   };
 
   return (
-    <section className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#050914]/80 backdrop-blur-xl">
+    <section className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/80 backdrop-blur-xl">
       <div className="border-b border-white/[0.06] px-6 py-5">
         <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/30">
           Your library

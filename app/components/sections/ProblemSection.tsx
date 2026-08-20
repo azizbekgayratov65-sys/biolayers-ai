@@ -157,7 +157,7 @@ export default function ProblemSection() {
         overflow-hidden
         border-t
         border-teal-100/[0.045]
-        bg-[#06111a]
+        bg-[#04070a]
         px-6
         py-28
         md:px-10
@@ -387,13 +387,13 @@ export default function ProblemSection() {
                   rounded-[24px]
                   border
                   border-teal-100/[0.085]
-                  bg-[#0a1b26]/58
+                  bg-[#0a0f14]/58
                   p-7
                   backdrop-blur-2xl
                   transition-colors
                   duration-500
                   hover:border-teal-100/[0.16]
-                  hover:bg-[#0d2430]/72
+                  hover:bg-[#10161d]/72
                   md:p-8
                 "
               >
@@ -580,7 +580,7 @@ export default function ProblemSection() {
             rounded-[28px]
             border
             border-teal-100/[0.085]
-            bg-[#0a1b26]/58
+            bg-[#0a0f14]/58
             p-8
             backdrop-blur-2xl
             md:p-10

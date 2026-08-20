@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -54,7 +54,7 @@ export default function Home() {
           overflow-hidden
           border-t
           border-teal-200/[0.06]
-          bg-[#040d15]
+          bg-[#030507]
           py-24
         "
       >

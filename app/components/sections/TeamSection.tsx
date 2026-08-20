@@ -266,9 +266,9 @@ function CoreNode() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="relative flex h-28 w-28 items-center justify-center rounded-full border border-cyan-200/25 bg-[#050814]/90 shadow-[0_0_36px_rgba(103,232,249,.28),0_0_80px_rgba(139,92,246,.18)] backdrop-blur-xl"
+        className="relative flex h-28 w-28 items-center justify-center rounded-full border border-cyan-200/25 bg-[#050814]/90 shadow-[0_0_36px_rgba(161,92,255,.28),0_0_80px_rgba(161,92,255,.18)] backdrop-blur-xl"
       >
-        <div className="h-8 w-8 rounded-full bg-white shadow-[0_0_18px_white,0_0_42px_#67e8f9,0_0_72px_#8b5cf6]" />
+        <div className="h-8 w-8 rounded-full bg-white shadow-[0_0_18px_white,0_0_42px_#a15cff,0_0_72px_#8b5cf6]" />
       </motion.div>
 
       <div className="absolute bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-center">
@@ -292,9 +292,9 @@ export default function TeamSection() {
     <section
       id="team"
       aria-labelledby="team-heading"
-      className="relative z-40 overflow-hidden border-y border-white/[0.06] bg-[#01030a] px-6 py-24 sm:px-10 lg:px-16 lg:py-32"
+      className="relative z-40 overflow-hidden border-y border-white/[0.06] bg-[#030507] px-6 py-24 sm:px-10 lg:px-16 lg:py-32"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_25%,rgba(34,211,238,.09),transparent_30%),radial-gradient(circle_at_82%_30%,rgba(139,92,246,.10),transparent_32%),radial-gradient(circle_at_50%_110%,rgba(236,72,153,.06),transparent_38%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_25%,rgba(34,211,238,.09),transparent_30%),radial-gradient(circle_at_82%_30%,rgba(161,92,255,.10),transparent_32%),radial-gradient(circle_at_50%_110%,rgba(236,72,153,.06),transparent_38%)]" />
 
       {!reduceMotion && (
         <motion.div
@@ -312,8 +312,8 @@ export default function TeamSection() {
           className="pointer-events-none absolute inset-0 opacity-[0.035]"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(103,232,249,.14) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(139,92,246,.12) 1px, transparent 1px)
+              linear-gradient(rgba(161,92,255,.14) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(161,92,255,.12) 1px, transparent 1px)
             `,
             backgroundSize:
               "72px 72px",
@@ -371,7 +371,7 @@ export default function TeamSection() {
             skills={
               founderSkills
             }
-            accent="#67e8f9"
+            accent="#a15cff"
           />
 
           <div className="relative hidden lg:block">
@@ -399,7 +399,7 @@ export default function TeamSection() {
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="absolute left-1/2 top-[142px] h-1.5 w-10 -translate-x-1/2 rounded-full bg-white shadow-[0_0_14px_white,0_0_24px_#67e8f9]"
+              className="absolute left-1/2 top-[142px] h-1.5 w-10 -translate-x-1/2 rounded-full bg-white shadow-[0_0_14px_white,0_0_24px_#a15cff]"
             />
 
             <CoreNode />

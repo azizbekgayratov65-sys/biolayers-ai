@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 
@@ -195,7 +195,7 @@ export default function FounderSection() {
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="block bg-gradient-to-r from-cyan-300 via-violet-400 to-fuchsia-400 bg-[length:220%_220%] bg-clip-text text-transparent"
+              className="block bg-gradient-to-r from-[#8db2ff] via-[#a15cff] to-[#c095fd] bg-[length:220%_220%] bg-clip-text text-transparent"
             >
               biology, AI and human impact.
             </motion.span>

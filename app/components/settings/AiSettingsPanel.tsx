@@ -187,7 +187,7 @@ export function AiSettingsPanel({
   return (
     <section
       id="ai"
-      className="scroll-mt-24 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#050914]/80 backdrop-blur-xl"
+      className="scroll-mt-24 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/80 backdrop-blur-xl"
     >
       <div className="border-b border-white/[0.06] px-6 py-5">
         <div className="flex items-center justify-between gap-4">

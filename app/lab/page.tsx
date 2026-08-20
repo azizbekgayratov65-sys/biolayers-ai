@@ -82,7 +82,7 @@ const accentMap = {
   cyan: {
     border: "hover:border-cyan-300/30",
     glow: "group-hover:shadow-[0_0_55px_rgba(34,211,238,.10)]",
-    dot: "bg-cyan-300 shadow-[0_0_14px_rgba(103,232,249,.9)]",
+    dot: "bg-cyan-300 shadow-[0_0_14px_rgba(161,92,255,.9)]",
     text: "text-cyan-200",
     background: "from-cyan-400/[0.07]",
   },
@@ -130,8 +130,8 @@ const accentMap = {
   },
   teal: {
     border: "hover:border-teal-300/30",
-    glow: "group-hover:shadow-[0_0_55px_rgba(45,212,191,.10)]",
-    dot: "bg-teal-300 shadow-[0_0_14px_rgba(94,234,212,.9)]",
+    glow: "group-hover:shadow-[0_0_55px_rgba(77,141,255,.10)]",
+    dot: "bg-teal-300 shadow-[0_0_14px_rgba(77,141,255,.9)]",
     text: "text-teal-200",
     background: "from-teal-400/[0.07]",
   },
@@ -139,7 +139,7 @@ const accentMap = {
 
 export default function LabPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background />
 
       <div className="relative z-10 mx-auto max-w-[1700px] px-5 pb-24 pt-10 md:px-8 lg:px-10">
@@ -147,7 +147,7 @@ export default function LabPage() {
           <div className="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,.9)]" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(161,92,255,.9)]" />
 
                 <span className="text-[10px] font-bold uppercase tracking-[0.34em] text-cyan-200/70">
                   BioLayers AI Research OS
@@ -156,7 +156,7 @@ export default function LabPage() {
 
               <h1 className="mt-4 max-w-5xl text-4xl font-semibold tracking-[-0.05em] sm:text-5xl lg:text-7xl">
                 Computational Oncology
-                <span className="block bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-[#8db2ff] via-white to-[#c095fd] bg-clip-text text-transparent">
                   Research Platform
                 </span>
               </h1>
@@ -220,7 +220,7 @@ export default function LabPage() {
                 >
                   <Link
                     href={module.href}
-                    className={`group relative block min-h-[310px] overflow-hidden rounded-[28px] border border-white/[0.07] bg-[#050914]/80 p-5 backdrop-blur-xl transition-all duration-300 ${accent.border} ${accent.glow}`}
+                    className={`group relative block min-h-[310px] overflow-hidden rounded-[28px] border border-white/[0.07] bg-[#070b10]/80 p-5 backdrop-blur-xl transition-all duration-300 ${accent.border} ${accent.glow}`}
                   >
                     <div
                       className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent.background} via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100`}

@@ -32,7 +32,7 @@ type Interaction = {
 const cellColors: Record<CellType, string> = {
   Cancer: "#fb7185",
   CAF: "#f59e0b",
-  "T Cell": "#22d3ee",
+  "T Cell": "#a15cff",
   Macrophage: "#a78bfa",
   Endothelial: "#34d399",
   Hypoxic: "#64748b",
@@ -65,7 +65,7 @@ const interactions: Interaction[] = [
     target: "Cancer",
     signal: "Cytotoxicity",
     strength: 64,
-    color: "#22d3ee",
+    color: "#a15cff",
   },
   {
     source: "Cancer",
@@ -124,7 +124,7 @@ export default function TumorMicroenvironmentAtlas() {
   }, [selectedType]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020409] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#030507] text-white">
       <Background />
 
       <div className="relative z-10 mx-auto max-w-[1720px] px-4 pb-20 pt-8 md:px-8">
@@ -158,7 +158,7 @@ export default function TumorMicroenvironmentAtlas() {
 
         <section className="grid gap-6 xl:grid-cols-[0.75fr_1.25fr_.8fr]">
           <aside className="space-y-6">
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <PanelHeader eyebrow="Cell populations" title="Spatial Layers" />
 
               <div className="mt-5 space-y-2">
@@ -187,13 +187,13 @@ export default function TumorMicroenvironmentAtlas() {
               </div>
             </section>
 
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <PanelHeader eyebrow="Spatial summary" title="Tissue Composition" />
 
               <div className="mt-5 space-y-4">
                 <CompositionRow label="Cancer cells" value={39} color="#fb7185" />
                 <CompositionRow label="CAFs" value={21} color="#f59e0b" />
-                <CompositionRow label="T cells" value={14} color="#22d3ee" />
+                <CompositionRow label="T cells" value={14} color="#a15cff" />
                 <CompositionRow
                   label="Macrophages"
                   value={11}
@@ -296,7 +296,7 @@ export default function TumorMicroenvironmentAtlas() {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl"
+                className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl"
               >
                 <PanelHeader
                   eyebrow="Cell inspector"
@@ -348,7 +348,7 @@ export default function TumorMicroenvironmentAtlas() {
               </motion.section>
             </AnimatePresence>
 
-            <section className="rounded-[30px] border border-white/[0.08] bg-[#050914]/85 p-5 backdrop-blur-xl">
+            <section className="rounded-[30px] border border-white/[0.08] bg-[#070b10]/85 p-5 backdrop-blur-xl">
               <PanelHeader
                 eyebrow="Communication network"
                 title="Cell-Cell Signaling"
@@ -421,7 +421,7 @@ export default function TumorMicroenvironmentAtlas() {
               title="Immune Exclusion"
               description="Spatial segregation suggests incomplete immune penetration into the tumor core."
               score={73}
-              color="#22d3ee"
+              color="#a15cff"
             />
 
             <ProgramCard
@@ -463,7 +463,7 @@ function TissueMap({
 }) {
   return (
     <div className="absolute inset-0">
-      <div className="absolute left-1/2 top-1/2 h-[460px] w-[460px] max-w-[78vw] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.06] bg-gradient-to-br from-white/[0.025] via-violet-500/[0.03] to-rose-500/[0.025] shadow-[0_0_120px_rgba(139,92,246,.08)]">
+      <div className="absolute left-1/2 top-1/2 h-[460px] w-[460px] max-w-[78vw] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.06] bg-gradient-to-br from-white/[0.025] via-violet-500/[0.03] to-rose-500/[0.025] shadow-[0_0_120px_rgba(161,92,255,.08)]">
         <div className="absolute inset-[9%] rounded-full border border-white/[0.05]" />
         <div className="absolute inset-[20%] rounded-full border border-white/[0.04]" />
         <div className="absolute inset-[33%] rounded-full border border-white/[0.03]" />
@@ -556,7 +556,7 @@ function TissueMap({
 
         {scanMode && (
           <motion.div
-            className="pointer-events-none absolute inset-x-0 h-px bg-cyan-200 shadow-[0_0_24px_rgba(165,243,252,.9)]"
+            className="pointer-events-none absolute inset-x-0 h-px bg-cyan-200 shadow-[0_0_24px_rgba(161,92,255,.9)]"
             animate={{
               top: ["5%", "95%", "5%"],
             }}
