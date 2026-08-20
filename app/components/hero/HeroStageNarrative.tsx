@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AnimatePresence,
   motion,
   useReducedMotion,
 } from "framer-motion";
@@ -229,11 +228,15 @@ export default function HeroStageNarrative() {
           absolute
           bottom-8
           right-6
+          hidden
           w-[min(420px,calc(100vw-3rem))]
           sm:right-10
           lg:bottom-10
           lg:right-14
+          lg:block
+          lg:w-[min(340px,calc(100vw-3rem))]
           xl:right-20
+          xl:w-[min(420px,calc(100vw-3rem))]
         "
       >
         <div
@@ -350,93 +353,81 @@ export default function HeroStageNarrative() {
           {/* =============================================== */}
 
           <div className="relative mt-4 min-h-[120px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeStage.key}
-                initial={
+            <motion.div
+              key={activeStage.key}
+              initial={
+                reduceMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 10,
+                      filter:
+                        "blur(6px)",
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter:
+                  "blur(0px)",
+              }}
+              transition={{
+                duration:
                   reduceMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 10,
-                        filter:
-                          "blur(6px)",
-                      }
-                }
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  filter:
-                    "blur(0px)",
-                }}
-                exit={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        opacity: 0,
-                        y: -8,
-                        filter:
-                          "blur(6px)",
-                      }
-                }
-                transition={{
-                  duration:
-                    reduceMotion
-                      ? 0
-                      : 0.45,
-                  ease: [
-                    0.16,
-                    1,
-                    0.3,
-                    1,
-                  ],
-                }}
+                    ? 0
+                    : 0.45,
+                ease: [
+                  0.16,
+                  1,
+                  0.3,
+                  1,
+                ],
+              }}
+            >
+              {/* EYEBROW */}
+
+              <p
+                className="
+                  text-[9px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.2em]
+                  text-sky-300/70
+                "
               >
-                {/* EYEBROW */}
+                {activeStage.eyebrow}
+              </p>
 
-                <p
-                  className="
-                    text-[9px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.2em]
-                    text-sky-300/70
-                  "
-                >
-                  {activeStage.eyebrow}
-                </p>
+              {/* TITLE */}
 
-                {/* TITLE */}
+              <h2
+                className="
+                  mt-2
+                  text-xl
+                  font-semibold
+                  tracking-[-0.035em]
+                  text-[#eef4ff]
+                  sm:text-2xl
+                "
+              >
+                {activeStage.title}
+              </h2>
 
-                <h2
-                  className="
-                    mt-2
-                    text-xl
-                    font-semibold
-                    tracking-[-0.035em]
-                    text-[#eef4ff]
-                    sm:text-2xl
-                  "
-                >
-                  {activeStage.title}
-                </h2>
+              {/* DESCRIPTION */}
 
-                {/* DESCRIPTION */}
-
-                <p
-                  className="
-                    mt-3
-                    max-w-[340px]
-                    text-xs
-                    leading-6
-                    text-slate-300/80
-                    sm:text-[13px]
-                  "
-                >
-                  {activeStage.description}
-                </p>
-              </motion.div>
-            </AnimatePresence>
+              <p
+                className="
+                  mt-3
+                  max-w-[340px]
+                  text-xs
+                  leading-6
+                  text-slate-300/80
+                  sm:text-[13px]
+                "
+              >
+                {activeStage.description}
+              </p>
+            </motion.div>
           </div>
 
           {/* =============================================== */}
