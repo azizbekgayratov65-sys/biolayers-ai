@@ -9,8 +9,6 @@ import {
   Users,
 } from "lucide-react";
 
-import { createClient } from "../../lib/supabase/client";
-
 /* =========================================================
    SMOOTH COUNT-UP
    ========================================================= */
@@ -192,18 +190,26 @@ export default function ProblemSection() {
   useEffect(() => {
     let cancelled = false;
 
-    createClient()
-      .rpc("get_platform_stats")
-      .then(({ data, error }) => {
-        if (cancelled) return;
-
-        if (error) {
-          setStatus("error");
-          return;
+    fetch("/api/platform-stats")
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(
+            `Platform stats request failed: ${res.status}`,
+          );
         }
 
-        setStats(data as PlatformStats);
+        return res.json() as Promise<PlatformStats>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+
+        setStats(data);
         setStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStatus("error");
+        }
       });
 
     return () => {
