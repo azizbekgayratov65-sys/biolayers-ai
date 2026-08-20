@@ -12,6 +12,32 @@ import {
   updated) response.
 */
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  const isProtectedPage =
+    pathname === "/mindmap" ||
+    pathname.startsWith("/mindmap/") ||
+    pathname === "/explore" ||
+    pathname.startsWith("/explore/") ||
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/");
+
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/signup";
+
+  const isApiRoute = pathname.startsWith("/api");
+
+  /*
+    Public pages don't need a Supabase session check. Skipping the
+    getUser() network call keeps TTFB at edge-cache speed for the
+    marketing routes instead of adding a Supabase round-trip to
+    every navigation.
+  */
+  if (!isProtectedPage && !isAuthPage && !isApiRoute) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -50,20 +76,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
-
-  const isProtectedPage =
-    pathname === "/mindmap" ||
-    pathname.startsWith("/mindmap/") ||
-    pathname === "/explore" ||
-    pathname.startsWith("/explore/") ||
-    pathname === "/settings" ||
-    pathname.startsWith("/settings/");
-
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/signup";
 
   if (!user && isProtectedPage) {
     const url = request.nextUrl.clone();

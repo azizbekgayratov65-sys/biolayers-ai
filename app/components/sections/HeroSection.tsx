@@ -7,13 +7,11 @@ import HeroStageNarrative from "../hero/HeroStageNarrative";
 
 const CursorEnergyField = dynamic(
   () => import("../hero/CursorEnergyField"),
-  { ssr: false },
 );
 
 const HeroThreeScene = dynamic(
   () => import("../hero/HeroThreeScene"),
   {
-    ssr: false,
     loading: () => (
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(77,141,255,.055),transparent_30%),radial-gradient(circle_at_84%_70%,rgba(141,178,255,.035),transparent_26%)]" />
     ),
@@ -21,19 +19,34 @@ const HeroThreeScene = dynamic(
 );
 
 function useAfterIdle(
-  timeoutMs = 2500,
+  timeoutMs = 6000,
 ): boolean {
   const [ready, setReady] =
     useState(false);
 
   useEffect(() => {
-    const handle = window.requestIdleCallback(
-      () => setReady(true),
-      { timeout: timeoutMs },
-    );
+    const start = () => {
+      const handle = window.requestIdleCallback(
+        () => setReady(true),
+        { timeout: timeoutMs },
+      );
+
+      return () => {
+        window.cancelIdleCallback(handle);
+      };
+    };
+
+    // Wait for the window load event so the three.js chunk
+    // (3D scene) never competes with the critical JS/CSS that
+    // paints the hero text — especially on slow connections.
+    if (document.readyState === "complete") {
+      return start();
+    }
+
+    window.addEventListener("load", start, { once: true });
 
     return () => {
-      window.cancelIdleCallback(handle);
+      window.removeEventListener("load", start);
     };
   }, [timeoutMs]);
 

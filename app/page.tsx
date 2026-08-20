@@ -6,14 +6,15 @@ import { ArrowRight, FlaskConical } from "lucide-react";
 
 import dynamic from "next/dynamic";
 
+import HeroSection from "./components/sections/HeroSection";
+
 const SectionPlaceholder = ({ className = "" }: { className?: string }) => (
   <div className={`w-full animate-pulse ${className}`} />
 );
 
-const HeroSection = dynamic(() => import("./components/sections/HeroSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-screen" /> });
-const ProblemSection = dynamic(() => import("./components/sections/ProblemSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[60vh]" /> });
-const CapabilitiesSection = dynamic(() => import("./components/sections/CapabilitiesSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[80vh]" /> });
-const AboutSection = dynamic(() => import("./components/sections/AboutSection"), { ssr: false, loading: () => <SectionPlaceholder className="min-h-[50vh]" /> });
+const ProblemSection = dynamic(() => import("./components/sections/ProblemSection"), { loading: () => <SectionPlaceholder className="min-h-[60vh]" /> });
+const CapabilitiesSection = dynamic(() => import("./components/sections/CapabilitiesSection"), { loading: () => <SectionPlaceholder className="min-h-[80vh]" /> });
+const AboutSection = dynamic(() => import("./components/sections/AboutSection"), { loading: () => <SectionPlaceholder className="min-h-[50vh]" /> });
 
 export default function Home() {
   const reduceMotion = Boolean(useReducedMotion());

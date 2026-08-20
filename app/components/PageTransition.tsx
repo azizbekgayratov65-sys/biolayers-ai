@@ -12,15 +12,7 @@ export default function PageTransition({
 
   return (
     <motion.div
-      initial={
-        reduceMotion
-          ? false
-          : {
-              opacity: 0,
-              y: 18,
-              filter: "blur(10px)",
-            }
-      }
+      initial={false}
       animate={{
         opacity: 1,
         y: 0,

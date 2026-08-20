@@ -198,15 +198,7 @@ export default function HeroContent() {
           {/* ============================================= */}
 
           <motion.div
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: -12,
-                    scale: 0.94,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,
@@ -453,14 +445,7 @@ export default function HeroContent() {
           {/* ============================================= */}
 
           <motion.div
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 14,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,
@@ -530,14 +515,7 @@ export default function HeroContent() {
           {/* ============================================= */}
 
           <motion.h1
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 24,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,
@@ -604,14 +582,7 @@ export default function HeroContent() {
           {/* ============================================= */}
 
           <motion.p
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 18,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,
@@ -651,14 +622,7 @@ export default function HeroContent() {
           {/* ============================================= */}
 
           <motion.div
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 12,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,
@@ -698,14 +662,7 @@ export default function HeroContent() {
 
           <motion.form
             onSubmit={openWorkspace}
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 24,
-                  }
-            }
+            initial={false}
             animate={{
               opacity: 1,
               y: 0,

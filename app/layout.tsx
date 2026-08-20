@@ -148,6 +148,13 @@ export default function RootLayout({
 
         <Navbar />
 
+        <link
+          rel="preload"
+          as="image"
+          href="/branding/biolayers-logo.png"
+          fetchPriority="high"
+        />
+
         <main
           id="main-content"
           tabIndex={-1}
