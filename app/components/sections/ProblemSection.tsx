@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
   FileText,
-  ScanSearch,
-  Download,
+  Network,
+  Users,
 } from "lucide-react";
+
+import { createClient } from "../../lib/supabase/client";
 
 /* =========================================================
    SMOOTH COUNT-UP
@@ -101,6 +103,18 @@ function CountUp({
     };
   }, [value, duration]);
 
+  /*
+   * When a new value arrives after the count-up already ran (e.g.
+   * live stats resolve after the animation), snap to it instead of
+   * leaving the previous number on screen.
+   */
+  useEffect(() => {
+    if (hasAnimatedRef.current && numberRef.current) {
+      numberRef.current.textContent =
+        value.toLocaleString("en-US");
+    }
+  }, [value]);
+
   return (
     <span
       ref={wrapperRef}
@@ -112,43 +126,91 @@ function CountUp({
 }
 
 /* =========================================================
-   VERIFIED RESEARCH METRICS
+   LIVE PLATFORM METRICS
    ========================================================= */
 
-const signals = [
+type PlatformStats = {
+  users: number;
+  papers: number;
+  entities: number;
+};
+
+type MetricStatus =
+  | "loading"
+  | "ready"
+  | "error";
+
+const metricDefs: Array<{
+  key: keyof PlatformStats;
+  icon: typeof Users;
+  label: string;
+  detail: string;
+}> = [
   {
+    key: "users",
+    icon: Users,
+    label: "researchers on BioLayers",
+    detail:
+      "Every BioLayers account — researchers mapping cancer mechanisms from the literature.",
+  },
+  {
+    key: "papers",
     icon: FileText,
-    value: 5,
-    label: "input formats",
+    label: "papers analyzed",
     detail:
-      "PDF, DOCX, TXT, Markdown, or pasted research text — parsed into a structured, evidence-linked mind map.",
-    source: "Live in the BioLayers workspace",
+      "Papers uploaded in the workspace and turned into structured, evidence-linked mind maps.",
   },
-
   {
-    icon: ScanSearch,
-    value: 4,
-    label: "evidence tiers",
+    key: "entities",
+    icon: Network,
+    label: "entities mapped",
     detail:
-      "Supporting, contradicting, contextual, and unrelated — computed per relationship from the papers retrieved for your research text.",
-    source: "Computed per relationship",
-  },
-
-  {
-    icon: Download,
-    value: 3,
-    label: "graph exports",
-    detail:
-      "PNG, JSON, and GraphML — with layer-by-layer filtering across cells, proteins, pathways, processes, and disease states.",
-    source: "In the research workspace",
+      "Cells, genes, proteins, pathways and processes mapped across every saved mind map.",
   },
 ];
+
+function metricSource(status: MetricStatus): string {
+  if (status === "ready") {
+    return "Live from the BioLayers platform";
+  }
+
+  if (status === "loading") {
+    return "Loading live data";
+  }
+
+  return "Live data unavailable";
+}
 
 /* =========================================================
    PROBLEM SECTION
    ========================================================= */
 
 export default function ProblemSection() {
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [status, setStatus] = useState<MetricStatus>("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    createClient()
+      .rpc("get_platform_stats")
+      .then(({ data, error }) => {
+        if (cancelled) return;
+
+        if (error) {
+          setStatus("error");
+          return;
+        }
+
+        setStats(data as PlatformStats);
+        setStatus("ready");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section
       className="
@@ -352,8 +414,10 @@ export default function ProblemSection() {
             md:grid-cols-3
           "
         >
-          {signals.map((item, index) => {
+          {metricDefs.map((item, index) => {
             const Icon = item.icon;
+            const value = stats?.[item.key] ?? 0;
+            const source = metricSource(status);
 
             return (
               <motion.div
@@ -485,7 +549,7 @@ export default function ProblemSection() {
                     "
                   >
                     <CountUp
-                      value={item.value}
+                      value={value}
                       duration={1200}
                     />
                   </div>
@@ -543,7 +607,7 @@ export default function ProblemSection() {
                       group-hover:text-slate-300/80
                     "
                   >
-                    {item.source}
+                    {source}
                   </div>
                 </div>
               </motion.div>
