@@ -663,8 +663,9 @@ export default memo(function BiologicalEdge({
           <>
             {[
               0,
-              0.46,
-              0.78,
+              0.38,
+              0.68,
+              0.92,
             ].map(
               (
                 delay,
@@ -674,7 +675,7 @@ export default memo(function BiologicalEdge({
                   key={delay}
                   r={
                     active
-                      ? 3.5
+                      ? 3.8
                       : 2.2
                   }
                   fill={
@@ -693,7 +694,7 @@ export default memo(function BiologicalEdge({
                   style={{
                     filter:
                       active
-                        ? `drop-shadow(0 0 8px ${relationship.color})`
+                        ? `drop-shadow(0 0 10px ${relationship.color}) drop-shadow(0 0 20px ${relationship.color}33)`
                         : "none",
                   }}
                 >
@@ -701,7 +702,7 @@ export default memo(function BiologicalEdge({
                     begin={`${delay}s`}
                     dur={
                       active
-                        ? "1.25s"
+                        ? "1.15s"
                         : "3s"
                     }
                     repeatCount="indefinite"
@@ -723,11 +724,12 @@ export default memo(function BiologicalEdge({
         "signal" &&
         !isUnmapped && (
           <>
+            {/* leading particle */}
             <circle
               r={
                 active
-                  ? 4
-                  : 2.6
+                  ? 4.5
+                  : 2.8
               }
               fill="#ffffff"
               opacity={
@@ -739,7 +741,7 @@ export default memo(function BiologicalEdge({
               style={{
                 filter:
                   active
-                    ? `drop-shadow(0 0 10px ${relationship.secondary})`
+                    ? `drop-shadow(0 0 12px ${relationship.secondary}) drop-shadow(0 0 24px ${relationship.secondary}44)`
                     : "none",
               }}
             >
@@ -756,16 +758,21 @@ export default memo(function BiologicalEdge({
               />
             </circle>
 
+            {/* glow halo */}
             <circle
               r={
                 active
-                  ? 7
-                  : 4
+                  ? 9
+                  : 4.5
               }
               fill={
                 relationship.color
               }
-              opacity=".16"
+              opacity={
+                active
+                  ? 0.22
+                  : 0.12
+              }
               className="pointer-events-none"
             >
               <animateMotion
@@ -780,6 +787,23 @@ export default memo(function BiologicalEdge({
                 }
               />
             </circle>
+
+            {/* trailing ghost */}
+            {active && (
+              <circle
+                r={3}
+                fill={relationship.secondary}
+                opacity={0.35}
+                className="pointer-events-none"
+              >
+                <animateMotion
+                  dur="0.95s"
+                  begin="0.32s"
+                  repeatCount="indefinite"
+                  path={edgePath}
+                />
+              </circle>
+            )}
           </>
         )}
 

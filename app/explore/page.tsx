@@ -65,7 +65,7 @@ const CopilotPanel = dynamic(() => import("../components/workspace/CopilotPanel"
 const PaperInspectorPanel = dynamic(() => import("../components/workspace/PaperInspectorPanel"), { ssr: false });
 const NarrativeOverlay = dynamic(() => import("../components/workspace/NarrativeOverlay"), { ssr: false });
 const DemoModeOverlay = dynamic(() => import("../components/workspace/DemoModeOverlay"), { ssr: false });
-const ProjectSidebar = dynamic(() => import("../components/workspace/ProjectSidebar"), { ssr: false });
+const ProjectToolbar = dynamic(() => import("../components/workspace/ProjectSidebar"), { ssr: false });
 const TimelinePanel = dynamic(() => import("../components/workspace/TimelinePanel"), { ssr: false });
 const ConnectBiologyPanel = dynamic(() => import("../components/workspace/ConnectBiologyPanel"), { ssr: false });
 const EvidenceLensPanel = dynamic(() => import("../components/workspace/EvidenceLensPanel"), { ssr: false });
@@ -2955,24 +2955,26 @@ ${edgeXml}
           className={`relative z-20 grid grid-cols-1 ${
             demoMode
               ? "h-[100dvh] lg:grid-cols-1"
-              : "h-[calc(100dvh-72px)] lg:grid-cols-[176px_minmax(0,1fr)_232px] xl:grid-cols-[184px_minmax(0,1fr)_242px] 2xl:grid-cols-[192px_minmax(0,1fr)_252px]"
+              : "h-[calc(100dvh-72px)] lg:grid-cols-[1fr_232px] xl:grid-cols-[1fr_242px] 2xl:grid-cols-[1fr_252px]"
           }`}
         >
-          <ProjectSidebar
-            demoMode={demoMode}
-            nodeCount={nodes.length}
-            edgeCount={edges.length}
-            activeLayerCount={activeLayerCount}
-            sourceText={sourceText}
-            layers={layers}
-            toggleLayer={toggleLayer}
-            saveCurrentProject={saveCurrentProject}
-            restoreSavedProject={restoreSavedProject}
-            deleteSavedProject={deleteSavedProject}
-            hasSavedProject={hasSavedProject}
-            saveMessage={saveMessage}
-            apiError={apiError}
-          />
+          {/* compact toolbar + canvas wrapper */}
+          <div className="flex flex-col overflow-hidden">
+            <ProjectToolbar
+              demoMode={demoMode}
+              nodeCount={nodes.length}
+              edgeCount={edges.length}
+              activeLayerCount={activeLayerCount}
+              sourceText={sourceText}
+              layers={layers}
+              toggleLayer={toggleLayer}
+              saveCurrentProject={saveCurrentProject}
+              restoreSavedProject={restoreSavedProject}
+              deleteSavedProject={deleteSavedProject}
+              hasSavedProject={hasSavedProject}
+              saveMessage={saveMessage}
+              apiError={apiError}
+            />
 
           {/* GRAPH CANVAS */}
           <section
@@ -3606,6 +3608,7 @@ ${edgeXml}
               />
             )}
           </section>
+          </div>
 
           <InspectorSidebar
             selectedEdge={selectedEdge}

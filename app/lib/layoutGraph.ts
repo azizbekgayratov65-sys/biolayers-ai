@@ -6,8 +6,8 @@ import {
   type Node,
 } from "@xyflow/react";
 
-const NODE_WIDTH = 220;
-const NODE_HEIGHT = 80;
+const NODE_WIDTH = 100;
+const NODE_HEIGHT = 100;
 
 export function layoutGraph<
   T extends Record<string, unknown>,
