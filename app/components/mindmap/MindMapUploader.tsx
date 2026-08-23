@@ -180,11 +180,18 @@ export default function MindMapUploader({
               : "Drop your research paper here"}
           </p>
 
-          <p className="mt-1 text-xs text-slate-400">
-            or click to browse — PDF, TXT,
-            Markdown or DOCX (≤ 4 MB) ·
-            PDF/TXT/MD are read locally
-          </p>
+              <p className="mt-1 text-xs text-slate-400">
+                or click to browse — PDF, TXT,
+                Markdown or DOCX (≤ 4 MB) ·
+                PDF/TXT/MD are read locally
+              </p>
+
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                This is the <span className="font-semibold text-slate-400">mind map</span> tool — it extracts
+                biological relationships from a paper and visualizes them as a
+                knowledge graph. For text summaries, use the{" "}
+                <span className="font-semibold text-slate-400">paragraph summarizer</span> on the Journey page.
+              </p>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">

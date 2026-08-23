@@ -517,6 +517,12 @@ export default function MindMapPage() {
                 compact, interactive mind map — every idea preserved, every
                 node linked back to the exact source text it came from.
               </p>
+
+              <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-slate-500">
+                <span className="font-semibold text-slate-400">Mind map</span> vs <span className="font-semibold text-slate-400">paragraph summarizer</span>: the summarizer
+                simplifies your text; the mind map extracts biological relationships
+                and visualizes them as an interactive knowledge graph.
+              </p>
             </div>
 
             {needsKey && (
