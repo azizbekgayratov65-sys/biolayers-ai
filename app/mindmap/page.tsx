@@ -17,6 +17,12 @@ import Link from "next/link";
 import type {
   MindMapResponse,
 } from "../lib/mindmapTypes";
+import { MAX_TEXT_LENGTH } from "../lib/mindmapTypes";
+import {
+  CLIENT_DOCX_MAX_BYTES,
+  extractTextInBrowser,
+  isClientExtractable,
+} from "../lib/extractTextClient";
 
 import MindMapUploader from "../components/mindmap/MindMapUploader";
 import MindMapDocument from "../components/mindmap/MindMapDocument";
@@ -118,6 +124,24 @@ export default function MindMapPage() {
     async (file: File) => {
       setError(null);
       setFileName(file.name);
+
+      const extension =
+        file.name
+          .toLowerCase()
+          .split(".")
+          .pop() ?? "";
+
+      if (
+        extension === "docx" &&
+        file.size > CLIENT_DOCX_MAX_BYTES
+      ) {
+        setError(
+          "Word documents are limited to 4 MB. Export the paper as a PDF and try again.",
+        );
+        setPhase("upload");
+        return;
+      }
+
       setPhase("loading");
       setProgressSteps([]);
 
@@ -126,14 +150,147 @@ export default function MindMapPage() {
       );
 
       try {
-        const formData = new FormData();
-        formData.append("file", file);
+        let fetchResponse: Response;
 
-        const fetchResponse =
-          await fetch("/api/mindmap", {
-            method: "POST",
-            body: formData,
-          });
+        if (isClientExtractable(file.name)) {
+          // Extract the text locally so the raw file never has to
+          // cross the serverless request-body size limit.
+          setProgressSteps([
+            {
+              step: 0,
+              label:
+                "Extracting text locally",
+              message: `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`,
+              ts: 0,
+            },
+          ]);
+
+          const extracted =
+            await extractTextInBrowser(
+              file,
+            );
+
+          if (
+            extracted.text.trim()
+              .length < 50
+          ) {
+            throw new Error(
+              "Not enough readable text could be extracted from this PDF. It may be a scanned or image-based document. Try a text-based PDF or run OCR first.",
+            );
+          }
+
+          if (
+            extracted.text.length >
+            MAX_TEXT_LENGTH
+          ) {
+            throw new Error(
+              "The extracted text is longer than the current processing limit of 500,000 characters. Upload a shorter paper.",
+            );
+          }
+
+          console.info(
+            `[mindmap] Extracted ${extracted.text.length.toLocaleString()} characters${extracted.pages > 0 ? ` from ${extracted.pages} pages` : ""} locally.`,
+          );
+
+          fetchResponse =
+            await fetch(
+              "/api/mindmap",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+                body: JSON.stringify(
+                  {
+                    fileName:
+                      file.name,
+                    text: extracted.text,
+                  },
+                ),
+              },
+            );
+        } else {
+          const formData =
+            new FormData();
+          formData.append(
+            "file",
+            file,
+          );
+
+          fetchResponse =
+            await fetch(
+              "/api/mindmap",
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+        }
+
+        if (!fetchResponse.ok) {
+          // The platform or server rejected the request before the
+          // NDJSON stream started; surface a friendly message.
+          let detail = "";
+
+          try {
+            const raw =
+              await fetchResponse.text();
+
+            for (const line of raw.split("\n")) {
+              const trimmed =
+                line.trim();
+
+              if (!trimmed) {
+                continue;
+              }
+
+              try {
+                const event = JSON.parse(
+                  trimmed,
+                ) as StreamEvent;
+
+                if (event.message) {
+                  detail = event.message;
+                  break;
+                }
+              } catch {
+                detail = trimmed;
+                break;
+              }
+            }
+          } catch {
+            // No readable body.
+          }
+
+          if (!detail) {
+            if (
+              fetchResponse.status ===
+              413
+            ) {
+              detail =
+                "This paper is too large to process in one request. Try a shorter document.";
+            } else if (
+              fetchResponse.status ===
+              401 ||
+              fetchResponse.status ===
+                403
+            ) {
+              detail =
+                "Your session has expired. Sign in again and retry.";
+            } else if (
+              fetchResponse.status ===
+              429
+            ) {
+              detail =
+                "Too many requests — please wait a few minutes and try again.";
+            } else {
+              detail = `The server could not process this upload (HTTP ${fetchResponse.status}).`;
+            }
+          }
+
+          throw new Error(detail);
+        }
 
         if (!fetchResponse.body) {
           throw new Error(
@@ -177,9 +334,17 @@ export default function MindMapPage() {
               continue;
             }
 
-            const event = JSON.parse(
-              line,
-            ) as StreamEvent;
+            let event: StreamEvent;
+
+            try {
+              event = JSON.parse(
+                line,
+              ) as StreamEvent;
+            } catch {
+              throw new Error(
+                "The server returned an unexpected response while generating the mind map.",
+              );
+            }
 
             if (
               event.type ===
@@ -399,7 +564,7 @@ export default function MindMapPage() {
             >
               <CapacityCard
                 label="File size"
-                value="Up to 25 MB"
+                value="Any size · read locally"
               />
               <CapacityCard
                 label="Paper length"

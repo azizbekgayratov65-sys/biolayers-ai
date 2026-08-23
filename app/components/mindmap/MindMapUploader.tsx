@@ -182,7 +182,8 @@ export default function MindMapUploader({
 
           <p className="mt-1 text-xs text-slate-400">
             or click to browse — PDF, TXT,
-            Markdown or DOCX · up to 25 MB
+            Markdown or DOCX (≤ 4 MB) ·
+            PDF/TXT/MD are read locally
           </p>
         </div>
 

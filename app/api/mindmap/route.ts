@@ -490,58 +490,213 @@ export async function POST(
       userId,
     );
 
-  let formData: FormData;
+  const contentType = (
+    request.headers.get(
+      "content-type",
+    ) ?? ""
+  ).toLowerCase();
 
-  try {
-    formData = await request.formData();
-  } catch {
-    return new Response(
-      jsonLine({
-        type: "error",
-        message:
-          "The request body must be multipart form data containing a file.",
-      }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type":
-            "application/x-ndjson",
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
+  // Browser-extracted uploads (large PDFs) arrive as JSON
+  // containing already-extracted text; files that still need
+  // server-side parsing arrive as multipart form data.
+  const isJsonPayload =
+    contentType.includes(
+      "application/json",
     );
+
+  let uploadedFile: File | null =
+    null;
+
+  let providedText: string | null =
+    null;
+
+  if (isJsonPayload) {
+    let payload: unknown;
+
+    try {
+      payload =
+        await request.json();
+    } catch {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "The request body must be valid JSON containing 'fileName' and 'text'.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    const candidate =
+      payload as {
+        fileName?: unknown;
+        text?: unknown;
+      } | null;
+
+    const rawFileName =
+      typeof candidate?.fileName ===
+      "string"
+        ? candidate.fileName
+        : "";
+
+    const rawText =
+      typeof candidate?.text ===
+      "string"
+        ? candidate.text
+        : "";
+
+    if (
+      !rawFileName.trim() ||
+      !rawText.trim()
+    ) {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "JSON uploads must include non-empty 'fileName' and 'text' fields.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    if (
+      !getFileType(rawFileName)
+    ) {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "Unsupported file type. Upload a PDF, TXT or Markdown file.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    providedText = rawText;
+  } else {
+    let formData: FormData;
+
+    try {
+      formData =
+        await request.formData();
+    } catch {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "The request body must be multipart form data containing a file.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    const file = formData.get(
+      "file",
+    ) as File | null;
+
+    if (!file || !(file instanceof File)) {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "A file must be uploaded as the 'file' form field.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    if (!getFileType(file.name)) {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "Unsupported file type. Upload a PDF, TXT, Markdown or DOCX file.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return new Response(
+        jsonLine({
+          type: "error",
+          message:
+            "The uploaded file is too large. The maximum allowed size is 25 MB.",
+        }),
+        {
+          status: 413,
+          headers: {
+            "Content-Type":
+              "application/x-ndjson",
+            "Cache-Control":
+              "no-store, max-age=0",
+          },
+        },
+      );
+    }
+
+    uploadedFile = file;
   }
 
-  const file = formData.get(
-    "file",
-  ) as File | null;
+  const fileName = uploadedFile
+    ? (uploadedFile.name.trim() ||
+        "paper.pdf")
+    : "paper.txt";
 
-  if (!file || !(file instanceof File)) {
-    return new Response(
-      jsonLine({
-        type: "error",
-        message:
-          "A file must be uploaded as the 'file' form field.",
-      }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type":
-            "application/x-ndjson",
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
-    );
-  }
-
-  const fileName =
-    file.name.trim() || "paper.pdf";
-
-  const fileType = getFileType(fileName);
+  const fileType =
+    getFileType(fileName);
 
   if (!fileType) {
+    // Defensive: both input paths validate the extension
+    // before reaching this point.
     return new Response(
       jsonLine({
         type: "error",
@@ -550,25 +705,6 @@ export async function POST(
       }),
       {
         status: 400,
-        headers: {
-          "Content-Type":
-            "application/x-ndjson",
-          "Cache-Control":
-            "no-store, max-age=0",
-        },
-      },
-    );
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
-    return new Response(
-      jsonLine({
-        type: "error",
-        message:
-          "The uploaded file is too large. The maximum allowed size is 25 MB.",
-      }),
-      {
-        status: 413,
         headers: {
           "Content-Type":
             "application/x-ndjson",
@@ -619,7 +755,9 @@ export async function POST(
         progress(
           1,
           "Upload received",
-          `${fileName} · ${(file.size / 1024 / 1024).toFixed(2)} MB`,
+          providedText !== null
+            ? `${fileName} · ${(providedText.length / 1000).toFixed(0)}k characters`
+            : `${fileName} · ${((uploadedFile?.size ?? 0) / 1024 / 1024).toFixed(2)} MB`,
         );
 
         if (!geminiApiKey) {
@@ -632,14 +770,27 @@ export async function POST(
           return;
         }
 
-        const {
-          text: rawText,
-          pages,
-        } =
-          await extractTextFromFile(
-            file,
-            fileName,
+        let rawText: string;
+
+        let pages: number;
+
+        if (providedText !== null) {
+          rawText = providedText;
+          pages = 0;
+        } else if (uploadedFile) {
+          ({
+            text: rawText,
+            pages,
+          } =
+            await extractTextFromFile(
+              uploadedFile,
+              fileName,
+            ));
+        } else {
+          throw new Error(
+            "No file or text was provided.",
           );
+        }
 
         const paperText =
           normalizePaperText(rawText);
