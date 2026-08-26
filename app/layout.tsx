@@ -73,6 +73,12 @@ export const metadata: Metadata = {
     follow: true,
   },
 
+  icons: {
+    icon: "/branding/biolayers-logo.png",
+    shortcut: "/branding/biolayers-logo.png",
+    apple: "/branding/biolayers-logo.png",
+  },
+
   openGraph: {
     type: "website",
     title: "BioLayers AI",

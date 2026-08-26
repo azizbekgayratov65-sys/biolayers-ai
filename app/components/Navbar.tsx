@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   AnimatePresence,
@@ -350,29 +351,13 @@ export default function Navbar() {
                   bg-teal-300/[0.045]
                 "
               >
-                <div
-                  aria-hidden="true"
-                  className="
-                    absolute
-                    inset-0
-                    bg-gradient-to-br
-                    from-teal-200/[0.12]
-                    via-transparent
-                    to-sky-300/[0.10]
-                  "
+                <Image
+                  src="/branding/biolayers-logo.png"
+                  alt="BioLayers AI"
+                  fill
+                  className="object-contain p-1"
+                  priority
                 />
-
-                <span
-                  className="
-                    relative
-                    text-[11px]
-                    font-black
-                    tracking-[0.08em]
-                    text-teal-50
-                  "
-                >
-                  BL
-                </span>
               </motion.div>
 
               <div>
