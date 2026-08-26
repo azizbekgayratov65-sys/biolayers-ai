@@ -75,8 +75,8 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
-      { url: "/branding/biolayers-logo.png", sizes: "32x32", type: "image/png" },
       { url: "/branding/biolayers-logo.png", sizes: "16x16", type: "image/png" },
+      { url: "/branding/biolayers-logo.png", sizes: "32x32", type: "image/png" },
       { url: "/branding/biolayers-logo.png", sizes: "48x48", type: "image/png" },
       { url: "/branding/biolayers-logo.png", sizes: "64x64", type: "image/png" },
       { url: "/branding/biolayers-logo.png", sizes: "96x96", type: "image/png" },
@@ -85,7 +85,6 @@ export const metadata: Metadata = {
       { url: "/branding/biolayers-logo.png", sizes: "256x256", type: "image/png" },
       { url: "/branding/biolayers-logo.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/branding/biolayers-logo.png",
     apple: "/branding/biolayers-logo.png",
   },
 
