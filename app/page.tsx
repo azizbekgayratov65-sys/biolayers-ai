@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -46,7 +46,7 @@ export default function Home() {
       <AboutSection />
 
       {/* ================================================= */}
-      {/* 05 — NEXT PAGE CTA                               */}
+      {/* 06 — NEXT PAGE CTA                               */}
       {/* ================================================= */}
 
       <section

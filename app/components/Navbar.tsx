@@ -42,6 +42,11 @@ const navItems = [
     label: "Mind Map",
     path: "/mindmap",
   },
+  {
+    href: "/press",
+    label: "Press",
+    path: "/press",
+  },
 ] as const;
 
 /* =========================================================
