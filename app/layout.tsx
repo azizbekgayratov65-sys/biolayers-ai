@@ -129,6 +129,9 @@ export default function RootLayout({
       `}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="icon" href="/branding/biolayers-logo.png" sizes="any" type="image/png" />
+      </head>
       <body
         className="
           min-h-full
