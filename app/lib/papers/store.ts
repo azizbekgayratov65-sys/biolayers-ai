@@ -187,6 +187,7 @@ export async function listLibraryPapers(
 
   return papers.map((row) => {
     const profile = profileMap.get(row.user_id);
+    const displayName = profile?.full_name ?? profile?.email?.split("@")[0] ?? row.user_id.slice(0, 8);
     return {
       id: row.id as string,
       fileName: (row.file_name as string) ?? null,
@@ -197,7 +198,7 @@ export async function listLibraryPapers(
       createdAt: (row.created_at as string) ?? "",
       userId: row.user_id as string,
       userEmail: profile?.email ?? null,
-      userFullName: profile?.full_name ?? null,
+      userFullName: displayName,
       userAvatarUrl: profile?.avatar_url ?? null,
     };
   });
