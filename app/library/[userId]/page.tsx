@@ -5,19 +5,6 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, User, Clock, Loader2, ArrowLeft } from "lucide-react";
 
-import dynamic from "next/dynamic";
-
-import type { MindMap } from "../../lib/mindmapTypes";
-
-const SectionPlaceholder = ({ className = "" }: { className?: string }) => (
-  <div className={`w-full animate-pulse ${className}`} />
-);
-
-const MindMapDocument = dynamic(
-  () => import("../../components/mindmap/MindMapDocument"),
-  { ssr: false, loading: () => <SectionPlaceholder className="min-h-[100vh]" /> },
-);
-
 type SavedPaper = {
   id: string;
   fileName: string | null;
@@ -33,6 +20,7 @@ type UserProfile = {
   email: string | null;
   fullName: string | null;
   avatarUrl: string | null;
+  username: string | null;
 };
 
 type LibraryResponse = {
@@ -54,33 +42,15 @@ export default function UserLibraryPage({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPaper, setSelectedPaper] = useState<SavedPaper | null>(null);
-  const [paperMindmap, setPaperMindmap] = useState<SavedPaper | null>(null);
-  const [loadingPaper, setLoadingPaper] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const LIMIT = 20;
   const [targetUserId, setTargetUserId] = useState("");
 
-  const fetchPaperMindmap = async (paperId: string) => {
-    setLoadingPaper(true);
-    try {
-      const res = await fetch(`/api/library/paper/${paperId}`);
-      if (!res.ok) throw new Error("Failed to fetch paper");
-      const data = await res.json();
-      setPaperMindmap(data.paper);
-    } catch (err) {
-      console.error(err);
-      setPaperMindmap(null);
-    } finally {
-      setLoadingPaper(false);
-    }
-  };
-
   const handlePaperClick = (paper: SavedPaper) => {
-    setSelectedPaper(paper);
-    fetchPaperMindmap(paper.id);
+    // Open in new tab
+    window.open(`/mindmap/${paper.id}`, '_blank', 'noopener,noreferrer');
   };
 
   useEffect(() => {
@@ -170,7 +140,7 @@ export default function UserLibraryPage({
   };
 
   const displayName =
-    profile?.fullName ?? profile?.email?.split("@")[0] ?? "Unknown User";
+    profile?.username ?? profile?.fullName ?? profile?.email?.split("@")[0] ?? "Unknown User";
 
   return (
     <div className="relative min-h-screen bg-[#04070a]">
@@ -298,37 +268,6 @@ export default function UserLibraryPage({
           )}
         </motion.div>
       </div>
-
-      {selectedPaper && (
-        <MindMapDocument
-          response={{
-            mindmap: (paperMindmap?.mindmap as MindMap | undefined) ?? {
-              title: selectedPaper.title ?? "Untitled",
-              summary: "",
-              sections: [],
-              nodes: [],
-              links: [],
-            },
-            extractedText: "",
-            meta: {
-              provider: "BioLayers",
-              model: "Community",
-              requestedModel: "Community",
-              attempts: [],
-              fileName: paperMindmap?.fileName ?? selectedPaper.fileName ?? "Unknown",
-              fileType: paperMindmap?.fileType ?? selectedPaper.fileType ?? "Mind Map",
-              nodeCount: 0,
-              linkCount: 0,
-              characterCount: paperMindmap?.characterCount ?? selectedPaper.characterCount ?? 0,
-              paperId: selectedPaper.id,
-            },
-          }}
-          onReset={() => {
-            setSelectedPaper(null);
-            setPaperMindmap(null);
-          }}
-        />
-      )}
     </div>
   );
 }

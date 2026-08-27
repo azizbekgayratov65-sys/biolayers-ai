@@ -178,7 +178,7 @@ export async function listLibraryPapers(
   const userIds = [...new Set(papers.map((p) => p.user_id).filter(Boolean))];
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, email, full_name, avatar_url")
+    .select("id, email, full_name, avatar_url, username")
     .in("id", userIds);
 
   const profileMap = new Map(
@@ -188,6 +188,7 @@ export async function listLibraryPapers(
   return papers.map((row) => {
     const profile = profileMap.get(row.user_id);
     const displayName = profile?.full_name ?? profile?.email?.split("@")[0] ?? row.user_id.slice(0, 8);
+    const username = profile?.username ?? profile?.email?.split("@")[0] ?? row.user_id.slice(0, 8);
     return {
       id: row.id as string,
       fileName: (row.file_name as string) ?? null,
@@ -200,6 +201,7 @@ export async function listLibraryPapers(
       userEmail: profile?.email ?? null,
       userFullName: displayName,
       userAvatarUrl: profile?.avatar_url ?? null,
+      username,
     };
   });
 }
@@ -258,10 +260,11 @@ export async function getUserProfile(
   email: string | null;
   fullName: string | null;
   avatarUrl: string | null;
+  username: string | null;
 } | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, full_name, avatar_url")
+    .select("id, email, full_name, avatar_url, username")
     .eq("id", userId)
     .maybeSingle();
 
@@ -274,6 +277,7 @@ export async function getUserProfile(
     email: data.email as string | null,
     fullName: data.full_name as string | null,
     avatarUrl: data.avatar_url as string | null,
+    username: data.username as string | null,
   };
 }
 
