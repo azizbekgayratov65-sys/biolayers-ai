@@ -44,6 +44,11 @@ const navItems = [
     path: "/mindmap",
   },
   {
+    href: "/library",
+    label: "Library",
+    path: "/library",
+  },
+  {
     href: "/press",
     label: "Press",
     path: "/press",
@@ -207,7 +212,7 @@ export default function Navbar() {
             overflow-hidden
             rounded-[20px]
             border
-            backdrop-blur-2xl
+            backdrop-blur-xl
             
           "
         >
@@ -352,7 +357,7 @@ export default function Navbar() {
                 "
               >
                 <Image
-                  src="/branding/biolayers-logo.png"
+                  src="/biolayers-logo.svg"
                   alt="BioLayers AI"
                   fill
                   className="object-contain p-1"
@@ -565,7 +570,7 @@ export default function Navbar() {
               px-4
               pb-6
               pt-[100px]
-              backdrop-blur-3xl
+              backdrop-blur-xl
               lg:hidden
             "
           >

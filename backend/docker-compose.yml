@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: skinsight-backend:1.0.0
+    container_name: skinsight-backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Comma-separated fallback chain. Pin a single repo to skip the search.
+      MODEL_ID: "Anwarkh1/Skin_Cancer-Image_Classification,NeuronZero/SkinCancerClassifier,VRJBro/skin-cancer-detection"
+      FALLBACK_TIMM_ARCH: "efficientnet_b1"
+      DEVICE: "cpu"
+      CAM_ALPHA: "0.5"
+      MAX_UPLOAD_BYTES: "12582912"
+      CORS_ORIGINS: "*"
+      HF_HOME: "/models"
+      TORCH_HOME: "/models/torch"
+    volumes:
+      # Weights survive rebuilds; first boot downloads, later boots are instant.
+      - model-cache:/models
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health | grep -q '\"status\":\"ready\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 300s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: skinsight-frontend:1.0.0
+    container_name: skinsight-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      BACKEND_URL: "http://backend:8000"
+      REQUEST_TIMEOUT: "180"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  model-cache:

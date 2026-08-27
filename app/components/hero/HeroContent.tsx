@@ -83,7 +83,7 @@ export default function HeroContent() {
       transitionTimerRef.current =
         window.setTimeout(
           () => {
-            router.push("/explore");
+            router.push("/mindmap");
           },
           reduceMotion
             ? 150

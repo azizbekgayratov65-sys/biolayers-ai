@@ -25,7 +25,7 @@ export default function PromptBox() {
     }
 
     sessionStorage.setItem("biolayers-input", cleanedText);
-    router.push("/explore");
+    router.push("/mindmap");
   }
 
   return (

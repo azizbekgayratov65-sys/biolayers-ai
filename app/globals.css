@@ -584,7 +584,7 @@ select:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.02),
     var(--shadow-panel);
 
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(12px);
 }
 
 .bl-surface-strong {
@@ -602,7 +602,7 @@ select:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.024),
     var(--shadow-floating);
 
-  backdrop-filter: blur(28px);
+  backdrop-filter: blur(16px);
 }
 
 .bl-surface-hover {
@@ -988,6 +988,63 @@ input[type="range"] {
   }
 }
 
+/* =========================================================
+   AMBIENT BACKGROUND ANIMATIONS
+   Pure CSS replacements for framer-motion ambient loops.
+   These run on the compositor thread with zero JS overhead.
+   ========================================================= */
+
+@keyframes bl-ambient-cyan-drift {
+  0% {
+    transform: translate(-45px, -20px) scale(0.96);
+  }
+  33% {
+    transform: translate(35px, 40px) scale(1.04);
+  }
+  66% {
+    transform: translate(-25px, 50px) scale(0.98);
+  }
+  100% {
+    transform: translate(-45px, -20px) scale(0.96);
+  }
+}
+
+@keyframes bl-ambient-violet-drift {
+  0% {
+    transform: translate(40px, -30px) scale(0.97);
+  }
+  33% {
+    transform: translate(-30px, 35px) scale(1.03);
+  }
+  66% {
+    transform: translate(50px, 45px) scale(1.01);
+  }
+  100% {
+    transform: translate(40px, -30px) scale(0.97);
+  }
+}
+
+@keyframes bl-ambient-grid-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 72px 72px;
+  }
+}
+
+.bl-ambient-cyan-drift {
+  animation: bl-ambient-cyan-drift 22s ease-in-out infinite;
+}
+
+.bl-ambient-violet-drift {
+  animation: bl-ambient-violet-drift 24s ease-in-out infinite;
+}
+
+.bl-ambient-grid-drift {
+  animation: bl-ambient-grid-drift 28s linear infinite;
+}
+
 .bl-float {
   animation:
     bl-float
@@ -1021,8 +1078,8 @@ input[type="range"] {
 }
 
 /* =========================================================
-   PERFORMANCE / RENDERING
-   ========================================================= */
+    PERFORMANCE / RENDERING
+    ========================================================= */
 
 canvas {
   image-rendering: auto;
@@ -1036,6 +1093,11 @@ canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
   will-change: transform;
+}
+
+.bl-offscreen {
+  content-visibility: auto;
+  contain-intrinsic-size: 1000px;
 }
 
 /* =========================================================

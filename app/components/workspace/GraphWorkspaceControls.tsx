@@ -28,7 +28,7 @@ type GraphWorkspaceControlsProps = {
     value: string,
   ) => void;
   exportError: string;
-  findEntity: () => Promise<void>;
+  findEntity: (searchQuery: string) => Promise<{ error?: string; success?: boolean }>;
 };
 
 export default function GraphWorkspaceControls({
@@ -421,7 +421,7 @@ export default function GraphWorkspaceControls({
                 event.key ===
                 "Enter"
               ) {
-                void findEntity();
+                void findEntity(searchQuery);
               }
             }}
             aria-label="Search biological entities in the graph"
@@ -443,7 +443,7 @@ export default function GraphWorkspaceControls({
           <button
             type="button"
             onClick={() =>
-              void findEntity()
+              void findEntity(searchQuery)
             }
             disabled={
               searchQuery.trim()

@@ -29,6 +29,93 @@ import OrbitSystem from "../planet/OrbitSystem";
 import Stars from "../planet/Stars";
 
 /* ====================================================== */
+/* PERFORMANCE UTILITIES                                  */
+/* ====================================================== */
+
+let rafId: number | null = null;
+const visibilityCallbacks = new Map<string, (visible: boolean) => void>();
+
+function useSectionVisibility(sectionName: string, threshold = 0.02) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const callback = (visible: boolean) => setIsVisible(visible);
+    visibilityCallbacks.set(sectionName, callback);
+
+    return () => {
+      visibilityCallbacks.delete(sectionName);
+    };
+  }, [sectionName]);
+
+  return isVisible;
+}
+
+function registerVisibilityObserver(
+  element: HTMLElement | null,
+  sectionName: string,
+) {
+  if (!element || typeof IntersectionObserver === "undefined") return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      const callback = visibilityCallbacks.get(sectionName);
+      if (callback) callback(entry.isIntersecting);
+    },
+    { root: null, rootMargin: "100px", threshold: 0.01 },
+  );
+
+  observer.observe(element);
+  return () => observer.disconnect();
+}
+
+function useIntersectionObserver(
+  ref: React.RefObject<HTMLElement>,
+  sectionName: string,
+) {
+  useEffect(() => {
+    if (!ref.current) return;
+    return registerVisibilityObserver(ref.current, sectionName);
+  }, [ref, sectionName]);
+}
+
+function useThrottledFrame(
+  callback: (state: any, delta: number) => void,
+  enabled = true,
+  fps = 30
+) {
+  const lastTime = useRef(0);
+  const interval = 1000 / fps;
+
+  useFrame((state, delta) => {
+    if (!enabled) return;
+    const now = performance.now();
+    if (now - lastTime.current >= interval) {
+      lastTime.current = now;
+      callback(state, delta);
+    }
+  });
+}
+
+function useThrottledFrameReduced(
+  callback: (state: any, delta: number) => void,
+  enabled = true,
+  fps = 15
+) {
+  const lastTime = useRef(0);
+  const interval = 1000 / fps;
+
+  useFrame((state, delta) => {
+    if (!enabled) return;
+    const now = performance.now();
+    if (now - lastTime.current >= interval) {
+      lastTime.current = now;
+      callback(state, delta);
+    }
+  });
+}
+
+/* ====================================================== */
 /* TYPES                                                  */
 /* ====================================================== */
 
@@ -1218,8 +1305,8 @@ function CinematicCellDive({
             <sphereGeometry
               args={[
                 1,
-                26,
-                26,
+                16,
+                16,
               ]}
             />
 
@@ -1245,8 +1332,8 @@ function CinematicCellDive({
         <sphereGeometry
           args={[
             1.45,
-            48,
-            48,
+            32,
+            32,
           ]}
         />
 
@@ -1269,8 +1356,8 @@ function CinematicCellDive({
         <sphereGeometry
           args={[
             1.5,
-            40,
-            40,
+            24,
+            24,
           ]}
         />
 
@@ -1537,11 +1624,14 @@ function PaperKnowledgeGraphScene({
       [],
     );
 
-  useFrame((state, delta) => {
+  const isVisible = useSectionVisibility("papergraph");
+
+  useThrottledFrame((state, delta) => {
     const group =
       groupRef.current;
 
-    if (!group) {
+    if (!group || !isVisible) {
+      if (group) group.visible = false;
       return;
     }
 
@@ -1711,7 +1801,7 @@ function PaperKnowledgeGraphScene({
           localReveal;
       },
     );
-  });
+  }, isVisible, reduced ? 15 : 30);
 
   return (
     <group
@@ -1779,7 +1869,7 @@ function PaperKnowledgeGraphScene({
           position={[0, 0, 0.16]}
           visible={false}
         >
-          <sphereGeometry args={[0.12, 20, 20]} />
+          <sphereGeometry args={[0.12, 12, 12]} />
           <meshBasicMaterial
             color={entity.color}
             transparent
@@ -1926,11 +2016,16 @@ function EvidenceFlowScene({
       [],
     );
 
-  useFrame((state, delta) => {
+  const isVisible = useSectionVisibility("evidenceflow");
+
+  useThrottledFrame((state, delta) => {
     const group =
       groupRef.current;
 
-    if (!group) return;
+    if (!group || !isVisible) {
+      if (group) group.visible = false;
+      return;
+    }
 
     const p =
       progress.get();
@@ -2036,7 +2131,7 @@ function EvidenceFlowScene({
           visibility > 0.02;
       },
     );
-  });
+  }, isVisible, reduced ? 15 : 30);
 
   return (
     <group
@@ -2066,8 +2161,8 @@ function EvidenceFlowScene({
                   node.kind === "conflict"
                     ? 0.13
                     : 0.105,
-                  18,
-                  18,
+                  12,
+                  12,
                 ]}
               />
               <meshBasicMaterial
@@ -2275,7 +2370,9 @@ function HypothesisBirthScene({
   const particleRefs =
     useRef<Array<THREE.Mesh | null>>([]);
 
-  useFrame((state, delta) => {
+  const isVisible = useSectionVisibility("hypothesis");
+
+  useThrottledFrame((state, delta) => {
     const group =
       groupRef.current;
 
@@ -2284,8 +2381,10 @@ function HypothesisBirthScene({
 
     if (
       !group ||
-      !core
+      !core ||
+      !isVisible
     ) {
+      if (group) group.visible = false;
       return;
     }
 
@@ -2412,7 +2511,7 @@ function HypothesisBirthScene({
         pulse,
       );
     }
-  });
+  }, isVisible, reduced ? 15 : 30);
 
   return (
     <group
@@ -2474,8 +2573,8 @@ function HypothesisBirthScene({
         <sphereGeometry
           args={[
             0.22,
-            30,
-            30,
+            20,
+            20,
           ]}
         />
         <meshBasicMaterial
@@ -2563,7 +2662,7 @@ function ResearchConstellation({
 
   const positions =
     useMemo(() => {
-      const count = 90;
+      const count = 50;
       const array =
         new Float32Array(
           count * 3,
@@ -2749,8 +2848,8 @@ function MolecularField({
 
   const count =
     reduced
-      ? 220
-      : 520;
+      ? 100
+      : 200;
 
   const positions =
     useMemo(() => {
@@ -3004,7 +3103,9 @@ function EnergyTunnel({
       [],
     );
 
-  useFrame(
+  const isVisible = useSectionVisibility("energytunnel");
+
+  useThrottledFrame(
     (
       state,
       delta,
@@ -3012,7 +3113,8 @@ function EnergyTunnel({
       const group =
         groupRef.current;
 
-      if (!group) {
+      if (!group || !isVisible) {
+        if (group) group.visible = false;
         return;
       }
 
@@ -3087,6 +3189,8 @@ function EnergyTunnel({
         },
       );
     },
+    isVisible,
+    reduced ? 15 : 30,
   );
 
   return (
@@ -3209,7 +3313,9 @@ function JourneyDNA({
       );
     }, []);
 
-  useFrame(
+  const isVisible = useSectionVisibility("dna");
+
+  useThrottledFrame(
     (
       state,
       delta,
@@ -3217,7 +3323,8 @@ function JourneyDNA({
       const group =
         groupRef.current;
 
-      if (!group) {
+      if (!group || !isVisible) {
+        if (group) group.visible = false;
         return;
       }
 
@@ -3325,6 +3432,8 @@ function JourneyDNA({
         },
       );
     },
+    isVisible,
+    reduced ? 15 : 30,
   );
 
   return (
@@ -3482,7 +3591,9 @@ function Singularity({
       null,
     );
 
-  useFrame(
+  const isVisible = useSectionVisibility("singularity");
+
+  useThrottledFrame(
     (
       state,
       delta,
@@ -3495,8 +3606,10 @@ function Singularity({
 
       if (
         !group ||
-        !core
+        !core ||
+        !isVisible
       ) {
+        if (group) group.visible = false;
         return;
       }
 
@@ -3586,6 +3699,8 @@ function Singularity({
         },
       );
     },
+    isVisible,
+    reduced ? 15 : 30,
   );
 
   return (
@@ -6873,6 +6988,18 @@ export default function BioJourney() {
     useRef<HTMLElement | null>(
       null,
     );
+  const [canvasVisible, setCanvasVisible] = useState(true);
+
+  // Pause Three.js render loop when section is off-screen
+  useEffect(() => {
+    if (!sectionRef.current || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCanvasVisible(entry.isIntersecting),
+      { root: null, rootMargin: "200px", threshold: 0.01 },
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const reduced = Boolean(
     useReducedMotion(),
@@ -6988,7 +7115,7 @@ export default function BioJourney() {
       aria-label="Journey from manuscript to molecular signal"
       className="
         relative
-        h-[620vh]
+        h-[300vh]
         bg-[#06111a]
       "
     >
@@ -7122,10 +7249,7 @@ export default function BioJourney() {
             dpr={
               reduced
                 ? 1
-                : [
-                    1,
-                    1.1,
-                  ]
+                : 1
             }
             gl={{
               alpha: false,
@@ -7133,6 +7257,8 @@ export default function BioJourney() {
               powerPreference:
                 "high-performance",
             }}
+            frameloop={canvasVisible ? "always" : "demand"}
+            flat
             onCreated={({
               gl,
             }) => {

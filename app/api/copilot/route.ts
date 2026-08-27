@@ -7,6 +7,12 @@ import {
   unauthorizedJson,
 } from "../../lib/auth/api-auth";
 import { checkRateLimit } from "../../lib/auth/rate-limit";
+import {
+  getOpenAIApiKey,
+  getOpenAICopilotModel,
+} from "../../lib/env";
+import { copilotRequestSchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -291,16 +297,8 @@ function sanitizePapers(
     result.push({
       pmid,
       title,
-      journal:
-        cleanText(
-          item.journal,
-          240,
-        ) || "Unknown journal",
-      year:
-        cleanText(
-          item.year,
-          20,
-        ) || "Unknown year",
+      journal: cleanText(item.journal, 240) || "Unknown journal",
+      year: cleanText(item.year, 20) || "Unknown year",
       authors,
       doi:
         typeof item.doi === "string"
@@ -386,7 +384,7 @@ function buildContext({
   sourceText: string;
   selectedEntity: CopilotEntity;
   connections: CopilotConnection[];
-  papers: CopilotPaper[];
+  papers: Array<{ pmid: string; title: string; journal?: string; year?: string; authors?: string[]; doi?: string | null; pubmedUrl?: string }>;
 }): string {
   const connectionText =
     connections.length > 0
@@ -408,7 +406,7 @@ function buildContext({
       ? papers
           .map(
             (paper, index) =>
-              `${index + 1}. PMID ${paper.pmid}; ${paper.title}; ${paper.journal}; ${paper.year}${
+              `${index + 1}. PMID ${paper.pmid}; ${paper.title}; ${paper.journal || "Unknown journal"}; ${paper.year || "Unknown year"}${
                 paper.doi
                   ? `; DOI ${paper.doi}`
                   : ""
@@ -556,11 +554,9 @@ export async function POST(
   }
 
   try {
-    let body: CopilotRequestBody;
-
+    let body: unknown;
     try {
-      body =
-        (await request.json()) as CopilotRequestBody;
+      body = await request.json();
     } catch {
       return NextResponse.json(
         {
@@ -573,43 +569,16 @@ export async function POST(
       );
     }
 
-    const mode = isCopilotMode(
-      body.mode,
-    )
-      ? body.mode
-      : "custom";
-
-    const question = cleanText(
-      body.question,
-      MAX_QUESTION_LENGTH,
-    );
-
-    const sourceText = cleanText(
-      body.sourceText,
-      MAX_SOURCE_LENGTH,
-    );
-
-    const selectedEntity =
-      sanitizeEntity(
-        body.selectedEntity,
-      );
-
-    if (!selectedEntity) {
-      return NextResponse.json(
-        {
-          error:
-            "A valid selected biological entity is required.",
-        },
-        {
-          status: 400,
-        },
-      );
+    const parsed = copilotRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      const { message, status: statusCode } = handleValidationError(parsed.error);
+      return NextResponse.json({ error: message }, { status: statusCode });
     }
 
-    if (
-      mode === "custom" &&
-      question.length < 3
-    ) {
+    const { mode, question, sourceText, selectedEntity, connections, papers } = parsed.data;
+
+    // Additional validation that requires context from sanitized data
+    if (mode === "custom" && question.length < 3) {
       return NextResponse.json(
         {
           error:
@@ -633,34 +602,9 @@ export async function POST(
       );
     }
 
-    const connections =
-      sanitizeConnections(
-        body.connections,
-      );
+    const apiKey = getOpenAIApiKey();
 
-    const papers = sanitizePapers(
-      body.papers,
-    );
-
-    const apiKey =
-      process.env.OPENAI_API_KEY?.trim();
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          error:
-            "OPENAI_API_KEY is missing from the server environment.",
-        },
-        {
-          status: 503,
-        },
-      );
-    }
-
-    const model =
-      process.env.OPENAI_COPILOT_MODEL?.trim() ||
-      process.env.OPENAI_MODEL?.trim() ||
-      "gpt-5-mini";
+    const model = getOpenAICopilotModel();
 
     const client = new OpenAI({
       apiKey,

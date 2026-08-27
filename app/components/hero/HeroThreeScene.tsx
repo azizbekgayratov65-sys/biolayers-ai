@@ -1,12 +1,6 @@
 "use client";
 
 import {
-  Bloom,
-  EffectComposer,
-  Vignette,
-} from "@react-three/postprocessing";
-
-import {
   Canvas,
   useFrame,
   useThree,
@@ -20,7 +14,7 @@ import {
 
 import * as THREE from "three";
 
-const PARTICLE_COUNT = 6500;
+const PARTICLE_COUNT = 2500;
 const CYCLE_SECONDS = 15;
 
 function getCycleState(time: number) {
@@ -448,41 +442,22 @@ function ParticleMorph() {
         uOpacity: {
           value: 0.92,
         },
+        uPaletteA: { value: colorVector(PALETTES[0][0]) },
+        uPaletteB: { value: colorVector(PALETTES[0][1]) },
+        uPaletteC: { value: colorVector(PALETTES[0][2]) },
+        uPalette2A: { value: colorVector(PALETTES[1][0]) },
+        uPalette2B: { value: colorVector(PALETTES[1][1]) },
+        uPalette2C: { value: colorVector(PALETTES[1][2]) },
+        uPalette3A: { value: colorVector(PALETTES[2][0]) },
+        uPalette3B: { value: colorVector(PALETTES[2][1]) },
+        uPalette3C: { value: colorVector(PALETTES[2][2]) },
+        uPalette4A: { value: colorVector(PALETTES[3][0]) },
+        uPalette4B: { value: colorVector(PALETTES[3][1]) },
+        uPalette4C: { value: colorVector(PALETTES[3][2]) },
+        uPalette5A: { value: colorVector(PALETTES[4][0]) },
+        uPalette5B: { value: colorVector(PALETTES[4][1]) },
+        uPalette5C: { value: colorVector(PALETTES[4][2]) },
       };
-
-      PALETTES.forEach(
-        (
-          palette,
-          paletteIndex,
-        ) => {
-          uniforms[
-            `uPalette${paletteIndex}A`
-          ] = {
-            value:
-              colorVector(
-                palette[0],
-              ),
-          };
-
-          uniforms[
-            `uPalette${paletteIndex}B`
-          ] = {
-            value:
-              colorVector(
-                palette[1],
-              ),
-          };
-
-          uniforms[
-            `uPalette${paletteIndex}C`
-          ] = {
-            value:
-              colorVector(
-                palette[2],
-              ),
-          };
-        },
-      );
 
       return new THREE.ShaderMaterial({
         transparent: true,
@@ -497,12 +472,9 @@ function ParticleMorph() {
           uniform float uProgress;
           uniform float uPointSize;
 
-          uniform vec3 uPalette0A;
-          uniform vec3 uPalette0B;
-          uniform vec3 uPalette0C;
-          uniform vec3 uPalette1A;
-          uniform vec3 uPalette1B;
-          uniform vec3 uPalette1C;
+          uniform vec3 uPaletteA;
+          uniform vec3 uPaletteB;
+          uniform vec3 uPaletteC;
           uniform vec3 uPalette2A;
           uniform vec3 uPalette2B;
           uniform vec3 uPalette2C;
@@ -512,6 +484,9 @@ function ParticleMorph() {
           uniform vec3 uPalette4A;
           uniform vec3 uPalette4B;
           uniform vec3 uPalette4C;
+          uniform vec3 uPalette5A;
+          uniform vec3 uPalette5B;
+          uniform vec3 uPalette5C;
 
           attribute vec3 aShape1;
           attribute vec3 aShape2;
@@ -531,27 +506,27 @@ function ParticleMorph() {
           }
 
           vec3 paletteA(float index) {
-            if (index < 0.5) return uPalette0A;
-            if (index < 1.5) return uPalette1A;
-            if (index < 2.5) return uPalette2A;
-            if (index < 3.5) return uPalette3A;
-            return uPalette4A;
+            if (index < 0.5) return uPaletteA;
+            if (index < 1.5) return uPalette2A;
+            if (index < 2.5) return uPalette3A;
+            if (index < 3.5) return uPalette4A;
+            return uPalette5A;
           }
 
           vec3 paletteB(float index) {
-            if (index < 0.5) return uPalette0B;
-            if (index < 1.5) return uPalette1B;
-            if (index < 2.5) return uPalette2B;
-            if (index < 3.5) return uPalette3B;
-            return uPalette4B;
+            if (index < 0.5) return uPaletteB;
+            if (index < 1.5) return uPalette2B;
+            if (index < 2.5) return uPalette3B;
+            if (index < 3.5) return uPalette4B;
+            return uPalette5B;
           }
 
           vec3 paletteC(float index) {
-            if (index < 0.5) return uPalette0C;
-            if (index < 1.5) return uPalette1C;
-            if (index < 2.5) return uPalette2C;
-            if (index < 3.5) return uPalette3C;
-            return uPalette4C;
+            if (index < 0.5) return uPaletteC;
+            if (index < 1.5) return uPalette2C;
+            if (index < 2.5) return uPalette3C;
+            if (index < 3.5) return uPalette4C;
+            return uPalette5C;
           }
 
           float ease(float x) {
@@ -568,103 +543,23 @@ function ParticleMorph() {
             vec3 p1 = shapeAt(endIndex);
             vec3 p = mix(p0, p1, e);
 
-            float pulse =
-              sin(
-                uTime * 1.65 +
-                aParticleProgress * 38.0
-              ) * 0.025;
+            float pulse = sin(uTime * 1.65 + aParticleProgress * 38.0) * 0.025;
+            p += normalize(p + vec3(0.0001)) * pulse;
 
-            float breathing =
-              cos(
-                uTime * 0.8 +
-                p.x * 1.2 +
-                p.y * 0.7
-              ) * 0.014;
+            float lightWave = 0.5 + 0.5 * sin(aParticleProgress * 48.0 + uTime * 1.15 + p.x * 0.55);
+            float accent = pow(lightWave, 6.0);
 
-            p +=
-              normalize(
-                p + vec3(0.0001)
-              ) *
-              (pulse + breathing);
+            vec3 base0 = mix(paletteA(startIndex), paletteB(startIndex), lightWave);
+            vec3 base1 = mix(paletteA(endIndex), paletteB(endIndex), lightWave);
+            vec3 base = mix(base0, base1, e);
+            vec3 accentColor = mix(paletteC(startIndex), paletteC(endIndex), e);
 
-            float lightWave =
-              0.5 +
-              0.5 *
-              sin(
-                aParticleProgress * 48.0 +
-                uTime * 1.15 +
-                p.x * 0.55
-              );
+            vColor = mix(base, accentColor, accent) * (1.0 + accent * 1.15);
+            vAlpha = 0.72 + accent * 0.28;
 
-            float accent =
-              pow(
-                lightWave,
-                6.0
-              );
-
-            vec3 base0 =
-              mix(
-                paletteA(startIndex),
-                paletteB(startIndex),
-                lightWave
-              );
-
-            vec3 base1 =
-              mix(
-                paletteA(endIndex),
-                paletteB(endIndex),
-                lightWave
-              );
-
-            vec3 base =
-              mix(
-                base0,
-                base1,
-                e
-              );
-
-            vec3 accentColor =
-              mix(
-                paletteC(startIndex),
-                paletteC(endIndex),
-                e
-              );
-
-            vColor =
-              mix(
-                base,
-                accentColor,
-                accent
-              ) *
-              (
-                1.0 +
-                accent * 1.15
-              );
-
-            vAlpha =
-              0.72 +
-              accent * 0.28;
-
-            vec4 mv =
-              modelViewMatrix *
-              vec4(
-                p,
-                1.0
-              );
-
-            gl_Position =
-              projectionMatrix *
-              mv;
-
-            gl_PointSize =
-              uPointSize *
-              (
-                8.0 /
-                max(
-                  -mv.z,
-                  0.1
-                )
-              );
+            vec4 mv = modelViewMatrix * vec4(p, 1.0);
+            gl_Position = projectionMatrix * mv;
+            gl_PointSize = uPointSize * (8.0 / max(-mv.z, 0.1));
           }
         `,
 
@@ -675,42 +570,14 @@ function ParticleMorph() {
           varying float vAlpha;
 
           void main() {
-            float d =
-              distance(
-                gl_PointCoord,
-                vec2(0.5)
-              );
+            float d = distance(gl_PointCoord, vec2(0.5));
 
-            float glow =
-              1.0 -
-              smoothstep(
-                0.05,
-                0.5,
-                d
-              );
+            float glow = 1.0 - smoothstep(0.05, 0.5, d);
+            float core = 1.0 - smoothstep(0.0, 0.13, d);
 
-            float core =
-              1.0 -
-              smoothstep(
-                0.0,
-                0.13,
-                d
-              );
+            vec3 color = vColor * (glow * 1.85 + core * 3.7);
 
-            vec3 color =
-              vColor *
-              (
-                glow * 1.85 +
-                core * 3.7
-              );
-
-            gl_FragColor =
-              vec4(
-                color,
-                glow *
-                vAlpha *
-                uOpacity
-              );
+            gl_FragColor = vec4(color, glow * vAlpha * uOpacity);
           }
         `,
       });
@@ -827,12 +694,12 @@ function StarField() {
     useMemo(() => {
       const positions =
         new Float32Array(
-          1200 * 3,
+          600 * 3,
         );
 
       const colors =
         new Float32Array(
-          1200 * 3,
+          600 * 3,
         );
 
       const cyan =
@@ -850,7 +717,7 @@ function StarField() {
 
       for (
         let index = 0;
-        index < 1200;
+        index < 600;
         index += 1
       ) {
         const i = index * 3;
@@ -1390,7 +1257,7 @@ function EnergyTrails() {
 
   const geometry =
     useMemo(() => {
-      const streaks = 600;
+      const streaks = 300;
 
       const positions =
         new Float32Array(
@@ -1849,28 +1716,6 @@ function CameraRig() {
   return null;
 }
 
-function PostFX() {
-  return (
-    <EffectComposer
-      multisampling={0}
-      enableNormalPass={false}
-    >
-      <Bloom
-        intensity={2.5}
-        luminanceThreshold={0.1}
-        luminanceSmoothing={0.9}
-        mipmapBlur
-      />
-
-      <Vignette
-        eskil={false}
-        offset={0.16}
-        darkness={0.88}
-      />
-    </EffectComposer>
-  );
-}
-
 export default function HeroThreeScene() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -1887,7 +1732,7 @@ export default function HeroThreeScene() {
           near: 0.1,
           far: 100,
         }}
-        dpr={[1, 1.5]}
+        dpr={[1, 1.2]}
         gl={{
           antialias: true,
           alpha: false,
@@ -1924,7 +1769,6 @@ export default function HeroThreeScene() {
         <GalaxyCore />
         <ParticleMorph />
         <CameraRig />
-        <PostFX />
       </Canvas>
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_48%,transparent_0%,rgba(6,17,26,.03)_42%,rgba(6,17,26,.52)_80%,#04070a_100%)]" />

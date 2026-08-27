@@ -10,6 +10,8 @@ import {
   unauthorizedJson,
 } from "../../../lib/auth/api-auth";
 import { getAiSettingsStatus } from "../../../lib/gemini/store";
+import { mindmapModelQuerySchema } from "./validation";
+import { handleValidationError } from "../../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,12 +22,19 @@ export const dynamic = "force-dynamic";
   key and which model will be used. Never probes the model or leaks
   any key material.
 */
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createApiClient();
   const userId = await getApiUserId(supabase);
 
   if (!userId) {
     return unauthorizedJson();
+  }
+
+  // Validate query parameters (none expected, but validates empty query)
+  const parsed = mindmapModelQuerySchema.safeParse({});
+  if (!parsed.success) {
+    const { message, status: statusCode } = handleValidationError(parsed.error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 
   const status = await getAiSettingsStatus(

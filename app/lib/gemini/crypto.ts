@@ -7,6 +7,8 @@ import {
   randomBytes,
 } from "crypto";
 
+import { getGeminiEncryptionKey } from "../env";
+
 const ALGORITHM = "aes-256-gcm";
 const VERSION = "v1";
 const IV_BYTES = 12;
@@ -21,13 +23,7 @@ const IV_BYTES = 12;
   never exposed to the client.
 */
 function deriveKey(): Buffer {
-  const raw = process.env.GEMINI_ENCRYPTION_KEY?.trim();
-
-  if (!raw) {
-    throw new Error(
-      "GEMINI_ENCRYPTION_KEY is missing from the server environment.",
-    );
-  }
+  const raw = getGeminiEncryptionKey();
 
   if (/^[0-9a-fA-F]{64}$/.test(raw)) {
     return Buffer.from(raw, "hex");

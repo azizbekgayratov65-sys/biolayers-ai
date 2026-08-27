@@ -223,18 +223,8 @@ export default function MechanismPipelineSection() {
           >
             <div className="absolute inset-0 bg-teal-100/[0.06]" />
 
-            <motion.div
-              initial={{ x: "-100%" }}
-              whileInView={{ x: "100%" }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{
-                duration: 4.5,
-                delay: 0.3,
-                repeat: Infinity,
-                repeatDelay: 0.6,
-                ease: "linear",
-              }}
-              className="
+            <div
+              className={`
                 absolute
                 top-0
                 h-px
@@ -243,7 +233,8 @@ export default function MechanismPipelineSection() {
                 from-transparent
                 via-teal-200/65
                 to-transparent
-              "
+                bl-flow-sweep
+              `}
             />
           </div>
 

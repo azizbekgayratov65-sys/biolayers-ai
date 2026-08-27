@@ -7,6 +7,12 @@ import {
   unauthorizedJson,
 } from "../../lib/auth/api-auth";
 import { checkRateLimit } from "../../lib/auth/rate-limit";
+import {
+  getOpenAIApiKey,
+  getOpenAIModel,
+} from "../../lib/env";
+import { generateGraphRequestSchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -302,14 +308,10 @@ export async function POST(
   }
 
   try {
-    let body: {
-      text?: unknown;
-    };
+    let body: unknown;
 
     try {
-      body = (await request.json()) as {
-        text?: unknown;
-      };
+      body = await request.json();
     } catch {
       return NextResponse.json(
         {
@@ -322,66 +324,17 @@ export async function POST(
       );
     }
 
-    if (typeof body.text !== "string") {
-      return NextResponse.json(
-        {
-          error:
-            "Text must be provided as a string.",
-        },
-        {
-          status: 400,
-        },
-      );
+    const parsed = generateGraphRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      const { message, status: statusCode } = handleValidationError(parsed.error);
+      return NextResponse.json({ error: message }, { status: statusCode });
     }
 
-    const text = body.text.trim();
+    const { text } = parsed.data;
 
-    if (text.length < 20) {
-      return NextResponse.json(
-        {
-          error:
-            "Please provide a research paragraph containing at least 20 characters.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
+    const apiKey = getOpenAIApiKey();
 
-    if (text.length > MAX_INPUT_LENGTH) {
-      return NextResponse.json(
-        {
-          error:
-            `The submitted text is too long. The maximum length is ${MAX_INPUT_LENGTH} characters.`,
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    const apiKey =
-      process.env.OPENAI_API_KEY?.trim();
-
-    if (!apiKey) {
-      console.error(
-        "OPENAI_API_KEY is missing from the server environment.",
-      );
-
-      return NextResponse.json(
-        {
-          error:
-            "AI generation is not configured. Add OPENAI_API_KEY to .env.local and restart the server.",
-        },
-        {
-          status: 503,
-        },
-      );
-    }
-
-    const model =
-      process.env.OPENAI_MODEL?.trim() ||
-      "gpt-5-mini";
+    const model = getOpenAIModel();
 
     const client = new OpenAI({
       apiKey,

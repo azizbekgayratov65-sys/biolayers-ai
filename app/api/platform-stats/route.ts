@@ -5,6 +5,8 @@ import {
   getSupabaseSecretKey,
   getSupabaseUrl,
 } from "../../lib/supabase/env";
+import { platformStatsQuerySchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,7 +24,12 @@ type PlatformStats = {
   calls it server-side with the service-role key and returns the
   plain aggregate object.
 */
-export async function GET() {
+export async function GET(request: Request) {
+  const parsed = platformStatsQuerySchema.safeParse({});
+  if (!parsed.success) {
+    const { message, status: statusCode } = handleValidationError(parsed.error);
+    return NextResponse.json({ error: message }, { status: statusCode });
+  }
   const secretKey = getSupabaseSecretKey();
 
   if (!secretKey) {

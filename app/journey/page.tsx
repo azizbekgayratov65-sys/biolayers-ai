@@ -125,7 +125,7 @@ export default function JourneyPage() {
               }
             >
               <Link
-                href="/explore"
+                href="/mindmap"
                 className="
                   group
                   flex

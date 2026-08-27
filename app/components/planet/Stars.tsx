@@ -15,7 +15,13 @@ type StarsProps = {
   reduced?: boolean;
 };
 
-const COUNT = 1800;
+function getStarCount(reduced: boolean) {
+  return reduced ? 900 : 1400;
+}
+
+function getDustCount(reduced: boolean) {
+  return reduced ? 400 : 700;
+}
 
 function seeded(
   index: number,
@@ -47,17 +53,20 @@ export default function Stars({
       null,
     );
 
+  const starCount = getStarCount(reduced);
+  const dustCount = getDustCount(reduced);
+
   const positions =
     useMemo(
       () => {
         const data =
           new Float32Array(
-            COUNT * 3,
+            starCount * 3,
           );
 
         for (
           let index = 0;
-          index < COUNT;
+          index < starCount;
           index += 1
         ) {
           const i =
@@ -116,23 +125,20 @@ export default function Stars({
 
         return data;
       },
-      [],
+      [starCount],
     );
 
   const dustPositions =
     useMemo(
       () => {
-        const count =
-          900;
-
         const data =
           new Float32Array(
-            count * 3,
+            dustCount * 3,
           );
 
         for (
           let index = 0;
-          index < count;
+          index < dustCount;
           index += 1
         ) {
           const i =
@@ -169,7 +175,7 @@ export default function Stars({
 
         return data;
       },
-      [],
+      [dustCount],
     );
 
   useFrame(

@@ -7,6 +7,8 @@ import {
   useState,
 } from "react";
 
+import { useReducedMotion } from "framer-motion";
+
 type CursorPoint = {
   x: number;
   y: number;
@@ -47,7 +49,7 @@ const STAGE_COLORS = [
   },
 ];
 
-const TRAIL_LENGTH = 18;
+const TRAIL_LENGTH = 8;
 
 function getStageIndex(clientX: number) {
   if (typeof window === "undefined") {
@@ -65,6 +67,12 @@ function getStageIndex(clientX: number) {
 }
 
 export default function CursorEnergyField() {
+  const reduceMotion = Boolean(useReducedMotion());
+  
+  if (reduceMotion) {
+    return null;
+  }
+  
   const targetRef = useRef<CursorPoint>({
     x: 0,
     y: 0,

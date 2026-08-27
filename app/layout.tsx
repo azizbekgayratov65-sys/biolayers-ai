@@ -74,18 +74,9 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: [
-      { url: "/branding/biolayers-logo.png", sizes: "16x16", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "48x48", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "64x64", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "96x96", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "128x128", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "192x192", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "256x256", type: "image/png" },
-      { url: "/branding/biolayers-logo.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: "/branding/biolayers-logo.png",
+    icon: "/biolayers-logo.svg",
+    shortcut: "/biolayers-logo.svg",
+    apple: "/biolayers-logo.svg",
   },
 
   openGraph: {
@@ -130,7 +121,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="icon" href="/branding/biolayers-logo.png" sizes="any" type="image/png" />
+        <link rel="icon" href="/biolayers-logo.svg" type="image/svg+xml" />
       </head>
       <body
         className="
@@ -169,7 +160,7 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/branding/biolayers-logo.png"
+          href="/biolayers-logo.svg"
           fetchPriority="high"
         />
 

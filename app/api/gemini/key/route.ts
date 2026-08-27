@@ -16,6 +16,8 @@ import {
   looksLikeGeminiKey,
   validateGeminiKey,
 } from "../../../lib/gemini/validation";
+import { geminiKeyPostSchema } from "./validation";
+import { handleValidationError } from "../../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,26 +83,20 @@ export async function POST(request: Request) {
     return unauthorizedJson();
   }
 
-  let body: KeyRequest;
-
+  let body: unknown;
   try {
-    body = (await request.json()) as KeyRequest;
+    body = await request.json();
   } catch {
-    return jsonError(
-      "The request body must contain valid JSON.",
-    );
+    return jsonError("The request body must contain valid JSON.");
   }
 
-  const action =
-    typeof body.action === "string"
-      ? body.action
-      : "";
-
-  if (action !== "save" && action !== "test") {
-    return jsonError(
-      "Provide an action of \"save\" or \"test\".",
-    );
+  const parsed = geminiKeyPostSchema.safeParse(body);
+  if (!parsed.success) {
+    const { message, status } = handleValidationError(parsed.error);
+    return jsonError(message, status);
   }
+
+  const { action, apiKey: rawKey } = parsed.data;
 
   const rateLimitKey = `gemini-key:${userId}:${action}`;
 
@@ -116,11 +112,6 @@ export async function POST(request: Request) {
       429,
     );
   }
-
-  const rawKey =
-    typeof body.apiKey === "string"
-      ? body.apiKey.trim()
-      : "";
 
   if (action === "save") {
     if (!rawKey) {

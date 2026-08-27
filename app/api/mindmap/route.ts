@@ -21,6 +21,8 @@ import {
 import { checkRateLimit } from "../../lib/auth/rate-limit";
 import { getDecryptedGeminiKey } from "../../lib/gemini/store";
 import { savePaper } from "../../lib/papers/store";
+import { mindmapJsonPayloadSchema, mindmapFileUploadSchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -514,8 +516,7 @@ export async function POST(
     let payload: unknown;
 
     try {
-      payload =
-        await request.json();
+      payload = await request.json();
     } catch {
       return new Response(
         jsonLine({
@@ -535,49 +536,24 @@ export async function POST(
       );
     }
 
-    const candidate =
-      payload as {
-        fileName?: unknown;
-        text?: unknown;
-      } | null;
-
-    const rawFileName =
-      typeof candidate?.fileName ===
-      "string"
-        ? candidate.fileName
-        : "";
-
-    const rawText =
-      typeof candidate?.text ===
-      "string"
-        ? candidate.text
-        : "";
-
-    if (
-      !rawFileName.trim() ||
-      !rawText.trim()
-    ) {
+    const parsed = mindmapJsonPayloadSchema.safeParse(payload);
+    if (!parsed.success) {
+      const { message, status: statusCode } = handleValidationError(parsed.error);
       return new Response(
-        jsonLine({
-          type: "error",
-          message:
-            "JSON uploads must include non-empty 'fileName' and 'text' fields.",
-        }),
+        jsonLine({ type: "error", message }),
         {
-          status: 400,
+          status: statusCode,
           headers: {
-            "Content-Type":
-              "application/x-ndjson",
-            "Cache-Control":
-              "no-store, max-age=0",
+            "Content-Type": "application/x-ndjson",
+            "Cache-Control": "no-store, max-age=0",
           },
         },
       );
     }
 
-    if (
-      !getFileType(rawFileName)
-    ) {
+    const { fileName: rawFileName, text: rawText } = parsed.data;
+
+    if (!getFileType(rawFileName)) {
       return new Response(
         jsonLine({
           type: "error",

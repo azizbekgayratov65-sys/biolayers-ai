@@ -79,3 +79,28 @@ export function forbiddenJson(
     { status: 403 },
   );
 }
+
+/*
+  Creates a Supabase client using the public/anon key for public routes.
+  No session cookies, no user context — RLS policies allow reading
+  published rows.
+*/
+export function createPublicClient(): SupabaseClient {
+  return createServerClient(
+    getSupabaseUrl(),
+    getSupabasePublishableKey(),
+    {
+      auth: {
+        persistSession: false,
+      },
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll() {
+          // no-op
+        },
+      },
+    },
+  );
+}

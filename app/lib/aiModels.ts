@@ -39,11 +39,10 @@ export const GEMINI_MODEL_RANK = [
 export const GEMINI_BASE =
   "https://generativelanguage.googleapis.com/v1beta";
 
+import { getPreferredGeminiModel } from "./env";
+
 export function getPreferredModel(): string {
-  return (
-    process.env.GEMINI_MODEL?.trim() ||
-    GEMINI_MODEL_RANK[0]
-  );
+  return getPreferredGeminiModel();
 }
 
 export function classifyAiFailure(

@@ -848,7 +848,7 @@ export default function InteractiveMechanismDemoSection() {
                 {/* CTA */}
 
                 <a
-                  href="/explore"
+                  href="/mindmap"
                   className="
                     group
                     mt-5

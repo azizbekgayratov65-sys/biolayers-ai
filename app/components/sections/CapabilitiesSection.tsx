@@ -65,7 +65,7 @@ const capabilities: Capability[] = [
 ];
 
 export default function CapabilitiesSection() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = Boolean(useReducedMotion());
 
   return (
     <section
@@ -101,26 +101,15 @@ export default function CapabilitiesSection() {
 
       {/* Subtle grid */}
 
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                backgroundPosition: ["0px 0px", "72px 72px"],
-              }
-        }
-        transition={{
-          duration: 28,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="
+        className={`
           pointer-events-none
           absolute
           inset-0
           opacity-[0.025]
-        "
+          ${reduceMotion ? "" : "bl-ambient-grid-drift"}
+        `}
         style={{
           backgroundImage: `
             linear-gradient(rgba(77,141,255,.11) 1px, transparent 1px),
@@ -132,23 +121,9 @@ export default function CapabilitiesSection() {
 
       {/* Cyan ambient field */}
 
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                x: [-45, 45, -45],
-                y: [-20, 28, -20],
-                scale: [0.96, 1.05, 0.96],
-              }
-        }
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="
+        className={`
           pointer-events-none
           absolute
           -left-48
@@ -158,28 +133,15 @@ export default function CapabilitiesSection() {
           rounded-full
           bg-teal-400/[0.06]
           blur-[150px]
-        "
+          ${reduceMotion ? "" : "bl-ambient-cyan-drift"}
+        `}
       />
 
       {/* Violet ambient field */}
 
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                x: [45, -45, 45],
-                y: [20, -28, 20],
-                scale: [1.04, 0.96, 1.04],
-              }
-        }
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="
+        className={`
           pointer-events-none
           absolute
           -right-48
@@ -189,7 +151,8 @@ export default function CapabilitiesSection() {
           rounded-full
           bg-sky-400/[0.05]
           blur-[155px]
-        "
+          ${reduceMotion ? "" : "bl-ambient-violet-drift"}
+        `}
       />
 
       {/* ================================================= */}

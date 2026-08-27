@@ -560,7 +560,7 @@ export default function HypothesisBuilderSection() {
               </div>
 
               <a
-                href="/explore"
+                href="/mindmap"
                 className="
                   group
                   mt-6

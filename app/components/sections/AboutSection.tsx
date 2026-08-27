@@ -102,22 +102,9 @@ export default function AboutSection() {
 
       {/* Cyan atmosphere */}
 
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                x: [-35, 35, -35],
-                y: [-10, 20, -10],
-              }
-        }
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="
+        className={`
           pointer-events-none
           absolute
           -left-52
@@ -128,27 +115,15 @@ export default function AboutSection() {
           rounded-full
           bg-sky-400/[0.045]
           blur-[170px]
-        "
+          ${reduceMotion ? "" : "bl-atmosphere-cyan-drift"}
+        `}
       />
 
       {/* Teal atmosphere */}
 
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                x: [35, -35, 35],
-                y: [10, -20, 10],
-              }
-        }
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="
+        className={`
           pointer-events-none
           absolute
           -right-52
@@ -159,7 +134,8 @@ export default function AboutSection() {
           rounded-full
           bg-teal-400/[0.045]
           blur-[180px]
-        "
+          ${reduceMotion ? "" : "bl-atmosphere-teal-drift"}
+        `}
       />
 
       {/* Very subtle grid */}
@@ -846,7 +822,7 @@ export default function AboutSection() {
             </div>
 
             <a
-              href="/explore"
+              href="/mindmap"
               className="
                 group
                 inline-flex

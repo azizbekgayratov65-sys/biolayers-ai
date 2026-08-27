@@ -5,6 +5,8 @@ import {
   getApiUserId,
   unauthorizedJson,
 } from "../../../lib/auth/api-auth";
+import { paperIdParamsSchema } from "./validation";
+import { handleValidationError } from "../../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,11 +30,10 @@ export async function DELETE(
 
   const { id } = await context.params;
 
-  if (!id) {
-    return NextResponse.json(
-      { error: "A paper id is required." },
-      { status: 400 },
-    );
+  const parsed = paperIdParamsSchema.safeParse({ id });
+  if (!parsed.success) {
+    const { message, status: statusCode } = handleValidationError(parsed.error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 
   const { error, count } = await supabase

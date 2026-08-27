@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { cellsQuerySchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -380,186 +383,133 @@ function mapOlsDocuments(
 }
 
 export async function GET(request: Request) {
-  const requestUrl =
-    new URL(request.url);
-
-  const query =
-    requestUrl.searchParams
-      .get("q")
-      ?.trim() ?? "";
-
-  if (query.length < 2) {
-    return NextResponse.json(
-      {
-        error:
-          "Enter at least 2 characters to search cell ontologies.",
-      },
-      {
-        status: 400,
-      },
-    );
-  }
-
-  const page = Math.max(
-    0,
-    parseInteger(
-      requestUrl.searchParams.get(
-        "page",
-      ),
-      0,
-    ),
-  );
-
-  const pageSize = Math.min(
-    MAX_PAGE_SIZE,
-    Math.max(
-      1,
-      parseInteger(
-        requestUrl.searchParams.get(
-          "pageSize",
-        ),
-        DEFAULT_PAGE_SIZE,
-      ),
-    ),
-  );
-
-  const requestedOntology =
-    requestUrl.searchParams.get(
-      "ontology",
-    );
-
-  const ontology =
-    requestedOntology === "clo"
-      ? "clo"
-      : requestedOntology === "all"
-        ? "cl,clo"
-        : "cl";
-
-  const localResult =
-    getLocalMatches(
-      query,
-      page,
-      pageSize,
-    );
-
-  const controller =
-    new AbortController();
-
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, REQUEST_TIMEOUT_MS);
-
   try {
+    const requestUrl = new URL(request.url);
+    const queryParams = {
+      q: requestUrl.searchParams.get("q") ?? "",
+      page: requestUrl.searchParams.get("page") ?? "0",
+      pageSize: requestUrl.searchParams.get("pageSize") ?? "20",
+      ontology: requestUrl.searchParams.get("ontology") ?? "cl",
+    };
+
+    const parsed = cellsQuerySchema.safeParse(queryParams);
+    if (!parsed.success) {
+      const { message, status } = handleValidationError(parsed.error);
+      return NextResponse.json({ error: message }, { status });
+    }
+
+    const { q: query, page, pageSize, ontology } = parsed.data;
+
+    const ontologyValue =
+      ontology === "clo"
+        ? "clo"
+        : ontology === "all"
+          ? "cl,clo"
+          : "cl";
+
+    const localResult =
+      getLocalMatches(
+        query,
+        page,
+        pageSize,
+      );
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, REQUEST_TIMEOUT_MS);
+
     /*
       /api/select is optimized by OLS for selecting ontology terms
       and is typically faster than the full /api/search endpoint.
     */
-    const params =
-      new URLSearchParams({
-        q: query,
-        ontology,
-        type: "class",
-        rows: String(pageSize),
-        start: String(page),
-        local: "true",
-        obsoletes: "false",
-        fieldList:
-          "iri,label,short_form,obo_id,ontology_name,ontology_prefix,description,synonym,type,is_obsolete",
-      });
+    const params = new URLSearchParams({
+      q: query,
+      ontology,
+      type: "class",
+      rows: String(pageSize),
+      start: String(page),
+      local: "true",
+      obsoletes: "false",
+      fieldList:
+        "iri,label,short_form,obo_id,ontology_name,ontology_prefix,description,synonym,type,is_obsolete",
+    });
 
-    const response = await fetch(
-      `${OLS_SELECT_URL}?${params.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "User-Agent":
-            "BioLayers-AI/1.0",
+    try {
+      const response = await fetch(
+        `${OLS_SELECT_URL}?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "BioLayers-AI/1.0",
+          },
+          cache: "no-store",
+          signal: controller.signal,
         },
-        cache: "no-store",
-        signal: controller.signal,
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `OLS returned status ${response.status}.`,
-      );
-    }
-
-    const raw = await response.text();
-
-    const data =
-      JSON.parse(raw) as OlsSelectResponse;
-
-    const remoteTerms =
-      mapOlsDocuments(
-        data.response?.docs ?? [],
       );
 
-    const remoteTotal =
-      data.response?.numFound ?? 0;
+      if (!response.ok) {
+        throw new Error(`OLS returned status ${response.status}.`);
+      }
 
-    /*
-      If OLS returns no matching records while the local fallback has
-      valid entries, use the fallback instead of showing an empty page.
-    */
-    if (
-      remoteTerms.length === 0 &&
-      localResult.terms.length > 0
-    ) {
+      const raw = await response.text();
+      const data = JSON.parse(raw) as OlsSelectResponse;
+
+      const remoteTerms = mapOlsDocuments(data.response?.docs ?? []);
+      const remoteTotal = data.response?.numFound ?? 0;
+
+      if (remoteTerms.length === 0 && localResult.terms.length > 0) {
+        return NextResponse.json({
+          query,
+          ontology,
+          page,
+          pageSize,
+          total: localResult.total,
+          hasMore: (page + 1) * pageSize < localResult.total,
+          source: "local-fallback",
+          warning:
+            "The remote ontology service returned no records, so BioLayers used its local verified cell catalog.",
+          terms: localResult.terms,
+        });
+      }
+
+      return NextResponse.json({
+        query,
+        ontology,
+        page,
+        pageSize,
+        total: remoteTotal,
+        hasMore: (page + 1) * pageSize < remoteTotal,
+        source: "ols",
+        terms: remoteTerms,
+      });
+    } catch (error) {
+      console.warn("OLS unavailable; using local Cell Atlas fallback:", error);
+
       return NextResponse.json({
         query,
         ontology,
         page,
         pageSize,
         total: localResult.total,
-        hasMore:
-          (page + 1) * pageSize <
-          localResult.total,
+        hasMore: (page + 1) * pageSize < localResult.total,
         source: "local-fallback",
         warning:
-          "The remote ontology service returned no records, so BioLayers used its local verified cell catalog.",
+          error instanceof Error && error.name === "AbortError"
+            ? "The remote ontology service timed out. BioLayers used its local verified cell catalog."
+            : "The remote ontology service was unavailable. BioLayers used its local verified cell catalog.",
         terms: localResult.terms,
       });
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return NextResponse.json({
-      query,
-      ontology,
-      page,
-      pageSize,
-      total: remoteTotal,
-      hasMore:
-        (page + 1) * pageSize <
-        remoteTotal,
-      source: "ols",
-      terms: remoteTerms,
-    });
   } catch (error) {
-    console.warn(
-      "OLS unavailable; using local Cell Atlas fallback:",
-      error,
+    console.error("Cell search error:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred while searching cell ontologies." },
+      { status: 500 }
     );
-
-    return NextResponse.json({
-      query,
-      ontology,
-      page,
-      pageSize,
-      total: localResult.total,
-      hasMore:
-        (page + 1) * pageSize <
-        localResult.total,
-      source: "local-fallback",
-      warning:
-        error instanceof Error &&
-        error.name === "AbortError"
-          ? "The remote ontology service timed out. BioLayers used its local verified cell catalog."
-          : "The remote ontology service was unavailable. BioLayers used its local verified cell catalog.",
-      terms: localResult.terms,
-    });
-  } finally {
-    clearTimeout(timeout);
   }
 }

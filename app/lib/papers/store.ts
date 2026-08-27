@@ -11,8 +11,26 @@ export type SavedPaper = {
   createdAt: string;
 };
 
+export type LibraryPaper = SavedPaper & {
+  userId: string;
+  userEmail: string | null;
+  userFullName: string | null;
+  userAvatarUrl: string | null;
+};
+
+/*
+  Generates a SHA-256 hash of the mindmap for deduplication.
+  Runs on the server (Node.js crypto).
+*/
+async function generateMindmapHash(mindmap: unknown): Promise<string> {
+  const crypto = await import("crypto");
+  const normalized = JSON.stringify(mindmap, Object.keys(mindmap as object).sort());
+  return crypto.createHash("sha256").update(normalized).digest("hex");
+}
+
 /*
   Persists a generated mind map to the authenticated user's account.
+  Uses deduplication: identical mind maps share the same storage.
   Ownership is derived server-side from the session; the client never
   supplies a user id.
 */
@@ -27,6 +45,30 @@ export async function savePaper(
     characterCount: number;
   },
 ): Promise<string | null> {
+  const mindmap = input.mindmap as Record<string, unknown>;
+  const nodeCount = Array.isArray(mindmap.nodes) ? mindmap.nodes.length : 0;
+  const linkCount = Array.isArray(mindmap.links) ? mindmap.links.length : 0;
+
+  // Get or create deduplicated mindmap entry
+  const { data: mindmapId, error: mindmapError } = await supabase.rpc(
+    "get_or_create_mindmap",
+    {
+      p_mindmap: input.mindmap,
+      p_node_count: nodeCount,
+      p_link_count: linkCount,
+    },
+  );
+
+  if (mindmapError || !mindmapId) {
+    console.error(
+      "[papers] Failed to get/create mindmap:",
+      mindmapError,
+    );
+    return null;
+  }
+
+  const contentHash = await generateMindmapHash(input.mindmap);
+
   const { data, error } = await supabase
     .from("papers")
     .insert({
@@ -35,6 +77,8 @@ export async function savePaper(
       file_type: input.fileType,
       title: input.title,
       mindmap: input.mindmap,
+      mindmap_id: mindmapId,
+      content_hash: contentHash,
       character_count: input.characterCount,
     })
     .select("id")
@@ -45,6 +89,8 @@ export async function savePaper(
       "[papers] Failed to save paper:",
       error,
     );
+    // Rollback: decrement reference count on failure
+    await supabase.rpc("release_mindmap", { p_mindmap_id: mindmapId });
     return null;
   }
 
@@ -81,6 +127,153 @@ export async function listPapers(
     createdAt:
       (row.created_at as string) ?? "",
   }));
+}
+
+/*
+  Fetches PUBLIC papers for the collective library view with user profile info.
+  Supports pagination for memory efficiency.
+  Only returns papers where is_public = true.
+*/
+export async function listLibraryPapers(
+  supabase: SupabaseClient,
+  options: {
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<LibraryPaper[]> {
+  const limit = options.limit ?? 20;
+  const offset = options.offset ?? 0;
+
+  // First get papers (using public client so is_public filter works)
+  const { data: papers, error } = await supabase
+    .from("papers")
+    .select(
+      `
+      id,
+      file_name,
+      file_type,
+      title,
+      character_count,
+      created_at,
+      user_id
+    `,
+    )
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error(
+      "[papers] Failed to list library papers:",
+      error,
+    );
+    return [];
+  }
+
+  if (!papers || papers.length === 0) {
+    return [];
+  }
+
+  // Then get profiles for those user_ids
+  const userIds = [...new Set(papers.map((p) => p.user_id).filter(Boolean))];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, email, full_name, avatar_url")
+    .in("id", userIds);
+
+  const profileMap = new Map(
+    (profiles ?? []).map((p) => [p.id, p]),
+  );
+
+  return papers.map((row) => {
+    const profile = profileMap.get(row.user_id);
+    return {
+      id: row.id as string,
+      fileName: (row.file_name as string) ?? null,
+      fileType: (row.file_type as string) ?? null,
+      title: (row.title as string) ?? null,
+      characterCount:
+        (row.character_count as number) ?? null,
+      createdAt: (row.created_at as string) ?? "",
+      userId: row.user_id as string,
+      userEmail: profile?.email ?? null,
+      userFullName: profile?.full_name ?? null,
+      userAvatarUrl: profile?.avatar_url ?? null,
+    };
+  });
+}
+
+/*
+  Fetches papers for a specific user's library view.
+  Supports pagination for memory efficiency.
+*/
+export async function listUserLibraryPapers(
+  supabase: SupabaseClient,
+  targetUserId: string,
+  options: {
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<SavedPaper[]> {
+  const limit = options.limit ?? 20;
+  const offset = options.offset ?? 0;
+
+  const { data, error } = await supabase
+    .from("papers")
+    .select(
+      "id, file_name, file_type, title, character_count, created_at",
+    )
+    .eq("user_id", targetUserId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error(
+      "[papers] Failed to list user library papers:",
+      error,
+    );
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    fileName: (row.file_name as string) ?? null,
+    fileType: (row.file_type as string) ?? null,
+    title: (row.title as string) ?? null,
+    characterCount:
+      (row.character_count as number) ?? null,
+    createdAt: (row.created_at as string) ?? "",
+  }));
+}
+
+/*
+  Gets user profile info for the library header.
+*/
+export async function getUserProfile(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{
+  id: string;
+  email: string | null;
+  fullName: string | null;
+  avatarUrl: string | null;
+} | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, email, full_name, avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    id: data.id as string,
+    email: data.email as string | null,
+    fullName: data.full_name as string | null,
+    avatarUrl: data.avatar_url as string | null,
+  };
 }
 
 export async function getPaper(
@@ -144,4 +337,150 @@ export async function deletePaper(
     ok: true,
     notFound: (count ?? 0) === 0,
   };
+}
+
+export async function listPublishedPapers(
+  supabase: SupabaseClient,
+): Promise<SavedPaper[]> {
+  const { data, error } = await supabase
+    .from("papers")
+    .select(
+      "id, file_name, file_type, title, character_count, created_at",
+    )
+    .eq("published", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(
+      "[papers] Failed to list published papers:",
+      error,
+    );
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    fileName: (row.file_name as string) ?? null,
+    fileType: (row.file_type as string) ?? null,
+    title: (row.title as string) ?? null,
+    characterCount: (row.character_count as number) ?? null,
+    createdAt: (row.created_at as string) ?? "",
+  }));
+}
+
+export async function getPublicPaperByToken(
+  supabase: SupabaseClient,
+  token: string,
+): Promise<(SavedPaper & { mindmap: unknown }) | null> {
+  const { data, error } = await supabase
+    .from("papers")
+    .select(
+      "id, file_name, file_type, title, character_count, created_at, mindmap",
+    )
+    .eq("published", true)
+    .eq("token", token)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "[papers] Failed to get public paper:",
+      error,
+    );
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id as string,
+    fileName: (data.file_name as string) ?? null,
+    fileType: (data.file_type as string) ?? null,
+    title: (data.title as string) ?? null,
+    characterCount: (data.character_count as number) ?? null,
+    createdAt: (data.created_at as string) ?? "",
+    mindmap: data.mindmap,
+  };
+}
+
+/*
+  Fetches a paper by ID for the library view.
+  Only returns papers that are published (publicly accessible).
+  Uses the public client which can read published papers via RLS.
+*/
+export async function getPaperForLibrary(
+  supabase: SupabaseClient,
+  paperId: string,
+): Promise<(SavedPaper & { mindmap: unknown }) | null> {
+  const { data, error } = await supabase
+    .from("papers")
+    .select(
+      "id, file_name, file_type, title, character_count, created_at, mindmap",
+    )
+    .eq("is_public", true)
+    .eq("id", paperId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "[papers] Failed to get library paper:",
+      error,
+    );
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id as string,
+    fileName: (data.file_name as string) ?? null,
+    fileType: (data.file_type as string) ?? null,
+    title: (data.title as string) ?? null,
+    characterCount: (data.character_count as number) ?? null,
+    createdAt: (data.created_at as string) ?? "",
+    mindmap: data.mindmap,
+  };
+}
+
+export async function togglePublishPaper(
+  supabase: SupabaseClient,
+  userId: string,
+  paperId: string,
+): Promise<{ ok: boolean; published: boolean; shareToken?: string }> {
+  const { data, error } = await supabase
+    .from("papers")
+    .select("published, share_token")
+    .eq("id", paperId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "[papers] Failed to read paper publish state:",
+      error,
+    );
+    return { ok: false, published: false };
+  }
+
+  const current = data?.published ?? false;
+  const shareToken = data?.share_token ?? null;
+
+  const { error: updateError } = await supabase
+    .from("papers")
+    .update({ published: !current })
+    .eq("id", paperId)
+    .eq("user_id", userId);
+
+  if (updateError) {
+    console.error(
+      "[papers] Failed to update paper publish state:",
+      updateError,
+    );
+    return { ok: false, published: current };
+  }
+
+  return { ok: true, published: !current, shareToken: shareToken ?? undefined };
 }

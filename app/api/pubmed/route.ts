@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
 
+import {
+  getNcbiApiKey,
+  getNcbiTool,
+  getNcbiEmail,
+} from "../../lib/env";
+import { pubmedQuerySchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -110,7 +118,7 @@ const CACHE_TTL_MS =
   3. EFetch
 */
 const NCBI_REQUEST_GAP_MS =
-  process.env.NCBI_API_KEY
+  getNcbiApiKey()
     ? 120
     : 380;
 
@@ -222,25 +230,23 @@ function paramsOf(
       ...values,
 
       tool:
-        process.env.NCBI_TOOL ||
+        getNcbiTool() ||
         "biolayers-ai",
     });
 
-  if (
-    process.env.NCBI_EMAIL
-  ) {
+  const ncbiEmail = getNcbiEmail();
+  if (ncbiEmail) {
     params.set(
       "email",
-      process.env.NCBI_EMAIL,
+      ncbiEmail,
     );
   }
 
-  if (
-    process.env.NCBI_API_KEY
-  ) {
+  const ncbiApiKey = getNcbiApiKey();
+  if (ncbiApiKey) {
     params.set(
       "api_key",
-      process.env.NCBI_API_KEY,
+      ncbiApiKey,
     );
   }
 
@@ -752,75 +758,23 @@ export async function GET(
         request.url,
       );
 
-    const query =
-      url.searchParams
-        .get(
-          "q",
-        )
-        ?.trim() ??
-      "";
+    const queryParams = {
+      q: url.searchParams.get("q") ?? "",
+      page: url.searchParams.get("page") ?? "0",
+      pageSize: url.searchParams.get("pageSize") ?? "20",
+      sort: url.searchParams.get("sort") ?? "relevance",
+    };
 
-    /* =====================================================
-       VALIDATION
-       ===================================================== */
-
-    if (
-      query.length < 2
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Enter at least 2 characters.",
-        },
-        {
-          status:
-            400,
-        },
-      );
+    const parsed = pubmedQuerySchema.safeParse(queryParams);
+    if (!parsed.success) {
+      const { message, status: statusCode } = handleValidationError(parsed.error);
+      return NextResponse.json({ error: message }, { status: statusCode });
     }
 
-    const page =
-      Math.max(
-        0,
+    const { q: query, page, pageSize, sort } = parsed.data;
 
-        intParam(
-          url.searchParams.get(
-            "page",
-          ),
-          0,
-        ),
-      );
-
-    const pageSize =
-      Math.min(
-        30,
-
-        Math.max(
-          1,
-
-          intParam(
-            url.searchParams.get(
-              "pageSize",
-            ),
-            20,
-          ),
-        ),
-      );
-
-    const sort =
-      url.searchParams.get(
-        "sort",
-      ) === "date"
-        ? "pub_date"
-        : "relevance";
-
-    const responseSort:
-      | "relevance"
-      | "date" =
-      sort ===
-      "pub_date"
-        ? "date"
-        : "relevance";
+    const sortValue = sort === "date" ? "pub_date" : "relevance";
+    const responseSort: "relevance" | "date" = sortValue === "pub_date" ? "date" : "relevance";
 
     const retstart =
       page *

@@ -7,6 +7,8 @@ import {
   unauthorizedJson,
 } from "../../lib/auth/api-auth";
 import { checkRateLimit } from "../../lib/auth/rate-limit";
+import { classifyEvidenceRequestSchema } from "./validation";
+import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -926,12 +928,10 @@ export async function POST(
   }
 
   try {
-    let body:
-      RequestBody;
+    let body: unknown;
 
     try {
-      body =
-        (await request.json()) as RequestBody;
+      body = await request.json();
     } catch {
       return NextResponse.json(
         {
@@ -944,50 +944,32 @@ export async function POST(
       );
     }
 
-    /* =====================================================
-       RELATIONSHIP
-       ===================================================== */
+    const parsed = classifyEvidenceRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      const { message, status: statusCode } = handleValidationError(parsed.error);
+      return NextResponse.json({ error: message }, { status: statusCode });
+    }
 
-    const relationship =
-      sanitizeRelationship(
-        body.relationship,
-      );
+    const { relationship: rawRelationship, papers: rawPapers } = parsed.data;
 
-    if (
-      !relationship
-    ) {
+    const relationship = sanitizeRelationship(rawRelationship);
+    if (!relationship) {
       return NextResponse.json(
         {
-          error:
-            "A valid biological relationship is required.",
+          error: "A valid biological relationship is required.",
         },
-        {
-          status: 400,
-        },
+        { status: 400 },
       );
     }
 
-    /* =====================================================
-       PAPERS
-       ===================================================== */
+    const papers = sanitizePapers(rawPapers);
 
-    const papers =
-      sanitizePapers(
-        body.papers,
-      );
-
-    if (
-      papers.length ===
-      0
-    ) {
+    if (papers.length === 0) {
       return NextResponse.json(
         {
-          error:
-            "At least one valid PubMed candidate paper is required.",
+          error: "At least one valid PubMed candidate paper is required.",
         },
-        {
-          status: 400,
-        },
+        { status: 400 },
       );
     }
 
