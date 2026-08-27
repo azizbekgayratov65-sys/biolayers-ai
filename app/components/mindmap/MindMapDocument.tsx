@@ -248,7 +248,7 @@ export default function MindMapDocument({
             max-w-[820px]
           "
         >
-          <header>
+          <header style={{ scrollMarginTop: '100px' }}>
             <div
               className="
                 flex
