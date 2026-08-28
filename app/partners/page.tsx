@@ -11,24 +11,24 @@ import {
   TrendingUp,
   Handshake,
   Mail,
-  ArrowRight,
+  Network,
 } from "lucide-react";
 
 const pillars = [
   {
-    title: "AI Ecosystem Strategy",
-    desc: "Guiding platform commercialization, AI positioning, and research infrastructure.",
+    title: "Graph Theory & AI Safety",
+    desc: "Collaborating on spectral graph algorithms, causal reasoning, and verified AI systems.",
+    icon: Network,
+  },
+  {
+    title: "Frontier AI Research",
+    desc: "Exploring advanced mathematical architectures and robust biomedical neural systems.",
     icon: Cpu,
   },
   {
-    title: "HealthTech Outreach",
-    desc: "Connecting BioLayers with global life science networks and medical technology exhibitions.",
+    title: "Global Ecosystem",
+    desc: "Connecting open science, AI alignment, and precision oncology across international research networks.",
     icon: Globe2,
-  },
-  {
-    title: "Market Intelligence",
-    desc: "Delivering market analytics to accelerate researcher adoption of mechanism mapping.",
-    icon: TrendingUp,
   },
 ];
 
@@ -66,8 +66,8 @@ export default function PartnersPage() {
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
-            BioLayers AI collaborates with leading innovation catalysts and healthtech
-            networks to expand AI-driven oncology knowledge mapping globally.
+            BioLayers AI collaborates with leading innovation catalysts and frontier AI
+            organizations to expand AI-driven oncology knowledge mapping globally.
           </p>
         </motion.div>
 
@@ -78,8 +78,8 @@ export default function PartnersPage() {
             <div className="flex items-center gap-4">
               <div className="relative flex h-14 w-48 items-center justify-center overflow-hidden rounded-xl border border-teal-200/20 bg-[#070d14]/90 p-2 sm:h-16 sm:w-56">
                 <Image
-                  src="/branding/nxthorizon-logo.svg"
-                  alt="NXT Horizon - AI & Strategic Innovation"
+                  src="/branding/nxthorizon-logo.png"
+                  alt="NXT Horizon - AI & Frontier Research"
                   fill
                   className="object-contain p-2"
                   priority
@@ -92,18 +92,18 @@ export default function PartnersPage() {
                   Featured Strategic Partner
                 </span>
                 <div className="font-mono text-[10px] text-teal-300/80">
-                  AI Acceleration & Commercial Strategy
+                  AI Research & Frontier Computational Systems
                 </div>
               </div>
             </div>
 
             <a
-              href="https://nxthorizon.ai"
+              href="https://nxthorizon.org"
               target="_blank"
               rel="noopener noreferrer"
               className="group/btn inline-flex items-center gap-2 rounded-xl border border-teal-200/30 bg-teal-300/[0.08] px-4 py-2 text-xs font-bold text-teal-50 transition hover:border-teal-200/50 hover:bg-teal-300/[0.16]"
             >
-              <span>Visit nxthorizon.ai</span>
+              <span>Visit nxthorizon.org</span>
               <ExternalLink className="h-3 w-3 transition-transform group-hover/btn:translate-x-0.5" />
             </a>
           </div>
@@ -111,12 +111,12 @@ export default function PartnersPage() {
           <div className="mt-5 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold text-teal-200/90">
-                Strategic Innovation & Biomedical Ecosystem Acceleration
+                Frontier AI Research & Computational Knowledge Systems
               </p>
               <p className="mt-2 text-xs leading-relaxed text-slate-300/85">
-                NXT Horizon collaborates with BioLayers AI to scale platform positioning,
-                commercial strategy, and biomedical ecosystem outreach across international
-                technology hubs and life science exhibitions.
+                NXT Horizon collaborates with BioLayers AI to explore next-generation
+                graph theory, AI safety, and computational architectures for extracting
+                and verifying complex biological mechanisms.
               </p>
             </div>
 

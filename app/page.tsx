@@ -161,7 +161,7 @@ export default function HomePage() {
           >
             <div className="relative h-4 w-20">
               <Image
-                src="/branding/nxthorizon-logo.svg"
+                src="/branding/nxthorizon-logo.png"
                 alt="NXT Horizon"
                 fill
                 className="object-contain"
