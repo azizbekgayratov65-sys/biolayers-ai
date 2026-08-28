@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, User, Clock, Loader2, ArrowLeft } from "lucide-react";
 
@@ -33,9 +34,10 @@ type LibraryResponse = {
 export default function UserLibraryPage({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ username: string }>;
 }) {
   const reduceMotion = Boolean(useReducedMotion());
+  const router = useRouter();
   const [papers, setPapers] = useState<SavedPaper[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,26 +48,26 @@ export default function UserLibraryPage({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const LIMIT = 20;
-  const [targetUserId, setTargetUserId] = useState("");
+  const [targetUsername, setTargetUsername] = useState("");
 
   const handlePaperClick = (paper: SavedPaper) => {
-    // Open in new tab
-    window.open(`/mindmap/${paper.id}`, '_blank', 'noopener,noreferrer');
+    // Navigate in same tab
+    router.push(`/mindmap/${paper.id}`);
   };
 
   useEffect(() => {
-    params.then((p) => setTargetUserId(p.userId));
+    params.then((p) => setTargetUsername(p.username));
   }, [params]);
 
   const fetchPapers = async (offset: number, append = false) => {
-    if (!targetUserId) return;
+    if (!targetUsername) return;
     try {
       if (append) setLoadingMore(true);
       else setLoading(true);
       setError(null);
 
       const res = await fetch(
-        `/api/library/user/${targetUserId}?limit=${LIMIT}&offset=${offset}`,
+        `/api/library/username/${targetUsername}?limit=${LIMIT}&offset=${offset}`,
       );
       if (!res.ok) {
         if (res.status === 404) throw new Error("User not found");
@@ -98,10 +100,10 @@ export default function UserLibraryPage({
   };
 
   useEffect(() => {
-    if (targetUserId) {
+    if (targetUsername) {
       fetchPapers(0, false);
     }
-  }, [targetUserId]);
+  }, [targetUsername]);
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(

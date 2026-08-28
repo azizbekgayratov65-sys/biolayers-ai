@@ -271,14 +271,14 @@ function PaperCard({
               <Clock className="h-3 w-3" />
               {formatDate(paper.createdAt)}
             </span>
-            {paper.userId && (
+            {paper.username && (
               <Link
-                href={`/library/${paper.userId}`}
+                href={`/library/${paper.username}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5 hover:text-teal-300 transition-colors"
               >
                 <User className="h-3 w-3" />
-                {paper.username ?? paper.userFullName ?? "Anonymous"}
+                @{paper.username}
               </Link>
             )}
           </div>

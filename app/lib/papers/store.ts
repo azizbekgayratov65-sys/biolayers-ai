@@ -285,6 +285,36 @@ export async function getPublicUserProfile(
 }
 
 /*
+  Gets public user profile by username.
+*/
+export async function getPublicUserProfileByUsername(
+  supabase: SupabaseClient,
+  username: string,
+): Promise<{
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  username: string | null;
+} | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username, full_name, avatar_url")
+    .eq("username", username.toLowerCase())
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    id: data.id as string,
+    fullName: data.full_name as string | null,
+    avatarUrl: data.avatar_url as string | null,
+    username: data.username as string | null,
+  };
+}
+
+/*
   Gets user profile info for the library header (includes email for own profile).
 */
 export async function getUserProfile(

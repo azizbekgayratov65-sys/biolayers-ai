@@ -5,19 +5,19 @@ import {
   getApiUserId,
   unauthorizedJson,
 } from "../../../../lib/auth/api-auth";
-import { listUserLibraryPapers, getPublicUserProfile } from "../../../../lib/papers/store";
+import { listUserLibraryPapers, getPublicUserProfileByUsername } from "../../../../lib/papers/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /*
-  GET /api/library/user/[userId]
-  Returns paginated list of papers for a specific user's library.
+  GET /api/library/username/[username]
+  Returns paginated list of papers for a specific user's library by username.
   Query params: limit (default 20), offset (default 0)
 */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: Promise<{ username: string }> },
 ) {
   const supabase = await createApiClient();
   const userId = await getApiUserId(supabase);
@@ -26,7 +26,7 @@ export async function GET(
     return unauthorizedJson();
   }
 
-  const { userId: targetUserId } = await params;
+  const { username } = await params;
   const { searchParams } = new URL(request.url);
   const limit = Math.min(
     parseInt(searchParams.get("limit") ?? "20", 10),
@@ -37,10 +37,8 @@ export async function GET(
     0,
   );
 
-  const [papers, profile] = await Promise.all([
-    listUserLibraryPapers(supabase, targetUserId, { limit, offset }),
-    getPublicUserProfile(supabase, targetUserId),
-  ]);
+  // First get the profile by username to get the user ID
+  const profile = await getPublicUserProfileByUsername(supabase, username);
 
   if (!profile) {
     return NextResponse.json(
@@ -48,6 +46,8 @@ export async function GET(
       { status: 404 },
     );
   }
+
+  const papers = await listUserLibraryPapers(supabase, profile.id, { limit, offset });
 
   return NextResponse.json({ papers, profile, limit, offset });
 }

@@ -241,7 +241,6 @@ export default function MindMapDocument({
         <MindMapToc
           sections={groups}
           authorUsername={meta.authorUsername}
-          authorId={meta.authorId}
         />
 
         <main

@@ -11,13 +11,11 @@ import type {
 type MindMapTocProps = {
   sections: MindMapSection[];
   authorUsername?: string | null;
-  authorId?: string | null;
 };
 
 export default function MindMapToc({
   sections,
   authorUsername,
-  authorId,
 }: MindMapTocProps) {
   const [active, setActive] =
     useState(0);
@@ -175,7 +173,7 @@ export default function MindMapToc({
         )}
       </ol>
 
-        {authorUsername && authorId && (
+        {authorUsername && (
           <div
             className="
               mt-6 pt-4
@@ -187,7 +185,7 @@ export default function MindMapToc({
               Author
             </p>
             <Link
-              href={`/library/${authorId}`}
+              href={`/library/${authorUsername}`}
               className="
                 flex items-center gap-2
                 px-2.5 py-2
