@@ -7,6 +7,9 @@ import {
   Loader2,
   Mail,
   Sparkles,
+  User,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -36,6 +39,7 @@ export function AccountPanel({
   userId,
   email,
   name,
+  username,
   avatarUrl,
   createdAt,
   geminiConfigured,
@@ -43,6 +47,7 @@ export function AccountPanel({
   userId: string;
   email: string;
   name: string | null;
+  username: string | null;
   avatarUrl: string | null;
   createdAt: string | null;
   geminiConfigured: boolean;
@@ -50,9 +55,12 @@ export function AccountPanel({
   const [displayName, setDisplayName] = useState(
     name ?? "",
   );
+  const [inputUsername, setInputUsername] = useState(username ?? "");
   const [saving, setSaving] = useState(false);
+  const [savingUsername, setSavingUsername] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [usernameAvailable, setUsernameAvailable] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
   const saveName = async () => {
     setSaving(true);
@@ -79,6 +87,99 @@ export function AccountPanel({
     }
 
     setNotice("Profile updated.");
+  };
+
+  const checkUsernameAvailability = async (value: string) => {
+    if (!value || value.length < 3) {
+      setUsernameAvailable("idle");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+      setUsernameAvailable("idle");
+      return;
+    }
+    if (value === username) {
+      setUsernameAvailable("available");
+      return;
+    }
+
+    setUsernameAvailable("checking");
+    const supabase = createClient();
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", value.toLowerCase())
+      .maybeSingle();
+
+    setUsernameAvailable(data ? "taken" : "available");
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    setInputUsername(value);
+    checkUsernameAvailability(value);
+  };
+
+  const saveUsername = async () => {
+    setSavingUsername(true);
+    setError(null);
+    setNotice(null);
+
+    if (!inputUsername.trim()) {
+      setError("Username cannot be empty.");
+      setSavingUsername(false);
+      return;
+    }
+
+    if (inputUsername.length < 3) {
+      setError("Username must be at least 3 characters.");
+      setSavingUsername(false);
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(inputUsername)) {
+      setError("Username can only contain letters, numbers, and underscores.");
+      setSavingUsername(false);
+      return;
+    }
+
+    if (usernameAvailable === "taken") {
+      setError("This username is already taken.");
+      setSavingUsername(false);
+      return;
+    }
+
+    if (usernameAvailable === "checking") {
+      setError("Please wait for username check to complete.");
+      setSavingUsername(false);
+      return;
+    }
+
+    const supabase = createClient();
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .upsert(
+        {
+          id: userId,
+          username: inputUsername.trim().toLowerCase(),
+        },
+        { onConflict: "id" },
+      );
+
+    setSavingUsername(false);
+
+    if (updateError) {
+      if (updateError.code === "23505") {
+        setError("This username is already taken.");
+      } else {
+        setError("Could not save username. Please try again.");
+      }
+      return;
+    }
+
+    setNotice("Username updated.");
   };
 
   const rowClass =
@@ -120,6 +221,16 @@ export function AccountPanel({
           </div>
           <span className="max-w-[220px] truncate text-sm text-white/85">
             {email || "—"}
+          </span>
+        </div>
+
+        <div className={rowClass}>
+          <div className="flex items-center gap-2 text-sm text-white/50">
+            <User className="h-4 w-4 text-white/25" />
+            Username
+          </div>
+          <span className="max-w-[220px] truncate text-sm text-white/85 font-mono">
+            @{username || "—"}
           </span>
         </div>
 
@@ -194,6 +305,60 @@ export function AccountPanel({
             Save
           </button>
         </div>
+
+        {error && (
+          <p className="mt-2 text-xs text-rose-300/80">{error}</p>
+        )}
+        {notice && (
+          <p className="mt-2 text-xs text-teal-300/80">{notice}</p>
+        )}
+      </div>
+
+      <div className="border-t border-white/[0.06] px-6 py-5">
+        <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
+          Username
+        </div>
+        <div className="relative flex gap-2">
+          <input
+            type="text"
+            value={inputUsername}
+            onChange={handleUsernameChange}
+            placeholder="your_username"
+            className="h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045] pr-20"
+            maxLength={30}
+          />
+          {usernameAvailable === "checking" && (
+            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-amber-300/80" aria-live="polite">
+              Checking…
+            </span>
+          )}
+          {usernameAvailable === "available" && (
+            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-emerald-300/80" aria-live="polite">
+              Available
+            </span>
+          )}
+          {usernameAvailable === "taken" && (
+            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-rose-300/80" aria-live="polite">
+              Taken
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => void saveUsername()}
+            disabled={savingUsername || usernameAvailable === "taken" || usernameAvailable === "checking" || !inputUsername.trim() || inputUsername.length < 3}
+            className="flex h-11 shrink-0 items-center gap-2 rounded-[13px] border border-teal-200/20 bg-teal-300/[0.07] px-4 text-xs font-bold text-teal-50 transition hover:border-teal-200/35 hover:bg-teal-300/[0.11] disabled:opacity-60"
+          >
+            {savingUsername ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+            Save
+          </button>
+        </div>
+        <p className="mt-1 text-[10px] text-white/30">
+          3–30 characters. Letters, numbers, and underscores only.
+        </p>
 
         {error && (
           <p className="mt-2 text-xs text-rose-300/80">{error}</p>

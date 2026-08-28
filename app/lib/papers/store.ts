@@ -417,11 +417,11 @@ export async function getPublicPaperByToken(
 export async function getPaperForLibrary(
   supabase: SupabaseClient,
   paperId: string,
-): Promise<(SavedPaper & { mindmap: unknown }) | null> {
+): Promise<(SavedPaper & { mindmap: unknown; userId: string; username: string | null }) | null> {
   const { data, error } = await supabase
     .from("papers")
     .select(
-      "id, file_name, file_type, title, character_count, created_at, mindmap",
+      "id, file_name, file_type, title, character_count, created_at, mindmap, user_id",
     )
     .eq("is_public", true)
     .eq("id", paperId)
@@ -439,6 +439,13 @@ export async function getPaperForLibrary(
     return null;
   }
 
+  // Fetch author profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", data.user_id)
+    .maybeSingle();
+
   return {
     id: data.id as string,
     fileName: (data.file_name as string) ?? null,
@@ -447,6 +454,8 @@ export async function getPaperForLibrary(
     characterCount: (data.character_count as number) ?? null,
     createdAt: (data.created_at as string) ?? "",
     mindmap: data.mindmap,
+    userId: data.user_id as string,
+    username: profile?.username ?? null,
   };
 }
 

@@ -40,7 +40,7 @@ export default async function SettingsPage() {
   ] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, email, full_name, avatar_url, created_at")
+      .select("id, email, full_name, avatar_url, username, created_at")
       .eq("id", user.id)
       .single(),
     getAiSettingsStatus(
@@ -83,6 +83,10 @@ export default async function SettingsPage() {
                 (profile as { full_name?: string | null } | null)
                   ?.full_name ??
                 user.fullName
+              }
+              username={
+                (profile as { username?: string | null } | null)
+                  ?.username ?? null
               }
               avatarUrl={
                 (profile as { avatar_url?: string | null } | null)

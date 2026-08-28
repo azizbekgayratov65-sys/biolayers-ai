@@ -127,6 +127,16 @@ export type MindMapResponse = {
       (present when the paper was persisted server-side).
     */
     paperId?: string | null;
+
+    /*
+      Author's username (when viewing a public paper from library).
+    */
+    authorUsername?: string | null;
+
+    /*
+      Author's user ID (when viewing a public paper from library).
+    */
+    authorId?: string | null;
   };
 
   error?: string;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { requireUser } from "../../lib/auth/require-user";
-import { getPaper } from "../../lib/papers/store";
+import { getPaper, getPaperForLibrary } from "../../lib/papers/store";
 import {
   sanitizeMindMap,
   type MindMapResponse,
@@ -20,8 +20,10 @@ type PageProps = {
 };
 
 /*
-  Re-opens a previously saved paper's mind map from the user's
-  library. The original source text is not persisted, so the
+  Re-opens a previously saved paper's mind map.
+  If the user owns the paper, they can view it regardless of public status.
+  If the paper is public (is_public = true), anyone can view it.
+  The original source text is not persisted, so the
   verbatim quotes render without in-context highlighting.
 */
 export default async function SavedMindMapPage({
@@ -33,14 +35,22 @@ export default async function SavedMindMapPage({
     `/mindmap/${id}`,
   );
 
-  const paper = await getPaper(
-    supabase,
-    user.id,
-    id,
-  );
+  // First try to get the paper as the owner
+  let paper = await getPaper(supabase, user.id, id);
+  let authorUsername: string | null = null;
+  let authorId: string | null = null;
+  let isOwner = true;
 
   if (!paper?.mindmap) {
-    notFound();
+    // Not the owner, try to fetch as public paper
+    isOwner = false;
+    const publicPaper = await getPaperForLibrary(supabase, id);
+    if (!publicPaper?.mindmap) {
+      notFound();
+    }
+    paper = publicPaper;
+    authorUsername = publicPaper.username;
+    authorId = publicPaper.userId;
   }
 
   const mindmap = sanitizeMindMap(
@@ -66,6 +76,8 @@ export default async function SavedMindMapPage({
       characterCount:
         paper.characterCount ?? 0,
       paperId: paper.id,
+      authorUsername: isOwner ? null : authorUsername,
+      authorId: isOwner ? null : authorId,
     },
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, User, AlertCircle, CheckCircle } from "lucide-react";
 import { useState } from "react";
 
 import { createClient } from "../../lib/supabase/client";
@@ -14,13 +14,42 @@ export default function SignUpForm({
   next: string;
 }) {
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [usernameAvailable, setUsernameAvailable] = useState<"idle" | "checking" | "available" | "taken">("idle");
+
+  const checkUsernameAvailability = async (value: string) => {
+    if (!value || value.length < 3) {
+      setUsernameAvailable("idle");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+      setUsernameAvailable("idle");
+      return;
+    }
+
+    setUsernameAvailable("checking");
+    const supabase = createClient();
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", value.toLowerCase())
+      .maybeSingle();
+
+    setUsernameAvailable(data ? "taken" : "available");
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    setUsername(value);
+    checkUsernameAvailability(value);
+  };
 
   const signUp = async () => {
     setError(null);
@@ -28,6 +57,31 @@ export default function SignUpForm({
 
     if (!email.trim() || !password) {
       setError("Enter your email and password.");
+      return;
+    }
+
+    if (!username.trim()) {
+      setError("Choose a username.");
+      return;
+    }
+
+    if (username.length < 3) {
+      setError("Username must be at least 3 characters.");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError("Username can only contain letters, numbers, and underscores.");
+      return;
+    }
+
+    if (usernameAvailable === "taken") {
+      setError("This username is already taken.");
+      return;
+    }
+
+    if (usernameAvailable === "checking") {
+      setError("Please wait for username check to complete.");
       return;
     }
 
@@ -52,6 +106,7 @@ export default function SignUpForm({
         options: {
           data: {
             full_name: fullName.trim() || undefined,
+            username: username.trim().toLowerCase(),
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
@@ -130,6 +185,45 @@ export default function SignUpForm({
           placeholder="Ada Lovelace"
           className={inputClass}
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="signup-username"
+          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+        >
+          Username
+        </label>
+        <div className="relative">
+          <input
+            id="signup-username"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={handleUsernameChange}
+            placeholder="your_username"
+            className={inputClass}
+            maxLength={30}
+          />
+          {usernameAvailable === "checking" && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-amber-300/80" aria-live="polite">
+              Checking…
+            </span>
+          )}
+          {usernameAvailable === "available" && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-300/80" aria-live="polite">
+              Available
+            </span>
+          )}
+          {usernameAvailable === "taken" && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rose-300/80" aria-live="polite">
+              Taken
+            </span>
+          )}
+        </div>
+        <p className="mt-1 text-[10px] text-white/30">
+          3–30 characters. Letters, numbers, and underscores only.
+        </p>
       </div>
 
       <div>

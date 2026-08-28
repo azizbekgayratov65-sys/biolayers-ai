@@ -11,6 +11,7 @@ import {
   Bot,
   FileText,
   RefreshCcw,
+  User,
   Workflow,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ import type {
   MindMapResponse,
 } from "../../lib/mindmapTypes";
 
+import Link from "next/link";
 import MindMapToc from "./MindMapToc";
 import MindMapSection from "./MindMapSection";
 
@@ -455,6 +457,33 @@ export default function MindMapDocument({
               Back to top
             </button>
           </footer>
+
+          {meta.authorUsername && meta.authorId && (
+            <div
+              className="
+                mt-8 pt-6
+                border-t border-white/[0.05]
+                flex items-center gap-2
+              "
+            >
+              <User className="h-4 w-4 text-slate-500" />
+              <span className="text-sm text-slate-400">Analyzed by</span>
+              <Link
+                href={`/library/${meta.authorId}`}
+                className="
+                  flex items-center gap-1.5
+                  font-semibold text-teal-300/90
+                  hover:text-teal-200
+                  transition-colors
+                "
+              >
+                @{meta.authorUsername}
+              </Link>
+              <span className="text-slate-500 mx-1">·</span>
+              <span className="text-xs text-slate-500">View all papers</span>
+            </div>
+          )}
+
         </main>
       </div>
     </div>
