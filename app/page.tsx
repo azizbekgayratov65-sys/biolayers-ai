@@ -157,16 +157,19 @@ export default function HomePage() {
           </span>
           <Link
             href="/partners"
-            className="group flex items-center gap-2 rounded-lg border border-teal-200/20 bg-white/[0.02] px-2.5 py-1 hover:border-teal-200/40 hover:bg-white/[0.04]"
+            className="group flex items-center gap-2.5 rounded-xl border border-teal-200/20 bg-white/[0.02] px-3 py-1.5 transition hover:border-teal-200/40 hover:bg-white/[0.05]"
           >
-            <div className="relative h-4 w-20">
+            <div className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/20 bg-white p-0.5 shadow-sm">
               <Image
                 src="/branding/nxthorizon-logo.png"
                 alt="NXT Horizon"
-                fill
-                className="object-contain"
+                width={20}
+                height={20}
+                className="h-full w-full object-contain"
               />
             </div>
+            <span className="font-bold text-teal-100 group-hover:text-white">NXT Horizon</span>
+            <span className="font-mono text-[9px] text-slate-400">· nxthorizon.org</span>
             <ArrowRight className="h-3 w-3 text-teal-300 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
