@@ -318,47 +318,48 @@ export function AccountPanel({
         <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
           Username
         </div>
-        <div className="relative flex gap-2">
-          <input
-            type="text"
-            value={inputUsername}
-            onChange={handleUsernameChange}
-            placeholder="your_username"
-            className="h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045] pr-20"
-            maxLength={30}
-          />
-          {usernameAvailable === "checking" && (
-            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-amber-300/80" aria-live="polite">
-              Checking…
-            </span>
-          )}
-          {usernameAvailable === "available" && (
-            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-emerald-300/80" aria-live="polite">
-              Available
-            </span>
-          )}
-          {usernameAvailable === "taken" && (
-            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-rose-300/80" aria-live="polite">
-              Taken
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => void saveUsername()}
-            disabled={savingUsername || usernameAvailable === "taken" || usernameAvailable === "checking" || !inputUsername.trim() || inputUsername.length < 3}
-            className="flex h-11 shrink-0 items-center gap-2 rounded-[13px] border border-teal-200/20 bg-teal-300/[0.07] px-4 text-xs font-bold text-teal-50 transition hover:border-teal-200/35 hover:bg-teal-300/[0.11] disabled:opacity-60"
-          >
-            {savingUsername ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Check className="h-4 w-4" />
+        <div className="flex flex-col gap-2">
+          <div className="relative flex gap-2">
+            <input
+              type="text"
+              value={inputUsername}
+              onChange={handleUsernameChange}
+              placeholder="your_username"
+              className="h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045] pr-20"
+              maxLength={30}
+            />
+            <button
+              type="button"
+              onClick={() => void saveUsername()}
+              disabled={savingUsername || usernameAvailable === "taken" || usernameAvailable === "checking" || !inputUsername.trim() || inputUsername.length < 3}
+              className="flex h-11 shrink-0 items-center gap-2 rounded-[13px] border border-teal-200/20 bg-teal-300/[0.07] px-4 text-xs font-bold text-teal-50 transition hover:border-teal-200/35 hover:bg-teal-300/[0.11] disabled:opacity-60"
+            >
+              {savingUsername ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              Save
+            </button>
+          </div>
+          <div className="flex items-center gap-2 text-xs" aria-live="polite">
+            {usernameAvailable === "checking" && (
+              <span className="text-amber-300/80">Checking…</span>
             )}
-            Save
-          </button>
+            {usernameAvailable === "available" && (
+              <span className="text-emerald-300/80">Available</span>
+            )}
+            {usernameAvailable === "taken" && (
+              <span className="text-rose-300/80">Taken</span>
+            )}
+            {usernameAvailable === "idle" && inputUsername.trim().length >= 3 && /^[a-zA-Z0-9_]+$/.test(inputUsername) && (
+              <span className="text-white/30">Enter username to check availability</span>
+            )}
+          </div>
+          <p className="text-[10px] text-white/30">
+            3–30 characters. Letters, numbers, and underscores only.
+          </p>
         </div>
-        <p className="mt-1 text-[10px] text-white/30">
-          3–30 characters. Letters, numbers, and underscores only.
-        </p>
 
         {error && (
           <p className="mt-2 text-xs text-rose-300/80">{error}</p>

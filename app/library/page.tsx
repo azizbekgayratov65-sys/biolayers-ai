@@ -13,7 +13,6 @@ type LibraryPaper = {
   characterCount: number | null;
   createdAt: string;
   userId: string;
-  userEmail: string | null;
   userFullName: string | null;
   userAvatarUrl: string | null;
   username: string | null;
@@ -279,7 +278,7 @@ function PaperCard({
                 className="flex items-center gap-1.5 hover:text-teal-300 transition-colors"
               >
                 <User className="h-3 w-3" />
-                {paper.username ?? paper.userEmail?.split("@")[0] ?? paper.userFullName ?? "Anonymous"}
+                {paper.username ?? paper.userFullName ?? "Anonymous"}
               </Link>
             )}
           </div>

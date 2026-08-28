@@ -13,9 +13,9 @@ export type SavedPaper = {
 
 export type LibraryPaper = SavedPaper & {
   userId: string;
-  userEmail: string | null;
   userFullName: string | null;
   userAvatarUrl: string | null;
+  username: string | null;
 };
 
 /*
@@ -174,12 +174,20 @@ export async function listLibraryPapers(
     return [];
   }
 
-  // Then get profiles for those user_ids
+  // Then get profiles for those user_ids using the public profiles function
+  // which bypasses RLS for safe fields only
   const userIds = [...new Set(papers.map((p) => p.user_id).filter(Boolean))];
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, username")
-    .in("id", userIds);
+  const { data: profiles, error: profilesError } = await supabase.rpc(
+    "get_public_profiles",
+    { p_user_ids: userIds },
+  ) as { data: Array<{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }> | null; error: Error | null };
+
+  if (profilesError) {
+    console.error(
+      "[papers] Failed to fetch public profiles:",
+      profilesError,
+    );
+  }
 
   const profileMap = new Map(
     (profiles ?? []).map((p) => [p.id, p]),
@@ -187,8 +195,8 @@ export async function listLibraryPapers(
 
   return papers.map((row) => {
     const profile = profileMap.get(row.user_id);
-    const displayName = profile?.full_name ?? profile?.email?.split("@")[0] ?? row.user_id.slice(0, 8);
-    const username = profile?.username ?? profile?.email?.split("@")[0] ?? row.user_id.slice(0, 8);
+    const displayName = profile?.full_name ?? profile?.username ?? row.user_id.slice(0, 8);
+    const username = profile?.username ?? row.user_id.slice(0, 8);
     return {
       id: row.id as string,
       fileName: (row.file_name as string) ?? null,
@@ -198,7 +206,6 @@ export async function listLibraryPapers(
         (row.character_count as number) ?? null,
       createdAt: (row.created_at as string) ?? "",
       userId: row.user_id as string,
-      userEmail: profile?.email ?? null,
       userFullName: displayName,
       userAvatarUrl: profile?.avatar_url ?? null,
       username,
@@ -250,7 +257,35 @@ export async function listUserLibraryPapers(
 }
 
 /*
-  Gets user profile info for the library header.
+  Gets user profile info for the library header (public version).
+*/
+export async function getPublicUserProfile(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  username: string | null;
+} | null> {
+  const { data, error } = await supabase.rpc("get_public_profile", {
+    p_user_id: userId,
+  }) as { data: Array<{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }> | null; error: Error | null };
+
+  if (error || !data || data.length === 0) {
+    return null;
+  }
+
+  return {
+    id: data[0].id,
+    fullName: data[0].full_name,
+    avatarUrl: data[0].avatar_url,
+    username: data[0].username,
+  };
+}
+
+/*
+  Gets user profile info for the library header (includes email for own profile).
 */
 export async function getUserProfile(
   supabase: SupabaseClient,
@@ -439,12 +474,10 @@ export async function getPaperForLibrary(
     return null;
   }
 
-  // Fetch author profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", data.user_id)
-    .maybeSingle();
+  // Fetch author profile using public profile function
+  const { data: profile } = await supabase.rpc("get_public_profile", {
+    p_user_id: data.user_id,
+  }) as { data: Array<{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }> | null; error: Error | null };
 
   return {
     id: data.id as string,
@@ -455,7 +488,7 @@ export async function getPaperForLibrary(
     createdAt: (data.created_at as string) ?? "",
     mindmap: data.mindmap,
     userId: data.user_id as string,
-    username: profile?.username ?? null,
+    username: profile?.[0]?.username ?? null,
   };
 }
 

@@ -5,7 +5,7 @@ import {
   getApiUserId,
   unauthorizedJson,
 } from "../../../../lib/auth/api-auth";
-import { listUserLibraryPapers, getUserProfile } from "../../../../lib/papers/store";
+import { listUserLibraryPapers, getPublicUserProfile } from "../../../../lib/papers/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,7 +39,7 @@ export async function GET(
 
   const [papers, profile] = await Promise.all([
     listUserLibraryPapers(supabase, targetUserId, { limit, offset }),
-    getUserProfile(supabase, targetUserId),
+    getPublicUserProfile(supabase, targetUserId),
   ]);
 
   if (!profile) {
