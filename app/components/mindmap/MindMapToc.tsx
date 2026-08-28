@@ -1,9 +1,8 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { User } from "lucide-react";
 
 import type {
   MindMapSection,
@@ -11,10 +10,14 @@ import type {
 
 type MindMapTocProps = {
   sections: MindMapSection[];
+  authorUsername?: string | null;
+  authorId?: string | null;
 };
 
 export default function MindMapToc({
   sections,
+  authorUsername,
+  authorId,
 }: MindMapTocProps) {
   const [active, setActive] =
     useState(0);
@@ -171,6 +174,42 @@ export default function MindMapToc({
           },
         )}
       </ol>
-    </nav>
+
+        {authorUsername && authorId && (
+          <div
+            className="
+              mt-6 pt-4
+              border-t border-white/[0.06]
+              flex flex-col gap-2
+            "
+          >
+            <p className="px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              Author
+            </p>
+            <Link
+              href={`/library/${authorId}`}
+              className="
+                flex items-center gap-2
+                px-2.5 py-2
+                rounded-lg
+                border border-teal-200/20
+                bg-teal-300/[0.07]
+                text-teal-300/90
+                font-semibold text-sm
+                transition
+                hover:border-teal-200/40
+                hover:bg-teal-300/[0.12]
+                hover:text-teal-200
+              "
+            >
+              <User className="h-4 w-4" />
+              <span className="truncate">@{authorUsername}</span>
+            </Link>
+            <p className="px-2.5 text-[10px] text-slate-500/70">
+              View all papers
+            </p>
+          </div>
+        )}
+      </nav>
   );
 }

@@ -161,15 +161,11 @@ export function AccountPanel({
 
     const supabase = createClient();
 
+    // Use update instead of upsert to avoid not-null constraint on email
     const { error: updateError } = await supabase
       .from("profiles")
-      .upsert(
-        {
-          id: userId,
-          username: inputUsername.trim().toLowerCase(),
-        },
-        { onConflict: "id" },
-      );
+      .update({ username: inputUsername.trim().toLowerCase() })
+      .eq("id", userId);
 
     setSavingUsername(false);
 
