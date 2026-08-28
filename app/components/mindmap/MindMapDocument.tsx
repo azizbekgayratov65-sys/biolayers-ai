@@ -233,7 +233,7 @@ export default function MindMapDocument({
           gap-10
           px-5
           pb-24
-          pt-8
+          pt-20
           xl:grid-cols-[220px_minmax(0,1fr)]
         "
       >
@@ -248,7 +248,7 @@ export default function MindMapDocument({
             max-w-[820px]
           "
         >
-          <header style={{ scrollMarginTop: '100px' }}>
+          <header>
             <div
               className="
                 flex
