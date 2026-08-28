@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70" fill="none">
+  <defs>
+    <linearGradient id="nxtGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0072FF" />
+      <stop offset="100%" stop-color="#7B2CBF" />
+    </linearGradient>
+    <linearGradient id="arcGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D2FF" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#9D4EDD" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Emblem: Stylized N / Horizon Wave -->
+  <g transform="translate(10, 8)">
+    <rect width="54" height="54" rx="14" fill="#0A121E" stroke="url(#nxtGrad)" stroke-width="1.5" />
+    
+    <!-- Horizon Arc -->
+    <path d="M 12 40 C 20 22, 34 22, 42 40" stroke="url(#arcGrad)" stroke-width="3" stroke-linecap="round" fill="none" />
+    
+    <!-- Modern N Shape -->
+    <path d="M 18 38 L 18 16 L 36 38 L 36 16" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    
+    <!-- Glowing Node on Horizon -->
+    <circle cx="27" cy="23" r="3.5" fill="#00D2FF" />
+  </g>
+  
+  <!-- Typography: NXT HORIZON -->
+  <g transform="translate(76, 20)">
+    <text x="0" y="22" font-family="'Instrument Sans', 'Inter', -apple-system, sans-serif" font-size="22" font-weight="900" letter-spacing="0.12em" fill="#FFFFFF">
+      NXT<tspan fill="#00D2FF">HORIZON</tspan>
+    </text>
+    <text x="2" y="36" font-family="'IBM Plex Mono', monospace" font-size="8" font-weight="700" letter-spacing="0.28em" fill="#88A0B8">
+      AI &amp; STRATEGIC INNOVATION
+    </text>
+  </g>
+</svg>

@@ -19,44 +19,50 @@ import { useEffect, useState } from "react";
 import { AccountMenu } from "./auth/AccountMenu";
 
 /* =========================================================
-   NAVIGATION
+   NAVIGATION CONFIG
    ========================================================= */
 
-const navItems = [
+type NavItem = {
+  label: string;
+  href: string;
+  path: string;
+};
+
+const navItems: NavItem[] = [
   {
-    href: "/",
     label: "Home",
+    href: "/",
     path: "/",
   },
   {
-    href: "/platform",
-    label: "Platform",
-    path: "/platform",
-  },
-  {
-    href: "/journey",
     label: "Journey",
+    href: "/journey",
     path: "/journey",
   },
   {
-    href: "/mindmap",
-    label: "Mind Map",
-    path: "/mindmap",
+    label: "About & Mentorship",
+    href: "/about",
+    path: "/about",
   },
   {
-    href: "/library",
-    label: "Library",
-    path: "/library",
+    label: "Partners",
+    href: "/partners",
+    path: "/partners",
   },
   {
-    href: "/press",
     label: "Press",
+    href: "/press",
     path: "/press",
   },
-] as const;
+  {
+    label: "Library",
+    href: "/library",
+    path: "/library",
+  },
+];
 
 /* =========================================================
-   NAVBAR
+   NAVBAR COMPONENT
    ========================================================= */
 
 export default function Navbar() {
@@ -126,7 +132,7 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   /* =======================================================
-     CLOSE MOBILE MENU ON DESKTOP RESIZE
+     CLOSE MOBILE ON DESKTOP RESIZE
      ======================================================= */
 
   useEffect(() => {
@@ -144,36 +150,27 @@ export default function Navbar() {
   }, []);
 
   /* =======================================================
-     SCROLL TO TOP ON ROUTE CHANGE
+     CLOSE ON ROUTE CHANGE
      ======================================================= */
 
-  const [prevPathname, setPrevPathname] =
-    useState(pathname);
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setMobileOpen(false);
   }
 
-  /* =======================================================
-     RENDER
-     ======================================================= */
+  const isItemActive = (item: NavItem) => {
+    if (item.path === "/" && pathname === "/") return true;
+    if (item.path !== "/" && pathname.startsWith(item.path)) return true;
+    return false;
+  };
 
   return (
     <>
       <motion.header
-        initial={
-          reduceMotion
-            ? false
-            : {
-                y: -70,
-                opacity: 0,
-              }
-        }
-        animate={{
-          y: 0,
-          opacity: 1,
-        }}
+        initial={reduceMotion ? false : { y: -70, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{
           duration: reduceMotion ? 0 : 0.8,
           ease: [0.16, 1, 0.3, 1],
@@ -193,7 +190,7 @@ export default function Navbar() {
           animate={{
             backgroundColor: scrolled
               ? "rgba(4, 7, 10, 0.94)"
-              : "rgba(4, 7, 10, 0.38)",
+              : "rgba(4, 7, 10, 0.45)",
             borderColor: scrolled
               ? "rgba(141,178,255,0.14)"
               : "rgba(77,141,255,0.08)",
@@ -209,17 +206,12 @@ export default function Navbar() {
             relative
             mx-auto
             max-w-[1540px]
-            overflow-hidden
             rounded-[20px]
             border
             backdrop-blur-xl
-            
           "
         >
-          {/* ================================================= */}
-          {/* TOP LIGHT                                         */}
-          {/* ================================================= */}
-
+          {/* Top highlight bar */}
           <div
             aria-hidden="true"
             className="
@@ -235,10 +227,7 @@ export default function Navbar() {
             "
           />
 
-          {/* ================================================= */}
-          {/* AMBIENT GLOW                                      */}
-          {/* ================================================= */}
-
+          {/* Ambient Glows */}
           <div
             aria-hidden="true"
             className="
@@ -253,7 +242,6 @@ export default function Navbar() {
               blur-[70px]
             "
           />
-
           <div
             aria-hidden="true"
             className="
@@ -269,31 +257,7 @@ export default function Navbar() {
             "
           />
 
-          <motion.div
-            aria-hidden="true"
-            animate={{
-              opacity: scrolled ? 1 : 0,
-            }}
-            transition={{
-              duration: 0.25,
-            }}
-            className="
-              pointer-events-none
-              absolute
-              inset-x-0
-              bottom-0
-              h-px
-              bg-gradient-to-r
-              from-transparent
-              via-teal-200/20
-              to-transparent
-            "
-          />
-
-          {/* ================================================= */}
-          {/* NAVBAR CONTENT                                    */}
-          {/* ================================================= */}
-
+          {/* NAVBAR ROW */}
           <motion.div
             animate={{
               height: scrolled ? 64 : 72,
@@ -313,10 +277,7 @@ export default function Navbar() {
               lg:px-6
             "
           >
-            {/* ================================================= */}
-            {/* BRAND                                            */}
-            {/* ================================================= */}
-
+            {/* Brand Logo */}
             <Link
               href="/"
               aria-label="BioLayers AI home"
@@ -329,19 +290,9 @@ export default function Navbar() {
               "
             >
               <motion.div
-                whileHover={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        scale: 1.05,
-                      }
-                }
-                animate={{
-                  scale: scrolled ? 0.94 : 1,
-                }}
-                transition={{
-                  duration: 0.25,
-                }}
+                whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+                animate={{ scale: scrolled ? 0.94 : 1 }}
+                transition={{ duration: 0.25 }}
                 className="
                   relative
                   flex
@@ -376,7 +327,6 @@ export default function Navbar() {
                 >
                   BioLayers AI
                 </div>
-
                 <div
                   className="
                     mt-0.5
@@ -395,10 +345,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* ================================================= */}
-            {/* DESKTOP NAVIGATION                               */}
-            {/* ================================================= */}
-
+            {/* DESKTOP NAVIGATION */}
             <nav
               aria-label="Primary navigation"
               className="
@@ -408,20 +355,21 @@ export default function Navbar() {
                 lg:flex
               "
             >
-              {navItems.map((item) => (
-                <DesktopNavItem
-                  key={item.path}
-                  href={item.href}
-                  label={item.label}
-                  active={pathname === item.path}
-                />
-              ))}
+              {navItems.map((item) => {
+                const active = isItemActive(item);
+
+                return (
+                  <DesktopNavItem
+                    key={item.label}
+                    href={item.href}
+                    label={item.label}
+                    active={active}
+                  />
+                );
+              })}
             </nav>
 
-            {/* ================================================= */}
-            {/* DESKTOP ACTIONS                                  */}
-            {/* ================================================= */}
-
+            {/* DESKTOP ACTIONS */}
             <div
               className="
                 hidden
@@ -431,23 +379,10 @@ export default function Navbar() {
                 lg:flex
               "
             >
-              {/* Mind Map */}
-
+              {/* Mind Map CTA */}
               <motion.div
-                whileHover={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        y: -2,
-                      }
-                }
-                whileTap={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        scale: 0.97,
-                      }
-                }
+                whileHover={reduceMotion ? undefined : { y: -2 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.97 }}
               >
                 <Link
                   href="/mindmap"
@@ -471,46 +406,21 @@ export default function Navbar() {
                     hover:bg-emerald-300/[0.14]
                   "
                 >
-                  <Workflow
-                    className="
-                      h-3.5
-                      w-3.5
-                      text-emerald-300/90
-                    "
-                  />
-
-                  Mind Map
-
-                  <ArrowRight
-                    className="
-                      h-3.5
-                      w-3.5
-                      transition-transform
-                      duration-300
-                      group-hover:translate-x-0.5
-                    "
-                  />
+                  <Workflow className="h-3.5 w-3.5 text-emerald-300/90" />
+                  <span>Mind Map</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Link>
               </motion.div>
 
               <AccountMenu />
             </div>
 
-            {/* ================================================= */}
-            {/* MOBILE BUTTON                                    */}
-            {/* ================================================= */}
-
+            {/* MOBILE MENU TOGGLE BUTTON */}
             <button
               type="button"
-              aria-label={
-                mobileOpen
-                  ? "Close navigation menu"
-                  : "Open navigation menu"
-              }
+              aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={mobileOpen}
-              onClick={() => {
-                setMobileOpen((current) => !current);
-              }}
+              onClick={() => setMobileOpen((current) => !current)}
               className="
                 flex
                 h-10
@@ -529,53 +439,33 @@ export default function Navbar() {
                 lg:hidden
               "
             >
-              {mobileOpen ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
+              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </motion.div>
         </motion.div>
       </motion.header>
 
-      {/* ===================================================== */}
-      {/* MOBILE NAVIGATION                                    */}
-      {/* ===================================================== */}
-
+      {/* MOBILE NAVIGATION DRAWER */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={
-              reduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                  }
-            }
-            animate={{
-              opacity: 1,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            transition={{
-              duration: reduceMotion ? 0 : 0.25,
-            }}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.25 }}
             className="
               fixed
               inset-0
               z-[90]
+              overflow-y-auto
               bg-[#04070a]/96
               px-4
-              pb-6
-              pt-[100px]
-              backdrop-blur-xl
+              pb-8
+              pt-[96px]
+              backdrop-blur-2xl
               lg:hidden
             "
           >
-            {/* Ambient */}
-
             <div
               aria-hidden="true"
               className="
@@ -593,22 +483,9 @@ export default function Navbar() {
             />
 
             <motion.div
-              initial={
-                reduceMotion
-                  ? false
-                  : {
-                      opacity: 0,
-                      y: -15,
-                    }
-              }
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              exit={{
-                opacity: 0,
-                y: -10,
-              }}
+              initial={reduceMotion ? false : { opacity: 0, y: -15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{
                 duration: reduceMotion ? 0 : 0.35,
                 ease: [0.16, 1, 0.3, 1],
@@ -617,113 +494,61 @@ export default function Navbar() {
                 relative
                 mx-auto
                 max-w-xl
-                overflow-hidden
                 rounded-[26px]
                 border
                 border-teal-100/[0.08]
-                bg-[#0a0f14]/72
+                bg-[#0a0f14]/80
                 p-4
-                shadow-[0_30px_100px_rgba(0,0,0,.4)]
+                shadow-[0_30px_100px_rgba(0,0,0,.5)]
               "
             >
-              {/* Navigation */}
-
-              <nav
-                aria-label="Mobile navigation"
-                className="space-y-1"
-              >
+              <nav aria-label="Mobile navigation" className="space-y-1.5">
                 {navItems.map((item, index) => {
-                  const active = pathname === item.path;
+                  const active = isItemActive(item);
 
                   return (
                     <Link
-                      key={item.path}
+                      key={item.label}
                       href={item.href}
-                      onClick={() => {
-                        setMobileOpen(false);
-                      }}
+                      onClick={() => setMobileOpen(false)}
                       className={`
-                        group
                         flex
                         items-center
                         justify-between
-                        rounded-[17px]
+                        rounded-[16px]
                         border
                         px-4
-                        py-4
+                        py-3.5
                         transition
-                        duration-300
-
                         ${
                           active
-                            ? "border-teal-200/15 bg-teal-300/[0.06]"
-                            : "border-transparent hover:border-teal-100/[0.08] hover:bg-teal-100/[0.03]"
+                            ? "border-teal-200/20 bg-teal-300/[0.08] text-white"
+                            : "border-transparent text-white/70 hover:border-teal-100/[0.08] hover:bg-teal-100/[0.03] hover:text-white"
                         }
                       `}
                     >
-                      <div className="flex items-center gap-4">
-                        <span
-                          className="
-                            font-mono
-                            text-[8px]
-                            font-bold
-                            tracking-[0.15em]
-                            text-teal-300/45
-                          "
-                        >
+                      <div className="flex items-center gap-3.5">
+                        <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-teal-300/50">
                           0{index + 1}
                         </span>
-
-                        <span
-                          className={`
-                            text-lg
-                            font-semibold
-                            tracking-[-0.02em]
-
-                            ${
-                              active
-                                ? "text-white"
-                                : "text-white/60"
-                            }
-                          `}
-                        >
+                        <span className="text-base font-semibold">
                           {item.label}
                         </span>
                       </div>
-
                       {active && (
-                        <span
-                          className="
-                            h-1.5
-                            w-1.5
-                            rounded-full
-                            bg-teal-300
-                            shadow-[0_0_10px_rgba(77,141,255,.75)]
-                          "
-                        />
+                        <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,0.8)]" />
                       )}
                     </Link>
                   );
                 })}
               </nav>
 
-              {/* Mobile actions */}
-
-              <div
-                className="
-                  mt-4
-                  border-t
-                  border-teal-100/[0.055]
-                  pt-4
-                "
-              >
+              {/* Mobile Actions */}
+              <div className="mt-4 border-t border-teal-100/[0.06] pt-4">
                 <Link
                   href="/mindmap"
-                  onClick={() => {
-                    setMobileOpen(false);
-                  }}
+                  onClick={() => setMobileOpen(false)}
                   className="
-                    group
                     flex
                     items-center
                     justify-center
@@ -743,61 +568,20 @@ export default function Navbar() {
                   "
                 >
                   <Workflow className="h-4 w-4" />
-
-                  Mind Map
-
-                  <ArrowRight
-                    className="
-                      h-4
-                      w-4
-                      transition-transform
-                      group-hover:translate-x-0.5
-                    "
-                  />
+                  <span>Open Mind Map</span>
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
 
-              {/* Account / auth actions */}
-
-              <div
-                className="
-                  mt-3
-                  border-t
-                  border-teal-100/[0.055]
-                  pt-4
-                "
-              >
+              {/* Mobile Account */}
+              <div className="mt-3 border-t border-teal-100/[0.06] pt-4">
                 <AccountMenu variant="mobile" />
               </div>
 
-              {/* Status */}
-
-              <div
-                className="
-                  mt-4
-                  flex
-                  items-center
-                  gap-2
-                  px-2
-                  pb-1
-                  font-mono
-                  text-[9px]
-                  font-bold
-                  uppercase
-                  tracking-[0.2em]
-                  text-slate-500/80
-                "
-              >
-                <span
-                  className="
-                    h-1.5
-                    w-1.5
-                    rounded-full
-                    bg-teal-300/65
-                  "
-                />
-
-                Research platform in development
+              {/* Status footer */}
+              <div className="mt-4 flex items-center gap-2 px-2 pb-1 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-300/65" />
+                <span>Computational oncology workspace</span>
               </div>
             </motion.div>
           </motion.div>
@@ -808,7 +592,7 @@ export default function Navbar() {
 }
 
 /* =========================================================
-   DESKTOP NAV ITEM
+   DESKTOP NAV ITEM COMPONENT
    ========================================================= */
 
 function DesktopNavItem({
@@ -833,11 +617,10 @@ function DesktopNavItem({
         font-semibold
         transition-colors
         duration-300
-
         ${
           active
             ? "text-white"
-            : "text-white/45 hover:text-white/80"
+            : "text-white/55 hover:text-white/90"
         }
       `}
     >
@@ -860,9 +643,7 @@ function DesktopNavItem({
         />
       )}
 
-      <span className="relative">
-        {label}
-      </span>
+      <span className="relative">{label}</span>
 
       {active && (
         <motion.span
