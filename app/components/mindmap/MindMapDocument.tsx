@@ -233,7 +233,7 @@ export default function MindMapDocument({
           gap-10
           px-5
           pb-24
-          pt-20
+          pt-40
           xl:grid-cols-[220px_minmax(0,1fr)]
         "
       >
