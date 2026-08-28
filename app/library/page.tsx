@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, User, Clock, Loader2 } from "lucide-react";
 
@@ -26,6 +27,7 @@ type LibraryResponse = {
 
 export default function LibraryPage() {
   const reduceMotion = Boolean(useReducedMotion());
+  const router = useRouter();
   const [papers, setPapers] = useState<LibraryPaper[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -37,8 +39,8 @@ export default function LibraryPage() {
   const LIMIT = 20;
 
   const handlePaperClick = (paper: LibraryPaper) => {
-    // Open in new tab
-    window.open(`/mindmap/${paper.id}`, '_blank', 'noopener,noreferrer');
+    // Navigate in same tab
+    router.push(`/mindmap/${paper.id}`);
   };
 
   const fetchPapers = async (offset: number, append = false) => {
