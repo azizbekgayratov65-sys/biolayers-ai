@@ -39,11 +39,9 @@ export default async function SavedMindMapPage({
   let paper = await getPaper(supabase, user.id, id);
   let authorUsername: string | null = null;
   let authorId: string | null = null;
-  let isOwner = true;
 
   if (!paper?.mindmap) {
     // Not the owner, try to fetch as public paper
-    isOwner = false;
     const publicPaper = await getPaperForLibrary(supabase, id);
     if (!publicPaper?.mindmap) {
       notFound();
@@ -51,6 +49,13 @@ export default async function SavedMindMapPage({
     paper = publicPaper;
     authorUsername = publicPaper.username;
     authorId = publicPaper.userId;
+  } else {
+    // Owner viewing their own paper - fetch their profile for author info
+    const { data: profile } = await supabase.rpc("get_public_profile", {
+      p_user_id: user.id,
+    }) as { data: Array<{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }> | null; error: Error | null };
+    authorUsername = profile?.[0]?.username ?? null;
+    authorId = user.id;
   }
 
   const mindmap = sanitizeMindMap(
@@ -76,8 +81,8 @@ export default async function SavedMindMapPage({
       characterCount:
         paper.characterCount ?? 0,
       paperId: paper.id,
-      authorUsername: isOwner ? null : authorUsername,
-      authorId: isOwner ? null : authorId,
+      authorUsername,
+      authorId,
     },
   };
 

@@ -106,12 +106,15 @@ export function AccountPanel({
     setUsernameAvailable("checking");
     const supabase = createClient();
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("id")
       .eq("username", value.toLowerCase())
       .maybeSingle();
 
+    if (error) {
+      console.error("[AccountPanel] Username check error:", error);
+    }
     setUsernameAvailable(data ? "taken" : "available");
   };
 
@@ -171,10 +174,11 @@ export function AccountPanel({
     setSavingUsername(false);
 
     if (updateError) {
+      console.error("[AccountPanel] Username update error:", updateError);
       if (updateError.code === "23505") {
         setError("This username is already taken.");
       } else {
-        setError("Could not save username. Please try again.");
+        setError(`Could not save username: ${updateError.message}`);
       }
       return;
     }
