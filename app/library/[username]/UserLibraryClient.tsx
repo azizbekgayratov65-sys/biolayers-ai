@@ -28,10 +28,12 @@ export default function UserLibraryClient({
   profile,
   initialPapers,
   username,
+  userNotFound = false,
 }: {
   profile: UserProfile;
   initialPapers: SavedPaper[];
   username: string;
+  userNotFound?: boolean;
 }) {
   const router = useRouter();
   const [papers, setPapers] = useState<SavedPaper[]>(initialPapers);
@@ -155,7 +157,20 @@ export default function UserLibraryClient({
             </div>
           )}
 
-          {papers.length === 0 ? (
+          {userNotFound ? (
+            <div className="py-16 text-center">
+              <p className="text-base text-slate-300">Researcher @{username} was not found.</p>
+              <div className="mt-4">
+                <Link
+                  href="/library"
+                  className="inline-flex items-center gap-2 rounded-xl border border-teal-200/20 bg-teal-300/[0.08] px-4 py-2 text-xs font-bold text-teal-200 hover:bg-teal-300/[0.15] transition"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Browse Public Papers
+                </Link>
+              </div>
+            </div>
+          ) : papers.length === 0 ? (
             <div className="py-16 text-center text-slate-500">
               This user hasn&apos;t analyzed any public papers yet.
             </div>

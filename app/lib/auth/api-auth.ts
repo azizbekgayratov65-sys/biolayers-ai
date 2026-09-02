@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
   getSupabasePublishableKey,
+  getSupabaseSecretKey,
   getSupabaseUrl,
 } from "../supabase/env";
 
@@ -89,6 +90,35 @@ export function createPublicClient(): SupabaseClient {
   return createServerClient(
     getSupabaseUrl(),
     getSupabasePublishableKey(),
+    {
+      auth: {
+        persistSession: false,
+      },
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll() {
+          // no-op
+        },
+      },
+    },
+  );
+}
+
+/*
+  Creates a Supabase client using the secret/service-role key for server-side
+  operations that bypass RLS (e.g. resolving a public profile by username).
+*/
+export function createAdminClient(): SupabaseClient {
+  const secretKey = getSupabaseSecretKey();
+  if (!secretKey) {
+    return createPublicClient();
+  }
+
+  return createServerClient(
+    getSupabaseUrl(),
+    secretKey,
     {
       auth: {
         persistSession: false,

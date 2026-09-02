@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "../auth/api-auth";
 
 export type SavedPaper = {
   id: string;
@@ -234,6 +235,7 @@ export async function listUserLibraryPapers(
       "id, file_name, file_type, title, character_count, created_at",
     )
     .eq("user_id", targetUserId)
+    .eq("is_public", true)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -296,21 +298,39 @@ export async function getPublicUserProfileByUsername(
   avatarUrl: string | null;
   username: string | null;
 } | null> {
-  const { data, error } = await supabase
+  // Use admin client to bypass profiles RLS (which only allows owner SELECT)
+  const admin = createAdminClient();
+  const { data, error } = await admin
     .from("profiles")
     .select("id, username, full_name, avatar_url")
-    .eq("username", username.toLowerCase())
+    .ilike("username", username)
     .maybeSingle();
 
-  if (error || !data) {
+  if (!error && data) {
+    return {
+      id: data.id as string,
+      fullName: data.full_name as string | null,
+      avatarUrl: data.avatar_url as string | null,
+      username: data.username as string | null,
+    };
+  }
+
+  // Fallback to provided client
+  const { data: fallbackData } = await supabase
+    .from("profiles")
+    .select("id, username, full_name, avatar_url")
+    .ilike("username", username)
+    .maybeSingle();
+
+  if (!fallbackData) {
     return null;
   }
 
   return {
-    id: data.id as string,
-    fullName: data.full_name as string | null,
-    avatarUrl: data.avatar_url as string | null,
-    username: data.username as string | null,
+    id: fallbackData.id as string,
+    fullName: fallbackData.full_name as string | null,
+    avatarUrl: fallbackData.avatar_url as string | null,
+    username: fallbackData.username as string | null,
   };
 }
 
