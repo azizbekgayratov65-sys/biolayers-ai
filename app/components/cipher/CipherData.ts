@@ -48,6 +48,18 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "Modern oncology researchers designed miniature synthetic lock-picks (such as MRTX1133 and Sotorasib derivatives) that slip directly into the mutated pocket, turning the switch off chemically.",
       },
     ],
+    quiz: {
+      question: "Why is KRAS G12D constantly stuck in the active state?",
+      options: [
+        "It lacks a cell membrane to bind to",
+        "The G12D mutation prevents GTP hydrolysis, so it cannot turn off its fuel",
+        "It produces too many ribosomes",
+        "It destroys all surrounding white blood cells",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Correct! The G12D mutation replaces glycine with aspartic acid, sterically blocking water molecules from hydrolyzing GTP to GDP, trapping KRAS in the active signaling conformation.",
+    },
     nodes: [
       {
         id: "kras-mutation",
@@ -60,6 +72,7 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "Imagine a car's gas pedal welded to the floorboard. A single letter change in DNA replaces glycine with aspartate, turning a careful traffic cop into an unstoppable engine.",
         academicExcerpt:
           "The oncogenic KRAS G12D substitution impairs both intrinsic and GAP-mediated GTP hydrolysis, maintaining the GTPase in a constitutively active state.",
+        pronunciation: "KAY-rass G-12-D",
         keyMolecules: ["KRAS", "Codon 12", "Aspartate"],
       },
       {
@@ -330,6 +343,18 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "By inhibiting chromatin silencers like EZH2, oncologists can force the mutant cell to re-learn its identity and regain sensitivity to drugs.",
       },
     ],
+    quiz: {
+      question: "What superpower does cellular dedifferentiation give to cancer cells?",
+      options: [
+        "It forces the tumor to generate healthy hemoglobin",
+        "It erases adult cell identity and confers drug-resistant stem cell plasticity",
+        "It locks the cancer cells permanently into apoptosis",
+        "It makes the cell vulnerable to every known antibiotic",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Correct! Dedifferentiation allows specialized cells to revert into plastic, stem-like states, letting them morph shapes, crawl into blood vessels, and survive toxic chemotherapies.",
+    },
     nodes: [
       {
         id: "epigenetic-disruption",
@@ -342,6 +367,7 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "Think of DNA as a massive library. Epigenetics places bookmarks telling cells which pages to read. Cancer mutates the bookmarks so the cell reads the wrong pages.",
         academicExcerpt:
           "Alterations in histone methyltransferases (e.g. EZH2) and chromatin remodelers facilitate widespread genome-wide chromatin remodeling in carcinomas.",
+        pronunciation: "ep-i-jen-ET-ik / ee-ZEE-aych-too",
         keyMolecules: ["EZH2", "DNMT3A", "H3K27me3"],
       },
       {
@@ -520,6 +546,18 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "In tumors where p53 is intact but suppressed by MDM2, molecular drugs called Nutlins pull off the suppressor to trigger tumor suicide.",
       },
     ],
+    quiz: {
+      question: "Under normal healthy conditions, what does p53 do when double-strand DNA breaks occur?",
+      options: [
+        "It speeds up cell division without fixing errors",
+        "It halts the cell cycle to allow repair, or triggers apoptosis if damage is irreparable",
+        "It suppresses white blood cells and immune surveillance",
+        "It creates glucose molecules out of lactic acid",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Correct! Known as the 'Guardian of the Genome', p53 holds the cell at the G1/S checkpoint to fix DNA or commands the cell to self-destruct (apoptosis) via BAX/PUMA if the damage is beyond repair.",
+    },
     nodes: [
       {
         id: "dna-breaks",
@@ -532,6 +570,7 @@ export const CIPHER_DATASETS: CipherDataset[] = [
           "UV light or toxic chemicals snap the double helix, like tearing a critical blueprint in half.",
         academicExcerpt:
           "Ionizing radiation and replication fork stalling induce DNA double-strand breaks (DSBs) exposing free DNA ends.",
+        pronunciation: "D-N-A breaks",
         keyMolecules: ["DSB", "gamma-H2AX", "ROS"],
       },
       {

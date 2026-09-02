@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Maximize2, Minimize2, Leaf, Camera } from "lucide-react";
 import type { CipherNode, CipherEdge } from "./CipherTypes";
 
 type Point = { x: number; y: number };
 
 type Particle = {
   edgeIndex: number;
-  progress: number; // 0 to 1
+  progress: number;
   speed: number;
 };
 
@@ -19,30 +20,34 @@ type CanvasProps = {
   onSelectNode: (nodeId: string | null) => void;
 };
 
-const CATEGORY_COLORS: Record<string, { fill: string; stroke: string; glow: string; text: string }> = {
+const CATEGORY_COLORS: Record<string, { fill: string; stroke: string; halo: string; text: string; dot: string }> = {
   trigger: {
-    fill: "#1f1218",
+    fill: "#1f1015",
     stroke: "#f43f5e",
-    glow: "rgba(244, 63, 94, 0.45)",
+    halo: "rgba(244, 63, 94, 0.22)",
     text: "#fecdd3",
+    dot: "#fb7185",
   },
   mechanism: {
-    fill: "#091724",
+    fill: "#081622",
     stroke: "#06b6d4",
-    glow: "rgba(6, 182, 212, 0.45)",
+    halo: "rgba(6, 182, 212, 0.22)",
     text: "#cffafe",
+    dot: "#22d3ee",
   },
   effect: {
-    fill: "#171024",
+    fill: "#150e20",
     stroke: "#a855f7",
-    glow: "rgba(168, 85, 247, 0.45)",
+    halo: "rgba(168, 85, 247, 0.22)",
     text: "#f3e8ff",
+    dot: "#c084fc",
   },
   therapy: {
-    fill: "#091f18",
+    fill: "#091c16",
     stroke: "#10b981",
-    glow: "rgba(16, 185, 129, 0.45)",
+    halo: "rgba(16, 185, 129, 0.22)",
     text: "#d1fae5",
+    dot: "#34d399",
   },
 };
 
@@ -63,10 +68,24 @@ export default function CipherNetworkCanvas({
     scale: 1,
   });
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [ecoMode, setEcoMode] = useState(false);
+
   // Node runtime state (positions & velocities)
   const nodePositions = useRef<Map<string, { x: number; y: number; vx: number; vy: number; radius: number }>>(
     new Map(),
   );
+
+  // Simulation & Power State
+  const simulationEnergy = useRef<number>(1.0); // Decays to 0 to sleep physics
+  const isVisibleRef = useRef<boolean>(true); // IntersectionObserver tracking
+  const isTabActiveRef = useRef<boolean>(true); // visibilitychange tracking
+  const cameraTarget = useRef<{ x: number; y: number; scale: number; active: boolean }>({
+    x: 0,
+    y: 0,
+    scale: 1,
+    active: false,
+  });
 
   // Interaction tracking
   const isDraggingCanvas = useRef(false);
@@ -75,8 +94,9 @@ export default function CipherNetworkCanvas({
   const hoveredNodeId = useRef<string | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animFrameId = useRef<number | null>(null);
+  const lastFrameTime = useRef<number>(0);
 
-  // Initialize node layout positions in a balanced, organic constellation
+  // Initialize node layout positions in an organic, balanced constellation
   useEffect(() => {
     const width = containerRef.current?.clientWidth || 900;
     const height = containerRef.current?.clientHeight || 600;
@@ -85,8 +105,7 @@ export default function CipherNetworkCanvas({
 
     const map = new Map<string, { x: number; y: number; vx: number; vy: number; radius: number }>();
 
-    // Layer-based spread: Triggers on left (level 1), Mechanisms in center (level 2),
-    // Effects on right (level 3), Therapies bottom/adjacent (level 4)
+    // Layer-based spread: Triggers left, Mechanisms center, Effects right, Therapies bottom
     nodes.forEach((node, i) => {
       const radius = 16 + (node.weight || 3) * 3;
       let targetX = centerX;
@@ -94,9 +113,9 @@ export default function CipherNetworkCanvas({
 
       if (node.category === "trigger") {
         targetX = centerX - width * 0.32 + ((i % 2) * 50 - 25);
-        targetY = centerY - 140 + i * 110;
+        targetY = centerY - 140 + i * 115;
       } else if (node.category === "mechanism") {
-        targetX = centerX - 60 + ((i % 3) - 1) * 120;
+        targetX = centerX - 60 + ((i % 3) - 1) * 125;
         targetY = centerY - 160 + i * 85;
       } else if (node.category === "effect") {
         targetX = centerX + width * 0.28 + ((i % 2) * 40 - 20);
@@ -106,9 +125,9 @@ export default function CipherNetworkCanvas({
         targetY = centerY + 180;
       }
 
-      // Add small natural jitter
-      targetX += (Math.random() - 0.5) * 40;
-      targetY += (Math.random() - 0.5) * 40;
+      // Small jitter for natural spacing
+      targetX += (Math.random() - 0.5) * 30;
+      targetY += (Math.random() - 0.5) * 30;
 
       map.set(node.id, {
         x: targetX,
@@ -120,26 +139,66 @@ export default function CipherNetworkCanvas({
     });
 
     nodePositions.current = map;
+    simulationEnergy.current = 1.0; // Wake up physics simulation for initial settling
 
-    // Initialize edge particles for directional causality flows
+    // Initialize edge particles
     const newParticles: Particle[] = [];
     edges.forEach((_, idx) => {
-      // 2-3 particles per edge
       newParticles.push({
         edgeIndex: idx,
         progress: Math.random(),
-        speed: 0.005 + Math.random() * 0.005,
-      });
-      newParticles.push({
-        edgeIndex: idx,
-        progress: Math.random(),
-        speed: 0.005 + Math.random() * 0.005,
+        speed: 0.004 + Math.random() * 0.004,
       });
     });
     particlesRef.current = newParticles;
   }, [nodes, edges]);
 
-  // Compute upstream causes and downstream effects for active highlighting
+  // Smooth Camera Fly-To when selectedNodeId changes
+  useEffect(() => {
+    if (!selectedNodeId) return;
+    const pos = nodePositions.current.get(selectedNodeId);
+    const canvas = canvasRef.current;
+    if (!pos || !canvas) return;
+
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const targetScale = Math.max(transform.scale, 1.05);
+
+    cameraTarget.current = {
+      x: width / 2 - pos.x * targetScale,
+      y: height / 2 - pos.y * targetScale,
+      scale: targetScale,
+      active: true,
+    };
+  }, [selectedNodeId, transform.scale]);
+
+  // Low-Power Lifecycle Observers: Pause when offscreen or tab hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isTabActiveRef.current = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisibleRef.current = entry.isIntersecting;
+        });
+      },
+      { threshold: 0.05 },
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Compute upstream & downstream for selected node
   const activePathway = useCallback(() => {
     if (!selectedNodeId) return null;
 
@@ -161,7 +220,7 @@ export default function CipherNetworkCanvas({
     return { upstream, downstream, activeEdges };
   }, [selectedNodeId, edges]);
 
-  // Main Canvas Rendering Loop
+  // Main High-Performance, Low-Power 60FPS Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -170,8 +229,22 @@ export default function CipherNetworkCanvas({
 
     let running = true;
 
-    const render = () => {
+    const render = (now: number) => {
       if (!running) return;
+
+      // Throttle for Eco Mode or Low Power (skip frames if ecoMode active to save battery)
+      const delta = now - lastFrameTime.current;
+      if (ecoMode && delta < 33) {
+        animFrameId.current = requestAnimationFrame(render);
+        return;
+      }
+      lastFrameTime.current = now;
+
+      // Zero CPU if tab hidden or offscreen
+      if (!isVisibleRef.current || !isTabActiveRef.current) {
+        animFrameId.current = requestAnimationFrame(render);
+        return;
+      }
 
       const dpr = window.devicePixelRatio || 1;
       const width = canvas.clientWidth;
@@ -182,18 +255,37 @@ export default function CipherNetworkCanvas({
         canvas.height = height * dpr;
       }
 
+      // Camera Lerp Animation
+      if (cameraTarget.current.active) {
+        const tgt = cameraTarget.current;
+        const lerpFactor = 0.09;
+        setTransform((prev) => {
+          const nx = prev.x + (tgt.x - prev.x) * lerpFactor;
+          const ny = prev.y + (tgt.y - prev.y) * lerpFactor;
+          const ns = prev.scale + (tgt.scale - prev.scale) * lerpFactor;
+          if (
+            Math.abs(nx - tgt.x) < 1 &&
+            Math.abs(ny - tgt.y) < 1 &&
+            Math.abs(ns - tgt.scale) < 0.01
+          ) {
+            cameraTarget.current.active = false;
+          }
+          return { x: nx, y: ny, scale: ns };
+        });
+      }
+
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // Clear dark universe background
+      // Deep Space Background
       ctx.fillStyle = "#04070a";
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle background constellation grid
+      // Background Grid (subtle cosmic coordinates)
       ctx.save();
-      ctx.strokeStyle = "rgba(77, 141, 255, 0.035)";
+      ctx.strokeStyle = "rgba(77, 141, 255, 0.03)";
       ctx.lineWidth = 1;
-      const gridSize = 48 * transform.scale;
+      const gridSize = 44 * transform.scale;
       const offsetX = transform.x % gridSize;
       const offsetY = transform.y % gridSize;
 
@@ -209,7 +301,7 @@ export default function CipherNetworkCanvas({
       ctx.stroke();
       ctx.restore();
 
-      // Apply Pan & Zoom
+      // Camera Transform
       ctx.save();
       ctx.translate(transform.x, transform.y);
       ctx.scale(transform.scale, transform.scale);
@@ -217,29 +309,34 @@ export default function CipherNetworkCanvas({
       const pathway = activePathway();
       const posMap = nodePositions.current;
 
-      // Soft physics: gentle node repulsion to prevent overlaps while stabilizing
-      const posList = Array.from(posMap.values());
-      for (let i = 0; i < posList.length; i++) {
-        for (let j = i + 1; j < posList.length; j++) {
-          const a = posList[i];
-          const b = posList[j];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const minDist = a.radius + b.radius + 35;
-          if (dist < minDist) {
-            const force = (minDist - dist) * 0.02;
-            const fx = (dx / dist) * force;
-            const fy = (dy / dist) * force;
-            if (isDraggingNode.current !== nodes[i]?.id) {
-              a.x -= fx;
-              a.y -= fy;
-            }
-            if (isDraggingNode.current !== nodes[j]?.id) {
-              b.x += fx;
-              b.y += fy;
+      // PHYSICS SIMULATION WITH COOLING / SLEEP (Zero CPU once settled)
+      if (simulationEnergy.current > 0.02 || isDraggingNode.current) {
+        const posList = Array.from(posMap.values());
+        for (let i = 0; i < posList.length; i++) {
+          for (let j = i + 1; j < posList.length; j++) {
+            const a = posList[i];
+            const b = posList[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const minDist = a.radius + b.radius + 35;
+            if (dist < minDist) {
+              const force = (minDist - dist) * 0.025;
+              const fx = (dx / dist) * force;
+              const fy = (dy / dist) * force;
+              if (isDraggingNode.current !== nodes[i]?.id) {
+                a.x -= fx;
+                a.y -= fy;
+              }
+              if (isDraggingNode.current !== nodes[j]?.id) {
+                b.x += fx;
+                b.y += fy;
+              }
             }
           }
+        }
+        if (!isDraggingNode.current) {
+          simulationEnergy.current *= 0.96; // Smooth thermal decay
         }
       }
 
@@ -258,7 +355,7 @@ export default function CipherNetworkCanvas({
           nodes.find((n) => n.id === edge.source)?.category !== activeFilter &&
           nodes.find((n) => n.id === edge.target)?.category !== activeFilter;
 
-        const alpha = isFiltered ? 0.08 : isEdgeActive ? (pathway ? 0.95 : 0.35) : 0.12;
+        const alpha = isFiltered ? 0.06 : isEdgeActive ? (pathway ? 0.95 : 0.3) : 0.1;
 
         ctx.save();
         ctx.beginPath();
@@ -276,17 +373,17 @@ export default function CipherNetworkCanvas({
           ctx.setLineDash([]);
         }
 
-        ctx.lineWidth = isEdgeActive && pathway ? 2.5 : 1.5;
+        ctx.lineWidth = isEdgeActive && pathway ? 2.5 : 1.2;
         ctx.stroke();
         ctx.restore();
 
-        // Edge label (on hover or active)
+        // Edge label (illuminated pathway)
         if (isEdgeActive && pathway) {
           const midX = (sourcePos.x + targetPos.x) / 2;
           const midY = (sourcePos.y + targetPos.y) / 2;
           ctx.save();
           ctx.font = "9px 'IBM Plex Mono', monospace";
-          ctx.fillStyle = "rgba(203, 213, 225, 0.85)";
+          ctx.fillStyle = "rgba(203, 213, 225, 0.9)";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(edge.label, midX, midY - 6);
@@ -294,38 +391,38 @@ export default function CipherNetworkCanvas({
         }
       });
 
-      // 2. DRAW FLOW PARTICLES (Cause ➔ Effect Directional Glow)
-      particlesRef.current.forEach((particle) => {
-        particle.progress += particle.speed;
-        if (particle.progress > 1) particle.progress = 0;
+      // 2. DIRECTIONAL PARTICLES (Low-Power Hardware-Accelerated Pulse)
+      if (!ecoMode) {
+        particlesRef.current.forEach((particle) => {
+          particle.progress += particle.speed;
+          if (particle.progress > 1) particle.progress = 0;
 
-        const edge = edges[particle.edgeIndex];
-        if (!edge) return;
+          const edge = edges[particle.edgeIndex];
+          if (!edge) return;
 
-        const sourcePos = posMap.get(edge.source);
-        const targetPos = posMap.get(edge.target);
-        if (!sourcePos || !targetPos) return;
+          const sourcePos = posMap.get(edge.source);
+          const targetPos = posMap.get(edge.target);
+          if (!sourcePos || !targetPos) return;
 
-        const px = sourcePos.x + (targetPos.x - sourcePos.x) * particle.progress;
-        const py = sourcePos.y + (targetPos.y - sourcePos.y) * particle.progress;
+          const px = sourcePos.x + (targetPos.x - sourcePos.x) * particle.progress;
+          const py = sourcePos.y + (targetPos.y - sourcePos.y) * particle.progress;
 
-        const isEdgeActive = pathway
-          ? pathway.activeEdges.has(`${edge.source}->${edge.target}`)
-          : true;
+          const isEdgeActive = pathway
+            ? pathway.activeEdges.has(`${edge.source}->${edge.target}`)
+            : true;
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(px, py, isEdgeActive ? 2.8 : 1.8, 0, Math.PI * 2);
-        ctx.fillStyle =
-          edge.relationshipType === "inhibits"
-            ? "rgba(251, 113, 133, 0.9)"
-            : "rgba(34, 211, 238, 0.9)";
-        ctx.shadowColor =
-          edge.relationshipType === "inhibits" ? "#f43f5e" : "#06b6d4";
-        ctx.shadowBlur = isEdgeActive ? 8 : 4;
-        ctx.fill();
-        ctx.restore();
-      });
+          // Zero-cost concentric alpha halos (no costly shadowBlur!)
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(px, py, isEdgeActive ? 2.6 : 1.8, 0, Math.PI * 2);
+          ctx.fillStyle =
+            edge.relationshipType === "inhibits"
+              ? "rgba(251, 113, 133, 0.9)"
+              : "rgba(34, 211, 238, 0.9)";
+          ctx.fill();
+          ctx.restore();
+        });
+      }
 
       // 3. DRAW NODES
       nodes.forEach((node) => {
@@ -341,19 +438,15 @@ export default function CipherNetworkCanvas({
           !pathway || isSelected || isHovered || isUpstream || isDownstream;
 
         const isFilteredOut = activeFilter && node.category !== activeFilter;
-
         const colors = CATEGORY_COLORS[node.category] || CATEGORY_COLORS.mechanism;
-        const baseAlpha = isFilteredOut ? 0.15 : isHighlighted ? 1 : 0.22;
 
         ctx.save();
 
-        // Node Glow Halo
+        // Hardware-Accelerated Glow Rings (avoids battery-draining Gaussian blur)
         if ((isSelected || isHovered || isUpstream || isDownstream) && !isFilteredOut) {
           ctx.beginPath();
-          ctx.arc(pos.x, pos.y, pos.radius + (isSelected ? 10 : 6), 0, Math.PI * 2);
-          ctx.fillStyle = colors.glow;
-          ctx.shadowColor = colors.stroke;
-          ctx.shadowBlur = isSelected ? 22 : 12;
+          ctx.arc(pos.x, pos.y, pos.radius + (isSelected ? 9 : 5), 0, Math.PI * 2);
+          ctx.fillStyle = colors.halo;
           ctx.fill();
         }
 
@@ -361,18 +454,18 @@ export default function CipherNetworkCanvas({
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, pos.radius, 0, Math.PI * 2);
         ctx.fillStyle = colors.fill;
-        ctx.globalAlpha = baseAlpha;
+        ctx.globalAlpha = isFilteredOut ? 0.15 : isHighlighted ? 1 : 0.22;
         ctx.fill();
 
-        // Border Stroke
+        // High-Contrast Border Stroke
         ctx.strokeStyle = isSelected ? "#ffffff" : colors.stroke;
         ctx.lineWidth = isSelected ? 2.5 : 1.5;
         ctx.stroke();
 
-        // Center Indicator Pin
+        // Center Molecular Pin
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = colors.stroke;
+        ctx.fillStyle = colors.dot;
         ctx.fill();
 
         // Node Label
@@ -384,23 +477,70 @@ export default function CipherNetworkCanvas({
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
 
-        // Truncate label for clean display
         const displayLabel =
           node.label.length > 22 ? `${node.label.slice(0, 20)}…` : node.label;
         ctx.fillText(displayLabel, pos.x, pos.y + pos.radius + 6);
 
-        // Subtitle badge tag (Trigger, Mechanism, Effect, Therapy)
+        // Category Tag on Hover or Select
         if (isSelected || isHovered) {
           ctx.font = "bold 8px 'IBM Plex Mono', monospace";
           ctx.fillStyle = colors.stroke;
-          ctx.fillText(node.category.toUpperCase(), pos.x, pos.y + pos.radius + 20);
+          ctx.fillText(node.category.toUpperCase(), pos.x, pos.y + pos.radius + 19);
         }
 
         ctx.restore();
       });
 
+      ctx.restore(); // Restore camera transform
+
+      // 4. MINI-MAP (Radar HUD in bottom-right corner)
+      const mmWidth = 110;
+      const mmHeight = 70;
+      const mmPadding = 12;
+      const mmX = width - mmWidth - mmPadding;
+      const mmY = height - mmHeight - mmPadding;
+
+      ctx.save();
+      // Mini-map background
+      ctx.fillStyle = "rgba(7, 12, 20, 0.75)";
+      ctx.strokeStyle = "rgba(77, 141, 255, 0.15)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(mmX, mmY, mmWidth, mmHeight, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Mini-map node dots
+      const scaleX = mmWidth / width;
+      const scaleY = mmHeight / height;
+      nodes.forEach((n) => {
+        const p = posMap.get(n.id);
+        if (!p) return;
+        const mx = mmX + p.x * scaleX;
+        const my = mmY + p.y * scaleY;
+        ctx.beginPath();
+        ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = CATEGORY_COLORS[n.category]?.dot || "#22d3ee";
+        ctx.fill();
+      });
+
+      // Viewport Wireframe
+      const vpLeft = mmX - (transform.x / width) * mmWidth;
+      const vpTop = mmY - (transform.y / height) * mmHeight;
+      const vpW = (mmWidth / transform.scale) * 0.75;
+      const vpH = (mmHeight / transform.scale) * 0.75;
+
+      ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        Math.max(mmX, vpLeft),
+        Math.max(mmY, vpTop),
+        Math.min(mmWidth, vpW),
+        Math.min(mmHeight, vpH),
+      );
       ctx.restore();
-      ctx.restore();
+
+      ctx.restore(); // Restore dpr scale
 
       animFrameId.current = requestAnimationFrame(render);
     };
@@ -411,7 +551,7 @@ export default function CipherNetworkCanvas({
       running = false;
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
     };
-  }, [nodes, edges, transform, selectedNodeId, activeFilter, activePathway]);
+  }, [nodes, edges, transform, selectedNodeId, activeFilter, activePathway, ecoMode]);
 
   // Coordinate helper: Canvas screen coords to graph space
   const screenToGraph = useCallback(
@@ -424,7 +564,7 @@ export default function CipherNetworkCanvas({
     [transform],
   );
 
-  // Mouse / Touch Event Handlers for Panning, Zooming, and Node Dragging
+  // Pointer Interaction Handlers
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -445,6 +585,7 @@ export default function CipherNetworkCanvas({
 
     if (hitNodeId) {
       isDraggingNode.current = hitNodeId;
+      simulationEnergy.current = 1.0; // Wake up physics on interaction
       onSelectNode(hitNodeId);
       dragStart.current = { x: graphPt.x, y: graphPt.y };
     } else {
@@ -467,6 +608,7 @@ export default function CipherNetworkCanvas({
       if (nodePos) {
         nodePos.x = graphPt.x;
         nodePos.y = graphPt.y;
+        simulationEnergy.current = 0.8;
       }
       return;
     }
@@ -538,10 +680,33 @@ export default function CipherNetworkCanvas({
     setTransform((prev) => ({ ...prev, scale: Math.max(prev.scale * 0.8, 0.4) }));
   };
 
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  const snapshotGraph = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `biolayers-cipher-network-${Date.now()}.png`;
+    a.click();
+  };
+
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a]"
+      className={`relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a] contain-intrinsic-size-[auto_none_auto_600px] ${
+        isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
+      }`}
     >
       <canvas
         ref={canvasRef}
@@ -553,8 +718,8 @@ export default function CipherNetworkCanvas({
         onWheel={handleWheel}
       />
 
-      {/* Floating Canvas Controls (Zoom, Reset) */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-xl border border-teal-200/20 bg-[#070d14]/85 p-1.5 backdrop-blur-xl shadow-lg">
+      {/* Floating Canvas Controls (Zoom, Reset, Fullscreen, Eco Mode, Snapshot) */}
+      <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-xl border border-teal-200/20 bg-[#070d14]/90 p-1.5 backdrop-blur-xl shadow-lg">
         <button
           type="button"
           onClick={zoomIn}
@@ -579,23 +744,64 @@ export default function CipherNetworkCanvas({
         >
           Reset
         </button>
+
+        <div className="h-4 w-px bg-white/10" />
+
+        {/* Eco Mode / Low Power Toggle */}
+        <button
+          type="button"
+          onClick={() => setEcoMode(!ecoMode)}
+          className={`flex h-7 items-center gap-1 px-2 rounded-lg border text-[10px] font-mono font-medium transition ${
+            ecoMode
+              ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-300"
+              : "border-white/10 bg-white/[0.04] text-slate-400 hover:text-slate-200"
+          }`}
+          title="Toggle Eco / Low Power Mode"
+        >
+          <Leaf className="h-3 w-3" />
+          <span className="hidden sm:inline">Eco</span>
+        </button>
+
+        {/* Snapshot / Download */}
+        <button
+          type="button"
+          onClick={snapshotGraph}
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition"
+          title="Download PNG Snapshot"
+        >
+          <Camera className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Fullscreen */}
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition"
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-3.5 w-3.5" />
+          ) : (
+            <Maximize2 className="h-3.5 w-3.5" />
+          )}
+        </button>
       </div>
 
       {/* Mini Legend Overlay */}
-      <div className="absolute top-4 left-4 hidden md:flex items-center gap-3 rounded-xl border border-white/10 bg-[#070c14]/85 px-3 py-1.5 text-[10px] font-mono backdrop-blur-xl">
-        <span className="flex items-center gap-1 text-rose-300">
+      <div className="absolute top-4 left-4 hidden sm:flex items-center gap-3 rounded-xl border border-white/10 bg-[#070c14]/85 px-3 py-1.5 text-[10px] font-mono backdrop-blur-xl">
+        <span className="flex items-center gap-1.5 text-rose-300">
           <span className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
           Trigger
         </span>
-        <span className="flex items-center gap-1 text-cyan-300">
+        <span className="flex items-center gap-1.5 text-cyan-300">
           <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
           Mechanism
         </span>
-        <span className="flex items-center gap-1 text-purple-300">
+        <span className="flex items-center gap-1.5 text-purple-300">
           <span className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
           Effect
         </span>
-        <span className="flex items-center gap-1 text-emerald-300">
+        <span className="flex items-center gap-1.5 text-emerald-300">
           <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
           Therapy
         </span>

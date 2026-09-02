@@ -10,6 +10,7 @@ export type CipherNode = {
   plainTitle: string;
   plainExplanation: string; // Everyday student analogy
   academicExcerpt: string; // Real scientific quote / formal mechanism
+  pronunciation?: string; // e.g. "KAY-rass G-12-D"
   keyMolecules?: string[]; // e.g. ["KRAS", "GTP", "RAF"]
   // Physics / position hints
   x?: number;
@@ -34,6 +35,13 @@ export type GuidedTourStep = {
   questionPrompt?: string;
 };
 
+export type StudentQuiz = {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
 export type CipherDataset = {
   id: string;
   title: string;
@@ -45,4 +53,5 @@ export type CipherDataset = {
   nodes: CipherNode[];
   edges: CipherEdge[];
   tour: GuidedTourStep[];
+  quiz?: StudentQuiz;
 };
