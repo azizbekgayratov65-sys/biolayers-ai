@@ -233,6 +233,7 @@ export default function PartnersPage() {
                     width={100}
                     height={28}
                     className="h-auto max-h-8 w-auto object-contain"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 </div>
 

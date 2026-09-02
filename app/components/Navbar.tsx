@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Menu,

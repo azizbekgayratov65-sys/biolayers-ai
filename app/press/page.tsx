@@ -17,18 +17,6 @@ import {
 export default function PressPage() {
   const reduceMotion = Boolean(useReducedMotion());
 
-  const cardVariants = {
-    hidden: { opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 20 },
-    visible: (idx: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: reduceMotion ? 0 : 0.6,
-        delay: reduceMotion ? 0 : idx * 0.08,
-      },
-    }),
-  };
-
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
       {/* Background ambient glows */}
@@ -73,10 +61,9 @@ export default function PressPage() {
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           {/* CARD 1: HUNDRED GLOBAL INNOVATION */}
           <motion.article
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            variants={cardVariants}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition-all hover:border-teal-200/35"
           >
             <div>
@@ -90,6 +77,7 @@ export default function PressPage() {
                       width={75}
                       height={18}
                       className="h-4 w-auto object-contain"
+                      style={{ width: "auto", height: "auto" }}
                     />
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/30 bg-teal-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
@@ -157,10 +145,9 @@ export default function PressPage() {
 
           {/* CARD 2: AI BUSINESS */}
           <motion.article
-            custom={1}
-            initial="hidden"
-            animate="visible"
-            variants={cardVariants}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.08 }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition-all hover:border-teal-200/35"
           >
             <div>

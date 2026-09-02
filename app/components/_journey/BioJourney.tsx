@@ -165,14 +165,7 @@ export default function BioJourney() {
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        <div
-          className="text-center"
-          style={{
-            opacity: reduceMotion ? 1 : 0,
-            transform: reduceMotion ? "none" : "translateY(16px)",
-            transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-          }}
-        >
+        <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Sparkles className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">

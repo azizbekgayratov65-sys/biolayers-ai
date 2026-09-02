@@ -287,6 +287,7 @@ export default function PressSection() {
                           width={64}
                           height={16}
                           className="h-3.5 w-auto object-contain"
+                          style={{ width: "auto", height: "auto" }}
                         />
                       </div>
                     ) : (

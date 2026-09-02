@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useReducedMotion } from "framer-motion";
 import {
   FileText,
   Dna,
@@ -147,18 +147,11 @@ const steps: JourneyStep[] = [
   },
 ];
 
-function StepContent({ step, reduceMotion }: { step: JourneyStep; reduceMotion: boolean }) {
+function StepContent({ step }: { step: JourneyStep; reduceMotion?: boolean }) {
   const StepIcon = step.icon;
 
   return (
-    <div
-      className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch"
-      style={{
-        opacity: reduceMotion ? 1 : 0,
-        transform: reduceMotion ? "none" : "translateY(10px)",
-        transition: "opacity 0.3s ease-out, transform 0.3s ease-out",
-      }}
-    >
+    <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
       <div className="flex flex-col justify-between rounded-[22px] border border-teal-100/[0.08] bg-[#070c12]/85 p-6 backdrop-blur-2xl">
         <div>
           <div className="flex items-center justify-between text-xs">
@@ -278,14 +271,7 @@ export default function BioJourney() {
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        <div
-          className="text-center"
-          style={{
-            opacity: reduceMotion ? 1 : 0,
-            transform: reduceMotion ? "none" : "translateY(16px)",
-            transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-          }}
-        >
+        <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Sparkles className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
