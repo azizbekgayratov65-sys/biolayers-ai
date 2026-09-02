@@ -38,6 +38,23 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some(
+      (c) =>
+        c.name.startsWith("sb-") &&
+        c.name.includes("auth-token"),
+    );
+
+  /*
+    If visiting login or signup and the user has no auth cookie, they
+    cannot be logged in. Skipping the getUser() call saves an unnecessary
+    remote network round-trip on every /login and /signup navigation.
+  */
+  if (isAuthPage && !hasAuthCookie) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

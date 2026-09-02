@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useReducedMotion } from "framer-motion";
 import {
   FileText,
   Dna,
@@ -147,7 +146,7 @@ const steps: JourneyStep[] = [
   },
 ];
 
-function StepContent({ step }: { step: JourneyStep; reduceMotion?: boolean }) {
+function StepContent({ step }: { step: JourneyStep }) {
   const StepIcon = step.icon;
 
   return (
@@ -259,7 +258,6 @@ function StepContent({ step }: { step: JourneyStep; reduceMotion?: boolean }) {
 }
 
 export default function BioJourney() {
-  const reduceMotion = Boolean(useReducedMotion());
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const activeStep = steps[activeStepIndex];
 
@@ -317,7 +315,7 @@ export default function BioJourney() {
           })}
         </div>
 
-        <StepContent step={activeStep} reduceMotion={reduceMotion} />
+        <StepContent step={activeStep} />
       </div>
 
       <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">

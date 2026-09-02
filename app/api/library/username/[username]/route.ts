@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
-  createApiClient,
-  getApiUserId,
-  unauthorizedJson,
+  createPublicClient,
 } from "../../../../lib/auth/api-auth";
 import { listUserLibraryPapers, getPublicUserProfileByUsername } from "../../../../lib/papers/store";
 
@@ -12,19 +10,15 @@ export const dynamic = "force-dynamic";
 
 /*
   GET /api/library/username/[username]
-  Returns paginated list of papers for a specific user's library by username.
+  Returns paginated list of papers for a specific user's public library by username.
+  Public access using public client to avoid 401 on public profiles.
   Query params: limit (default 20), offset (default 0)
 */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ username: string }> },
 ) {
-  const supabase = await createApiClient();
-  const userId = await getApiUserId(supabase);
-
-  if (!userId) {
-    return unauthorizedJson();
-  }
+  const supabase = createPublicClient();
 
   const { username } = await params;
   const { searchParams } = new URL(request.url);

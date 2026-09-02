@@ -49,7 +49,12 @@ export function AccountMenu({
 }) {
   const pathname = usePathname();
   const [user, setUser] = useState<SessionUser>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof document !== "undefined") {
+      return document.cookie.includes("-auth-token");
+    }
+    return false;
+  });
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [menuPos, setMenuPos] = useState<{

@@ -1,20 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
 import {
   ExternalLink,
   Microscope,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  Award,
 } from "lucide-react";
 
 export default function AboutPage() {
-  const reduceMotion = Boolean(useReducedMotion());
-
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
       <div
@@ -27,12 +18,7 @@ export default function AboutPage() {
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
+        <div className="text-center animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Microscope className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
@@ -51,15 +37,10 @@ export default function AboutPage() {
             Developed by a passionate computational researcher in Tashkent with
             guidance from leading physician-scientists in precision oncology and biomedical engineering.
           </p>
-        </motion.div>
+        </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
-          <motion.article
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35"
-          >
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-75">
             <div>
               <div className="flex items-center gap-4">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-teal-200/30 bg-teal-950/40 shadow-[0_0_25px_rgba(77,141,255,0.2)] sm:h-24 sm:w-24">
@@ -121,14 +102,9 @@ export default function AboutPage() {
                 Lead Research & Engineering
               </span>
             </div>
-          </motion.article>
+          </article>
 
-          <motion.article
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35"
-          >
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-150">
             <div>
               <div className="flex items-center gap-4">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-teal-200/30 bg-teal-950/40 shadow-[0_0_25px_rgba(77,141,255,0.2)] sm:h-24 sm:w-24">
@@ -212,7 +188,7 @@ export default function AboutPage() {
                 Precision Oncology Mentorship
               </span>
             </div>
-          </motion.article>
+          </article>
         </div>
 
         <p className="mx-auto mt-6 text-center text-[10px] text-slate-500">

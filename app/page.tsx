@@ -1,8 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Workflow,
@@ -19,6 +16,7 @@ const highlights = [
     desc: "Interactive computational walkthrough: from raw manuscript tokens to directional causal graphs.",
     href: "/journey",
     action: "Explore Journey",
+    delay: "delay-75",
   },
   {
     icon: BookOpen,
@@ -26,6 +24,7 @@ const highlights = [
     desc: "Founded in Tashkent with precision oncology and biomedical engineering mentorship.",
     href: "/about",
     action: "Meet the Team",
+    delay: "delay-150",
   },
   {
     icon: Globe2,
@@ -33,12 +32,11 @@ const highlights = [
     desc: "Partnered with NXT Horizon to scale AI-driven oncology knowledge mapping globally.",
     href: "/partners",
     action: "View Partners",
+    delay: "delay-225",
   },
 ];
 
 export default function HomePage() {
-  const reduceMotion = Boolean(useReducedMotion());
-
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
       <div
@@ -51,12 +49,7 @@ export default function HomePage() {
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
+        <div className="text-center animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Sparkles className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
@@ -101,18 +94,15 @@ export default function HomePage() {
               <span>About & Mentorship</span>
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {highlights.map((item, idx) => {
+          {highlights.map((item) => {
             const Icon = item.icon;
             return (
-              <motion.div
+              <div
                 key={item.title}
-                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="group relative flex flex-col justify-between rounded-[20px] border border-teal-100/[0.07] bg-[#070c12]/60 p-5 backdrop-blur-xl transition-all hover:border-teal-200/25 hover:bg-[#0a121a]/70"
+                className={`group relative flex flex-col justify-between rounded-[20px] border border-teal-100/[0.07] bg-[#070c12]/60 p-5 backdrop-blur-xl transition-all hover:border-teal-200/25 hover:bg-[#0a121a]/70 animate-fade-up ${item.delay}`}
               >
                 <div>
                   <div className="flex items-center gap-3">
@@ -137,7 +127,7 @@ export default function HomePage() {
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

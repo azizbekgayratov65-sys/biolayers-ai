@@ -1,32 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import AuthShell from "../components/auth/AuthShell";
-import LoginForm from "../components/auth/LoginForm";
-import OAuthButtons from "../components/auth/OAuthButtons";
+import LoginView from "../components/auth/LoginView";
 
 export const metadata: Metadata = {
   title: "Sign In",
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    next?: string;
-    error?: string;
-  }>;
-}) {
-  const params = await searchParams;
-
-  const next = params.next ?? "/settings";
-
-  const error = params.error
-    ? "Sign-in could not be completed. The link may be expired or invalid. Please try again."
-    : null;
-
+export default function LoginPage() {
   return (
     <AuthShell
       eyebrow="Welcome back"
@@ -44,17 +27,9 @@ export default async function LoginPage({
         </>
       }
     >
-      <OAuthButtons redirectTo={next} />
-
-      <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/[0.06]" />
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/30">
-          or continue with email
-        </span>
-        <div className="h-px flex-1 bg-white/[0.06]" />
-      </div>
-
-      <LoginForm next={next} initialError={error} />
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-white/[0.02]" />}>
+        <LoginView />
+      </Suspense>
     </AuthShell>
   );
 }

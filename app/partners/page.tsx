@@ -1,8 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
 import {
   ExternalLink,
   Globe2,
@@ -35,8 +32,6 @@ const nxtPillars = [
 ];
 
 export default function PartnersPage() {
-  const reduceMotion = Boolean(useReducedMotion());
-
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
       {/* Ambient background glow atmospheres */}
@@ -51,12 +46,7 @@ export default function PartnersPage() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
         {/* HEADER */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
+        <div className="text-center animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Globe2 className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
@@ -75,16 +65,11 @@ export default function PartnersPage() {
             BioLayers AI collaborates with leading innovation catalysts and frontier AI
             organizations to advance precision oncology knowledge graphs and verifiable AI architectures.
           </p>
-        </motion.div>
+        </div>
 
         <div className="mt-8 space-y-6">
           {/* FEATURED STRATEGIC PARTNER: NXT HORIZON */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.08 }}
-            className="rounded-[28px] border border-teal-200/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8"
-          >
+          <div className="rounded-[28px] border border-teal-200/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-75">
             {/* Top Bar: Emblem + Brand Info + CTA */}
             <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
               <div className="flex items-center gap-4 sm:gap-5">
@@ -189,7 +174,7 @@ export default function PartnersPage() {
                 })}
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* BOTTOM PARTNER INQUIRY CTA */}

@@ -7,6 +7,33 @@ const nextConfig: NextConfig = {
     "pdfjs-dist",
     "mammoth",
   ],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
+  },
+  compress: true,
+  async redirects() {
+    return [
+      {
+        source: "/platform",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/:all*(svg|jpg|png|webp|avif|ico)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   experimental: {
     optimizePackageImports: [
       "lucide-react",

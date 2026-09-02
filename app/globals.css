@@ -1077,16 +1077,39 @@ input[type="range"] {
     infinite;
 }
 
+@keyframes bl-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: bl-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-75 {
+  animation-delay: 75ms;
+}
+
+.delay-150 {
+  animation-delay: 150ms;
+}
+
+.delay-225 {
+  animation-delay: 225ms;
+}
+
 /* =========================================================
     PERFORMANCE / RENDERING
     ========================================================= */
 
 canvas {
   image-rendering: auto;
-}
-
-[data-framer-component-type] {
-  backface-visibility: hidden;
 }
 
 .bl-gpu {
@@ -1131,7 +1154,8 @@ canvas {
   .bl-pulse-soft,
   .bl-grid-drift,
   .bl-breathe,
-  .bl-focus-in {
+  .bl-focus-in,
+  .animate-fade-up {
     animation: none !important;
   }
 }
