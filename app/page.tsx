@@ -30,7 +30,7 @@ const highlights = [
   {
     icon: Globe2,
     title: "Strategic Alliances",
-    desc: "Partnered with NXT Horizon and featured by HundrED to scale AI-driven oncology knowledge mapping globally.",
+    desc: "Partnered with NXT Horizon to scale AI-driven oncology knowledge mapping globally.",
     href: "/partners",
     action: "View Partners",
   },
@@ -144,42 +144,52 @@ export default function HomePage() {
       </div>
 
       <div className="mx-auto mt-8 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="font-mono text-[10px] text-slate-400">
-            Strategic Ecosystem & Press:
-          </span>
-          <Link
-            href="/partners"
-            className="group flex items-center gap-2 rounded-xl border border-teal-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-teal-200/40 hover:bg-white/[0.05]"
-          >
-            <div className="relative flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
-              <Image
-                src="/branding/nxthorizon-logo.png"
-                alt="NXT Horizon"
-                width={16}
-                height={16}
-                className="h-full w-full object-contain"
-                style={{ width: "auto", height: "auto" }}
-              />
-            </div>
-            <span className="font-bold text-teal-100 group-hover:text-white text-[11px]">NXT Horizon</span>
-          </Link>
-          <Link
-            href="/press"
-            className="group flex items-center gap-2 rounded-xl border border-sky-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-sky-200/40 hover:bg-white/[0.05]"
-          >
-            <div className="relative flex h-4 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
-              <Image
-                src="/branding/hundred-logo.svg"
-                alt="HundrED"
-                width={28}
-                height={10}
-                className="h-full w-full object-contain"
-                style={{ width: "auto", height: "auto" }}
-              />
-            </div>
-            <span className="font-bold text-sky-100 group-hover:text-white text-[11px]">HundrED</span>
-          </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] text-slate-400">
+              Strategic Partner:
+            </span>
+            <Link
+              href="/partners"
+              className="group flex items-center gap-2 rounded-xl border border-teal-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-teal-200/40 hover:bg-white/[0.05]"
+            >
+              <div className="relative flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
+                <Image
+                  src="/branding/nxthorizon-logo.png"
+                  alt="NXT Horizon"
+                  width={16}
+                  height={16}
+                  className="h-full w-full object-contain"
+                  style={{ width: "auto", height: "auto" }}
+                />
+              </div>
+              <span className="font-bold text-teal-100 group-hover:text-white text-[11px]">NXT Horizon</span>
+            </Link>
+          </div>
+
+          <span className="text-slate-600">·</span>
+
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] text-slate-400">
+              Press & Coverage:
+            </span>
+            <Link
+              href="/press"
+              className="group flex items-center gap-2 rounded-xl border border-sky-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-sky-200/40 hover:bg-white/[0.05]"
+            >
+              <div className="relative flex h-4 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
+                <Image
+                  src="/branding/hundred-logo.svg"
+                  alt="HundrED"
+                  width={28}
+                  height={10}
+                  className="h-full w-full object-contain"
+                  style={{ width: "auto", height: "auto" }}
+                />
+              </div>
+              <span className="font-bold text-sky-100 group-hover:text-white text-[11px]">HundrED</span>
+            </Link>
+          </div>
         </div>
 
         <div className="flex items-center gap-4 font-mono text-[9px] uppercase tracking-wider text-slate-500">
