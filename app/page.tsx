@@ -81,6 +81,14 @@ export default function HomePage() {
             </Link>
 
             <Link
+              href="/cipher"
+              className="flex items-center gap-2 rounded-[14px] border border-cyan-200/30 bg-cyan-400/[0.08] px-5 py-3 text-xs font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-400/[0.15]"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+              <span>Project Cipher (Visual Maps)</span>
+            </Link>
+
+            <Link
               href="/journey"
               className="flex items-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-300/[0.06] px-5 py-3 text-xs font-semibold text-teal-100 transition hover:border-teal-200/40 hover:bg-teal-300/[0.12]"
             >

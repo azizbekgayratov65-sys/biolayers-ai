@@ -22,6 +22,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { label: "Home", href: "/", path: "/" },
+  { label: "Cipher", href: "/cipher", path: "/cipher" },
   { label: "Journey", href: "/journey", path: "/journey" },
   { label: "About & Mentorship", href: "/about", path: "/about" },
   { label: "Partners", href: "/partners", path: "/partners" },

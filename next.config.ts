@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/rosetta",
+        destination: "/cipher",
+        permanent: true,
+      },
+      {
+        source: "/cause-effect",
+        destination: "/cipher",
+        permanent: true,
+      },
     ];
   },
   async headers() {
