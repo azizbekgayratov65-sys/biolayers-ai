@@ -19,16 +19,17 @@ import Navbar from "./components/Navbar";
 const spectral = Spectral({
   variable: "--font-spectral",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["600", "700"],
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const instrument = Instrument_Sans({
   variable: "--font-instrument",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const plexMono = IBM_Plex_Mono({

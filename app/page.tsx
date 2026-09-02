@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "./hooks/useReducedMotion";
 import {
   ArrowRight,
   Workflow,
@@ -32,7 +32,7 @@ const highlights = [
   {
     icon: Globe2,
     title: "Strategic Alliances",
-    desc: "Partnered with NXT Horizon to scale AI-driven oncology knowledge mapping globally.",
+    desc: "Partnered with NXT Horizon and featured by HundrED to scale AI-driven oncology knowledge mapping globally.",
     href: "/partners",
     action: "View Partners",
   },
@@ -41,9 +41,20 @@ const highlights = [
 export default function HomePage() {
   const reduceMotion = Boolean(useReducedMotion());
 
+  const fadeInStyle = {
+    opacity: reduceMotion ? 1 : 0,
+    transform: reduceMotion ? "none" : "translateY(16px)",
+    transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+  } as React.CSSProperties;
+
+  const cardStyle = (idx: number) => ({
+    opacity: reduceMotion ? 1 : 0,
+    transform: reduceMotion ? "none" : "translateY(16px)",
+    transition: `opacity 0.5s ease-out ${idx * 0.08}s, transform 0.5s ease-out ${idx * 0.08}s`,
+  } as React.CSSProperties);
+
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
-      {/* Background glow atmospheres */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-1/3 -z-20 h-[500px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.045] blur-[160px]"
@@ -54,13 +65,7 @@ export default function HomePage() {
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        {/* TOP BADGE & HEADLINE */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
+        <div style={fadeInStyle} className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
             <Sparkles className="h-3.5 w-3.5 text-teal-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
@@ -81,7 +86,6 @@ export default function HomePage() {
             proteins, pathways, and therapeutic targets.
           </p>
 
-          {/* ACTIONS */}
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
             <Link
               href="/mindmap"
@@ -106,20 +110,13 @@ export default function HomePage() {
               <span>About & Mentorship</span>
             </Link>
           </div>
-        </motion.div>
+        </div>
 
-        {/* 3 HIGHLIGHT CARDS IN 1 ROW */}
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {highlights.map((item, idx) => {
             const Icon = item.icon;
             return (
-              <motion.div
-                key={item.title}
-                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="group relative flex flex-col justify-between rounded-[20px] border border-teal-100/[0.07] bg-[#070c12]/60 p-5 backdrop-blur-xl transition-all hover:border-teal-200/25 hover:bg-[#0a121a]/70"
-              >
+              <div key={item.title} style={cardStyle(idx)} className="group relative flex flex-col justify-between rounded-[20px] border border-teal-100/[0.07] bg-[#070c12]/60 p-5 backdrop-blur-xl transition-all hover:border-teal-200/25 hover:bg-[#0a121a]/70">
                 <div>
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-teal-200/20 bg-teal-300/[0.06] text-teal-300">
@@ -143,34 +140,46 @@ export default function HomePage() {
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* BOTTOM PARTNER & ECOSYSTEM STRIP */}
       <div className="mx-auto mt-8 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <span className="font-mono text-[10px] text-slate-400">
-            Strategic Innovation Partner:
+            Strategic Ecosystem & Press:
           </span>
           <Link
             href="/partners"
-            className="group flex items-center gap-2.5 rounded-xl border border-teal-200/20 bg-white/[0.02] px-3 py-1.5 transition hover:border-teal-200/40 hover:bg-white/[0.05]"
+            className="group flex items-center gap-2 rounded-xl border border-teal-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-teal-200/40 hover:bg-white/[0.05]"
           >
-            <div className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/20 bg-white p-0.5 shadow-sm">
+            <div className="relative flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
               <Image
                 src="/branding/nxthorizon-logo.png"
                 alt="NXT Horizon"
-                width={20}
-                height={20}
+                width={16}
+                height={16}
                 className="h-full w-full object-contain"
               />
             </div>
-            <span className="font-bold text-teal-100 group-hover:text-white">NXT Horizon</span>
-            <span className="font-mono text-[9px] text-slate-400">· nxthorizon.org</span>
-            <ArrowRight className="h-3 w-3 text-teal-300 transition-transform group-hover:translate-x-0.5" />
+            <span className="font-bold text-teal-100 group-hover:text-white text-[11px]">NXT Horizon</span>
+          </Link>
+          <Link
+            href="/press"
+            className="group flex items-center gap-2 rounded-xl border border-sky-200/20 bg-white/[0.02] px-2.5 py-1 transition hover:border-sky-200/40 hover:bg-white/[0.05]"
+          >
+            <div className="relative flex h-4 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-white/20 bg-white p-0.5">
+              <Image
+                src="/branding/hundred-logo.svg"
+                alt="HundrED"
+                width={28}
+                height={10}
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <span className="font-bold text-sky-100 group-hover:text-white text-[11px]">HundrED</span>
           </Link>
         </div>
 

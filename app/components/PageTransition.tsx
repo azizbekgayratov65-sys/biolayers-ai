@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { ReactNode } from "react";
 
 export default function PageTransition({
@@ -10,30 +10,12 @@ export default function PageTransition({
 }) {
   const reduceMotion = Boolean(useReducedMotion());
 
-  return (
-    <motion.div
-      initial={false}
-      animate={{
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-      }}
-      exit={
-        reduceMotion
-          ? undefined
-          : {
-              opacity: 0,
-              y: -12,
-              filter: "blur(8px)",
-            }
-      }
-      transition={{
-        duration: reduceMotion ? 0 : 0.55,
-        ease: [0.16, 1, 0.3, 1],
-      }}
-      className="min-h-screen"
-    >
-      {children}
-    </motion.div>
-  );
+  const style = {
+    opacity: reduceMotion ? 1 : 0,
+    transform: reduceMotion ? "none" : "translateY(12px)",
+    filter: reduceMotion ? "none" : "blur(8px)",
+    transition: `opacity ${reduceMotion ? 0 : 0.55}s ease-out, transform ${reduceMotion ? 0 : 0.55}s ease-out, filter ${reduceMotion ? 0 : 0.55}s ease-out`,
+  } as React.CSSProperties;
+
+  return <div style={style} className="min-h-screen">{children}</div>;
 }

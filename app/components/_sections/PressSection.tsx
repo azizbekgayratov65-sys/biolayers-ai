@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Sparkles, Globe, Newspaper } from "lucide-react";
 
 type PressItem = {
   name: string;
@@ -9,10 +10,25 @@ type PressItem = {
   description: string;
   url: string;
   date: string;
-  logo?: string;
+  badge: string;
+  tag: string;
+  location?: string;
+  logoSvg?: string;
 };
 
 const pressItems: PressItem[] = [
+  {
+    name: "HundrED",
+    headline: "BioLayers AI: Selected Global Education & AI Innovation",
+    description:
+      "Featured by HundrED (Helsinki, Finland) for converting dense cancer research into interactive, visual knowledge maps — democratizing biomedical learning for students, researchers, and educators across 17+ countries.",
+    url: "https://hundred.org/en/innovations/biolayers-ai",
+    date: "2026-09-02",
+    badge: "Global Innovation",
+    tag: "AI & STEM Education",
+    location: "Helsinki · 17+ Countries",
+    logoSvg: "/branding/hundred-logo.svg",
+  },
   {
     name: "AI Business",
     headline: "BioLayers AI: Cancer Literature Maps",
@@ -20,6 +36,9 @@ const pressItems: PressItem[] = [
       "A teenager in Tashkent read 100 cancer papers and built the tool he was missing — transforming fragmented literature into explorable mechanistic maps.",
     url: "https://aibusiness.vc/startups/biolayers-ai-cancer-literature-maps",
     date: "2026-08-25",
+    badge: "Startup Spotlight",
+    tag: "Computational Oncology",
+    location: "Tashkent & Global",
   },
 ];
 
@@ -81,7 +100,7 @@ export default function PressSection() {
         "
       />
 
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         {/* ================================================= */}
         {/* HEADER                                            */}
         {/* ================================================= */}
@@ -128,8 +147,8 @@ export default function PressSection() {
               text-teal-100/75
             "
           >
-            <span className="h-3.5 w-3.5 rounded-full bg-teal-300/60" />
-            Featured in
+            <span className="h-2 w-2 rounded-full bg-teal-300/80 shadow-[0_0_8px_rgba(77,141,255,0.7)]" />
+            Partners & Press Recognition
           </div>
 
           <h2
@@ -158,7 +177,7 @@ export default function PressSection() {
                 text-transparent
               "
             >
-              press coverage
+              global coverage
             </span>
           </h2>
 
@@ -174,26 +193,16 @@ export default function PressSection() {
               md:leading-9
             "
           >
-            BioLayers has been featured in publications covering AI-driven
-            computational oncology and research tooling.
+            BioLayers has been recognized across global education innovation platforms
+            and AI publications for transforming cancer literature into verifiable knowledge maps.
           </p>
         </motion.div>
 
-{/* ================================================= */}
-        {/* PRESS CARDS                                       */}
+        {/* ================================================= */}
+        {/* PRESS & PARTNER CARDS                             */}
         {/* ================================================= */}
 
-        <div
-          className="
-            mt-12
-            flex
-            flex-wrap
-            gap-4
-            justify-center
-            max-w-6xl
-            mx-auto
-          "
-        >
+        <div className="mt-14 grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
           {pressItems.map((item, index) => (
             <motion.article
               key={item.name}
@@ -215,7 +224,7 @@ export default function PressSection() {
               }}
               transition={{
                 duration: reduceMotion ? 0 : 0.58,
-                delay: reduceMotion ? 0 : index * 0.06,
+                delay: reduceMotion ? 0 : index * 0.08,
               }}
               whileHover={
                 reduceMotion
@@ -224,25 +233,28 @@ export default function PressSection() {
                       y: -4,
                     }
               }
-className="
+              className="
                 group
                 relative
+                flex
+                flex-col
+                justify-between
                 overflow-hidden
-                rounded-[24px]
+                rounded-[26px]
                 border
-                border-teal-100/[0.07]
-                bg-[#0a0f14]/50
+                border-teal-100/[0.08]
+                bg-gradient-to-b
+                from-[#0a121c]/90
+                via-[#070c14]/80
+                to-[#04080e]/90
                 p-6
-                shadow-[0_18px_55px_rgba(1,8,15,.16)]
+                sm:p-8
+                shadow-[0_20px_60px_rgba(0,0,0,0.45)]
                 backdrop-blur-2xl
-                transition-colors
+                transition-all
                 duration-300
-                hover:border-teal-100/[0.14]
-                hover:bg-[#10161d]/62
-                flex-1
-                min-w-[260px]
-                max-w-[360px]
-                basis-[calc(25%-12px)]
+                hover:border-teal-200/30
+                hover:bg-[#0c1622]/90
               "
             >
               <div
@@ -252,44 +264,61 @@ className="
                   absolute
                   -right-16
                   -top-16
-                  h-36
-                  w-36
+                  h-44
+                  w-44
                   rounded-full
-                  bg-teal-300/[0.045]
+                  bg-teal-300/[0.05]
                   blur-[60px]
                   transition
                   duration-500
-                  group-hover:bg-teal-300/[0.075]
+                  group-hover:bg-teal-300/[0.09]
                 "
               />
 
-              <div className="relative">
-                {/* Publication name / logo */}
-                <div
-                  className="
-                    inline-flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    border
-                    border-emerald-300/20
-                    bg-emerald-300/[0.06]
-                    px-3
-                    py-1.5
-                    font-mono
-                    text-[8px]
-                    font-bold
-                    uppercase
-                    tracking-[0.14em]
-                    text-emerald-200/90
-                  "
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                  {item.name}
-                </div>
+              <div>
+                {/* Top Header inside card */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/[0.06] pb-4">
+                  <div className="flex items-center gap-2.5">
+                    {item.logoSvg ? (
+                      <div className="relative flex h-7 items-center justify-center rounded-lg bg-white px-2.5 py-1 text-slate-900 shadow-sm">
+                        <Image
+                          src={item.logoSvg}
+                          alt={`${item.name} logo`}
+                          width={64}
+                          height={16}
+                          className="h-3.5 w-auto object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          rounded-full
+                          border
+                          border-emerald-300/20
+                          bg-emerald-300/[0.08]
+                          px-3
+                          py-1
+                          font-mono
+                          text-[9px]
+                          font-bold
+                          uppercase
+                          tracking-[0.14em]
+                          text-emerald-200
+                        "
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                        {item.name}
+                      </div>
+                    )}
 
-                {/* Date */}
-                <div className="mt-3">
+                    <span className="rounded-full border border-teal-100/10 bg-white/[0.025] px-2.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-teal-300/90">
+                      {item.badge}
+                    </span>
+                  </div>
+
                   <time
                     dateTime={item.date}
                     className="
@@ -298,11 +327,11 @@ className="
                       font-medium
                       uppercase
                       tracking-[0.16em]
-                      text-slate-500/80
+                      text-slate-400
                     "
                   >
                     {new Date(item.date).toLocaleDateString("en-US", {
-                      month: "long",
+                      month: "short",
                       day: "numeric",
                       year: "numeric",
                     })}
@@ -310,47 +339,49 @@ className="
                 </div>
 
                 {/* Headline */}
-                <h3 className="mt-4 text-lg font-semibold tracking-[-0.03em] text-teal-50">
+                <h3 className="mt-5 text-xl font-bold tracking-tight text-white sm:text-2xl leading-snug">
                   {item.headline}
                 </h3>
 
                 {/* Description */}
-                <p className="mt-3 text-sm leading-6 text-slate-400/90">
+                <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
                   {item.description}
                 </p>
 
-                {/* Read link */}
-                <div className="relative mt-6">
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
-                      group
-                      inline-flex
-                      items-center
-                      gap-2
-                      text-xs
-                      font-semibold
-                      text-teal-200/75
-                      transition
-                      hover:text-teal-100
-                    "
-                  >
-                    Read the story
-                    <motion.span
-                      animate={{
-                        x: reduceMotion ? 0 : 0,
-                      }}
-                      whileHover={{
-                        x: reduceMotion ? 0 : 4,
-                      }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </motion.span>
-                  </a>
+                {/* Tags / Metadata */}
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-md border border-teal-100/10 bg-teal-300/[0.04] px-2 py-0.5 font-mono text-[9px] font-semibold text-teal-200">
+                    {item.tag}
+                  </span>
+                  {item.location && (
+                    <span className="font-mono text-[9px] text-slate-400">
+                      · {item.location}
+                    </span>
+                  )}
                 </div>
+              </div>
+
+              {/* Bottom Read link */}
+              <div className="relative mt-8 border-t border-teal-100/[0.06] pt-4">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    group/link
+                    inline-flex
+                    items-center
+                    gap-2
+                    text-xs
+                    font-bold
+                    text-teal-300
+                    transition
+                    hover:text-teal-100
+                  "
+                >
+                  <span>Read feature on {item.name}</span>
+                  <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
+                </a>
               </div>
             </motion.article>
           ))}
@@ -381,28 +412,28 @@ className="
             duration: reduceMotion ? 0 : 0.6,
             delay: reduceMotion ? 0 : 0.1,
           }}
-          className="mt-10 text-center"
+          className="mt-12 text-center"
         >
-          <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-slate-500/75">
-            Partner Story · Written interview submitted through{" "}
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 rounded-full border border-teal-100/[0.08] bg-white/[0.02] px-5 py-2 font-mono text-[9px] uppercase tracking-[0.2em] text-slate-400 backdrop-blur-xl">
+            <span>Global Spotlights:</span>
             <a
-              href="https://aibusiness.vc/submit-your-story"
+              href="https://hundred.org/en/innovations/biolayers-ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-teal-200/60 hover:text-teal-100 underline underline-offset-2"
+              className="text-teal-300 hover:text-white underline underline-offset-2"
             >
-              Submit Your Story
+              HundrED Innovation Profile →
             </a>
-            {" · "}
+            <span>·</span>
             <a
-              href={pressItems[0].url}
+              href="https://aibusiness.vc/startups/biolayers-ai-cancer-literature-maps"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-teal-200/60 hover:text-teal-100 underline underline-offset-2"
+              className="text-teal-300 hover:text-white underline underline-offset-2"
             >
-              Read full article →
+              AI Business Story →
             </a>
-          </p>
+          </div>
         </motion.div>
       </div>
     </section>

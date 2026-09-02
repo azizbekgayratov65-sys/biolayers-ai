@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 import {
   FileText,
   Dna,
@@ -147,128 +151,11 @@ const steps: JourneyStep[] = [
   },
 ];
 
-function StepContent({ step, reduceMotion }: { step: JourneyStep; reduceMotion: boolean }) {
-  const StepIcon = step.icon;
-
-  return (
-    <div
-      className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch"
-      style={{
-        opacity: reduceMotion ? 1 : 0,
-        transform: reduceMotion ? "none" : "translateY(10px)",
-        transition: "opacity 0.3s ease-out, transform 0.3s ease-out",
-      }}
-    >
-      <div className="flex flex-col justify-between rounded-[22px] border border-teal-100/[0.08] bg-[#070c12]/85 p-6 backdrop-blur-2xl">
-        <div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
-              Step 0{steps.findIndex(s => s.id === step.id) + 1} · {step.badge}
-            </span>
-            <span className="font-mono text-[9px] text-slate-500">
-              {steps.findIndex(s => s.id === step.id) + 1} of {steps.length}
-            </span>
-          </div>
-
-          <h2 className="mt-3 text-xl font-bold tracking-tight text-white">
-            {step.title}
-          </h2>
-          <div className="font-mono text-[10px] text-teal-300/80">
-            {step.subtitle}
-          </div>
-
-          <p className="mt-3 text-xs leading-relaxed text-slate-300/85">
-            {step.description}
-          </p>
-
-          <div className="mt-4 space-y-2 border-t border-teal-100/[0.06] pt-3">
-            {step.featureList.map((feat) => (
-              <div key={feat} className="flex items-start gap-2 text-xs text-slate-300">
-                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-300" />
-                <span>{feat}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-          <button
-            disabled={steps.findIndex(s => s.id === step.id) === 0}
-            onClick={() => {}}
-            className="text-slate-400 hover:text-white disabled:opacity-30"
-          >
-            ← Previous Step
-          </button>
-
-          {steps.findIndex(s => s.id === step.id) < steps.length - 1 ? (
-            <button
-              onClick={() => {}}
-              className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
-            >
-              <span>Next: Step 0{steps.findIndex(s => s.id === step.id) + 2}</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <Link
-              href="/mindmap"
-              className="inline-flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200"
-            >
-              <Workflow className="h-3.5 w-3.5" />
-              <span>Open Mind Map</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-between rounded-[22px] border border-teal-100/[0.08] bg-[#070d13]/85 p-5 backdrop-blur-2xl">
-        <div>
-          <div className="flex items-center justify-between border-b border-teal-100/[0.06] pb-2 text-xs">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-slate-300">
-              {step.livePreview.heading}
-            </span>
-            <span className="font-mono text-[8px] text-teal-300">
-              {step.livePreview.subheading}
-            </span>
-          </div>
-
-          <div className="mt-3 space-y-1.5 text-xs">
-            {step.livePreview.details.map((d) => (
-              <div
-                key={d.label}
-                className="flex items-center justify-between rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-1.5"
-              >
-                <span className="text-slate-400">{d.label}:</span>
-                <span className="font-mono font-bold text-teal-200">{d.value}</span>
-              </div>
-            ))}
-          </div>
-
-          {step.livePreview.snippetText && (
-            <div className="mt-3 rounded-xl border border-teal-100/[0.06] bg-[#09111a]/80 p-3">
-              <div className="font-mono text-[8px] font-bold uppercase text-slate-400">
-                {step.livePreview.snippetTitle}:
-              </div>
-              <p className="mt-1 font-mono text-[10px] leading-relaxed text-slate-300">
-                {step.livePreview.snippetText}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 flex items-center justify-between border-t border-teal-100/[0.06] pt-2.5 text-[10px] text-slate-500">
-          <span>Verified in BioLayers Codebase</span>
-          <span className="font-mono text-emerald-400">Live Architecture</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function BioJourney() {
   const reduceMotion = Boolean(useReducedMotion());
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const activeStep = steps[activeStepIndex];
+  const StepIcon = activeStep.icon;
 
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
@@ -331,7 +218,119 @@ export default function BioJourney() {
           })}
         </div>
 
-        <StepContent step={activeStep} reduceMotion={reduceMotion} />
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={activeStep.id}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: reduceMotion ? 0 : 0.3 }}
+            className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch"
+          >
+            <div className="flex flex-col justify-between rounded-[22px] border border-teal-100/[0.08] bg-[#070c12]/85 p-6 backdrop-blur-2xl">
+              <div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
+                    Step 0{activeStepIndex + 1} · {activeStep.badge}
+                  </span>
+                  <span className="font-mono text-[9px] text-slate-500">
+                    {activeStepIndex + 1} of {steps.length}
+                  </span>
+                </div>
+
+                <h2 className="mt-3 text-xl font-bold tracking-tight text-white">
+                  {activeStep.title}
+                </h2>
+                <div className="font-mono text-[10px] text-teal-300/80">
+                  {activeStep.subtitle}
+                </div>
+
+                <p className="mt-3 text-xs leading-relaxed text-slate-300/85">
+                  {activeStep.description}
+                </p>
+
+                <div className="mt-4 space-y-2 border-t border-teal-100/[0.06] pt-3">
+                  {activeStep.featureList.map((feat) => (
+                    <div key={feat} className="flex items-start gap-2 text-xs text-slate-300">
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-300" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
+                <button
+                  disabled={activeStepIndex === 0}
+                  onClick={() => setActiveStepIndex((i) => Math.max(0, i - 1))}
+                  className="text-slate-400 hover:text-white disabled:opacity-30"
+                >
+                  ← Previous Step
+                </button>
+
+                {activeStepIndex < steps.length - 1 ? (
+                  <button
+                    onClick={() => setActiveStepIndex((i) => Math.min(steps.length - 1, i + 1))}
+                    className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
+                  >
+                    <span>Next: Step 0{activeStepIndex + 2}</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                ) : (
+                  <Link
+                    href="/mindmap"
+                    className="inline-flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200"
+                  >
+                    <Workflow className="h-3.5 w-3.5" />
+                    <span>Open Mind Map</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-[22px] border border-teal-100/[0.08] bg-[#070d13]/85 p-5 backdrop-blur-2xl">
+              <div>
+                <div className="flex items-center justify-between border-b border-teal-100/[0.06] pb-2 text-xs">
+                  <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-slate-300">
+                    {activeStep.livePreview.heading}
+                  </span>
+                  <span className="font-mono text-[8px] text-teal-300">
+                    {activeStep.livePreview.subheading}
+                  </span>
+                </div>
+
+                <div className="mt-3 space-y-1.5 text-xs">
+                  {activeStep.livePreview.details.map((d) => (
+                    <div
+                      key={d.label}
+                      className="flex items-center justify-between rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-1.5"
+                    >
+                      <span className="text-slate-400">{d.label}:</span>
+                      <span className="font-mono font-bold text-teal-200">{d.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {activeStep.livePreview.snippetText && (
+                  <div className="mt-3 rounded-xl border border-teal-100/[0.06] bg-[#09111a]/80 p-3">
+                    <div className="font-mono text-[8px] font-bold uppercase text-slate-400">
+                      {activeStep.livePreview.snippetTitle}:
+                    </div>
+                    <p className="mt-1 font-mono text-[10px] leading-relaxed text-slate-300">
+                      {activeStep.livePreview.snippetText}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between border-t border-teal-100/[0.06] pt-2.5 text-[10px] text-slate-500">
+                <span>Verified in BioLayers Codebase</span>
+                <span className="font-mono text-emerald-400">Live Architecture</span>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">

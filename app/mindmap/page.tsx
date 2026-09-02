@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useState,
+  Suspense,
 } from "react";
 
 import {
@@ -11,8 +12,10 @@ import {
   FileText,
   KeyRound,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 
 import type {
   MindMapResponse,
@@ -25,7 +28,18 @@ import {
 } from "../lib/extractTextClient";
 
 import MindMapUploader from "../components/mindmap/MindMapUploader";
-import MindMapDocument from "../components/mindmap/MindMapDocument";
+
+const MindMapDocument = dynamic(
+  () => import("../components/mindmap/MindMapDocument"),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-300" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 type Phase =
   | "upload"
@@ -669,10 +683,16 @@ export default function MindMapPage() {
 
         {phase === "ready" &&
           response && (
-            <MindMapDocument
-              response={response}
-              onReset={reset}
-            />
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-300" />
+              </div>
+            }>
+              <MindMapDocument
+                response={response}
+                onReset={reset}
+              />
+            </Suspense>
           )}
       </div>
     </div>
