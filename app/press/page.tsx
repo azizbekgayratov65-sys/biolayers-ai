@@ -202,10 +202,10 @@ export default function PressPage() {
           </div>
 
           <a
-            href="mailto:press@biolayers.ai?subject=Press%20Inquiry%20-%20BioLayers%20AI"
+            href="mailto:biolayers.ai@gmail.com?subject=Press%20Inquiry%20-%20BioLayers%20AI"
             className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
           >
-            <span>press@biolayers.ai</span>
+            <span>biolayers.ai@gmail.com</span>
           </a>
         </div>
       </div>

@@ -46,7 +46,7 @@ export default function AboutPage() {
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-teal-200/30 bg-teal-950/40 shadow-[0_0_25px_rgba(77,141,255,0.2)] sm:h-24 sm:w-24">
                   <Image
                     src="/mentorship/founder.png"
-                    alt="Azizbek Gayratov - Founder of BioLayers AI"
+                    alt="Azizbek Gayratov - Co-Founder of BioLayers AI"
                     fill
                     sizes="96px"
                     className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
@@ -58,14 +58,29 @@ export default function AboutPage() {
                 <div>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/25 bg-teal-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
                     <span className="h-1 w-1 rounded-full bg-teal-300" />
-                    Founder & Lead Architect
+                    Co-Founder & Lead Architect
                   </span>
                   <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
                     Azizbek Gayratov
                   </h2>
-                  <p className="font-mono text-[10px] text-teal-300/80">
-                    Founder of BioLayers AI · Tashkent
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p className="font-mono text-[10px] text-teal-300/80">
+                      Co-Founder of BioLayers AI · Tashkent
+                    </p>
+                    <span className="text-slate-600">·</span>
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-teal-200">
+                      <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-white shadow-sm">
+                        <Image
+                          src="/branding/ibn-sina.jpg"
+                          alt="Abu Ali Ibn Sina Specialized School"
+                          width={14}
+                          height={14}
+                          className="h-full w-full object-cover"
+                        />
+                      </span>
+                      Ibn Sina School Graduate
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -74,6 +89,40 @@ export default function AboutPage() {
                 reconstructing fragmented biomedical literature into explorable,
                 evidence-linked computational mind maps that empower oncologists to reason across disease layers.
               </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-white p-0.5 shadow-sm">
+                    <Image
+                      src="/branding/ibn-sina.jpg"
+                      alt="Abu Ali Ibn Sina Specialized School"
+                      width={32}
+                      height={32}
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-teal-300/70">Secondary Education</div>
+                    <div className="truncate text-[10px] font-bold text-white">Ibn Sina School Graduate</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-[#070c14] p-0.5 shadow-sm">
+                    <Image
+                      src="/branding/biolayers-logo.png"
+                      alt="BioLayers AI"
+                      width={32}
+                      height={32}
+                      className="h-full w-full rounded-full object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-teal-300/70">Venture Leadership</div>
+                    <div className="truncate text-[10px] font-bold text-white">BioLayers AI · Tashkent</div>
+                  </div>
+                </div>
+              </div>
 
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {["Computational Oncology", "Knowledge Graphs", "Biomedical AI", "Graph Theory"].map((tag) => (
@@ -390,7 +439,7 @@ export default function AboutPage() {
         </div>
 
         <p className="mx-auto mt-6 text-center text-[10px] text-slate-500 max-w-3xl">
-          Institutional names (MD Anderson Cancer Center, Weill Cornell Medicine, Johns Hopkins University School of Medicine, UC San Diego) are presented as biographical context for individual scientists and do not imply institutional endorsement of BioLayers AI.
+          Institutional and academic names (Abu Ali Ibn Sina Specialized School, MD Anderson Cancer Center, Weill Cornell Medicine, Johns Hopkins University School of Medicine, UC San Diego) are presented as biographical context for founders and mentors, and do not imply institutional endorsement of BioLayers AI.
         </p>
       </div>
 

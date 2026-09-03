@@ -567,11 +567,11 @@ export default function PartnersPage() {
           </div>
 
           <a
-            href="mailto:contact@biolayers.ai?subject=Partnership%20Inquiry%20-%20BioLayers%20AI"
+            href="mailto:biolayers.ai@gmail.com?subject=Partnership%20Inquiry%20-%20BioLayers%20AI"
             className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
           >
             <Mail className="h-3.5 w-3.5" />
-            <span>contact@biolayers.ai</span>
+            <span>biolayers.ai@gmail.com</span>
           </a>
         </div>
       </div>

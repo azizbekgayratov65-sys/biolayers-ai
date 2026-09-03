@@ -73,11 +73,11 @@ export default function ResearchMentorshipSection() {
 
         <div className="relative mt-16 grid gap-5 lg:grid-cols-[1fr_140px_1.18fr] lg:items-stretch">
           <ProfileCard
-            eyebrow="Founder"
+            eyebrow="Co-Founder"
             image="/mentorship/founder.png"
-            imageAlt="Founder of BioLayers AI"
+            imageAlt="Co-Founder of BioLayers AI"
             name="Azizbek Gayratov"
-            role="Founder of BioLayers AI"
+            role="Co-Founder & Lead Architect"
             description="Developing an AI-native research environment for reconstructing cancer mechanisms from fragmented biomedical evidence."
             reduceMotion={reduceMotion}
             linkedin="https://www.linkedin.com/in/azizbekgayratov/"
@@ -278,7 +278,21 @@ function ProfileCard({
           {name}
         </h3>
         <p className="mt-2 text-sm font-semibold text-teal-100/75">{role}</p>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300/78">
+        <div className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-400/[0.06] py-1 pl-1.5 pr-3 shadow-[0_0_15px_rgba(45,212,191,0.08)]">
+          <div className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-white p-0.5 shadow-sm">
+            <Image
+              src="/branding/ibn-sina.jpg"
+              alt="Abu Ali Ibn Sina Specialized School"
+              width={20}
+              height={20}
+              className="h-full w-full rounded-full object-cover"
+            />
+          </div>
+          <span className="font-mono text-[9.5px] font-medium text-teal-100">
+            Graduate of Ibn Sina School
+          </span>
+        </div>
+        <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300/78">
           {description}
         </p>
 
