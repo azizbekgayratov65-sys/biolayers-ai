@@ -49,12 +49,7 @@ export function AccountMenu({
 }) {
   const pathname = usePathname();
   const [user, setUser] = useState<SessionUser>(null);
-  const [loading, setLoading] = useState(() => {
-    if (typeof document !== "undefined") {
-      return document.cookie.includes("-auth-token");
-    }
-    return false;
-  });
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [menuPos, setMenuPos] = useState<{
@@ -186,7 +181,7 @@ export function AccountMenu({
     window.location.href = "/";
   };
 
-  if (loading) {
+  if (loading || signingOut) {
     return (
       <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-white/[0.08] bg-white/[0.03]">
         <Loader2 className="h-4 w-4 animate-spin text-white/40" />
