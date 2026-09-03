@@ -323,6 +323,7 @@ export default function CipherWorkspace() {
               edges={currentDataset.edges}
               selectedNodeId={selectedNodeId}
               activeFilter={activeFilter}
+              isTourActive={tourStepIndex !== null}
               onSelectNode={setSelectedNodeId}
             />
           </div>

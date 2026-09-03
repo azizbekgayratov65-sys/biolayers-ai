@@ -17,6 +17,7 @@ type CanvasProps = {
   edges: CipherEdge[];
   selectedNodeId: string | null;
   activeFilter: string | null;
+  isTourActive?: boolean;
   onSelectNode: (nodeId: string | null) => void;
 };
 
@@ -56,6 +57,7 @@ export default function CipherNetworkCanvas({
   edges,
   selectedNodeId,
   activeFilter,
+  isTourActive,
   onSelectNode,
 }: CanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,6 @@ export default function CipherNetworkCanvas({
   );
 
   // Simulation & Power State
-  const simulationEnergy = useRef<number>(1.0); // Decays to 0 to sleep physics
   const isTabActiveRef = useRef<boolean>(true);
   const cameraTarget = useRef<{ x: number; y: number; scale: number; active: boolean }>({
     x: 0,
@@ -95,9 +96,7 @@ export default function CipherNetworkCanvas({
   const animFrameId = useRef<number | null>(null);
   const lastFrameTime = useRef<number>(0);
 
-  const hasInitializedCamera = useRef(false);
-
-  // Initialize node layout positions in an organic, compact constellation fitting one window
+  // Initialize node layout positions in an organic, stable constellation fitting one window
   useEffect(() => {
     const width = containerRef.current?.clientWidth || 800;
     const height = containerRef.current?.clientHeight || 500;
@@ -114,7 +113,7 @@ export default function CipherNetworkCanvas({
     const effectNodes = nodes.filter((n) => n.category === "effect");
     const therapyNodes = nodes.filter((n) => n.category === "therapy");
 
-    nodes.forEach((node) => {
+    nodes.forEach((node, i) => {
       const radius = 13 + (node.weight || 3) * 2.5;
       let targetX = centerX;
       let targetY = centerY;
@@ -143,9 +142,9 @@ export default function CipherNetworkCanvas({
         targetY = centerY + ySpan + 35;
       }
 
-      // Micro-jitter to prevent linear symmetry
-      targetX += (Math.random() - 0.5) * 12;
-      targetY += (Math.random() - 0.5) * 12;
+      // 100% deterministic layout (no random jitter so positions never jump)
+      const stableOffset = ((i % 3) - 1) * 5;
+      targetY += stableOffset;
 
       map.set(node.id, {
         x: targetX,
@@ -157,31 +156,25 @@ export default function CipherNetworkCanvas({
     });
 
     nodePositions.current = map;
-    simulationEnergy.current = 1.0; // Wake up physics simulation
-    hasInitializedCamera.current = false;
 
     // Reset camera transform on dataset change
     transformRef.current = { x: 0, y: 0, scale: 1 };
 
-    // Initialize edge particles
+    // Initialize edge particles with slow, calm, predictable flow
     const newParticles: Particle[] = [];
     edges.forEach((_, idx) => {
       newParticles.push({
         edgeIndex: idx,
-        progress: Math.random(),
-        speed: 0.004 + Math.random() * 0.004,
+        progress: (idx * 0.25) % 1,
+        speed: 0.0012, // slow, serene, and predictable
       });
     });
     particlesRef.current = newParticles;
   }, [nodes, edges]);
 
-  // Smooth Camera Fly-To when selectedNodeId changes (user click or tour navigation)
+  // Smooth Camera Fly-To ONLY during Guided Tour step changes (keeps free exploration rock-solid)
   useEffect(() => {
-    if (!selectedNodeId) return;
-    if (!hasInitializedCamera.current) {
-      hasInitializedCamera.current = true;
-      return; // Keep initial view centered on full constellation
-    }
+    if (!selectedNodeId || !isTourActive) return;
     const pos = nodePositions.current.get(selectedNodeId);
     const canvas = canvasRef.current;
     if (!pos || !canvas) return;
@@ -197,7 +190,7 @@ export default function CipherNetworkCanvas({
       scale: targetScale,
       active: true,
     };
-  }, [selectedNodeId]);
+  }, [selectedNodeId, isTourActive]);
 
   // Low-Power Lifecycle: Pause when tab is backgrounded
   useEffect(() => {
@@ -272,7 +265,7 @@ export default function CipherNetworkCanvas({
       if (cameraTarget.current.active) {
         const tgt = cameraTarget.current;
         const cur = transformRef.current;
-        const lerpFactor = 0.08;
+        const lerpFactor = 0.04;
 
         cur.x += (tgt.x - cur.x) * lerpFactor;
         cur.y += (tgt.y - cur.y) * lerpFactor;
@@ -327,36 +320,7 @@ export default function CipherNetworkCanvas({
       const pathway = activePathway();
       const posMap = nodePositions.current;
 
-      // PHYSICS SIMULATION WITH COOLING / SLEEP (Zero CPU once settled)
-      if (simulationEnergy.current > 0.02 || isDraggingNode.current) {
-        const posList = Array.from(posMap.values());
-        for (let i = 0; i < posList.length; i++) {
-          for (let j = i + 1; j < posList.length; j++) {
-            const a = posList[i];
-            const b = posList[j];
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const minDist = a.radius + b.radius + 35;
-            if (dist < minDist) {
-              const force = (minDist - dist) * 0.025;
-              const fx = (dx / dist) * force;
-              const fy = (dy / dist) * force;
-              if (isDraggingNode.current !== nodes[i]?.id) {
-                a.x -= fx;
-                a.y -= fy;
-              }
-              if (isDraggingNode.current !== nodes[j]?.id) {
-                b.x += fx;
-                b.y += fy;
-              }
-            }
-          }
-        }
-        if (!isDraggingNode.current) {
-          simulationEnergy.current *= 0.96; // Exponential thermal decay
-        }
-      }
+      // Stable graph state (no erratic physics jitter)
 
       // 1. DRAW EDGES
       edges.forEach((edge) => {
@@ -607,7 +571,6 @@ export default function CipherNetworkCanvas({
 
     if (hitNodeId) {
       isDraggingNode.current = hitNodeId;
-      simulationEnergy.current = 1.0; // Wake up physics
       onSelectNode(hitNodeId);
       dragStart.current = { x: graphPt.x, y: graphPt.y };
     } else {
@@ -630,7 +593,6 @@ export default function CipherNetworkCanvas({
       if (nodePos) {
         nodePos.x = graphPt.x;
         nodePos.y = graphPt.y;
-        simulationEnergy.current = 0.8;
       }
       return;
     }
