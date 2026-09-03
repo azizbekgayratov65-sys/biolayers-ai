@@ -95,38 +95,57 @@ export default function CipherNetworkCanvas({
   const animFrameId = useRef<number | null>(null);
   const lastFrameTime = useRef<number>(0);
 
-  // Initialize node layout positions in an organic, balanced constellation
+  const hasInitializedCamera = useRef(false);
+
+  // Initialize node layout positions in an organic, compact constellation fitting one window
   useEffect(() => {
-    const width = containerRef.current?.clientWidth || 900;
-    const height = containerRef.current?.clientHeight || 600;
+    const width = containerRef.current?.clientWidth || 800;
+    const height = containerRef.current?.clientHeight || 500;
     const centerX = width / 2;
     const centerY = height / 2;
 
     const map = new Map<string, { x: number; y: number; vx: number; vy: number; radius: number }>();
 
-    // Layer-based spread: Triggers left, Mechanisms center, Effects right, Therapies bottom
-    nodes.forEach((node, i) => {
-      const radius = 16 + (node.weight || 3) * 3;
+    const xSpan = Math.min(width * 0.32, 220);
+    const ySpan = Math.min(height * 0.22, 100);
+
+    const triggerNodes = nodes.filter((n) => n.category === "trigger");
+    const mechanismNodes = nodes.filter((n) => n.category === "mechanism");
+    const effectNodes = nodes.filter((n) => n.category === "effect");
+    const therapyNodes = nodes.filter((n) => n.category === "therapy");
+
+    nodes.forEach((node) => {
+      const radius = 13 + (node.weight || 3) * 2.5;
       let targetX = centerX;
       let targetY = centerY;
 
       if (node.category === "trigger") {
-        targetX = centerX - width * 0.32 + ((i % 2) * 50 - 25);
-        targetY = centerY - 140 + i * 115;
+        const idx = triggerNodes.findIndex((n) => n.id === node.id);
+        const count = triggerNodes.length || 1;
+        targetX = centerX - xSpan;
+        targetY = centerY + (idx - (count - 1) / 2) * Math.min(65, (ySpan * 2) / count);
       } else if (node.category === "mechanism") {
-        targetX = centerX - 60 + ((i % 3) - 1) * 125;
-        targetY = centerY - 160 + i * 85;
+        const idx = mechanismNodes.findIndex((n) => n.id === node.id);
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const totalRows = Math.ceil(mechanismNodes.length / 2) || 1;
+        targetX = centerX + (col === 0 ? -55 : 55);
+        targetY = centerY + (row - (totalRows - 1) / 2) * 55;
       } else if (node.category === "effect") {
-        targetX = centerX + width * 0.28 + ((i % 2) * 40 - 20);
-        targetY = centerY - 130 + (i % 3) * 110;
+        const idx = effectNodes.findIndex((n) => n.id === node.id);
+        const count = effectNodes.length || 1;
+        targetX = centerX + xSpan;
+        targetY = centerY + (idx - (count - 1) / 2) * Math.min(65, (ySpan * 2) / count);
       } else if (node.category === "therapy") {
-        targetX = centerX - 80 + i * 160;
-        targetY = centerY + 180;
+        const idx = therapyNodes.findIndex((n) => n.id === node.id);
+        const count = therapyNodes.length || 1;
+        targetX = centerX + (idx - (count - 1) / 2) * 90;
+        targetY = centerY + ySpan + 35;
       }
 
-      // Natural jitter
-      targetX += (Math.random() - 0.5) * 30;
-      targetY += (Math.random() - 0.5) * 30;
+      // Micro-jitter to prevent linear symmetry
+      targetX += (Math.random() - 0.5) * 12;
+      targetY += (Math.random() - 0.5) * 12;
 
       map.set(node.id, {
         x: targetX,
@@ -139,6 +158,7 @@ export default function CipherNetworkCanvas({
 
     nodePositions.current = map;
     simulationEnergy.current = 1.0; // Wake up physics simulation
+    hasInitializedCamera.current = false;
 
     // Reset camera transform on dataset change
     transformRef.current = { x: 0, y: 0, scale: 1 };
@@ -155,9 +175,13 @@ export default function CipherNetworkCanvas({
     particlesRef.current = newParticles;
   }, [nodes, edges]);
 
-  // Smooth Camera Fly-To when selectedNodeId changes
+  // Smooth Camera Fly-To when selectedNodeId changes (user click or tour navigation)
   useEffect(() => {
     if (!selectedNodeId) return;
+    if (!hasInitializedCamera.current) {
+      hasInitializedCamera.current = true;
+      return; // Keep initial view centered on full constellation
+    }
     const pos = nodePositions.current.get(selectedNodeId);
     const canvas = canvasRef.current;
     if (!pos || !canvas) return;
@@ -165,7 +189,7 @@ export default function CipherNetworkCanvas({
     const width = canvas.clientWidth || 800;
     const height = canvas.clientHeight || 500;
     const curScale = transformRef.current.scale;
-    const targetScale = Math.max(curScale, 1.05);
+    const targetScale = Math.max(curScale, 1.0);
 
     cameraTarget.current = {
       x: width / 2 - pos.x * targetScale,

@@ -10,10 +10,10 @@ export const metadata: Metadata = {
 
 export default function CipherPage() {
   return (
-    <main className="relative min-h-screen bg-[#04070a] pt-16">
+    <main className="relative h-screen max-h-screen w-full overflow-hidden bg-[#04070a] pt-16">
       <Suspense
         fallback={
-          <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#04070a] p-8 text-center">
+          <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#04070a] p-8 text-center">
             <div className="h-10 w-10 animate-spin rounded-full border-2 border-teal-300/20 border-t-teal-300" />
             <p className="mt-4 font-mono text-xs uppercase tracking-widest text-teal-200/70">
               Loading Project Cipher…

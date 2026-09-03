@@ -160,27 +160,27 @@ export default function CipherWorkspace() {
   }, [currentDataset, searchQuery]);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#04070a] text-slate-100">
+    <div className="flex h-full max-h-full w-full flex-col overflow-hidden bg-[#04070a] text-slate-100">
       {/* TOP HEADER / INITIATIVE BANNER */}
-      <header className="border-b border-teal-200/10 bg-[#070c14]/85 px-4 py-3 backdrop-blur-xl sm:px-6">
-        <div className="mx-auto flex flex-wrap items-center justify-between gap-4">
+      <header className="border-b border-teal-200/10 bg-[#070c14]/85 px-4 py-2 backdrop-blur-xl sm:px-5">
+        <div className="mx-auto flex flex-wrap items-center justify-between gap-3">
           {/* Left: Initiative Branding */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-300/30 bg-teal-400/[0.08] text-teal-300 shadow-[0_0_15px_rgba(77,141,255,0.25)]">
-              <Compass className="h-5 w-5" />
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-teal-300/30 bg-teal-400/[0.08] text-teal-300 shadow-[0_0_15px_rgba(77,141,255,0.25)]">
+              <Compass className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold tracking-tight text-white sm:text-base">
+                <h1 className="text-xs font-bold tracking-tight text-white sm:text-sm">
                   Project Cipher
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/20 bg-teal-300/[0.06] px-2 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
-                  <Sparkles className="h-2.5 w-2.5 text-teal-300" />
+                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200/20 bg-teal-300/[0.06] px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
+                  <Sparkles className="h-2 w-2 text-teal-300" />
                   NXT × BioLayers
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Making cancer research papers readable for students through interactive cause ➔ effect maps
+              <p className="text-[10px] text-slate-400 hidden sm:block">
+                Making cancer research papers readable through interactive cause ➔ effect maps
               </p>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function CipherWorkspace() {
                   setSelectedQuizAnswer(null);
                   setShowQuizResult(false);
                 }}
-                className="h-9 rounded-xl border border-teal-200/20 bg-[#0a121c] px-3 pr-8 text-xs font-semibold text-slate-200 focus:border-teal-400 focus:outline-none"
+                className="h-8 rounded-xl border border-teal-200/20 bg-[#0a121c] px-2.5 pr-7 text-xs font-semibold text-slate-200 focus:border-teal-400 focus:outline-none"
                 aria-label="Select Cancer Mechanism Paper"
               >
                 {CIPHER_DATASETS.map((dataset) => (
@@ -212,13 +212,13 @@ export default function CipherWorkspace() {
               <button
                 type="button"
                 onClick={startTour}
-                className="group flex h-9 items-center gap-1.5 rounded-xl border border-teal-200/30 bg-teal-300/[0.1] px-3.5 text-xs font-bold text-teal-100 hover:border-teal-200/50 hover:bg-teal-300/[0.2] transition"
+                className="group flex h-8 items-center gap-1.5 rounded-xl border border-teal-200/30 bg-teal-300/[0.1] px-3 text-xs font-bold text-teal-100 hover:border-teal-200/50 hover:bg-teal-300/[0.2] transition"
               >
                 <Zap className="h-3.5 w-3.5 text-teal-300 transition-transform group-hover:scale-110" />
                 <span>Guided Tour</span>
               </button>
             ) : (
-              <div className="flex items-center gap-1.5 rounded-xl border border-teal-200/25 bg-teal-300/[0.08] px-2.5 py-1 text-xs">
+              <div className="flex items-center gap-1.5 rounded-xl border border-teal-200/25 bg-teal-300/[0.08] px-2 py-0.5 text-xs">
                 <span className="font-mono text-[10px] text-teal-200">
                   Step {tourStepIndex + 1}/{currentDataset.tour.length}
                 </span>
@@ -226,7 +226,7 @@ export default function CipherWorkspace() {
                   type="button"
                   onClick={prevTourStep}
                   disabled={tourStepIndex === 0}
-                  className="rounded px-1.5 py-0.5 text-slate-300 hover:bg-white/10 disabled:opacity-30"
+                  className="rounded px-1 py-0.5 text-slate-300 hover:bg-white/10 disabled:opacity-30"
                   title="Previous Step"
                 >
                   <ArrowLeft className="h-3 w-3" />
@@ -234,7 +234,7 @@ export default function CipherWorkspace() {
                 <button
                   type="button"
                   onClick={nextTourStep}
-                  className="rounded px-1.5 py-0.5 text-teal-200 hover:bg-white/10"
+                  className="rounded px-1 py-0.5 text-teal-200 hover:bg-white/10"
                   title="Next Step"
                 >
                   <ArrowRight className="h-3 w-3" />
@@ -254,18 +254,18 @@ export default function CipherWorkspace() {
             <button
               type="button"
               onClick={copyShareLink}
-              className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-medium text-slate-300 hover:text-white transition"
+              className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 text-xs font-medium text-slate-300 hover:text-white transition"
               title="Share Pathway Link"
             >
               {copiedLink ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-300">Copied!</span>
+                  <Check className="h-3 w-3 text-emerald-400" />
+                  <span className="text-emerald-300 text-[11px]">Copied!</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Share</span>
+                  <Share2 className="h-3 w-3" />
+                  <span className="hidden sm:inline text-[11px]">Share</span>
                 </>
               )}
             </button>
@@ -273,10 +273,10 @@ export default function CipherWorkspace() {
         </div>
       </header>
 
-      {/* SUB-BAR: QUICK FILTERS, LAYER BREADCRUMB, & SEARCH */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-200/10 bg-[#060a10]/90 px-4 py-2 text-xs sm:px-6">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="font-mono text-[9px] uppercase tracking-wider text-slate-500 mr-1">
+      {/* SUB-BAR: QUICK FILTERS & SEARCH */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-200/10 bg-[#060a10]/90 px-4 py-1.5 text-xs sm:px-5">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="font-mono text-[9px] uppercase tracking-wider text-slate-500 mr-1 hidden sm:inline">
             Filter:
           </span>
           {[
@@ -290,7 +290,7 @@ export default function CipherWorkspace() {
               key={pill.id ?? "all"}
               type="button"
               onClick={() => setActiveFilter(pill.id)}
-              className={`rounded-lg px-2.5 py-1 font-mono text-[10px] transition ${
+              className={`rounded-lg px-2 py-0.5 font-mono text-[9px] transition ${
                 activeFilter === pill.id
                   ? "border border-teal-300/40 bg-teal-300/[0.15] font-bold text-teal-100"
                   : "border border-white/5 bg-white/[0.02] text-slate-400 hover:border-white/10 hover:text-slate-200"
@@ -301,23 +301,23 @@ export default function CipherWorkspace() {
           ))}
         </div>
 
-        <div className="relative w-48 sm:w-64">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+        <div className="relative w-44 sm:w-56">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
-            placeholder="Search genes, proteins..."
+            placeholder="Search genes, molecules..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 w-full rounded-lg border border-white/10 bg-[#091018] pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-teal-400 focus:outline-none"
+            className="h-6 w-full rounded-lg border border-white/10 bg-[#091018] pl-7 pr-2.5 text-[11px] text-slate-200 placeholder-slate-500 focus:border-teal-400 focus:outline-none"
           />
         </div>
       </div>
 
       {/* MAIN BODY: SPLIT VIEW (CANVAS + CIPHER DECODER) */}
-      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_460px]">
+      <div className="grid flex-1 min-h-0 w-full grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] overflow-hidden">
         {/* LEFT/CENTER: INTERACTIVE CANVAS */}
-        <div className="relative flex flex-col p-4">
-          <div className="relative flex-1 min-h-[460px] lg:min-h-full">
+        <div className="relative flex flex-col p-2.5 min-h-0 h-full overflow-hidden">
+          <div className="relative flex-1 min-h-0 w-full overflow-hidden">
             <CipherNetworkCanvas
               nodes={displayedNodes}
               edges={currentDataset.edges}
@@ -328,30 +328,30 @@ export default function CipherWorkspace() {
           </div>
 
           {/* Canvas Bottom Instruction Strip */}
-          <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-slate-500">
+          <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono text-slate-500 shrink-0">
             <span>Click any node to trace upstream triggers & downstream effects</span>
-            <span>Eco Mode available for low-power devices · Camera auto-focuses on selection</span>
+            <span>Drag nodes · Scroll to zoom · Eco mode for low battery</span>
           </div>
         </div>
 
         {/* RIGHT PANEL: CIPHER STUDENT DECODER */}
-        <aside className="border-t border-teal-200/10 bg-[#070c14]/95 p-5 backdrop-blur-2xl lg:border-t-0 lg:border-l flex flex-col justify-between overflow-y-auto max-h-[85vh] lg:max-h-none">
-          <div className="space-y-5">
+        <aside className="border-t border-teal-200/10 bg-[#070c14]/95 p-4 backdrop-blur-2xl lg:border-t-0 lg:border-l flex flex-col justify-between overflow-y-auto min-h-0 h-full">
+          <div className="space-y-4">
             {/* Decoder Header & Mode Switcher */}
-            <div className="flex items-center justify-between border-b border-teal-100/[0.08] pb-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-teal-300" />
-                <span className="font-mono text-xs font-bold uppercase tracking-wider text-teal-100">
+            <div className="flex items-center justify-between border-b border-teal-100/[0.08] pb-2.5">
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="h-3.5 w-3.5 text-teal-300" />
+                <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-teal-100">
                   Cipher Decoder
                 </span>
               </div>
 
               {/* Mode Toggle: Plain English vs Academic Excerpt */}
-              <div className="flex rounded-lg border border-teal-200/20 bg-[#04080e] p-0.5 text-[10px] font-mono">
+              <div className="flex rounded-lg border border-teal-200/20 bg-[#04080e] p-0.5 text-[9px] font-mono">
                 <button
                   type="button"
                   onClick={() => setDecoderMode("plain")}
-                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 transition ${
+                  className={`flex items-center gap-1 rounded-md px-2 py-0.5 transition ${
                     decoderMode === "plain"
                       ? "bg-teal-400/[0.18] font-bold text-teal-200"
                       : "text-slate-400 hover:text-slate-200"
@@ -363,7 +363,7 @@ export default function CipherWorkspace() {
                 <button
                   type="button"
                   onClick={() => setDecoderMode("academic")}
-                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 transition ${
+                  className={`flex items-center gap-1 rounded-md px-2 py-0.5 transition ${
                     decoderMode === "academic"
                       ? "bg-teal-400/[0.18] font-bold text-teal-200"
                       : "text-slate-400 hover:text-slate-200"
