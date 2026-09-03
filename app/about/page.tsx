@@ -35,12 +35,11 @@ export default function AboutPage() {
 
           <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
             Developed by a passionate computational researcher in Tashkent with
-            guidance from leading physician-scientists and investigators in precision oncology,
-            genomics, and biomedical engineering.
+            guidance from leading physician-scientists in precision oncology and biomedical engineering.
           </p>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2 items-stretch">
+        <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
           <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-75">
             <div>
               <div className="flex items-center gap-4">
@@ -191,107 +190,8 @@ export default function AboutPage() {
             </div>
           </article>
 
-          {/* Card 3: John Paul Shen, M.D. */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-emerald-200/35 animate-fade-up delay-200">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-emerald-400/30 bg-emerald-950/40 shadow-[0_0_25px_rgba(16,185,129,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/john-paul-shen.jpg"
-                    alt="John Paul Shen, M.D. - Scientific Advisor & GI Oncology"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/25 bg-emerald-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-200">
-                    <span className="h-1 w-1 rounded-full bg-emerald-300" />
-                    GI Oncology & CPRIT Scholar
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    John Paul Shen
-                  </h2>
-                  <p className="font-mono text-[10px] text-emerald-300/80">
-                    Assistant Professor, GI Medical Oncology · MD Anderson
-                  </p>
-                </div>
-              </div>
-
-              {/* Status Note Chip */}
-              <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] p-2.5">
-                <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-                <div className="min-w-0">
-                  <div className="font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-300">
-                    Mentorship Engagement Status
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-snug font-medium text-emerald-100/90">
-                    🟢 Replied / Interested in BioLayers AI; Occasional Mentorship Requested Aug 25 — Awaiting Reply
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Physician-scientist leading the Shen Laboratory at MD Anderson, specializing in cancer genomics,
-                CRISPR screening, synthetic lethal interactions, and machine learning biomarkers in colorectal and gastrointestinal cancers.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/md-anderson.png"
-                      alt="MD Anderson Cancer Center"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">Faculty Appointment</div>
-                    <div className="truncate text-[10px] font-bold text-white">MD Anderson</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/uc-san-diego.png"
-                      alt="UC San Diego"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">PhD & Fellowship</div>
-                    <div className="truncate text-[10px] font-bold text-white">UC San Diego</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/john-paul-shen-393a2ab/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-emerald-300 transition hover:text-emerald-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Gastrointestinal Precision Oncology
-              </span>
-            </div>
-          </article>
-
-          {/* Card 4: Eric E. Gardner */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-amber-200/35 animate-fade-up delay-250">
+          {/* Card 3: Eric E. Gardner */}
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-amber-200/35 animate-fade-up delay-200">
             <div>
               <div className="flex items-center gap-4">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-amber-400/30 bg-amber-950/40 shadow-[0_0_25px_rgba(245,158,11,0.2)] sm:h-24 sm:w-24">
@@ -314,7 +214,7 @@ export default function AboutPage() {
                     Eric E. Gardner
                   </h2>
                   <p className="font-mono text-[10px] text-amber-300/80">
-                    Assistant Professor, Thoracic/Head & Neck Oncology · MD Anderson
+                    Assistant Professor, Thoracic/Head & Neck Medical Oncology · MD Anderson
                   </p>
                 </div>
               </div>
@@ -385,6 +285,105 @@ export default function AboutPage() {
 
               <span className="font-mono text-[10px] text-slate-500">
                 Thoracic Oncology & Allison Institute
+              </span>
+            </div>
+          </article>
+
+          {/* Card 4: John Paul Shen, M.D. */}
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-emerald-200/35 animate-fade-up delay-250">
+            <div>
+              <div className="flex items-center gap-4">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-emerald-400/30 bg-emerald-950/40 shadow-[0_0_25px_rgba(16,185,129,0.2)] sm:h-24 sm:w-24">
+                  <Image
+                    src="/mentorship/john-paul-shen.jpg"
+                    alt="John Paul Shen, M.D. - Scientific Advisor & GI Oncology"
+                    fill
+                    sizes="96px"
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
+                </div>
+
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/25 bg-emerald-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-200">
+                    <span className="h-1 w-1 rounded-full bg-emerald-300" />
+                    GI Oncology & CPRIT Scholar
+                  </span>
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    John Paul Shen
+                  </h2>
+                  <p className="font-mono text-[10px] text-emerald-300/80">
+                    Assistant Professor, Gastrointestinal Medical Oncology · MD Anderson
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Note Chip */}
+              <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] p-2.5">
+                <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+                <div className="min-w-0">
+                  <div className="font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-300">
+                    Mentorship Engagement Status
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug font-medium text-emerald-100/90">
+                    🟢 Replied / Interested in BioLayers AI; Occasional Mentorship Requested Aug 25 — Awaiting Reply
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+                Physician-scientist leading the Shen Laboratory at MD Anderson, specializing in cancer genomics,
+                CRISPR screening, synthetic lethal interactions, and machine learning biomarkers in colorectal and gastrointestinal cancers.
+              </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+                    <Image
+                      src="/mentorship/md-anderson.png"
+                      alt="MD Anderson Cancer Center"
+                      width={50}
+                      height={20}
+                      className="h-auto max-h-6 w-auto object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">Faculty Appointment</div>
+                    <div className="truncate text-[10px] font-bold text-white">MD Anderson</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+                    <Image
+                      src="/mentorship/uc-san-diego.png"
+                      alt="UC San Diego"
+                      width={50}
+                      height={20}
+                      className="h-auto max-h-6 w-auto object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">PhD & Fellowship</div>
+                    <div className="truncate text-[10px] font-bold text-white">UC San Diego</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
+              <a
+                href="https://www.linkedin.com/in/john-paul-shen-393a2ab/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-bold text-emerald-300 transition hover:text-emerald-100"
+              >
+                <span>LinkedIn Profile</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+
+              <span className="font-mono text-[10px] text-slate-500">
+                Gastrointestinal Precision Oncology
               </span>
             </div>
           </article>
