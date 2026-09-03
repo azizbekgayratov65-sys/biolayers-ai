@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 import AuthShell from "../components/auth/AuthShell";
 import SignUpView from "../components/auth/SignUpView";
@@ -9,7 +8,14 @@ export const metadata: Metadata = {
   title: "Create Account",
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const params = await searchParams;
+  const next = params?.next ?? "/settings";
+
   return (
     <AuthShell
       eyebrow="Get started"
@@ -27,9 +33,7 @@ export default function SignUpPage() {
         </>
       }
     >
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-white/[0.02]" />}>
-        <SignUpView />
-      </Suspense>
+      <SignUpView next={next} />
     </AuthShell>
   );
 }

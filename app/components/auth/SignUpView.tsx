@@ -1,12 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import OAuthButtons from "./OAuthButtons";
 import SignUpForm from "./SignUpForm";
 
-export default function SignUpView() {
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/settings";
+export default function SignUpView({
+  next = "/settings",
+}: {
+  next?: string;
+}) {
 
   return (
     <>

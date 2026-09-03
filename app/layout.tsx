@@ -124,6 +124,19 @@ export default function RootLayout({
     >
       <head>
         <link rel="icon" href="/biolayers-logo.svg" type="image/svg+xml" />
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link
+              rel="preconnect"
+              href={process.env.NEXT_PUBLIC_SUPABASE_URL}
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="dns-prefetch"
+              href={process.env.NEXT_PUBLIC_SUPABASE_URL}
+            />
+          </>
+        )}
       </head>
       <body
         className="

@@ -1,16 +1,15 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import OAuthButtons from "./OAuthButtons";
 import LoginForm from "./LoginForm";
 
-export default function LoginView() {
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/settings";
-  const errorParam = searchParams.get("error");
-  const error = errorParam
-    ? "Sign-in could not be completed. The link may be expired or invalid. Please try again."
-    : null;
+export default function LoginView({
+  next = "/settings",
+  error = null,
+}: {
+  next?: string;
+  error?: string | null;
+}) {
 
   return (
     <>

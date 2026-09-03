@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Menu,
@@ -13,6 +12,24 @@ import {
 import { useEffect, useState, useCallback } from "react";
 
 import { AccountMenu } from "./auth/AccountMenu";
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+
+    const listener = (event: MediaQueryListEvent) => {
+      setReduced(event.matches);
+    };
+
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
+
+  return reduced;
+}
 
 type NavItem = {
   label: string;
@@ -32,7 +49,7 @@ const navItems: NavItem[] = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const reduceMotion = Boolean(useReducedMotion());
+  const reduceMotion = usePrefersReducedMotion();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

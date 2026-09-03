@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 import AuthShell from "../components/auth/AuthShell";
 import LoginView from "../components/auth/LoginView";
@@ -9,7 +8,18 @@ export const metadata: Metadata = {
   title: "Sign In",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  const params = await searchParams;
+  const next = params?.next ?? "/settings";
+  const errorParam = params?.error;
+  const error = errorParam
+    ? "Sign-in could not be completed. The link may be expired or invalid. Please try again."
+    : null;
+
   return (
     <AuthShell
       eyebrow="Welcome back"
@@ -27,9 +37,7 @@ export default function LoginPage() {
         </>
       }
     >
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-white/[0.02]" />}>
-        <LoginView />
-      </Suspense>
+      <LoginView next={next} error={error} />
     </AuthShell>
   );
 }

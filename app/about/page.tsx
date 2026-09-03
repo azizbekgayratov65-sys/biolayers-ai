@@ -163,7 +163,6 @@ export default function AboutPage() {
                     fill
                     sizes="96px"
                     className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
                 </div>
