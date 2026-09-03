@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function CipherPage() {
   return (
-    /* Adjust pt-[102px] below to change distance from the top of the screen */
-    <main className="relative h-screen max-h-screen w-full overflow-hidden bg-[#04070a] pt-[102px]">
+    /* Adjust pt-[94px] below to change distance from the top of the screen */
+    <main className="relative h-screen max-h-screen w-full overflow-hidden bg-[#04070a] pt-[94px]">
       <Suspense
         fallback={
           <div className="flex h-full flex-col items-center justify-center bg-[#04070a] p-8 text-center">
