@@ -61,8 +61,8 @@ export default function CipherNetworkCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Viewport transforms (pan & zoom)
-  const [transform, setTransform] = useState<{ x: number; y: number; scale: number }>({
+  // Viewport transforms (stored in ref to prevent infinite React re-renders in 60fps loop)
+  const transformRef = useRef<{ x: number; y: number; scale: number }>({
     x: 0,
     y: 0,
     scale: 1,
@@ -78,8 +78,7 @@ export default function CipherNetworkCanvas({
 
   // Simulation & Power State
   const simulationEnergy = useRef<number>(1.0); // Decays to 0 to sleep physics
-  const isVisibleRef = useRef<boolean>(true); // IntersectionObserver tracking
-  const isTabActiveRef = useRef<boolean>(true); // visibilitychange tracking
+  const isTabActiveRef = useRef<boolean>(true);
   const cameraTarget = useRef<{ x: number; y: number; scale: number; active: boolean }>({
     x: 0,
     y: 0,
@@ -125,7 +124,7 @@ export default function CipherNetworkCanvas({
         targetY = centerY + 180;
       }
 
-      // Small jitter for natural spacing
+      // Natural jitter
       targetX += (Math.random() - 0.5) * 30;
       targetY += (Math.random() - 0.5) * 30;
 
@@ -139,7 +138,10 @@ export default function CipherNetworkCanvas({
     });
 
     nodePositions.current = map;
-    simulationEnergy.current = 1.0; // Wake up physics simulation for initial settling
+    simulationEnergy.current = 1.0; // Wake up physics simulation
+
+    // Reset camera transform on dataset change
+    transformRef.current = { x: 0, y: 0, scale: 1 };
 
     // Initialize edge particles
     const newParticles: Particle[] = [];
@@ -160,9 +162,10 @@ export default function CipherNetworkCanvas({
     const canvas = canvasRef.current;
     if (!pos || !canvas) return;
 
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const targetScale = Math.max(transform.scale, 1.05);
+    const width = canvas.clientWidth || 800;
+    const height = canvas.clientHeight || 500;
+    const curScale = transformRef.current.scale;
+    const targetScale = Math.max(curScale, 1.05);
 
     cameraTarget.current = {
       x: width / 2 - pos.x * targetScale,
@@ -170,31 +173,17 @@ export default function CipherNetworkCanvas({
       scale: targetScale,
       active: true,
     };
-  }, [selectedNodeId, transform.scale]);
+  }, [selectedNodeId]);
 
-  // Low-Power Lifecycle Observers: Pause when offscreen or tab hidden
+  // Low-Power Lifecycle: Pause when tab is backgrounded
   useEffect(() => {
     const handleVisibilityChange = () => {
       isTabActiveRef.current = !document.hidden;
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          isVisibleRef.current = entry.isIntersecting;
-        });
-      },
-      { threshold: 0.05 },
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      observer.disconnect();
     };
   }, []);
 
@@ -232,7 +221,7 @@ export default function CipherNetworkCanvas({
     const render = (now: number) => {
       if (!running) return;
 
-      // Throttle for Eco Mode or Low Power (skip frames if ecoMode active to save battery)
+      // Throttle for Eco Mode (saves battery on laptops and mobile devices)
       const delta = now - lastFrameTime.current;
       if (ecoMode && delta < 33) {
         animFrameId.current = requestAnimationFrame(render);
@@ -240,39 +229,44 @@ export default function CipherNetworkCanvas({
       }
       lastFrameTime.current = now;
 
-      // Zero CPU if tab hidden or offscreen
-      if (!isVisibleRef.current || !isTabActiveRef.current) {
+      // Skip render if tab is hidden
+      if (!isTabActiveRef.current) {
         animFrameId.current = requestAnimationFrame(render);
         return;
       }
 
       const dpr = window.devicePixelRatio || 1;
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
+      const width = canvas.clientWidth || 800;
+      const height = canvas.clientHeight || 500;
 
       if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
         canvas.height = height * dpr;
       }
 
-      // Camera Lerp Animation
+      // Camera Lerp Animation (mutates ref directly — zero React re-renders!)
       if (cameraTarget.current.active) {
         const tgt = cameraTarget.current;
-        const lerpFactor = 0.09;
-        setTransform((prev) => {
-          const nx = prev.x + (tgt.x - prev.x) * lerpFactor;
-          const ny = prev.y + (tgt.y - prev.y) * lerpFactor;
-          const ns = prev.scale + (tgt.scale - prev.scale) * lerpFactor;
-          if (
-            Math.abs(nx - tgt.x) < 1 &&
-            Math.abs(ny - tgt.y) < 1 &&
-            Math.abs(ns - tgt.scale) < 0.01
-          ) {
-            cameraTarget.current.active = false;
-          }
-          return { x: nx, y: ny, scale: ns };
-        });
+        const cur = transformRef.current;
+        const lerpFactor = 0.08;
+
+        cur.x += (tgt.x - cur.x) * lerpFactor;
+        cur.y += (tgt.y - cur.y) * lerpFactor;
+        cur.scale += (tgt.scale - cur.scale) * lerpFactor;
+
+        if (
+          Math.abs(cur.x - tgt.x) < 1 &&
+          Math.abs(cur.y - tgt.y) < 1 &&
+          Math.abs(cur.scale - tgt.scale) < 0.01
+        ) {
+          cur.x = tgt.x;
+          cur.y = tgt.y;
+          cur.scale = tgt.scale;
+          cameraTarget.current.active = false;
+        }
       }
+
+      const transform = transformRef.current;
 
       ctx.save();
       ctx.scale(dpr, dpr);
@@ -285,7 +279,7 @@ export default function CipherNetworkCanvas({
       ctx.save();
       ctx.strokeStyle = "rgba(77, 141, 255, 0.03)";
       ctx.lineWidth = 1;
-      const gridSize = 44 * transform.scale;
+      const gridSize = 44 * Math.max(transform.scale, 0.5);
       const offsetX = transform.x % gridSize;
       const offsetY = transform.y % gridSize;
 
@@ -336,7 +330,7 @@ export default function CipherNetworkCanvas({
           }
         }
         if (!isDraggingNode.current) {
-          simulationEnergy.current *= 0.96; // Smooth thermal decay
+          simulationEnergy.current *= 0.96; // Exponential thermal decay
         }
       }
 
@@ -377,7 +371,7 @@ export default function CipherNetworkCanvas({
         ctx.stroke();
         ctx.restore();
 
-        // Edge label (illuminated pathway)
+        // Edge label on illuminated pathway
         if (isEdgeActive && pathway) {
           const midX = (sourcePos.x + targetPos.x) / 2;
           const midY = (sourcePos.y + targetPos.y) / 2;
@@ -506,7 +500,13 @@ export default function CipherNetworkCanvas({
       ctx.strokeStyle = "rgba(77, 141, 255, 0.15)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.roundRect(mmX, mmY, mmWidth, mmHeight, 8);
+
+      // Safe fallback for roundRect
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(mmX, mmY, mmWidth, mmHeight, 8);
+      } else {
+        ctx.rect(mmX, mmY, mmWidth, mmHeight);
+      }
       ctx.fill();
       ctx.stroke();
 
@@ -527,8 +527,8 @@ export default function CipherNetworkCanvas({
       // Viewport Wireframe
       const vpLeft = mmX - (transform.x / width) * mmWidth;
       const vpTop = mmY - (transform.y / height) * mmHeight;
-      const vpW = (mmWidth / transform.scale) * 0.75;
-      const vpH = (mmHeight / transform.scale) * 0.75;
+      const vpW = (mmWidth / Math.max(transform.scale, 0.5)) * 0.75;
+      const vpH = (mmHeight / Math.max(transform.scale, 0.5)) * 0.75;
 
       ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
       ctx.lineWidth = 1;
@@ -551,18 +551,16 @@ export default function CipherNetworkCanvas({
       running = false;
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
     };
-  }, [nodes, edges, transform, selectedNodeId, activeFilter, activePathway, ecoMode]);
+  }, [nodes, edges, selectedNodeId, activeFilter, activePathway, ecoMode]);
 
   // Coordinate helper: Canvas screen coords to graph space
-  const screenToGraph = useCallback(
-    (screenX: number, screenY: number): Point => {
-      return {
-        x: (screenX - transform.x) / transform.scale,
-        y: (screenY - transform.y) / transform.scale,
-      };
-    },
-    [transform],
-  );
+  const screenToGraph = useCallback((screenX: number, screenY: number): Point => {
+    const transform = transformRef.current;
+    return {
+      x: (screenX - transform.x) / transform.scale,
+      y: (screenY - transform.y) / transform.scale,
+    };
+  }, []);
 
   // Pointer Interaction Handlers
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -585,7 +583,7 @@ export default function CipherNetworkCanvas({
 
     if (hitNodeId) {
       isDraggingNode.current = hitNodeId;
-      simulationEnergy.current = 1.0; // Wake up physics on interaction
+      simulationEnergy.current = 1.0; // Wake up physics
       onSelectNode(hitNodeId);
       dragStart.current = { x: graphPt.x, y: graphPt.y };
     } else {
@@ -617,11 +615,8 @@ export default function CipherNetworkCanvas({
     if (isDraggingCanvas.current) {
       const dx = e.clientX - dragStart.current.x;
       const dy = e.clientY - dragStart.current.y;
-      setTransform((prev) => ({
-        ...prev,
-        x: prev.x + dx,
-        y: prev.y + dy,
-      }));
+      transformRef.current.x += dx;
+      transformRef.current.y += dy;
       dragStart.current = { x: e.clientX, y: e.clientY };
       return;
     }
@@ -658,26 +653,25 @@ export default function CipherNetworkCanvas({
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
+    const cur = transformRef.current;
     const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(transform.scale * zoomFactor, 0.4), 2.8);
+    const newScale = Math.min(Math.max(cur.scale * zoomFactor, 0.4), 2.8);
 
-    setTransform((prev) => ({
-      scale: newScale,
-      x: mouseX - (mouseX - prev.x) * (newScale / prev.scale),
-      y: mouseY - (mouseY - prev.y) * (newScale / prev.scale),
-    }));
+    cur.x = mouseX - (mouseX - cur.x) * (newScale / cur.scale);
+    cur.y = mouseY - (mouseY - cur.y) * (newScale / cur.scale);
+    cur.scale = newScale;
   };
 
   const resetView = () => {
-    setTransform({ x: 0, y: 0, scale: 1 });
+    transformRef.current = { x: 0, y: 0, scale: 1 };
   };
 
   const zoomIn = () => {
-    setTransform((prev) => ({ ...prev, scale: Math.min(prev.scale * 1.2, 2.8) }));
+    transformRef.current.scale = Math.min(transformRef.current.scale * 1.2, 2.8);
   };
 
   const zoomOut = () => {
-    setTransform((prev) => ({ ...prev, scale: Math.max(prev.scale * 0.8, 0.4) }));
+    transformRef.current.scale = Math.max(transformRef.current.scale * 0.8, 0.4);
   };
 
   const toggleFullscreen = () => {
@@ -704,7 +698,7 @@ export default function CipherNetworkCanvas({
   return (
     <div
       ref={containerRef}
-      className={`relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a] contain-intrinsic-size-[auto_none_auto_600px] ${
+      className={`relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a] ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
       }`}
     >

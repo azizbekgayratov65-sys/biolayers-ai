@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Sparkles,
   Compass,
@@ -24,23 +25,19 @@ import CipherNetworkCanvas from "./CipherNetworkCanvas";
 import type { CipherDataset, CipherNode } from "./CipherTypes";
 
 export default function CipherWorkspace() {
+  const searchParams = useSearchParams();
+  const initialPaper = searchParams?.get("paper");
+  const initialNode = searchParams?.get("node");
+
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const paperParam = params.get("paper");
-      if (paperParam && CIPHER_DATASETS.some((d) => d.id === paperParam)) {
-        return paperParam;
-      }
+    if (initialPaper && CIPHER_DATASETS.some((d) => d.id === initialPaper)) {
+      return initialPaper;
     }
     return "kras-g12d";
   });
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const nodeParam = params.get("node");
-      if (nodeParam) {
-        return nodeParam;
-      }
+    if (initialNode) {
+      return initialNode;
     }
     return "kras-mutation";
   });
