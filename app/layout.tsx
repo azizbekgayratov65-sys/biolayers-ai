@@ -180,6 +180,7 @@ export default function RootLayout({
           tabIndex={-1}
           className="
             relative
+            z-10
             min-h-screen
             bg-transparent
             text-slate-100

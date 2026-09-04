@@ -16,47 +16,47 @@ export const VIDEO_PRESETS: Record<string, VideoPreset> = {
   dapi: {
     id: "dapi",
     name: "DAPI Azure & Cyan",
-    label: "DAPI Cyan (Recommended)",
-    filter: "hue-rotate(180deg) brightness(0.62) contrast(1.45) saturate(1.4)",
-    overlayGradient: "linear-gradient(135deg, rgba(77, 141, 255, 0.12) 0%, transparent 50%, rgba(161, 92, 255, 0.08) 100%)",
-    opacity: 0.55,
-  },
-  emerald: {
-    id: "emerald",
-    name: "FITC Emerald & Teal",
-    label: "FITC Emerald / Activation",
-    filter: "hue-rotate(115deg) brightness(0.55) contrast(1.4) saturate(1.35)",
-    overlayGradient: "linear-gradient(135deg, rgba(43, 255, 136, 0.1) 0%, transparent 50%, rgba(77, 141, 255, 0.08) 100%)",
-    opacity: 0.52,
-  },
-  violet: {
-    id: "violet",
-    name: "Cy5 Deep Violet",
-    label: "Cy5 Spectral Violet",
-    filter: "hue-rotate(225deg) brightness(0.6) contrast(1.5) saturate(1.5)",
-    overlayGradient: "linear-gradient(135deg, rgba(161, 92, 255, 0.12) 0%, transparent 50%, rgba(77, 141, 255, 0.08) 100%)",
-    opacity: 0.5,
+    label: "DAPI Cyan (Fluorescence)",
+    filter: "hue-rotate(175deg) brightness(0.95) contrast(1.3) saturate(1.4)",
+    overlayGradient: "linear-gradient(135deg, rgba(77, 141, 255, 0.1) 0%, transparent 50%, rgba(161, 92, 255, 0.08) 100%)",
+    opacity: 0.8,
   },
   amber: {
     id: "amber",
     name: "Subdued Amber / Gold",
     label: "Raw Microscopy Amber",
-    filter: "brightness(0.4) contrast(1.35) saturate(0.9)",
+    filter: "brightness(0.95) contrast(1.25) saturate(1.2)",
     overlayGradient: "linear-gradient(135deg, rgba(255, 197, 61, 0.08) 0%, transparent 50%, rgba(77, 141, 255, 0.05) 100%)",
-    opacity: 0.45,
+    opacity: 0.8,
+  },
+  emerald: {
+    id: "emerald",
+    name: "FITC Emerald & Teal",
+    label: "FITC Emerald / Activation",
+    filter: "hue-rotate(105deg) brightness(0.95) contrast(1.3) saturate(1.35)",
+    overlayGradient: "linear-gradient(135deg, rgba(43, 255, 136, 0.1) 0%, transparent 50%, rgba(77, 141, 255, 0.06) 100%)",
+    opacity: 0.8,
+  },
+  violet: {
+    id: "violet",
+    name: "Cy5 Deep Violet",
+    label: "Cy5 Spectral Violet",
+    filter: "hue-rotate(220deg) brightness(0.95) contrast(1.35) saturate(1.4)",
+    overlayGradient: "linear-gradient(135deg, rgba(161, 92, 255, 0.12) 0%, transparent 50%, rgba(77, 141, 255, 0.06) 100%)",
+    opacity: 0.78,
   },
   inverted: {
     id: "inverted",
     name: "Luminescent Inverted",
     label: "Inverted Bio-Fluorescence",
-    filter: "invert(1) hue-rotate(195deg) brightness(0.42) contrast(1.6) saturate(1.7)",
-    overlayGradient: "linear-gradient(135deg, rgba(77, 141, 255, 0.1) 0%, transparent 50%, rgba(161, 92, 255, 0.08) 100%)",
-    opacity: 0.4,
+    filter: "invert(1) hue-rotate(195deg) brightness(0.7) contrast(1.4) saturate(1.5)",
+    overlayGradient: "linear-gradient(135deg, rgba(77, 141, 255, 0.1) 0%, transparent 50%, rgba(161, 92, 255, 0.06) 100%)",
+    opacity: 0.65,
   },
 };
 
 interface BackgroundVideoProps {
-  /** Video source (defaults to /background.mp4 with smooth forward/reverse loop) */
+  /** Video source (defaults to /background.mp4) */
   src?: string;
   /** Initial preset key (defaults to 'dapi') */
   initialPreset?: keyof typeof VIDEO_PRESETS;
@@ -73,10 +73,10 @@ export default function BackgroundVideo({
   className = "",
 }: BackgroundVideoProps) {
   const [currentPresetKey, setCurrentPresetKey] = useState<string>(initialPreset);
-  const [opacity, setOpacity] = useState<number>(VIDEO_PRESETS[initialPreset]?.opacity ?? 0.55);
+  const [opacity, setOpacity] = useState<number>(VIDEO_PRESETS[initialPreset]?.opacity ?? 0.8);
   const [brightness, setBrightness] = useState<number>(100);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -129,19 +129,44 @@ export default function BackgroundVideo({
     };
   }, [isPanelOpen]);
 
+  // Ensure video autoplays reliably across all browsers
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-    };
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
 
-    video.addEventListener("canplay", handleCanPlay);
+    const markLoaded = () => setIsLoaded(true);
+
+    if (video.readyState >= 2) {
+      setIsLoaded(true);
+    }
+
+    video.addEventListener("loadeddata", markLoaded);
+    video.addEventListener("canplay", markLoaded);
+    video.addEventListener("playing", markLoaded);
+
+    // Explicitly invoke play() to guarantee browser playback
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setIsLoaded(true);
+        })
+        .catch((err) => {
+          console.warn("Autoplay notice:", err);
+        });
+    }
+
     return () => {
-      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", markLoaded);
+      video.removeEventListener("canplay", markLoaded);
+      video.removeEventListener("playing", markLoaded);
     };
-  }, []);
+  }, [src]);
 
   // Compute composed CSS filter
   const brightnessMultiplier = brightness / 100;
@@ -149,10 +174,10 @@ export default function BackgroundVideo({
 
   return (
     <>
-      {/* Background Video Layer — Fixed across whole project */}
+      {/* Background Video Layer — Fixed at z-0 behind content */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none fixed inset-0 -z-30 overflow-hidden select-none ${className}`}
+        className={`pointer-events-none fixed inset-0 z-0 overflow-hidden select-none ${className}`}
       >
         <video
           ref={videoRef}
@@ -162,32 +187,32 @@ export default function BackgroundVideo({
           muted
           playsInline
           preload="auto"
-          className={`h-full w-full object-cover transition-opacity duration-1000 ease-out will-change-transform ${
-            isLoaded ? "opacity-100" : "opacity-0"
+          className={`h-full w-full object-cover transition-opacity duration-500 ease-out will-change-transform ${
+            isLoaded ? "opacity-100" : "opacity-90"
           }`}
           style={{
             filter: computedFilter,
             opacity: opacity,
-            transform: "scale(1.05)",
+            transform: "scale(1.04)",
           }}
         />
 
-        {/* Multi-tier Cinematic Overlays to seamlessly blend into #04070a */}
-        {/* Tier 1: Radial Vignette protecting center content legibility */}
+        {/* Multi-tier Balanced Overlays: Protects text contrast while keeping video vibrantly visible */}
+        {/* Tier 1: Soft radial vignette behind center text */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 75% 65% at 50% 48%, rgba(4, 7, 10, 0.42) 0%, rgba(4, 7, 10, 0.78) 60%, #04070a 95%)",
+              "radial-gradient(ellipse 70% 55% at 50% 45%, rgba(4, 7, 10, 0.62) 0%, rgba(4, 7, 10, 0.2) 60%, rgba(4, 7, 10, 0.5) 100%)",
           }}
         />
 
-        {/* Tier 2: Linear Top & Bottom Fades */}
+        {/* Tier 2: Smooth top & bottom edge blend */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, #04070a 0%, rgba(4, 7, 10, 0.4) 14%, transparent 32%, rgba(4, 7, 10, 0.5) 75%, #04070a 100%)",
+              "linear-gradient(to bottom, rgba(4, 7, 10, 0.75) 0%, transparent 12%, transparent 82%, rgba(4, 7, 10, 0.9) 100%)",
           }}
         />
 
@@ -288,8 +313,8 @@ export default function BackgroundVideo({
                   </div>
                   <input
                     type="range"
-                    min="15"
-                    max="90"
+                    min="20"
+                    max="100"
                     value={Math.round(opacity * 100)}
                     onChange={(e) => setOpacity(Number(e.target.value) / 100)}
                     className="w-full accent-teal-400 h-1 bg-white/10 rounded-lg cursor-pointer"
