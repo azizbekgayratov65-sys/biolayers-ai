@@ -146,7 +146,15 @@ const steps: JourneyStep[] = [
   },
 ];
 
-function StepContent({ step }: { step: JourneyStep }) {
+function StepContent({
+  step,
+  onNext,
+  onPrev,
+}: {
+  step: JourneyStep;
+  onNext: () => void;
+  onPrev: () => void;
+}) {
   const StepIcon = step.icon;
 
   return (
@@ -185,17 +193,19 @@ function StepContent({ step }: { step: JourneyStep }) {
 
         <div className="mt-5 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
           <button
+            type="button"
             disabled={steps.findIndex(s => s.id === step.id) === 0}
-            onClick={() => {}}
-            className="text-slate-400 hover:text-white disabled:opacity-30"
+            onClick={onPrev}
+            className="text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
           >
             ← Previous Step
           </button>
 
           {steps.findIndex(s => s.id === step.id) < steps.length - 1 ? (
             <button
-              onClick={() => {}}
-              className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
+              type="button"
+              onClick={onNext}
+              className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100 transition"
             >
               <span>Next: Step 0{steps.findIndex(s => s.id === step.id) + 2}</span>
               <ChevronRight className="h-3.5 w-3.5" />
@@ -203,7 +213,7 @@ function StepContent({ step }: { step: JourneyStep }) {
           ) : (
             <Link
               href="/mindmap"
-              className="inline-flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200"
+              className="inline-flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200 transition"
             >
               <Workflow className="h-3.5 w-3.5" />
               <span>Open Mind Map</span>
@@ -262,7 +272,7 @@ export default function BioJourney() {
   const activeStep = steps[activeStepIndex];
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-[#04070a] px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
+    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-1/3 -z-20 h-[500px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.04] blur-[160px]"
@@ -315,7 +325,11 @@ export default function BioJourney() {
           })}
         </div>
 
-        <StepContent step={activeStep} />
+        <StepContent
+          step={activeStep}
+          onNext={() => setActiveStepIndex((prev) => Math.min(steps.length - 1, prev + 1))}
+          onPrev={() => setActiveStepIndex((prev) => Math.max(0, prev - 1))}
+        />
       </div>
 
       <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">

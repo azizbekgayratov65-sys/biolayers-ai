@@ -15,6 +15,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import Navbar from "./components/Navbar";
+import BackgroundVideo from "./components/BackgroundVideo";
 
 const spectral = Spectral({
   variable: "--font-spectral",
@@ -172,13 +173,15 @@ export default function RootLayout({
 
         <Navbar />
 
+        <BackgroundVideo />
+
         <main
           id="main-content"
           tabIndex={-1}
           className="
             relative
             min-h-screen
-            bg-[#04070a]
+            bg-transparent
             text-slate-100
           "
           style={{
