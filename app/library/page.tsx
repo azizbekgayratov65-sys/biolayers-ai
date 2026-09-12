@@ -116,7 +116,7 @@ export default function LibraryPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#04070a]">
+    <div className="relative isolate min-h-screen bg-transparent">
       <div
         aria-hidden="true"
         className="
@@ -229,6 +229,7 @@ function PaperCard({
         border
         border-teal-100/[0.07]
         bg-[#0a0f14]/70
+        backdrop-blur-xl
         p-5
         md:p-6
         transition-all

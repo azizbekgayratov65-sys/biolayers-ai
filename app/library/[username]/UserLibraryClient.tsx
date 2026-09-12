@@ -103,7 +103,7 @@ export default function UserLibraryClient({
     profile.username ?? profile.fullName ?? username ?? "Researcher";
 
   return (
-    <div className="relative min-h-screen bg-[#04070a]">
+    <div className="relative isolate min-h-screen bg-transparent">
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(77,141,255,.07),transparent_62%)]"
@@ -217,7 +217,7 @@ function PaperCard({
   return (
     <article
       onClick={() => onClick(paper)}
-      className="group relative cursor-pointer overflow-hidden rounded-[20px] border border-teal-100/[0.07] bg-[#0a0f14]/70 p-5 md:p-6 transition-all duration-300 hover:border-teal-200/20 hover:bg-[#10161d]/80 hover:-translate-y-0.5"
+      className="group relative cursor-pointer overflow-hidden rounded-[20px] border border-teal-100/[0.07] bg-[#0a0f14]/70 backdrop-blur-xl p-5 md:p-6 transition-all duration-300 hover:border-teal-200/20 hover:bg-[#10161d]/80 hover:-translate-y-0.5"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

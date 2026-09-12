@@ -267,20 +267,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Status Note Chip */}
-              <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-amber-400/20 bg-amber-400/[0.05] p-2.5">
-                <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                <div className="min-w-0">
-                  <div className="font-mono text-[8px] font-bold uppercase tracking-wider text-amber-300">
-                    Mentorship Engagement Status
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-snug font-medium text-amber-100/90">
-                    🟡 Occasional High-Level Guidance Offered; Project Direction Requested Aug 25 — Awaiting Reply
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
                 Principal Investigator at the James P. Allison Institute and MD Anderson Department of Thoracic/Head & Neck Medical Oncology,
                 investigating cancer plasticity, airway damage, and novel therapeutic targets in lung cancer.
               </p>
@@ -366,20 +353,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Status Note Chip */}
-              <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] p-2.5">
-                <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-                <div className="min-w-0">
-                  <div className="font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-300">
-                    Mentorship Engagement Status
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-snug font-medium text-emerald-100/90">
-                    🟢 Replied / Interested in BioLayers AI; Occasional Mentorship Requested Aug 25 — Awaiting Reply
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
                 Physician-scientist leading the Shen Laboratory at MD Anderson, specializing in cancer genomics,
                 CRISPR screening, synthetic lethal interactions, and machine learning biomarkers in colorectal and gastrointestinal cancers.
               </p>
@@ -435,10 +409,165 @@ export default function AboutPage() {
               </span>
             </div>
           </article>
+
+          {/* Card 5: Kathleen M. Schieffer, Ph.D. */}
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-purple-200/35 animate-fade-up delay-300">
+            <div>
+              <div className="flex items-center gap-4">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-purple-400/30 bg-purple-950/40 shadow-[0_0_25px_rgba(192,132,252,0.2)] sm:h-24 sm:w-24">
+                  <Image
+                    src="/mentorship/kathleen-m-schieffer.jpg"
+                    alt="Kathleen M. Schieffer, Ph.D. - Clinical Genomics & Pediatric Oncology"
+                    fill
+                    sizes="96px"
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
+                </div>
+
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300/25 bg-purple-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-purple-200">
+                    <span className="h-1 w-1 rounded-full bg-purple-300" />
+                    Clinical Genomics & Pediatric Oncology
+                  </span>
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    Kathleen M. Schieffer
+                  </h2>
+                  <p className="font-mono text-[10px] text-purple-300/80">
+                    Assistant Professor · Nationwide Children&apos;s &amp; Ohio State University
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+                Clinical and translational genomicist at the Steve and Cindy Rasmussen Institute for Genomic Medicine,
+                investigating pediatric tumor genomics, transcriptomic complexity, and translating high-throughput sequencing into clinical precision oncology.
+              </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] p-1">
+                    <span className="font-mono text-[8.5px] font-bold text-purple-200 text-center leading-tight">NCH / OSU</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-purple-300/70">Faculty Appointment</div>
+                    <div className="truncate text-[10px] font-bold text-white">Nationwide Children&apos;s / OSU</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+                    <Image
+                      src="/mentorship/penn-state.svg"
+                      alt="Penn State College of Medicine"
+                      width={50}
+                      height={20}
+                      className="h-auto max-h-6 w-auto object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-purple-300/70">Doctoral Training</div>
+                    <div className="truncate text-[10px] font-bold text-white">Penn State Medicine</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
+              <a
+                href="https://www.linkedin.com/in/kathleenmschieffer/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-bold text-purple-300 transition hover:text-purple-100"
+              >
+                <span>LinkedIn Profile</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+
+              <span className="font-mono text-[10px] text-slate-500">
+                Pediatric Cancer Genomics
+              </span>
+            </div>
+          </article>
+
+          {/* Card 6: Bailey Glen, Ph.D. */}
+          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-cyan-200/35 animate-fade-up delay-350">
+            <div>
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-20 w-20 shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-cyan-400/30 bg-gradient-to-br from-cyan-950/70 via-[#061424] to-[#040c17] shadow-[0_0_25px_rgba(6,182,212,0.2)] sm:h-24 sm:w-24">
+                  <span className="font-mono text-2xl font-black tracking-wider text-cyan-300">BG</span>
+                  <span className="font-mono text-[8px] font-semibold uppercase tracking-widest text-cyan-200/60 mt-0.5">Ph.D.</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent pointer-events-none" />
+                </div>
+
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/25 bg-cyan-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-cyan-200">
+                    <span className="h-1 w-1 rounded-full bg-cyan-300" />
+                    Bioinformatics &amp; NGS Architecture
+                  </span>
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    Bailey Glen
+                  </h2>
+                  <p className="font-mono text-[10px] text-cyan-300/80">
+                    Senior Bioinformatics Scientist &amp; Director · Hollings Cancer Center, MUSC
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+                Bioinformatics scientist directing high-throughput next-generation sequencing informatics,
+                multi-omics architecture, and reproducible computational pipelines supporting translational cancer genomics at Hollings Cancer Center.
+              </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] p-1">
+                    <span className="font-mono text-[8.5px] font-bold text-cyan-200 text-center leading-tight">MUSC</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-cyan-300/70">Faculty / Directorship</div>
+                    <div className="truncate text-[10px] font-bold text-white">Hollings Cancer Center · MUSC</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
+                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+                    <Image
+                      src="/mentorship/clemson.svg"
+                      alt="Clemson University"
+                      width={36}
+                      height={20}
+                      className="h-auto max-h-6 w-auto object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[7px] uppercase text-cyan-300/70">Doctoral Training</div>
+                    <div className="truncate text-[10px] font-bold text-white">Clemson University</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
+              <a
+                href="https://www.linkedin.com/in/bailey-glen-24a65b85/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-bold text-cyan-300 transition hover:text-cyan-100"
+              >
+                <span>LinkedIn Profile</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+
+              <span className="font-mono text-[10px] text-slate-500">
+                NGS Informatics &amp; Multi-Omics
+              </span>
+            </div>
+          </article>
         </div>
 
         <p className="mx-auto mt-6 text-center text-[10px] text-slate-500 max-w-3xl">
-          Institutional and academic names (Abu Ali Ibn Sina Specialized School, MD Anderson Cancer Center, Weill Cornell Medicine, Johns Hopkins University School of Medicine, UC San Diego) are presented as biographical context for founders and mentors, and do not imply institutional endorsement of BioLayers AI.
+          Institutional and academic names (Abu Ali Ibn Sina Specialized School, MD Anderson Cancer Center, Weill Cornell Medicine, Johns Hopkins University School of Medicine, UC San Diego, Nationwide Children&apos;s Hospital, The Ohio State University, Penn State College of Medicine, Hollings Cancer Center / MUSC, Clemson University) are presented as biographical context for founders and mentors, and do not imply institutional endorsement of BioLayers AI.
         </p>
       </div>
 
