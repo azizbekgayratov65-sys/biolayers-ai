@@ -68,16 +68,32 @@ export default function MicroscopyViewer({
     setContrast(100);
   }, []);
 
-  // Zoom controls with bounds
+  // Button Zoom controls with bounds
   const handleZoomIn = () => setZoom((prev) => Math.min(prev * 1.3, 8));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev / 1.3, 0.5));
 
-  // Mouse Wheel Zoom
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.15 : 0.87;
-    setZoom((prev) => Math.min(Math.max(prev * factor, 0.5), 8));
-  };
+  // Non-passive wheel event listener to strictly prevent page scrolling when pointer is inside the card
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheelNative = (e: WheelEvent) => {
+      // Unconditionally cancel page scroll while pointer is over this viewer card
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Zoom in or out based on scroll direction
+      const factor = e.deltaY < 0 ? 1.15 : 0.87;
+      setZoom((prev) => Math.min(Math.max(prev * factor, 0.5), 8));
+    };
+
+    // CRITICAL: passive: false is required by browsers to allow e.preventDefault()
+    el.addEventListener("wheel", onWheelNative, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", onWheelNative);
+    };
+  }, []);
 
   // Drag Pan Interaction
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -136,9 +152,8 @@ export default function MicroscopyViewer({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden rounded-2xl border border-teal-500/20 bg-[#04080e] shadow-2xl select-none ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-teal-500/25 bg-[#04080e]/90 backdrop-blur-xl shadow-2xl select-none overscroll-contain ${className}`}
       style={{ minHeight: "440px", height: isFullscreen ? "100vh" : "560px" }}
-      onWheel={handleWheel}
     >
       {/* 1. Main Viewport & Interactive Image Layer */}
       <div

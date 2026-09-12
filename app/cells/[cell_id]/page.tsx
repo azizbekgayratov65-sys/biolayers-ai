@@ -13,7 +13,6 @@ import {
   Sparkles,
   GitFork,
 } from "lucide-react";
-import Navbar from "../../components/Navbar";
 import MicroscopyViewer from "../../components/atlas/MicroscopyViewer";
 import { getCellAtlasDetailById } from "../../lib/atlasSeedData";
 import { EVIDENCE_BADGES, type EvidenceLevel } from "../../lib/atlasTypes";
@@ -47,10 +46,18 @@ export default async function CellCardPage({ params }: PageProps) {
   const { cellType, image, morphologySummary, entities } = detail;
 
   return (
-    <div className="min-h-screen bg-[#03070d] text-slate-100 selection:bg-teal-500/30 selection:text-teal-200">
-      <Navbar />
+    <div className="relative isolate min-h-screen bg-transparent text-slate-100 selection:bg-teal-500/30 selection:text-teal-200">
+      {/* Ambient background glow atmospheres */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/4 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.04] blur-[170px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-10 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.03] blur-[150px]"
+      />
 
-      <main className="mx-auto max-w-6xl px-4 pt-28 pb-28 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 pt-28 pb-28 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation */}
         <div className="mb-6 flex items-center justify-between">
           <Link
@@ -464,7 +471,7 @@ export default async function CellCardPage({ params }: PageProps) {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
