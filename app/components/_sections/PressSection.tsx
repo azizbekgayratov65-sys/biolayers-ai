@@ -39,7 +39,7 @@ const pressItems: PressItem[] = [
     badge: "Startup Spotlight",
     tag: "Computational Oncology",
     location: "Tashkent & Global",
-    logoSvg: "/branding/aibusiness-logo.svg",
+    logoSvg: "/branding/aibusiness-logo.png",
   },
 ];
 
