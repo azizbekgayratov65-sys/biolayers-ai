@@ -10,7 +10,13 @@ export type MicroscopyModality =
   | "phase_contrast"
   | "two_photon"
   | "electron"
-  | "super_resolution";
+  | "super_resolution"
+  | "light_sheet"
+  | "tirf"
+  | "dic"
+  | "atomic_force"
+  | "cryo_em"
+  | "multiplex_ihc";
 
 export const MODALITY_LABELS: Record<MicroscopyModality, string> = {
   confocal: "Confocal Laser Scanning",
@@ -20,6 +26,12 @@ export const MODALITY_LABELS: Record<MicroscopyModality, string> = {
   two_photon: "Two-Photon Multi-Photon",
   electron: "Electron Microscopy",
   super_resolution: "Super-Resolution (STED/SIM)",
+  light_sheet: "Light Sheet Fluorescence",
+  tirf: "Total Internal Reflection Fluorescence (TIRF)",
+  dic: "Differential Interference Contrast (DIC)",
+  atomic_force: "Atomic Force Microscopy (AFM)",
+  cryo_em: "Cryo-Electron Microscopy (Cryo-EM)",
+  multiplex_ihc: "Multiplex Immunohistochemistry",
 };
 
 export type EvidenceLevel =
