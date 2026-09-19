@@ -178,7 +178,7 @@ export default function CellAtlasCatalogPage() {
           <span className="text-xs font-mono text-slate-500 mr-1 flex items-center gap-1">
             <Filter className="h-3 w-3" /> Modality:
           </span>
-          {(["all", "confocal", "fluorescence"] as const).map((mod) => {
+          {(["all", "confocal", "fluorescence", "brightfield", "phase_contrast", "two_photon", "electron", "super_resolution"] as const).map((mod) => {
             const active = selectedModality === mod;
             return (
               <button
