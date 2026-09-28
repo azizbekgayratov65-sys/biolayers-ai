@@ -138,17 +138,19 @@ export default function LibraryPage() {
           className="mx-auto max-w-5xl"
         >
           <div className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/15 bg-teal-300/[0.05] px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-200/80">
-              <FileText className="h-3 w-3" />
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.06] px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-200/90 shadow-[0_0_15px_rgba(77,141,255,0.1)]">
+              <FileText className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
               Research Library
             </div>
 
-            <h1 className="text-3xl font-black tracking-[-0.03em] text-white sm:text-4xl md:text-5xl">
-              Collective
-              <span className="text-teal-300"> Knowledge</span>
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
+              Collective{" "}
+              <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
+                Knowledge
+              </span>
             </h1>
 
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-300/85">
               Explore papers analyzed by the BioLayers community. Every
               entry links to a full interactive mind map with evidence-backed
               biological mechanisms.
@@ -156,19 +158,19 @@ export default function LibraryPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-xl border border-rose-200/20 bg-rose-300/[0.05] p-4 text-center text-sm text-rose-200">
+            <div className="mb-6 rounded-[16px] border border-rose-200/25 bg-rose-400/[0.08] p-4 text-center text-sm font-semibold text-rose-200 shadow-sm" role="alert">
               {error}
             </div>
           )}
 
           {loading ? (
-            <div className="space-y-4" aria-busy="true">
+            <div className="space-y-4" aria-busy="true" aria-label="Loading library papers">
               {[...Array(5)].map((_, i) => (
                 <PaperCardSkeleton key={i} />
               ))}
             </div>
           ) : papers.length === 0 ? (
-            <div className="py-16 text-center text-slate-500">
+            <div className="py-20 text-center text-slate-400 text-sm">
               No papers in the library yet. Be the first to analyze one!
             </div>
           ) : (
@@ -186,14 +188,14 @@ export default function LibraryPage() {
 
               <div ref={sentinelRef} className="h-20" aria-hidden="true">
                 {loadingMore && (
-                  <div className="flex items-center justify-center gap-2 py-8">
-                    <Loader2 className="h-5 w-5 animate-spin text-teal-300" />
-                    <span className="text-sm text-slate-400">Loading more…</span>
+                  <div className="flex items-center justify-center gap-2 py-8" role="status" aria-live="polite">
+                    <Loader2 className="h-5 w-5 animate-spin text-teal-300" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-slate-300">Loading more…</span>
                   </div>
                 )}
                 {hasMore === false && papers.length > 0 && (
-                  <p className="text-center text-xs text-slate-500 py-4">
-                    End of library — {papers.length} papers loaded
+                  <p className="text-center font-mono text-[11px] text-slate-400 py-6">
+                    End of library · {papers.length}&nbsp;papers loaded
                   </p>
                 )}
               </div>
@@ -218,8 +220,9 @@ function PaperCard({
     <motion.article
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
       onClick={() => onClick(paper)}
+      style={{ touchAction: "manipulation" }}
       className="
         group
         relative
@@ -227,16 +230,22 @@ function PaperCard({
         overflow-hidden
         rounded-[20px]
         border
-        border-teal-100/[0.07]
-        bg-[#0a0f14]/70
+        border-teal-100/[0.09]
+        bg-[#0a0f16]/80
         backdrop-blur-xl
         p-5
         md:p-6
-        transition-all
-        duration-300
-        hover:border-teal-200/20
-        hover:bg-[#10161d]/80
+        transition-[transform,border-color,background-color,box-shadow]
+        duration-200
+        hover:border-teal-200/30
+        hover:bg-[#101822]/90
         hover:-translate-y-0.5
+        hover:shadow-[0_16px_48px_rgba(0,0,0,0.4)]
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-teal-400
+        focus-visible:ring-offset-2
+        focus-visible:ring-offset-[#04070a]
       "
       role="button"
       tabIndex={0}
@@ -249,38 +258,39 @@ function PaperCard({
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <div
               className="
-                flex h-10 w-10 shrink-0 items-center justify-center
-                rounded-xl border border-teal-200/15 bg-teal-300/[0.06]
+                flex h-11 w-11 shrink-0 items-center justify-center
+                rounded-[12px] border border-teal-200/20 bg-teal-300/[0.08]
+                shadow-[0_0_15px_rgba(77,141,255,0.08)]
               "
             >
-              <FileText className="h-5 w-5 text-teal-300/80" />
+              <FileText className="h-5 w-5 text-teal-300" aria-hidden="true" />
             </div>
 
             <div className="min-w-0">
-              <h3 className="truncate text-lg font-medium text-white">
+              <h3 className="truncate text-lg font-bold text-white group-hover:text-teal-100 transition-colors">
                 {paper.title ?? paper.fileName ?? "Untitled Paper"}
               </h3>
-              <p className="mt-1 truncate text-sm text-slate-400">
-                {paper.fileType ?? "Mind Map"} • {formatChars(paper.characterCount)} chars
+              <p className="mt-1 truncate font-mono text-xs text-slate-300 tabular-nums">
+                {paper.fileType ?? "Mind Map"} · {formatChars(paper.characterCount)}&nbsp;chars
               </p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono">
             <span className="flex items-center gap-1.5">
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
               {formatDate(paper.createdAt)}
             </span>
             {paper.username && (
               <Link
                 href={`/library/${paper.username}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 hover:text-teal-300 transition-colors"
+                className="flex items-center gap-1.5 font-semibold text-slate-300 hover:text-teal-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 rounded"
               >
-                <User className="h-3 w-3" />
+                <User className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
                 @{paper.username}
               </Link>
             )}
@@ -288,13 +298,14 @@ function PaperCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="rounded-full border border-teal-200/15 bg-teal-300/[0.05] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-teal-200/70">
+          <span className="rounded-full border border-teal-200/20 bg-teal-300/[0.08] px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-teal-200">
             Open Map
           </span>
         </div>
       </div>
 
       <div
+        aria-hidden="true"
         className="
           pointer-events-none
           absolute
@@ -304,7 +315,7 @@ function PaperCard({
           duration-300
           group-hover:opacity-100
           bg-gradient-to-r
-          from-teal-400/[0.03]
+          from-teal-400/[0.04]
           to-transparent
         "
       />
@@ -314,17 +325,17 @@ function PaperCard({
 
 function PaperCardSkeleton() {
   return (
-    <div className="rounded-[20px] border border-teal-100/[0.07] bg-[#0a0f14]/70 p-5 md:p-6">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 shrink-0 rounded-xl bg-white/[0.03] animate-pulse" />
+    <div className="rounded-[20px] border border-teal-100/[0.08] bg-[#0a0f16]/75 p-5 md:p-6 shadow-sm">
+      <div className="flex items-center gap-3.5">
+        <div className="h-11 w-11 shrink-0 rounded-[12px] bg-white/[0.05] animate-pulse" />
         <div className="flex-1 space-y-2">
-          <div className="h-5 w-3/4 bg-white/[0.03] animate-pulse rounded" />
-          <div className="h-4 w-1/2 bg-white/[0.03] animate-pulse rounded" />
+          <div className="h-5 w-2/3 bg-white/[0.05] animate-pulse rounded-[6px]" />
+          <div className="h-3.5 w-1/3 bg-white/[0.05] animate-pulse rounded-[6px]" />
         </div>
       </div>
       <div className="mt-4 flex gap-3">
-        <div className="h-4 w-24 bg-white/[0.03] animate-pulse rounded" />
-        <div className="h-4 w-32 bg-white/[0.03] animate-pulse rounded" />
+        <div className="h-3.5 w-24 bg-white/[0.05] animate-pulse rounded-[6px]" />
+        <div className="h-3.5 w-28 bg-white/[0.05] animate-pulse rounded-[6px]" />
       </div>
     </div>
   );

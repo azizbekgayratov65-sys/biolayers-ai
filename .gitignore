@@ -74,5 +74,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-all_tests.txt  
- 
+all_tests.txt
+scratch/
+.agents/

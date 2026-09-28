@@ -30,7 +30,7 @@ export default async function LoginPage({
           New to BioLayers?{" "}
           <Link
             href="/signup"
-            className="font-semibold text-teal-200/80 transition hover:text-teal-100"
+            className="font-semibold text-emerald-400 transition hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-sm"
           >
             Create an account
           </Link>

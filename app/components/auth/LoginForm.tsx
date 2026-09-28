@@ -13,7 +13,7 @@ import { createClient } from "../../lib/supabase/client";
 type Mode = "password" | "magiclink" | "forgot";
 
 const inputClass =
-  "h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045]";
+  "h-11 min-h-[44px] w-full rounded-xl border border-slate-700/80 bg-slate-950/60 px-3.5 text-base sm:text-sm text-white placeholder:text-slate-500 outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:border-emerald-500/40";
 
 export default function LoginForm({
   next,
@@ -153,14 +153,14 @@ export default function LoginForm({
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-rose-300/15 bg-rose-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-rose-200/80"
+          className="rounded-xl border border-rose-500/30 bg-rose-950/20 px-4 py-3 text-xs leading-relaxed text-rose-200"
         >
           {error}
         </div>
       )}
 
       {notice && (
-        <div className="rounded-xl border border-teal-300/15 bg-teal-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-teal-200/80">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs leading-relaxed text-emerald-200">
           {notice}
         </div>
       )}
@@ -170,9 +170,9 @@ export default function LoginForm({
           <div>
             <label
               htmlFor="login-email"
-              className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+              className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
             >
-              Email
+              Email Address
             </label>
             <input
               id="login-email"
@@ -188,7 +188,7 @@ export default function LoginForm({
           <div>
             <label
               htmlFor="login-password"
-              className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+              className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
             >
               Password
             </label>
@@ -203,7 +203,7 @@ export default function LoginForm({
                   void signInWithPassword();
                 }
               }}
-              placeholder="••••••••••"
+              placeholder="••••••••••••"
               className={inputClass}
             />
           </div>
@@ -212,24 +212,24 @@ export default function LoginForm({
             type="button"
             onClick={() => void signInWithPassword()}
             disabled={busy}
-            className="group relative flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-300/[0.09] text-sm font-bold text-teal-50 transition duration-300 hover:border-teal-200/45 hover:bg-teal-300/[0.14] disabled:opacity-60"
+            className="group relative flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500 text-slate-950 text-sm font-bold shadow-md transition-all hover:bg-emerald-400 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
             ) : (
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4 text-slate-950" />
             )}
             Sign In
           </button>
 
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-xs pt-1">
             <button
               type="button"
               onClick={() => {
                 clearMessages();
                 setMode("magiclink");
               }}
-              className="text-teal-200/60 transition hover:text-teal-100"
+              className="min-h-[44px] inline-flex items-center text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg px-2 -ml-2"
             >
               Send magic link
             </button>
@@ -240,7 +240,7 @@ export default function LoginForm({
                 clearMessages();
                 setMode("forgot");
               }}
-              className="text-white/40 transition hover:text-white/70"
+              className="min-h-[44px] inline-flex items-center text-xs text-slate-400 hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg px-2 -mr-2"
             >
               Forgot password?
             </button>
@@ -253,9 +253,9 @@ export default function LoginForm({
           <div>
             <label
               htmlFor="magic-email"
-              className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+              className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
             >
-              Email
+              Email Address
             </label>
             <input
               id="magic-email"
@@ -277,12 +277,12 @@ export default function LoginForm({
             type="button"
             onClick={() => void sendMagicLink()}
             disabled={busy}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-300/[0.09] text-sm font-bold text-teal-50 transition duration-300 hover:border-teal-200/45 hover:bg-teal-300/[0.14] disabled:opacity-60"
+            className="flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500 text-slate-950 text-sm font-bold shadow-md transition-all hover:bg-emerald-400 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
             ) : (
-              <Mail className="h-4 w-4" />
+              <Mail className="h-4 w-4 text-slate-950" />
             )}
             Send Magic Link
           </button>
@@ -293,7 +293,7 @@ export default function LoginForm({
               clearMessages();
               setMode("password");
             }}
-            className="flex items-center gap-1.5 text-xs text-white/40 transition hover:text-white/70"
+            className="min-h-[44px] inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg px-2 -ml-2"
           >
             <ArrowLeft className="h-3 w-3" />
             Back to password sign-in
@@ -303,17 +303,16 @@ export default function LoginForm({
 
       {mode === "forgot" && (
         <div className="space-y-4">
-          <p className="text-xs leading-relaxed text-white/45">
-            Enter the email on your account and we will send you a
-            link to reset your password.
+          <p className="text-xs leading-relaxed text-slate-400">
+            Enter the email address registered with your account and we will send you a secure link to reset your password.
           </p>
 
           <div>
             <label
               htmlFor="forgot-email"
-              className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+              className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
             >
-              Email
+              Email Address
             </label>
             <input
               id="forgot-email"
@@ -335,12 +334,12 @@ export default function LoginForm({
             type="button"
             onClick={() => void sendResetLink()}
             disabled={busy}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-300/[0.09] text-sm font-bold text-teal-50 transition duration-300 hover:border-teal-200/45 hover:bg-teal-300/[0.14] disabled:opacity-60"
+            className="flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500 text-slate-950 text-sm font-bold shadow-md transition-all hover:bg-emerald-400 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
             ) : (
-              <Mail className="h-4 w-4" />
+              <Mail className="h-4 w-4 text-slate-950" />
             )}
             Send Reset Link
           </button>
@@ -351,7 +350,7 @@ export default function LoginForm({
               clearMessages();
               setMode("password");
             }}
-            className="flex items-center gap-1.5 text-xs text-white/40 transition hover:text-white/70"
+            className="min-h-[44px] inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg px-2 -ml-2"
           >
             <ArrowLeft className="h-3 w-3" />
             Back to sign-in

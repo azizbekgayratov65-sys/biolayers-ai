@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
   ExternalLink,
   Newspaper,
@@ -22,21 +21,21 @@ export default function PressPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
         {/* HEADER */}
         <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
-            <Newspaper className="h-3.5 w-3.5 text-teal-300" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
+            <Newspaper className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
               Media, Recognition & Spotlights
             </span>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-white sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
             Recognition &{" "}
-            <span className="bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
               Global Coverage
             </span>
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
+          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
             BioLayers AI featured across global education innovation catalogs and technology
             publications for reconstructing cancer literature into explorable AI knowledge graphs.
           </p>
@@ -50,18 +49,10 @@ export default function PressPage() {
               {/* Card Header: Brand Logo & Date */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/[0.08] pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="relative flex h-8 items-center justify-center rounded-lg bg-white px-3 py-1 text-slate-900 shadow-sm">
-                    <Image
-                      src="/branding/hundred-logo.svg"
-                      alt="HundrED logo"
-                      width={75}
-                      height={18}
-                      className="h-4 w-auto object-contain"
-                      style={{ width: "auto", height: "auto" }}
-                    />
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/30 bg-teal-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,0.8)]" />
+                  <span className="rounded-full border border-teal-300/30 bg-teal-400/[0.1] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
+                    HundrED
+                  </span>
+                  <span className="inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-wider text-slate-400">
                     Global Innovation Spotlight
                   </span>
                 </div>

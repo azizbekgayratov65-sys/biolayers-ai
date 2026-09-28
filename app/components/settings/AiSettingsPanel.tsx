@@ -14,7 +14,7 @@ import { useState } from "react";
 const GEMINI_KEY_URL = "https://aistudio.google.com/app/apikey";
 
 const inputClass =
-  "h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 font-mono text-[13px] text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045]";
+  "h-11 min-h-[44px] w-full rounded-xl border border-slate-700/80 bg-slate-950/60 px-3.5 font-mono text-base sm:text-xs text-white placeholder:text-slate-500 outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:border-emerald-500/40";
 
 /*
   AI Settings — manage the user's own Gemini API key.
@@ -187,29 +187,29 @@ export function AiSettingsPanel({
   return (
     <section
       id="ai"
-      className="scroll-mt-24 overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/80 backdrop-blur-xl"
+      className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl"
     >
-      <div className="border-b border-white/[0.06] px-6 py-5">
+      <div className="border-b border-slate-800/70 px-6 py-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/30">
-              AI Settings
+            <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">
+              AI Engine Settings
             </div>
-            <div className="mt-1 flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-white">
-              <KeyRound className="h-4 w-4 text-teal-300/70" />
-              Gemini API
+            <div className="mt-1 flex items-center gap-2 text-xl font-serif font-bold tracking-tight text-white">
+              <KeyRound className="h-5 w-5 text-emerald-400" />
+              Google Gemini BYOK
             </div>
           </div>
 
           {configured ? (
-            <span className="flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-400/[0.06] px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300/90">
-              <CheckCircle2 className="h-3 w-3" />
+            <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
               Connected
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 rounded-full border border-amber-300/20 bg-amber-400/[0.06] px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-amber-300/90">
-              <TriangleAlert className="h-3 w-3" />
-              Key required
+            <span className="flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-300">
+              <TriangleAlert className="h-3.5 w-3.5 text-amber-400" />
+              Key Required
             </span>
           )}
         </div>
@@ -217,57 +217,56 @@ export function AiSettingsPanel({
 
       <div className="space-y-5 px-6 py-6">
         {error && (
-          <div className="rounded-xl border border-rose-300/15 bg-rose-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-rose-200/80">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 px-4 py-3 text-xs leading-relaxed text-rose-200">
             {error}
           </div>
         )}
 
         {notice && (
-          <div className="rounded-xl border border-teal-300/15 bg-teal-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-teal-200/80">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs leading-relaxed text-emerald-200">
             {notice}
           </div>
         )}
 
         <div>
-          <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
-            Status
+          <div className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Engine Status
           </div>
 
           {configured ? (
-            <div className="rounded-[16px] border border-emerald-300/12 bg-emerald-400/[0.04] px-4 py-3.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-200/90">
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 px-4 py-3.5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
                 <CheckCircle2 className="h-4 w-4" />
-                Gemini API key connected
+                Gemini API Key Connected
               </div>
-              <div className="mt-1.5 font-mono text-[13px] tracking-[0.08em] text-white/70">
+              <div className="mt-1.5 font-mono text-xs tracking-wider text-slate-300">
                 {keyMasked}
               </div>
-              <div className="mt-2 text-xs text-white/40">
+              <div className="mt-2 text-xs font-mono text-slate-500 tabular-nums">
                 {keyUpdatedAt
-                  ? `Connected ${new Date(keyUpdatedAt).toLocaleString()}`
+                  ? `Connected: ${new Date(keyUpdatedAt).toLocaleString()}`
                   : ""}
               </div>
             </div>
           ) : (
-            <div className="rounded-[16px] border border-amber-300/12 bg-amber-400/[0.04] px-4 py-3.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-amber-200/90">
+            <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-4 py-3.5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-300">
                 <TriangleAlert className="h-4 w-4" />
-                Gemini API key required
+                Gemini API Key Required
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-white/50">
-                Connect your Gemini API key to use AI features.
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+                Connect your personal Gemini API key to activate AI-driven manuscript mind maps and concept extraction.
               </p>
             </div>
           )}
         </div>
 
         <div>
-          <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
-            {configured
-              ? "Replace API key"
-              : "API key"}
-          </div>
+          <label htmlFor="gemini-key-input" className="block mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            {configured ? "Replace Gemini API Key" : "Paste Gemini API Key"}
+          </label>
           <input
+            id="gemini-key-input"
             type="password"
             autoComplete="off"
             value={apiKey}
@@ -277,22 +276,20 @@ export function AiSettingsPanel({
                 void handleSave();
               }
             }}
-            placeholder="Paste your Gemini API key"
+            placeholder="AIzaSy..."
             className={inputClass}
           />
-          <p className="mt-2 text-xs leading-relaxed text-white/40">
-            Your key is sent to a secure server endpoint, validated
-            against the Gemini API, encrypted and stored. The full key
-            is never shown again and is never exposed to your browser.
+          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+            Your key is transmitted to a secure server-side endpoint, verified with Google Gemini, encrypted with AES-256-GCM, and stored safely. The raw key is never exposed to the client or returned to the browser.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={() => void handleSave()}
             disabled={busy !== null}
-            className="flex h-11 items-center gap-2 rounded-[13px] border border-teal-200/25 bg-teal-300/[0.09] px-5 text-sm font-bold text-teal-50 transition hover:border-teal-200/45 hover:bg-teal-300/[0.14] disabled:opacity-60"
+            className="flex h-11 min-h-[44px] items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {busy === "save" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -306,14 +303,14 @@ export function AiSettingsPanel({
             type="button"
             onClick={() => void handleTest()}
             disabled={busy !== null}
-            className="flex h-11 items-center gap-2 rounded-[13px] border border-white/[0.09] bg-white/[0.03] px-4 text-xs font-semibold text-white/70 transition hover:border-white/[0.18] hover:bg-white/[0.06] disabled:opacity-60"
+            className="flex h-11 min-h-[44px] items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {busy === "test" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <CheckCircle2 className="h-4 w-4" />
             )}
-            Test key
+            Test Key Connection
           </button>
 
           {configured && (
@@ -321,37 +318,35 @@ export function AiSettingsPanel({
               type="button"
               onClick={() => void handleRemove()}
               disabled={busy !== null}
-              className="flex h-11 items-center gap-2 rounded-[13px] border border-rose-300/15 bg-rose-400/[0.05] px-4 text-xs font-semibold text-rose-200/80 transition hover:border-rose-300/30 hover:bg-rose-400/[0.1] disabled:opacity-60"
+              className="flex h-11 min-h-[44px] items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             >
               {busy === "remove" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              Remove key
+              Remove Key
             </button>
           )}
         </div>
 
-        <div className="rounded-[16px] border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-xs leading-relaxed text-white/45">
-          <span className="font-semibold text-white/70">
-            Billing note:{" "}
+        <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 px-4 py-3.5 text-xs leading-relaxed text-slate-400">
+          <span className="font-semibold text-slate-200">
+            Billing Notice:{" "}
           </span>
-          Your Gemini usage is billed and managed through your own
-          Google AI / Gemini account, not through this application.
-          You can monitor usage and set limits in Google AI Studio.
+          Your Gemini usage is billed and managed through your own Google Cloud / Google AI Studio account, never through BioLayers. Free tier keys from Google AI Studio are fully supported.
         </div>
       </div>
 
-      <div className="border-t border-white/[0.06] px-6 py-5">
+      <div className="border-t border-slate-800/70 px-6 py-4">
         <a
           href={GEMINI_KEY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-2 text-xs font-semibold text-teal-200/70 transition hover:text-teal-100"
+          className="group inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg"
         >
           <ExternalLink className="h-3.5 w-3.5" />
-          Get Gemini API Key — Google AI Studio
+          Get Free Gemini API Key — Google AI Studio
         </a>
       </div>
     </section>

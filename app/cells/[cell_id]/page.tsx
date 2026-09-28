@@ -101,10 +101,11 @@ export default async function CellCardPage({ params }: PageProps) {
 
             <div className="flex items-center gap-2">
               <Link
-                href="/platform/pipeline"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-400/40 bg-teal-500/15 px-4 py-2 text-xs font-semibold text-teal-200 hover:bg-teal-500/25 transition shadow-lg"
+                href="/mindmap"
+                style={{ touchAction: "manipulation" }}
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-[14px] border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-xs font-bold text-emerald-100 hover:bg-emerald-500/25 transition-[background-color,border-color,transform] shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2bff88]"
               >
-                <GitFork className="h-3.5 w-3.5" /> View in Knowledge Graph
+                <GitFork className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" /> Explore in Mind Map
               </Link>
             </div>
           </div>

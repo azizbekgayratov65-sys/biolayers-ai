@@ -13,6 +13,8 @@ import {
   KeyRound,
   Sparkles,
   Loader2,
+  Activity,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -33,8 +35,9 @@ const MindMapDocument = dynamic(
   () => import("../components/mindmap/MindMapDocument"),
   {
     loading: () => (
-      <div className="flex items-center justify-center min-h-[300px]">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-300" />
+      <div className="flex items-center justify-center min-h-[300px]" role="status" aria-label="Loading document viewer">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-300" aria-hidden="true" />
+        <span className="sr-only">Loading document viewer…</span>
       </div>
     ),
     ssr: false,
@@ -72,20 +75,13 @@ type StreamEvent = {
 };
 
 export default function MindMapPage() {
-  const [phase, setPhase] =
-    useState<Phase>("upload");
-  const [error, setError] =
-    useState<string | null>(null);
-  const [fileName, setFileName] =
-    useState("");
-  const [response, setResponse] =
-    useState<MindMapResponse | null>(null);
-  const [progressSteps, setProgressSteps] =
-    useState<ProgressStep[]>([]);
-  const [modelInfo, setModelInfo] =
-    useState<ModelInfo | null>(null);
-  const [needsKey, setNeedsKey] =
-    useState(false);
+  const [phase, setPhase] = useState<Phase>("upload");
+  const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [response, setResponse] = useState<MindMapResponse | null>(null);
+  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+  const [needsKey, setNeedsKey] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,9 +97,7 @@ export default function MindMapPage() {
             ),
       )
       .then((data: ModelInfo) => {
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
         setModelInfo(data);
 
@@ -119,14 +113,8 @@ export default function MindMapPage() {
         }
       })
       .catch((error: unknown) => {
-        if (cancelled) {
-          return;
-        }
-
-        console.error(
-          "[mindmap] Could not resolve the AI model:",
-          error,
-        );
+        if (cancelled) return;
+        console.error("[mindmap] Could not resolve AI model:", error);
       });
 
     return () => {
@@ -172,31 +160,21 @@ export default function MindMapPage() {
           setProgressSteps([
             {
               step: 0,
-              label:
-                "Extracting text locally",
+              label: "Extracting text locally",
               message: `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`,
               ts: 0,
             },
           ]);
 
-          const extracted =
-            await extractTextInBrowser(
-              file,
-            );
+          const extracted = await extractTextInBrowser(file);
 
-          if (
-            extracted.text.trim()
-              .length < 50
-          ) {
+          if (extracted.text.trim().length < 50) {
             throw new Error(
-              "Not enough readable text could be extracted from this PDF. It may be a scanned or image-based document. Try a text-based PDF or run OCR first.",
+              "Not enough readable text could be extracted from this document. It may be a scanned or image-based PDF. Try a text-based document.",
             );
           }
 
-          if (
-            extracted.text.length >
-            MAX_TEXT_LENGTH
-          ) {
+          if (extracted.text.length > MAX_TEXT_LENGTH) {
             throw new Error(
               "The extracted text is longer than the current processing limit of 500,000 characters. Upload a shorter paper.",
             );
@@ -206,64 +184,36 @@ export default function MindMapPage() {
             `[mindmap] Extracted ${extracted.text.length.toLocaleString()} characters${extracted.pages > 0 ? ` from ${extracted.pages} pages` : ""} locally.`,
           );
 
-          fetchResponse =
-            await fetch(
-              "/api/mindmap",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-                body: JSON.stringify(
-                  {
-                    fileName:
-                      file.name,
-                    text: extracted.text,
-                  },
-                ),
-              },
-            );
+          fetchResponse = await fetch("/api/mindmap", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fileName: file.name,
+              text: extracted.text,
+            }),
+          });
         } else {
-          const formData =
-            new FormData();
-          formData.append(
-            "file",
-            file,
-          );
+          const formData = new FormData();
+          formData.append("file", file);
 
-          fetchResponse =
-            await fetch(
-              "/api/mindmap",
-              {
-                method: "POST",
-                body: formData,
-              },
-            );
+          fetchResponse = await fetch("/api/mindmap", {
+            method: "POST",
+            body: formData,
+          });
         }
 
         if (!fetchResponse.ok) {
-          // The platform or server rejected the request before the
-          // NDJSON stream started; surface a friendly message.
           let detail = "";
 
           try {
-            const raw =
-              await fetchResponse.text();
-
+            const raw = await fetchResponse.text();
             for (const line of raw.split("\n")) {
-              const trimmed =
-                line.trim();
-
-              if (!trimmed) {
-                continue;
-              }
-
+              const trimmed = line.trim();
+              if (!trimmed) continue;
               try {
-                const event = JSON.parse(
-                  trimmed,
-                ) as StreamEvent;
-
+                const event = JSON.parse(trimmed) as StreamEvent;
                 if (event.message) {
                   detail = event.message;
                   break;
@@ -274,30 +224,16 @@ export default function MindMapPage() {
               }
             }
           } catch {
-            // No readable body.
+            // No readable body
           }
 
           if (!detail) {
-            if (
-              fetchResponse.status ===
-              413
-            ) {
-              detail =
-                "This paper is too large to process in one request. Try a shorter document.";
-            } else if (
-              fetchResponse.status ===
-              401 ||
-              fetchResponse.status ===
-                403
-            ) {
-              detail =
-                "Your session has expired. Sign in again and retry.";
-            } else if (
-              fetchResponse.status ===
-              429
-            ) {
-              detail =
-                "Too many requests — please wait a few minutes and try again.";
+            if (fetchResponse.status === 413) {
+              detail = "This paper is too large to process in one request. Try a shorter document.";
+            } else if (fetchResponse.status === 401 || fetchResponse.status === 403) {
+              detail = "Your session has expired. Sign in again and retry.";
+            } else if (fetchResponse.status === 429) {
+              detail = "Too many requests — please wait a few minutes and try again.";
             } else {
               detail = `The server could not process this upload (HTTP ${fetchResponse.status}).`;
             }
@@ -307,143 +243,77 @@ export default function MindMapPage() {
         }
 
         if (!fetchResponse.body) {
-          throw new Error(
-            "The server returned no response stream.",
-          );
+          throw new Error("The server returned no response stream.");
         }
 
-        const reader =
-          fetchResponse.body.getReader();
-
-        const decoder =
-          new TextDecoder();
-
+        const reader = fetchResponse.body.getReader();
+        const decoder = new TextDecoder();
         let buffer = "";
-
-        let result: MindMapResponse | null =
-          null;
+        let result: MindMapResponse | null = null;
 
         while (true) {
-          const { done, value } =
-            await reader.read();
+          const { done, value } = await reader.read();
+          if (done) break;
 
-          if (done) {
-            break;
-          }
-
-          buffer += decoder.decode(
-            value,
-            { stream: true },
-          );
-
-          const lines =
-            buffer.split("\n");
-
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
 
           for (const line of lines) {
-            if (
-              !line.trim()
-            ) {
-              continue;
-            }
+            if (!line.trim()) continue;
 
             let event: StreamEvent;
-
             try {
-              event = JSON.parse(
-                line,
-              ) as StreamEvent;
+              event = JSON.parse(line) as StreamEvent;
             } catch {
               throw new Error(
                 "The server returned an unexpected response while generating the mind map.",
               );
             }
 
-            if (
-              event.type ===
-              "progress"
-            ) {
-              const entry: ProgressStep =
-                {
-                  step:
-                    event.step ?? 0,
-                  label:
-                    event.label ??
-                    "",
-                  message:
-                    event.message ??
-                    "",
-                  ts:
-                    event.ts ?? 0,
-                };
+            if (event.type === "progress") {
+              const entry: ProgressStep = {
+                step: event.step ?? 0,
+                label: event.label ?? "",
+                message: event.message ?? "",
+                ts: event.ts ?? 0,
+              };
 
-              console.info(
-                `[mindmap] ${entry.label}: ${entry.message}`,
-              );
-
-              setProgressSteps(
-                (current) => [
-                  ...current,
-                  entry,
-                ],
-              );
+              console.info(`[mindmap] ${entry.label}: ${entry.message}`);
+              setProgressSteps((current) => [...current, entry]);
             }
 
-            if (
-              event.type === "error"
-            ) {
-              const streamError =
-                new Error(
-                  event.error ||
-                    event.message ||
-                    "Could not generate the mind map.",
-                );
+            if (event.type === "error") {
+              const streamError = new Error(
+                event.error || event.message || "Could not generate the mind map.",
+              );
 
-              if (
-                event.code ===
-                "GEMINI_KEY_REQUIRED"
-              ) {
-                (
-                  streamError as Error & {
-                    code?: string;
-                  }
-                ).code =
-                  "GEMINI_KEY_REQUIRED";
+              if (event.code === "GEMINI_KEY_REQUIRED") {
+                (streamError as Error & { code?: string }).code = "GEMINI_KEY_REQUIRED";
               }
 
               throw streamError;
             }
 
-            if (
-              event.type === "result"
-            ) {
+            if (event.type === "result") {
               result = event as unknown as MindMapResponse;
               break;
             }
           }
 
-          if (result) {
-            break;
-          }
+          if (result) break;
         }
 
         if (!result) {
-          throw new Error(
-            "The server closed the stream without a result.",
-          );
+          throw new Error("The server closed the stream without a result.");
         }
 
         if (
           !result.mindmap ||
-          !Array.isArray(
-            result.mindmap.nodes,
-          ) ||
+          !Array.isArray(result.mindmap.nodes) ||
           result.mindmap.nodes.length < 2
         ) {
-          throw new Error(
-            "The AI could not produce a usable mind map from this paper.",
-          );
+          throw new Error("The AI could not produce a usable mind map from this paper.");
         }
 
         console.info(
@@ -458,21 +328,12 @@ export default function MindMapPage() {
             ? caught.message
             : "Could not generate the mind map.";
 
-        const code =
-          (
-            caught as Error & {
-              code?: string;
-            }
-          )?.code;
-
+        const code = (caught as Error & { code?: string })?.code;
         if (code === "GEMINI_KEY_REQUIRED") {
           setNeedsKey(true);
         }
 
-        console.error(
-          `[mindmap] Failed: ${message}`,
-        );
-
+        console.error(`[mindmap] Failed: ${message}`);
         setError(message);
         setPhase("upload");
       }
@@ -489,191 +350,178 @@ export default function MindMapPage() {
 
   return (
     <div className="relative min-h-screen">
+      {/* Dark-field background glow */}
       <div
         aria-hidden="true"
-        className="
-          pointer-events-none
-          fixed
-          inset-x-0
-          top-0
-          z-0
-          h-[520px]
-          bg-[radial-gradient(ellipse_at_top,rgba(77,141,255,.07),transparent_62%)]
-        "
+        className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(43,255,136,0.06),transparent_65%)]"
       />
 
-      <div className="relative z-10 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
+      <div className="relative z-10 px-4 pb-12 pt-24 sm:px-6 lg:px-8">
         {phase !== "ready" && (
           <div className="mx-auto max-w-3xl">
-            <div className="mb-10 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/15 bg-teal-300/[0.05] px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-200/80">
-                <Sparkles className="h-3 w-3" />
+            {/* Header section */}
+            <div className="mb-8 text-center animate-fade-up">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.06] px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-200">
+                <Sparkles className="h-3 w-3 text-emerald-300" aria-hidden="true" />
                 AI Research Paper Mind Map
               </div>
 
-              <h1
-                className="
-                  text-3xl
-                  font-black
-                  tracking-[-0.03em]
-                  text-white
-                  sm:text-4xl
-                "
-              >
-                Turn a paper into a{" "}
-                <span className="text-teal-300">
+              <h1 className="text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl">
+                Turn research literature into a{" "}
+                <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
                   mind map
                 </span>
               </h1>
 
-              <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-400">
-                Upload a research paper and BioLayers compresses it into a
-                compact, interactive mind map — every idea preserved, every
-                node linked back to the exact source text it came from.
-              </p>
-
-              <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-slate-500">
-                <span className="font-semibold text-slate-400">Mind map</span> vs <span className="font-semibold text-slate-400">paragraph summarizer</span>: the summarizer
-                simplifies your text; the mind map extracts biological relationships
-                and visualizes them as an interactive knowledge graph.
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300/85">
+                Upload a research paper and BioLayers compresses it into a compact,
+                interactive reading document — every biological relationship preserved,
+                every idea anchored to its verbatim manuscript quote.
               </p>
             </div>
 
+            {/* BYOK Warning Banner */}
             {needsKey && (
-              <div className="mb-5 flex flex-col items-center justify-between gap-4 rounded-[20px] border border-amber-300/15 bg-amber-400/[0.05] px-5 py-4 sm:flex-row">
+              <div
+                role="status"
+                className="mb-6 flex flex-col items-center justify-between gap-4 rounded-[20px] border border-amber-300/20 bg-amber-400/[0.06] p-5 backdrop-blur-xl sm:flex-row"
+              >
                 <div className="flex items-start gap-3">
-                  <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-amber-300/80" />
+                  <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden="true" />
                   <div>
-                    <p className="text-sm font-semibold text-amber-100">
-                      Connect your Gemini API key to use AI features.
+                    <p className="text-sm font-bold text-amber-100">
+                      Connect your Gemini API key to activate AI mind map generation.
                     </p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-white/50">
-                      Your key powers the AI and is stored securely with
-                      your account.
+                    <p className="mt-0.5 text-xs text-amber-200/70">
+                      Your key powers the AI analysis and is encrypted with AES-256-GCM.
                     </p>
                   </div>
                 </div>
 
                 <Link
                   href="/settings#ai"
-                  className="flex h-10 shrink-0 items-center gap-2 rounded-[13px] border border-amber-300/25 bg-amber-300/[0.09] px-4 text-xs font-bold text-amber-50 transition hover:border-amber-300/45 hover:bg-amber-300/[0.14]"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-[12px] border border-amber-300/30 bg-amber-300/[0.12] px-4 py-2 text-xs font-bold text-amber-50 transition hover:border-amber-300/50 hover:bg-amber-300/[0.2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc53d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
                 >
-                  <KeyRound className="h-3.5 w-3.5" />
-                  Open AI Settings
+                  <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Open AI Settings</span>
+                  <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 </Link>
               </div>
             )}
 
+            {/* Stage 1: Document Upload */}
             <MindMapUploader
               busy={phase === "loading"}
               error={error}
-              onFileSelected={
-                handleFileSelected
-              }
+              onFileSelected={handleFileSelected}
             />
 
-            <div
-              className="
-                mx-auto
-                mt-6
-                grid
-                max-w-2xl
-                gap-3
-                sm:grid-cols-3
-              "
-            >
+            {/* Capacity status cards (Concentric nested geometry) */}
+            <div className="mx-auto mt-6 grid max-w-2xl gap-3 sm:grid-cols-3">
               <CapacityCard
-                label="File size"
-                value="Any size · read locally"
+                label="File Size & Storage"
+                value="Any size · Read locally"
+                subtext="PDFs bypass Vercel 4.5MB limit"
               />
               <CapacityCard
-                label="Paper length"
+                label="Processing Capacity"
                 value="Up to 500,000 chars"
+                subtext="Complete multi-section papers"
               />
               <CapacityCard
-                label="AI model"
+                label="Active AI Engine"
                 value={
                   needsKey
-                    ? "Connect key"
-                    : (modelInfo?.model ??
-                        "Checking…")
+                    ? "Key required"
+                    : (modelInfo?.model ?? "Resolving model…")
                 }
+                subtext={modelInfo?.provider ? `Provider: ${modelInfo.provider}` : "Gemini BYOK"}
               />
             </div>
 
+            {/* =========================================================================
+                STAGE 2: Streaming Progress Timeline
+                NDJSON event stream with pulsing active step, checkmarks, tabular-nums
+                ========================================================================= */}
             {phase === "loading" && (
-              <div className="mx-auto mt-6 max-w-2xl">
-                <div className="overflow-hidden rounded-2xl border border-teal-100/[0.07] bg-[#0a0f14]/70">
-                  <div className="flex items-center gap-2.5 border-b border-teal-100/[0.06] px-5 py-3.5">
-                    <FileText className="h-4 w-4 shrink-0 text-teal-300/80" />
-                    <span className="max-w-[260px] truncate text-xs font-semibold text-slate-200">
-                      {fileName}
-                    </span>
-                    <span className="ml-auto flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-teal-300/70">
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-300" />
-                      Processing
-                    </span>
+              <div
+                className="mx-auto mt-6 max-w-2xl animate-fade-up"
+                role="region"
+                aria-label="Document processing timeline"
+                aria-live="polite"
+              >
+                <div className="overflow-hidden rounded-[24px] border border-emerald-400/25 bg-[#0a0f14]/90 backdrop-blur-xl shadow-[0_16px_50px_rgba(0,0,0,0.5)]">
+                  {/* Timeline Header */}
+                  <div className="flex items-center justify-between border-b border-emerald-400/15 bg-emerald-400/[0.04] px-5 py-3.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <FileText className="h-4 w-4 shrink-0 text-emerald-300" aria-hidden="true" />
+                      <span className="truncate text-xs font-bold text-white">
+                        {fileName}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 font-mono text-[9.5px] font-bold uppercase tracking-[0.2em] text-emerald-300">
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                      </span>
+                      <span>Processing Stream</span>
+                    </div>
                   </div>
 
-                  <ol className="divide-y divide-white/[0.03] px-5 py-2">
-                    {progressSteps.map(
-                      (entry, index) => {
-                        const isLast =
-                          index ===
-                          progressSteps.length -
-                            1;
+                  {/* Ordered event stream list */}
+                  <ol className="divide-y divide-white/[0.04] px-5 py-3">
+                    {progressSteps.map((entry, index) => {
+                      const isLast = index === progressSteps.length - 1;
 
-                        return (
-                          <li
-                            key={`${entry.step}-${entry.ts}`}
-                            className="flex items-start gap-3 py-2.5"
+                      return (
+                        <li
+                          key={`${entry.step}-${entry.ts}-${index}`}
+                          className="flex items-start gap-3.5 py-3"
+                        >
+                          {/* Fluorophore beacon / checkmark marker */}
+                          <div
+                            className={`
+                              mt-0.5
+                              flex
+                              h-6
+                              w-6
+                              shrink-0
+                              items-center
+                              justify-center
+                              rounded-full
+                              border
+                              transition-colors
+                              ${
+                                isLast
+                                  ? "border-emerald-300/50 bg-emerald-400/15 text-emerald-200 shadow-[0_0_12px_rgba(43,255,136,0.3)]"
+                                  : "border-teal-300/30 bg-teal-400/[0.08] text-teal-200"
+                              }
+                            `}
                           >
-                            <span
-                              className={`
-                                mt-0.5
-                                flex
-                                h-5
-                                w-5
-                                shrink-0
-                                items-center
-                                justify-center
-                                rounded-full
-                                border
-                                font-mono
-                                text-[9px]
-                                font-bold
+                            {isLast ? (
+                              <span className="h-2 w-2 animate-pulse rounded-full bg-[#2bff88]" />
+                            ) : (
+                              <Check className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+                            )}
+                          </div>
 
-                                ${
-                                  isLast
-                                    ? "border-teal-300/40 bg-teal-300/10 text-teal-200"
-                                    : "border-emerald-300/30 bg-emerald-300/[0.07] text-emerald-200"
-                                }
-                              `}
-                            >
-                              {isLast ? (
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-300" />
-                              ) : (
-                                <Check className="h-3 w-3" />
-                              )}
-                            </span>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-baseline justify-between gap-3">
-                                <p className="text-xs font-bold text-white">
-                                  {entry.label}
-                                </p>
-                                <span className="shrink-0 font-mono text-[9px] text-slate-500">
-                                  {(entry.ts / 1000).toFixed(2)}s
-                                </span>
-                              </div>
-                              <p className="mt-0.5 truncate text-[11px] text-slate-400">
-                                {entry.message}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-3">
+                              <p className="text-xs font-bold text-white">
+                                {entry.label}
                               </p>
+                              <span className="shrink-0 font-mono text-[10px] font-bold tabular-nums text-emerald-300/90 bg-emerald-400/[0.08] px-2 py-0.5 rounded-[4px] border border-emerald-400/15">
+                                {(entry.ts / 1000).toFixed(2)}s
+                              </span>
                             </div>
-                          </li>
-                        );
-                      },
-                    )}
+                            <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                              {entry.message}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ol>
                 </div>
               </div>
@@ -681,19 +529,19 @@ export default function MindMapPage() {
           </div>
         )}
 
-        {phase === "ready" &&
-          response && (
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-[300px]">
-                <Loader2 className="h-8 w-8 animate-spin text-teal-300" />
+        {/* Stage 3: Interactive Reading Document Viewer */}
+        {phase === "ready" && response && (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-[300px]" role="status">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-300" aria-hidden="true" />
+                <span className="sr-only">Rendering document viewer…</span>
               </div>
-            }>
-              <MindMapDocument
-                response={response}
-                onReset={reset}
-              />
-            </Suspense>
-          )}
+            }
+          >
+            <MindMapDocument response={response} onReset={reset} />
+          </Suspense>
+        )}
       </div>
     </div>
   );
@@ -702,27 +550,22 @@ export default function MindMapPage() {
 function CapacityCard({
   label,
   value,
+  subtext,
 }: {
   label: string;
   value: string;
+  subtext: string;
 }) {
   return (
-    <div
-      className="
-        rounded-2xl
-        border
-        border-teal-100/[0.07]
-        bg-[#0a0f14]/70
-        px-4
-        py-3
-        text-center
-      "
-    >
+    <div className="rounded-[16px] border border-teal-100/[0.08] bg-[#0a0f14]/75 p-3.5 text-center backdrop-blur-sm">
       <p className="font-mono text-[8.5px] font-bold uppercase tracking-[0.18em] text-slate-500">
         {label}
       </p>
-      <p className="mt-1 text-sm font-bold text-teal-100/90">
+      <p className="mt-1 text-xs font-bold text-teal-100/90">
         {value}
+      </p>
+      <p className="mt-0.5 text-[9.5px] text-slate-500">
+        {subtext}
       </p>
     </div>
   );

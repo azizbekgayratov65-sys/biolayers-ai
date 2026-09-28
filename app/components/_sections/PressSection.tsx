@@ -280,41 +280,28 @@ export default function PressSection() {
                 {/* Top Header inside card */}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/[0.06] pb-4">
                   <div className="flex items-center gap-2.5">
-                    {item.logoSvg ? (
-                      <div className="relative flex h-7 items-center justify-center rounded-lg bg-white px-2.5 py-1 text-slate-900 shadow-sm">
-                        <Image
-                          src={item.logoSvg}
-                          alt={`${item.name} logo`}
-                          width={64}
-                          height={16}
-                          className="h-3.5 w-auto object-contain"
-                          style={{ width: "auto", height: "auto" }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          rounded-full
-                          border
-                          border-emerald-300/20
-                          bg-emerald-300/[0.08]
-                          px-3
-                          py-1
-                          font-mono
-                          text-[9px]
-                          font-bold
-                          uppercase
-                          tracking-[0.14em]
-                          text-emerald-200
-                        "
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                        {item.name}
-                      </div>
-                    )}
+                    <div
+                      className="
+                        inline-flex
+                        items-center
+                        gap-1.5
+                        rounded-full
+                        border
+                        border-teal-300/30
+                        bg-teal-400/[0.1]
+                        px-3
+                        py-1
+                        font-mono
+                        text-[9px]
+                        font-bold
+                        uppercase
+                        tracking-[0.14em]
+                        text-teal-200
+                      "
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(77,141,255,0.8)]" />
+                      {item.name}
+                    </div>
 
                     <span className="rounded-full border border-teal-100/10 bg-white/[0.025] px-2.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-teal-300/90">
                       {item.badge}

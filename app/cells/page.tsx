@@ -87,17 +87,22 @@ export default function CellAtlasCatalogPage() {
       <div className="mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
         {/* Header Hero */}
         <div className="relative border-b border-teal-500/15 pb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3.5 py-1 text-xs font-semibold text-teal-300 backdrop-blur-md mb-4">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>BioLayers Cell Atlas · Phase 1 Foundation</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3.5 py-1 text-xs font-semibold text-teal-200 backdrop-blur-md mb-4 shadow-[0_0_15px_rgba(77,141,255,0.12)]">
+            <Sparkles className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
+            <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.2em] text-teal-100">
+              BioLayers Cell Atlas · Phase 1 Foundation
+            </span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-white via-slate-100 to-teal-200 bg-clip-text text-transparent">
-                From Papers to Living Cells
+              <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-5xl text-white">
+                From Papers to{" "}
+                <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
+                  Living Cells
+                </span>
               </h1>
-              <p className="mt-3 max-w-3xl text-sm sm:text-base text-slate-400 leading-relaxed">
+              <p className="mt-3 max-w-3xl text-sm sm:text-base text-slate-300/90 leading-relaxed">
                 Explore calibrated microscopy, multi-channel fluorophore staining, and quantitative
                 morphology across verified oncology specimens. Every image is grounded in peer-reviewed literature
                 and open-access provenance.
@@ -105,9 +110,11 @@ export default function CellAtlasCatalogPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="rounded-xl border border-teal-500/20 bg-[#08121f]/60 px-4 py-2.5 backdrop-blur-md">
-                <span className="block font-mono text-xs text-slate-400">VERIFIED SPECIMENS</span>
-                <span className="font-mono text-xl font-bold text-teal-300">
+              <div className="rounded-[16px] border border-teal-500/25 bg-[#08121f]/75 px-5 py-3 backdrop-blur-md shadow-lg">
+                <span className="block font-mono text-[10px] uppercase tracking-wider text-slate-400">
+                  VERIFIED SPECIMENS
+                </span>
+                <span className="font-mono text-2xl font-bold text-teal-200 tabular-nums">
                   {SEED_CELL_ATLAS_ENTRIES.length} Available
                 </span>
               </div>
@@ -119,19 +126,22 @@ export default function CellAtlasCatalogPage() {
         <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12 items-center">
           {/* Search Input */}
           <div className="relative lg:col-span-6">
-            <Search className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
               type="text"
+              inputMode="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by cell type, line, marker (e.g. CAF, alpha-SMA, U2OS)..."
-              className="w-full rounded-xl border border-teal-500/25 bg-[#070e1a]/80 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 shadow-inner focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-400"
+              placeholder="Search by cell type, line, marker (e.g. CAF, alpha-SMA, U2OS)…"
+              aria-label="Search specimen catalog"
+              className="w-full min-h-[46px] rounded-[14px] border border-teal-500/25 bg-[#070e1a]/90 py-2.5 pl-10 pr-12 text-base sm:text-sm text-slate-100 placeholder-slate-400 shadow-inner transition-[border-color,box-shadow] focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/50"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-white"
+                aria-label="Clear search input"
+                className="absolute right-3 top-2.5 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition"
               >
                 Clear
               </button>
@@ -144,7 +154,8 @@ export default function CellAtlasCatalogPage() {
               value={selectedOrganism}
               onChange={(e) => setSelectedOrganism(e.target.value)}
               aria-label="Filter by organism"
-              className="w-full rounded-xl border border-teal-500/20 bg-[#070e1a]/80 py-2.5 px-3 text-sm text-slate-300 focus:border-teal-400 focus:outline-none"
+              style={{ colorScheme: "dark" }}
+              className="w-full min-h-[46px] rounded-[14px] border border-teal-500/20 bg-[#070e1a] py-2.5 px-3.5 text-sm font-medium text-slate-200 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
             >
               <option value="all">All Organisms</option>
               {organisms.map((org) => (
@@ -161,7 +172,8 @@ export default function CellAtlasCatalogPage() {
               value={selectedTissue}
               onChange={(e) => setSelectedTissue(e.target.value)}
               aria-label="Filter by tissue"
-              className="w-full rounded-xl border border-teal-500/20 bg-[#070e1a]/80 py-2.5 px-3 text-sm text-slate-300 focus:border-teal-400 focus:outline-none"
+              style={{ colorScheme: "dark" }}
+              className="w-full min-h-[46px] rounded-[14px] border border-teal-500/20 bg-[#070e1a] py-2.5 px-3.5 text-sm font-medium text-slate-200 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
             >
               <option value="all">All Tissues</option>
               {tissues.map((t) => (
@@ -174,9 +186,9 @@ export default function CellAtlasCatalogPage() {
         </div>
 
         {/* Modality Filter Tabs */}
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <span className="text-xs font-mono text-slate-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Modality:
+        <div className="mt-5 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Microscopy modalities">
+          <span className="text-xs font-mono text-slate-400 mr-1 flex items-center gap-1.5 shrink-0">
+            <Filter className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" /> Modality:
           </span>
           {(["all", "confocal", "fluorescence", "brightfield", "phase_contrast", "two_photon", "electron", "super_resolution", "light_sheet", "tirf", "dic", "atomic_force", "cryo_em", "multiplex_ihc"] as const).map((mod) => {
             const active = selectedModality === mod;
@@ -184,12 +196,15 @@ export default function CellAtlasCatalogPage() {
               <button
                 key={mod}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => setSelectedModality(mod)}
-                className={`whitespace-nowrap rounded-lg px-3 py-1 text-xs font-medium transition ${
+                style={{ touchAction: "manipulation" }}
+                className={`min-h-[34px] whitespace-nowrap rounded-[10px] px-3.5 py-1.5 text-xs font-medium transition-[background-color,border-color,color,box-shadow] ${
                   active
-                    ? "border border-teal-400/40 bg-teal-500/20 text-teal-200 font-semibold shadow-sm"
-                    : "border border-transparent bg-white/[0.03] text-slate-400 hover:bg-white/[0.07] hover:text-slate-200"
-                }`}
+                    ? "border border-teal-300/40 bg-teal-400/20 text-white font-semibold shadow-[0_0_12px_rgba(77,141,255,0.2)]"
+                    : "border border-white/5 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
               >
                 {mod === "all" ? "All Modalities" : MODALITY_LABELS[mod] || mod}
               </button>
@@ -199,27 +214,33 @@ export default function CellAtlasCatalogPage() {
 
         {/* Live Interactive Quick-Preview Modal (If toggled) */}
         {previewEntry && (
-          <div className="mt-8 rounded-2xl border border-teal-400/30 bg-[#060c16]/95 p-6 shadow-2xl backdrop-blur-2xl animate-fade-in">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="preview-modal-title"
+            className="mt-8 rounded-[24px] border border-teal-400/35 bg-[#060c16]/95 p-6 shadow-2xl backdrop-blur-2xl animate-fade-in"
+          >
             <div className="flex items-center justify-between border-b border-teal-500/20 pb-4 mb-4">
               <div>
-                <span className="font-mono text-xs font-semibold text-teal-300 tracking-wide uppercase">
+                <span className="font-mono text-[10px] font-semibold text-teal-300 tracking-wider uppercase">
                   Interactive Specimen Preview
                 </span>
-                <h3 className="text-lg font-bold text-white mt-0.5">
+                <h3 id="preview-modal-title" className="text-lg font-bold text-white mt-0.5">
                   {previewEntry.cellType.name} · {previewEntry.image.title}
                 </h3>
               </div>
               <div className="flex items-center gap-3">
                 <Link
                   href={`/cells/${previewEntry.cellType.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-teal-400/40 bg-teal-500/20 px-3 py-1.5 text-xs font-semibold text-teal-200 hover:bg-teal-500/30 transition"
+                  className="inline-flex min-h-[38px] items-center gap-2 rounded-[12px] border border-teal-400/40 bg-teal-500/20 px-4 py-2 text-xs font-bold text-teal-100 hover:bg-teal-500/30 transition shadow-sm"
                 >
-                  Open Full Cell Card <ArrowRight className="h-3.5 w-3.5" />
+                  Open Full Cell Card <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </Link>
                 <button
                   type="button"
                   onClick={() => setPreviewEntry(null)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition"
+                  aria-label="Close interactive preview"
+                  className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-[12px] p-2 text-slate-400 hover:bg-white/10 hover:text-white transition"
                 >
                   ✕
                 </button>
@@ -238,14 +259,14 @@ export default function CellAtlasCatalogPage() {
             return (
               <div
                 key={entry.cellType.id}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl ${
+                className={`group relative flex flex-col justify-between overflow-hidden rounded-[22px] border transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-2xl ${
                   isFlagship
-                    ? "border-teal-400/35 bg-gradient-to-b from-[#081322] to-[#040912] shadow-[0_0_30px_rgba(20,184,166,0.08)]"
-                    : "border-teal-500/15 bg-[#060b14] hover:border-teal-500/30"
+                    ? "border-teal-400/40 bg-gradient-to-b from-[#081322] to-[#040912] shadow-[0_0_35px_rgba(77,141,255,0.12)]"
+                    : "border-teal-500/20 bg-[#060b14]/90 hover:border-teal-400/35"
                 }`}
               >
                 {/* Card Top: Image Thumbnail with Badges */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/40">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/50">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={entry.image.thumbnailUrl}
@@ -254,23 +275,23 @@ export default function CellAtlasCatalogPage() {
                   />
 
                   {/* Gradient Scrim */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#060b14] via-transparent to-black/40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060b14] via-transparent to-black/50" />
 
                   {/* Top Badges */}
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                    <span className="rounded-md border border-teal-400/30 bg-[#060c16]/80 px-2 py-0.5 font-mono text-[10px] font-semibold text-teal-300 backdrop-blur-md">
+                    <span className="rounded-md border border-teal-400/35 bg-[#060c16]/90 px-2.5 py-1 font-mono text-[10px] font-bold text-teal-200 backdrop-blur-md">
                       {entry.image.microscopyModality.toUpperCase()}
                     </span>
 
                     <div className="flex items-center gap-1.5">
                       {isFlagship && (
-                        <span className="rounded-md border border-teal-400/40 bg-teal-500/20 px-2 py-0.5 text-[10px] font-bold text-teal-200 tracking-wide uppercase backdrop-blur-md">
+                        <span className="rounded-md border border-teal-400/40 bg-teal-500/25 px-2.5 py-1 text-[10px] font-bold text-teal-100 tracking-wide uppercase backdrop-blur-md">
                           Flagship Study
                         </span>
                       )}
-                      <span className="rounded-md border border-white/10 bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-slate-300 backdrop-blur-md flex items-center gap-1">
-                        <Layers className="h-2.5 w-2.5 text-teal-400" />
-                        {entry.image.channelCount} ch
+                      <span className="rounded-md border border-white/15 bg-black/80 px-2 py-1 font-mono text-[10px] font-semibold text-slate-200 backdrop-blur-md flex items-center gap-1">
+                        <Layers className="h-3 w-3 text-teal-300" aria-hidden="true" />
+                        {entry.image.channelCount}&nbsp;ch
                       </span>
                     </div>
                   </div>
@@ -280,9 +301,10 @@ export default function CellAtlasCatalogPage() {
                     <button
                       type="button"
                       onClick={() => setPreviewEntry(entry)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-teal-400/30 bg-[#08121f]/90 px-2.5 py-1 text-xs font-medium text-teal-200 backdrop-blur-md hover:bg-teal-500/30 transition shadow-md"
+                      style={{ touchAction: "manipulation" }}
+                      className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[12px] border border-teal-300/40 bg-[#08121f]/95 px-3 py-1.5 text-xs font-bold text-teal-100 backdrop-blur-md hover:bg-teal-500/30 transition-[background-color,border-color] shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
                     >
-                      <Eye className="h-3 w-3" /> Quick Viewer
+                      <Eye className="h-3.5 w-3.5" aria-hidden="true" /> Quick Viewer
                     </button>
                   </div>
                 </div>
@@ -291,48 +313,49 @@ export default function CellAtlasCatalogPage() {
                 <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>{entry.cellType.tissue}</span>
-                    <span className="font-mono text-[10px] text-teal-400/70">
+                    <span className="font-mono text-[10px] font-bold text-teal-300">
                       {entry.cellType.ontologyId}
                     </span>
                   </div>
 
-                  <h3 className="mt-1 text-lg font-bold text-white group-hover:text-teal-200 transition">
+                  <h3 className="mt-1.5 text-lg font-bold text-white group-hover:text-teal-200 transition-colors">
                     {entry.cellType.name}
                   </h3>
 
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                  <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
                     {entry.cellType.biologicalContext}
                   </p>
 
                   {/* Provenance Metadata Snapshot */}
-                  <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-[11px] space-y-1">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Cell Line:</span>
-                      <span className="font-medium text-slate-200">{entry.image.cellLine}</span>
+                  <div className="mt-4 rounded-[14px] border border-white/10 bg-white/[0.03] p-3.5 text-[11px] space-y-1.5">
+                    <div className="flex justify-between text-slate-300">
+                      <span className="text-slate-400">Cell Line:</span>
+                      <span className="font-semibold text-slate-100">{entry.image.cellLine}</span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Staining:</span>
-                      <span className="font-medium text-slate-200 truncate max-w-[180px]">
+                    <div className="flex justify-between text-slate-300">
+                      <span className="text-slate-400">Staining:</span>
+                      <span className="font-semibold text-slate-100 truncate max-w-[180px]">
                         {entry.image.staining}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Accession:</span>
-                      <span className="font-mono text-teal-300">{entry.image.datasetAccession}</span>
+                    <div className="flex justify-between text-slate-300">
+                      <span className="text-slate-400">Accession:</span>
+                      <span className="font-mono font-bold text-teal-300">{entry.image.datasetAccession}</span>
                     </div>
                   </div>
 
                   {/* Card Bottom CTA */}
-                  <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400">
-                      <ShieldCheck className="h-3.5 w-3.5 text-teal-400" /> {entry.image.license}
+                  <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                      <ShieldCheck className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" /> {entry.image.license}
                     </span>
 
                     <Link
                       href={`/cells/${entry.cellType.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-teal-300 hover:text-teal-100 transition group-hover:translate-x-0.5"
+                      style={{ touchAction: "manipulation" }}
+                      className="inline-flex min-h-[40px] items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-xs font-bold text-teal-200 hover:text-white transition-colors group-hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
                     >
-                      View Cell Card <ArrowRight className="h-3.5 w-3.5" />
+                      View Cell Card <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </Link>
                   </div>
                 </div>

@@ -183,119 +183,120 @@ export function AccountPanel({
   };
 
   const rowClass =
-    "flex items-center justify-between gap-4 py-3";
+    "flex items-center justify-between gap-4 py-3.5 border-b border-slate-800/50 last:border-b-0";
 
   return (
-    <section className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/80 backdrop-blur-xl">
-      <div className="border-b border-white/[0.06] px-6 py-5">
+    <section className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl">
+      <div className="border-b border-slate-800/70 px-6 py-5">
         <div className="flex items-center gap-4">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarUrl}
               alt=""
-              className="h-14 w-14 rounded-2xl border border-white/10 object-cover"
+              className="h-14 w-14 rounded-full border border-emerald-500/30 object-cover shadow-inner"
             />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/15 bg-teal-300/[0.06]">
-              <CircleUserRound className="h-7 w-7 text-teal-200/60" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-950/40">
+              <CircleUserRound className="h-7 w-7 text-emerald-400/80" />
             </div>
           )}
 
           <div>
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/30">
-              Profile
+            <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">
+              Researcher Profile
             </div>
-            <div className="mt-1 text-lg font-semibold tracking-[-0.02em] text-white">
-              {displayName.trim() || "BioLayers user"}
+            <div className="mt-1 text-xl font-serif font-bold tracking-tight text-white">
+              {displayName.trim() || "BioLayers Researcher"}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-6">
+      <div className="px-6 py-2">
         <div className={rowClass}>
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <Mail className="h-4 w-4 text-white/25" />
-            Email
+          <div className="flex items-center gap-2.5 text-sm text-slate-400">
+            <Mail className="h-4 w-4 text-slate-500" />
+            Email Address
           </div>
-          <span className="max-w-[220px] truncate text-sm text-white/85">
+          <span className="max-w-[240px] truncate text-sm font-medium text-slate-200">
             {email || "—"}
           </span>
         </div>
 
         <div className={rowClass}>
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <User className="h-4 w-4 text-white/25" />
+          <div className="flex items-center gap-2.5 text-sm text-slate-400">
+            <User className="h-4 w-4 text-slate-500" />
             Username
           </div>
-          <span className="max-w-[220px] truncate text-sm text-white/85 font-mono">
+          <span className="max-w-[240px] truncate text-sm font-mono text-emerald-300">
             @{username || "—"}
           </span>
         </div>
 
         <div className={rowClass}>
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <Calendar className="h-4 w-4 text-white/25" />
-            Member since
+          <div className="flex items-center gap-2.5 text-sm text-slate-400">
+            <Calendar className="h-4 w-4 text-slate-500" />
+            Member Since
           </div>
-          <span className="text-sm text-white/85">
+          <span className="text-sm font-mono tabular-nums text-slate-300">
             {formatDate(createdAt)}
           </span>
         </div>
 
         <div className={rowClass}>
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <Sparkles className="h-4 w-4 text-white/25" />
-            Gemini API
+          <div className="flex items-center gap-2.5 text-sm text-slate-400">
+            <Sparkles className="h-4 w-4 text-slate-500" />
+            Gemini Engine
           </div>
           <span
-            className={`flex items-center gap-1.5 text-xs font-semibold ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
               geminiConfigured
-                ? "text-emerald-300/90"
-                : "text-amber-300/90"
+                ? "bg-emerald-500/10 border border-emerald-500/25 text-emerald-300"
+                : "bg-amber-500/10 border border-amber-500/25 text-amber-300"
             }`}
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
                 geminiConfigured
-                  ? "bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,.8)]"
-                  : "bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,.8)]"
+                  ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                  : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
               }`}
             />
             {geminiConfigured
-              ? "Connected"
-              : "Key required"}
+              ? "Key Connected"
+              : "Key Required"}
           </span>
         </div>
 
-        <div className="border-t border-white/[0.06] py-3">
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/25">
+        <div className="py-3">
+          <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-slate-500">
             User ID
           </div>
-          <div className="mt-1 break-all font-mono text-[11px] text-white/45">
+          <div className="mt-1 break-all font-mono text-xs text-slate-400">
             {userId}
           </div>
         </div>
       </div>
 
-      <div className="border-t border-white/[0.06] px-6 py-5">
-        <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
-          Display name
-        </div>
+      <div className="border-t border-slate-800/70 px-6 py-5">
+        <label htmlFor="display-name-input" className="block mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Display Name
+        </label>
         <div className="flex gap-2">
           <input
+            id="display-name-input"
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Your name"
-            className="h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045]"
+            placeholder="Your name or affiliation"
+            className="h-11 min-h-[44px] w-full rounded-xl border border-slate-700/80 bg-slate-950/60 px-3.5 text-base sm:text-sm text-white placeholder:text-slate-500 outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:border-emerald-500/40"
           />
           <button
             type="button"
             onClick={() => void saveName()}
             disabled={saving}
-            className="flex h-11 shrink-0 items-center gap-2 rounded-[13px] border border-teal-200/20 bg-teal-300/[0.07] px-4 text-xs font-bold text-teal-50 transition hover:border-teal-200/35 hover:bg-teal-300/[0.11] disabled:opacity-60"
+            className="flex h-11 min-h-[44px] shrink-0 items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -307,32 +308,33 @@ export function AccountPanel({
         </div>
 
         {error && (
-          <p className="mt-2 text-xs text-rose-300/80">{error}</p>
+          <p className="mt-2 text-xs font-medium text-rose-300">{error}</p>
         )}
         {notice && (
-          <p className="mt-2 text-xs text-teal-300/80">{notice}</p>
+          <p className="mt-2 text-xs font-medium text-emerald-300">{notice}</p>
         )}
       </div>
 
-      <div className="border-t border-white/[0.06] px-6 py-5">
-        <div className="mb-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">
-          Username
-        </div>
+      <div className="border-t border-slate-800/70 px-6 py-5">
+        <label htmlFor="username-input" className="block mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Public Username
+        </label>
         <div className="flex flex-col gap-2">
           <div className="relative flex gap-2">
             <input
+              id="username-input"
               type="text"
               value={inputUsername}
               onChange={handleUsernameChange}
-              placeholder="your_username"
-              className="h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045] pr-20"
+              placeholder="username"
+              className="h-11 min-h-[44px] w-full rounded-xl border border-slate-700/80 bg-slate-950/60 px-3.5 text-base sm:text-sm font-mono text-white placeholder:text-slate-500 outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:border-emerald-500/40 pr-20"
               maxLength={30}
             />
             <button
               type="button"
               onClick={() => void saveUsername()}
               disabled={savingUsername || usernameAvailable === "taken" || usernameAvailable === "checking" || !inputUsername.trim() || inputUsername.length < 3}
-              className="flex h-11 shrink-0 items-center gap-2 rounded-[13px] border border-teal-200/20 bg-teal-300/[0.07] px-4 text-xs font-bold text-teal-50 transition hover:border-teal-200/35 hover:bg-teal-300/[0.11] disabled:opacity-60"
+              className="flex h-11 min-h-[44px] shrink-0 items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               {savingUsername ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -342,30 +344,30 @@ export function AccountPanel({
               Save
             </button>
           </div>
-          <div className="flex items-center gap-2 text-xs" aria-live="polite">
+          <div className="flex items-center gap-2 text-xs font-mono" aria-live="polite">
             {usernameAvailable === "checking" && (
-              <span className="text-amber-300/80">Checking…</span>
+              <span className="text-amber-300">Checking availability…</span>
             )}
             {usernameAvailable === "available" && (
-              <span className="text-emerald-300/80">Available</span>
+              <span className="text-emerald-400 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Username is available</span>
             )}
             {usernameAvailable === "taken" && (
-              <span className="text-rose-300/80">Taken</span>
+              <span className="text-rose-400 flex items-center gap-1"><AlertCircle className="h-3.5 w-3.5" /> This username is already taken</span>
             )}
             {usernameAvailable === "idle" && inputUsername.trim().length >= 3 && /^[a-zA-Z0-9_]+$/.test(inputUsername) && (
-              <span className="text-white/30">Enter username to check availability</span>
+              <span className="text-slate-500">Enter username to check availability</span>
             )}
           </div>
-          <p className="text-[10px] text-white/30">
-            3–30 characters. Letters, numbers, and underscores only.
+          <p className="text-[11px] text-slate-500">
+            3–30 characters. Letters, numbers, and underscores only. Used for your public library link (<span className="font-mono text-slate-400">/library/{inputUsername || "username"}</span>).
           </p>
         </div>
 
         {error && (
-          <p className="mt-2 text-xs text-rose-300/80">{error}</p>
+          <p className="mt-2 text-xs font-medium text-rose-300">{error}</p>
         )}
         {notice && (
-          <p className="mt-2 text-xs text-teal-300/80">{notice}</p>
+          <p className="mt-2 text-xs font-medium text-emerald-300">{notice}</p>
         )}
       </div>
     </section>

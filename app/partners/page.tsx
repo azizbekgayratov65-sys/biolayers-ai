@@ -114,21 +114,21 @@ export default function PartnersPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
         {/* HEADER */}
         <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
-            <Globe2 className="h-3.5 w-3.5 text-teal-300" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
+            <Globe2 className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
               Ecosystem & Strategic Alliances
             </span>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-white sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
             Strategic Partnerships &{" "}
-            <span className="bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
               Frontier Innovation
             </span>
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
+          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
             BioLayers AI collaborates with leading innovation catalysts and frontier AI
             organizations to advance precision oncology knowledge graphs and verifiable AI architectures.
           </p>

@@ -39,6 +39,20 @@
   --accent-strong: #8db2ff;
   --accent-soft: rgba(77, 141, 255, 0.09);
 
+  /* Fluorophore semantic stain tokens */
+  --stain-dapi: #4d8dff;
+  --stain-dapi-bright: #8db2ff;
+  --stain-fitc: #2bff88;
+  --stain-fitc-bright: #67ffaa;
+  --stain-cy5: #a15cff;
+  --stain-cy5-bright: #c084fc;
+  --stain-yfp: #ffc53d;
+  --stain-yfp-bright: #ffd666;
+  --stain-rfp: #ff3b5c;
+  --stain-rfp-bright: #ff6b84;
+
+  --focus-ring: #8db2ff;
+
   --cyan: #a15cff;
   --sky: #8db2ff;
   --violet: #a15cff;
@@ -63,6 +77,19 @@
   --radius-xl: 24px;
   --radius-2xl: 28px;
 
+  /* Concentric nested radii formulas: R_inner = max(0, R_outer - padding) */
+  --radius-outer-2xl: 28px;
+  --radius-outer-xl: 24px;
+  --radius-outer-lg: 20px;
+  --radius-outer-md: 16px;
+  --radius-outer-sm: 13px;
+
+  --radius-inner-2xl-p4: max(0px, calc(var(--radius-outer-2xl) - 16px));
+  --radius-inner-xl-p4: max(0px, calc(var(--radius-outer-xl) - 16px));
+  --radius-inner-lg-p3: max(0px, calc(var(--radius-outer-lg) - 12px));
+  --radius-inner-md-p2: max(0px, calc(var(--radius-outer-md) - 8px));
+  --radius-inner-sm-p1: max(0px, calc(var(--radius-outer-sm) - 4px));
+
   --section-max: 1450px;
 }
 
@@ -75,8 +102,22 @@
 @theme {
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-spectral), ui-serif, Georgia, Cambria,
+    "Times New Roman", Times, serif;
   --font-mono: var(--font-plex-mono), "SFMono-Regular", Consolas,
     "Liberation Mono", monospace;
+
+  /* Semantic fluorophore stains */
+  --color-stain-dapi: #4d8dff;
+  --color-stain-dapi-bright: #8db2ff;
+  --color-stain-fitc: #2bff88;
+  --color-stain-fitc-bright: #67ffaa;
+  --color-stain-cy5: #a15cff;
+  --color-stain-cy5-bright: #c084fc;
+  --color-stain-yfp: #ffc53d;
+  --color-stain-yfp-bright: #ffd666;
+  --color-stain-rfp: #ff3b5c;
+  --color-stain-rfp-bright: #ff6b84;
 
   /* DAPI — structural blue */
   --color-teal-50: #eef4ff;
@@ -285,7 +326,6 @@ body {
 
   font-family:
     var(--font-instrument),
-    var(--font-plex-mono),
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -498,21 +538,38 @@ select option {
 }
 
 /* =========================================================
-   FOCUS
+   FOCUS — High-contrast luminous DAPI azure (>3:1 WCAG AA)
    ========================================================= */
-
-:focus-visible {
-  outline: none;
-}
 
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid rgba(77, 141, 255, 0.5);
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid #8db2ff;
   outline-offset: 2px;
+}
+
+/* =========================================================
+   CONCENTRIC NESTED RADII UTILITIES
+   Formula: R_inner = max(0, R_outer - padding)
+   ========================================================= */
+
+.radius-nested-p4 {
+  border-radius: max(0px, calc(var(--parent-radius, 24px) - 16px));
+}
+.radius-nested-p3 {
+  border-radius: max(0px, calc(var(--parent-radius, 20px) - 12px));
+}
+.radius-nested-p2 {
+  border-radius: max(0px, calc(var(--parent-radius, 16px) - 8px));
+}
+.radius-nested-p1 {
+  border-radius: max(0px, calc(var(--parent-radius, 13px) - 4px));
 }
 
 /* =========================================================
@@ -1155,7 +1212,10 @@ canvas {
   .bl-grid-drift,
   .bl-breathe,
   .bl-focus-in,
-  .animate-fade-up {
+  .animate-fade-up,
+  .bl-ambient-cyan-drift,
+  .bl-ambient-violet-drift,
+  .bl-ambient-grid-drift {
     animation: none !important;
   }
 }

@@ -57,20 +57,22 @@ export default async function SettingsPage() {
     <div className="relative mx-auto w-full max-w-[1100px] px-4 pb-24 pt-28 sm:px-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-24 h-[360px] w-[560px] -translate-x-1/2 rounded-full bg-teal-400/[0.045] blur-[150px]"
+        className="pointer-events-none absolute left-1/2 top-24 h-[360px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/[0.04] blur-[150px]"
       />
 
       <div className="relative">
-        <div className="mb-8">
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-teal-300/50">
-            Settings
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 backdrop-blur-md mb-3">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
+              Account & Credentials
+            </span>
           </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-white">
-            Your account
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-white">
+            Researcher Profile & BYOK
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/45">
-            Manage your profile and connect your own Gemini API key to
-            power the AI features.
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-400">
+            Manage your researcher identity, configure your Google Gemini API key securely,
+            and review your analyzed oncology manuscripts.
           </p>
         </div>
 

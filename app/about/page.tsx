@@ -19,21 +19,21 @@ export default function AboutPage() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
         <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-300/[0.05] px-4 py-1.5 backdrop-blur-xl">
-            <Microscope className="h-3.5 w-3.5 text-teal-300" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
+            <Microscope className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
               Leadership & Scientific Mentorship
             </span>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.045em] text-white sm:text-4xl lg:text-5xl">
-            Building BioLayers at the intersection of{" "}
-            <span className="bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
-              AI & oncology
+          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Building BioLayers at the Intersection of{" "}
+            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
+              AI & Oncology
             </span>
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
+          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
             Developed by a passionate computational researcher in Tashkent with
             guidance from leading physician-scientists in precision oncology and biomedical engineering.
           </p>
@@ -494,10 +494,15 @@ export default function AboutPage() {
           <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-cyan-200/35 animate-fade-up delay-350">
             <div>
               <div className="flex items-center gap-4">
-                <div className="relative flex h-20 w-20 shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-cyan-400/30 bg-gradient-to-br from-cyan-950/70 via-[#061424] to-[#040c17] shadow-[0_0_25px_rgba(6,182,212,0.2)] sm:h-24 sm:w-24">
-                  <span className="font-mono text-2xl font-black tracking-wider text-cyan-300">BG</span>
-                  <span className="font-mono text-[8px] font-semibold uppercase tracking-widest text-cyan-200/60 mt-0.5">Ph.D.</span>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent pointer-events-none" />
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-400/30 bg-cyan-950/40 shadow-[0_0_25px_rgba(6,182,212,0.2)] sm:h-24 sm:w-24">
+                  <Image
+                    src="/mentorship/bailey-glen.jpg"
+                    alt="Bailey Glen, Ph.D. - Bioinformatics & NGS Architecture"
+                    fill
+                    sizes="96px"
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
                 </div>
 
                 <div>

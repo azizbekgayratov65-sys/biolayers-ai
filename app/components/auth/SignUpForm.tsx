@@ -6,7 +6,7 @@ import { useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 
 const inputClass =
-  "h-11 w-full rounded-[13px] border border-white/[0.09] bg-white/[0.025] px-3.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-teal-200/40 focus:bg-white/[0.045]";
+  "h-11 min-h-[44px] w-full rounded-xl border border-slate-700/80 bg-slate-950/60 px-3.5 text-base sm:text-sm text-white placeholder:text-slate-500 outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:border-emerald-500/40";
 
 export default function SignUpForm({
   next,
@@ -157,14 +157,14 @@ export default function SignUpForm({
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-rose-300/15 bg-rose-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-rose-200/80"
+          className="rounded-xl border border-rose-500/30 bg-rose-950/20 px-4 py-3 text-xs leading-relaxed text-rose-200"
         >
           {error}
         </div>
       )}
 
       {notice && (
-        <div className="rounded-xl border border-teal-300/15 bg-teal-400/[0.06] px-3.5 py-2.5 text-xs leading-relaxed text-teal-200/80">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs leading-relaxed text-emerald-200">
           {notice}
         </div>
       )}
@@ -172,9 +172,9 @@ export default function SignUpForm({
       <div>
         <label
           htmlFor="signup-name"
-          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+          className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
         >
-          Full name (optional)
+          Full Name (optional)
         </label>
         <input
           id="signup-name"
@@ -182,7 +182,7 @@ export default function SignUpForm({
           autoComplete="name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          placeholder="Ada Lovelace"
+          placeholder="Dr. Rosalind Franklin"
           className={inputClass}
         />
       </div>
@@ -190,9 +190,9 @@ export default function SignUpForm({
       <div>
         <label
           htmlFor="signup-username"
-          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+          className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
         >
-          Username
+          Public Username
         </label>
         <div className="relative">
           <input
@@ -201,27 +201,27 @@ export default function SignUpForm({
             autoComplete="username"
             value={username}
             onChange={handleUsernameChange}
-            placeholder="your_username"
-            className={inputClass}
+            placeholder="r_franklin"
+            className={`${inputClass} pr-24`}
             maxLength={30}
           />
           {usernameAvailable === "checking" && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-amber-300/80" aria-live="polite">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-amber-300" aria-live="polite">
               Checking…
             </span>
           )}
           {usernameAvailable === "available" && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-300/80" aria-live="polite">
-              Available
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-emerald-400 flex items-center gap-1" aria-live="polite">
+              <CheckCircle className="h-3 w-3" /> Available
             </span>
           )}
           {usernameAvailable === "taken" && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rose-300/80" aria-live="polite">
-              Taken
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-rose-400 flex items-center gap-1" aria-live="polite">
+              <AlertCircle className="h-3 w-3" /> Taken
             </span>
           )}
         </div>
-        <p className="mt-1 text-[10px] text-white/30">
+        <p className="mt-1 text-[11px] text-slate-500">
           3–30 characters. Letters, numbers, and underscores only.
         </p>
       </div>
@@ -229,9 +229,9 @@ export default function SignUpForm({
       <div>
         <label
           htmlFor="signup-email"
-          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+          className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
         >
-          Email
+          Institutional / Personal Email
         </label>
         <input
           id="signup-email"
@@ -239,7 +239,7 @@ export default function SignUpForm({
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="franklin@lab.org"
           className={inputClass}
         />
       </div>
@@ -247,7 +247,7 @@ export default function SignUpForm({
       <div>
         <label
           htmlFor="signup-password"
-          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+          className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
         >
           Password
         </label>
@@ -265,9 +265,9 @@ export default function SignUpForm({
       <div>
         <label
           htmlFor="signup-confirm"
-          className="mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/35"
+          className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
         >
-          Confirm password
+          Confirm Password
         </label>
         <input
           id="signup-confirm"
@@ -289,12 +289,12 @@ export default function SignUpForm({
         type="button"
         onClick={() => void signUp()}
         disabled={busy}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-300/[0.09] text-sm font-bold text-teal-50 transition duration-300 hover:border-teal-200/45 hover:bg-teal-300/[0.14] disabled:opacity-60"
+        className="flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500 text-slate-950 text-sm font-bold shadow-md transition-all hover:bg-emerald-400 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 mt-2"
       >
         {busy ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
         ) : (
-          <UserPlus className="h-4 w-4" />
+          <UserPlus className="h-4 w-4 text-slate-950" />
         )}
         Create Account
       </button>

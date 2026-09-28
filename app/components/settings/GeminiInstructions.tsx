@@ -35,32 +35,31 @@ const steps = [
 */
 export function GeminiInstructions() {
   return (
-    <section className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b10]/80 backdrop-blur-xl">
-      <div className="border-b border-white/[0.06] px-6 py-5">
-        <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/30">
-          Getting your key
+    <section className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl">
+      <div className="border-b border-slate-800/70 px-6 py-5">
+        <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">
+          BYOK Documentation
         </div>
-        <h2 className="mt-1 text-lg font-semibold tracking-[-0.02em] text-white">
-          How to get a Gemini API key
+        <h2 className="mt-1 text-xl font-serif font-bold tracking-tight text-white">
+          How to Obtain a Gemini API Key
         </h2>
-        <p className="mt-1.5 text-xs leading-relaxed text-white/45">
-          Follow these steps to get your own free Gemini API key from
-          Google. It takes about two minutes.
+        <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+          Follow these quick steps to generate your free personal Gemini API key from Google AI Studio. The entire setup takes less than two minutes.
         </p>
       </div>
 
-      <div className="space-y-4 px-6 py-6">
+      <div className="space-y-5 px-6 py-6">
         <ol className="space-y-4">
           {steps.map((step, index) => (
             <li key={step.title} className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-teal-200/12 bg-teal-300/[0.05] font-mono text-[11px] font-bold text-teal-300/70">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 font-mono text-xs font-bold text-emerald-300">
                 {index + 1}
               </span>
               <div>
-                <div className="text-sm font-semibold text-white/85">
+                <div className="text-sm font-semibold text-slate-200">
                   {step.title}
                 </div>
-                <p className="mt-0.5 text-xs leading-relaxed text-white/45">
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-400">
                   {step.body}
                 </p>
               </div>
@@ -72,31 +71,22 @@ export function GeminiInstructions() {
           href={GEMINI_KEY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex h-11 w-full items-center justify-center gap-2 rounded-[13px] border border-teal-200/25 bg-teal-300/[0.09] text-sm font-bold text-teal-50 transition hover:border-teal-200/45 hover:bg-teal-300/[0.14]"
+          className="group flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           <ExternalLink className="h-4 w-4" />
-          Get Gemini API Key
+          Open Google AI Studio
         </a>
 
-        <div className="rounded-[16px] border border-amber-300/12 bg-amber-400/[0.04] px-4 py-3.5">
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-200/90">
+        <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-4 py-3.5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-300">
             <ShieldAlert className="h-4 w-4" />
-            Keep your key private
+            Key Privacy & Hygiene
           </div>
-          <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-white/50">
-            <li>
-              • Never share your Gemini API key with other people.
-            </li>
-            <li>• Never commit it to GitHub or any public repository.</li>
-            <li>
-              • The key belongs to your Google account and unlocks access
-              to your Gemini quota.
-            </li>
-            <li>
-              • Gemini API usage may be subject to Google&apos;s current
-              quotas, limits and billing rules. Review Google&apos;s current
-              Gemini API pricing and usage policies before heavy use.
-            </li>
+          <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-slate-400">
+            <li>• Never share your Gemini API key publicly or commit it to GitHub.</li>
+            <li>• The key belongs exclusively to your Google account and accesses your own quota.</li>
+            <li>• Free tier keys in Google AI Studio offer generous rate limits for academic research.</li>
+            <li>• BioLayers encrypts and saves your key using AES-256-GCM, utilizing it strictly for your own requests.</li>
           </ul>
         </div>
       </div>

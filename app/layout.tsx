@@ -15,6 +15,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import BackgroundVideo from "./components/BackgroundVideo";
 
 const spectral = Spectral({
@@ -160,12 +161,18 @@ export default function RootLayout({
             border-teal-200/25
             bg-[#0a1118]
             px-4
-            py-2
+            py-2.5
             text-sm
             font-semibold
             text-teal-50
+            shadow-xl
             transition-transform
-            focus:translate-y-0
+            focus-visible:translate-y-0
+            focus-visible:outline-none
+            focus-visible:ring-2
+            focus-visible:ring-[#8db2ff]
+            focus-visible:ring-offset-2
+            focus-visible:ring-offset-[#04070a]
           "
         >
           Skip to content
@@ -191,6 +198,8 @@ export default function RootLayout({
         >
           {children}
         </main>
+
+        <Footer />
 
         <Analytics />
         <SpeedInsights />
