@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { atlasQuerySchema } from "./validation";
 import { handleValidationError } from "../../../lib/validation/schemas";
 import { queryCellAtlas } from "../../../lib/atlasSeedData";
+import { queryMasterCatalog } from "../../../lib/atlasMasterCatalog";
 import { createClient } from "../../../lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
+    const scope = url.searchParams.get("scope") || "detailed"; // "detailed" | "master"
     const rawParams = {
       search: url.searchParams.get("search") ?? "",
       cellLine: url.searchParams.get("cellLine") || undefined,
@@ -17,11 +19,12 @@ export async function GET(request: Request) {
       tissue: url.searchParams.get("tissue") || undefined,
       organism: url.searchParams.get("organism") || undefined,
       modality: url.searchParams.get("modality") || "all",
+      commercialOnly: url.searchParams.get("commercialOnly") === "true",
       phenotype: url.searchParams.get("phenotype") || undefined,
       dataset: url.searchParams.get("dataset") || undefined,
       condition: url.searchParams.get("condition") || undefined,
       page: url.searchParams.get("page") ?? "0",
-      pageSize: url.searchParams.get("pageSize") ?? "20",
+      pageSize: url.searchParams.get("pageSize") ?? "24",
     };
 
     const parsed = atlasQuerySchema.safeParse(rawParams);
@@ -32,7 +35,16 @@ export async function GET(request: Request) {
 
     const filters = parsed.data;
 
-    // Try Supabase first
+    // If master scope is requested, return paginated master catalog records with facets
+    if (scope === "master") {
+      const masterResult = queryMasterCatalog(filters);
+      return NextResponse.json({
+        source: "master-provenance-catalog",
+        ...masterResult,
+      });
+    }
+
+    // Try Supabase first for detailed images
     try {
       const supabase = await createClient();
       let query = supabase
@@ -69,7 +81,7 @@ export async function GET(request: Request) {
       // Fallback to verified local seed catalog if remote database table is not yet migrated
     }
 
-    // Fallback to verified seed catalog
+    // Fallback to verified seed catalog with detailed 10-block cards
     const localResult = queryCellAtlas(filters);
 
     return NextResponse.json({

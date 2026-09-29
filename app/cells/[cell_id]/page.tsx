@@ -14,6 +14,7 @@ import {
   GitFork,
 } from "lucide-react";
 import MicroscopyViewer from "../../components/atlas/MicroscopyViewer";
+import MigrationTrajectoryViewer from "../../components/atlas/MigrationTrajectoryViewer";
 import { getCellAtlasDetailById } from "../../lib/atlasSeedData";
 import { EVIDENCE_BADGES, type EvidenceLevel } from "../../lib/atlasTypes";
 
@@ -131,6 +132,13 @@ export default async function CellCardPage({ params }: PageProps) {
 
           <MicroscopyViewer image={image} />
         </section>
+
+        {/* FLAGSHIP DYNAMICS SECTION: Time-Lapse Single-Cell Migration Trajectory Viewer */}
+        {(image.isFlagship || cellType.id === "caf-cxcl12") && (
+          <section className="mb-12">
+            <MigrationTrajectoryViewer backgroundImageUrl={image.thumbnailUrl} />
+          </section>
+        )}
 
         {/* BLOCK 2: Metadata (Acquisition, Hardware, Staining, Provenance) */}
         <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">

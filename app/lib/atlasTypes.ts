@@ -211,6 +211,59 @@ export type CellAtlasDetail = {
   };
 };
 
+export type MasterCatalogRecord = {
+  image_id: string;
+  dataset_id: string;
+  source: string;
+  citation: string;
+  DOI?: string;
+  PMID?: string;
+  license: string;
+  commercial_use: "Permitted" | "Non-Commercial Only" | "Restricted";
+  redistribution_allowed: string;
+  cell_line: string;
+  organism: string;
+  tissue: string;
+  disease?: string;
+  phenotype: string;
+  microscopy_type: MicroscopyModality;
+  magnification?: string;
+  pixel_size?: string;
+  time_interval?: string;
+  staining: string;
+  treatment: string;
+  annotation_available: boolean;
+  segmentation_available: boolean;
+  tracking_available: boolean;
+  tier: number;
+  is_flagship: boolean;
+  is_ai_generated: boolean;
+  verification_status: string;
+  curator: string;
+  curation_date: string;
+  frame_index?: number;
+  timestamp_sec?: number;
+  image_url: string;
+  thumbnail_url: string;
+  mask_url?: string;
+};
+
+export type TrajectoryPoint = {
+  trajectory_id: string;
+  image_id: string;
+  cell_track_id: number;
+  frame_number: number;
+  timestamp_sec: number;
+  coord_x_px: number;
+  coord_y_px: number;
+  coord_x_um: number;
+  coord_y_um: number;
+  instantaneous_velocity_um_min: number;
+  net_displacement_um: number;
+  trajectory_angle_deg: number;
+  cell_color: string;
+};
+
 /* =========================================================
    CATALOG FILTERS (PRIORITY 1)
    ========================================================= */
@@ -221,9 +274,11 @@ export type CellAtlasFilters = {
   tissue?: string;
   organism?: string;
   modality?: MicroscopyModality | "all";
+  commercialOnly?: boolean;
   phenotype?: string;
   dataset?: string;
   condition?: string;
   page?: number;
   pageSize?: number;
 };
+

@@ -16,9 +16,16 @@ export const atlasQuerySchema = z.object({
       "two_photon",
       "electron",
       "super_resolution",
+      "light_sheet",
+      "tirf",
+      "dic",
+      "atomic_force",
+      "cryo_em",
+      "multiplex_ihc",
     ])
     .optional()
     .default("all"),
+  commercialOnly: z.coerce.boolean().optional(),
   phenotype: z.string().max(100).optional(),
   dataset: z.string().max(100).optional(),
   condition: z.string().max(100).optional(),
