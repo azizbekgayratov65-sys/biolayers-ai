@@ -1,0 +1,100 @@
+{
+  "version": "0.2.0",
+  "curated": "2026-09-30",
+  "curation_note": "Every entry was checked against its PubMed abstract. Statements paraphrase only what the abstract reports; context records the system the finding was made in, because it rarely matches our images.",
+  "papers": {
+    "zhou2002": {
+      "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+      "pmid": "12388552",
+      "doi": "10.1074/jbc.M206222200"
+    },
+    "ehtesham2006": {
+      "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+      "pmid": "16407848",
+      "doi": "10.1038/sj.onc.1209302"
+    },
+    "rempel2000": {
+      "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+      "pmid": "10656438",
+      "doi": null
+    },
+    "orimo2005": {
+      "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+      "pmid": "15882617",
+      "doi": "10.1016/j.cell.2005.02.034"
+    },
+    "torsvik2014": {
+      "citation": "Torsvik A, Stieber D, Enger PO, et al. U-251 revisited: genetic drift and phenotypic consequences of long-term cultures of glioblastoma cells. Cancer Med. 2014;3(4):812-24.",
+      "pmid": "24810477",
+      "doi": "10.1002/cam4.219"
+    }
+  },
+  "links": [
+    {
+      "id": "L1",
+      "phenotype": "migrating",
+      "entity": "CXCR4",
+      "entity_type": "receptor",
+      "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+      "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+      "papers": [
+        "zhou2002"
+      ],
+      "cell_types": [
+        "glioma"
+      ]
+    },
+    {
+      "id": "L2",
+      "phenotype": "migrating",
+      "entity": "CXCL12/CXCR4 axis",
+      "entity_type": "pathway",
+      "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+      "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+      "papers": [
+        "ehtesham2006"
+      ],
+      "cell_types": [
+        "glioma"
+      ]
+    },
+    {
+      "id": "L3",
+      "phenotype": "migrating",
+      "entity": "CXCL12 (SDF1) / CXCR4",
+      "entity_type": "pathway",
+      "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+      "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+      "papers": [
+        "rempel2000"
+      ],
+      "cell_types": [
+        "glioma"
+      ]
+    },
+    {
+      "id": "L4",
+      "phenotype": "migrating",
+      "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+      "entity_type": "cell type",
+      "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+      "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+      "papers": [
+        "orimo2005"
+      ],
+      "cell_types": [
+        "glioma"
+      ]
+    }
+  ],
+  "caveats": [
+    {
+      "id": "C1",
+      "applies_to": "U373",
+      "statement": "Many cell stocks labelled U-373 are the glioblastoma line U-251 due to an earlier cross-contamination, and long-term subclones drift genetically.",
+      "papers": [
+        "torsvik2014"
+      ]
+    }
+  ]
+}
