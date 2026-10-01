@@ -112,6 +112,7 @@ const toolNavItems: NavItem[] = [
 
 const institutionalNavItems: NavItem[] = [
   { label: "About", href: "/about", path: "/about", category: "institutional" },
+  { label: "Validation", href: "/validation", path: "/validation", category: "institutional" },
   { label: "Partners", href: "/partners", path: "/partners", category: "institutional" },
   { label: "Press", href: "/press", path: "/press", category: "institutional" },
 ];

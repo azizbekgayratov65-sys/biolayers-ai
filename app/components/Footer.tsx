@@ -133,6 +133,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/validation"
+                  className="flex min-h-[44px] items-center text-xs text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+                >
+                  <ShieldCheck className="mr-2 h-3.5 w-3.5 text-emerald-400" />
+                  Validation Report
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/partners"
                   className="flex min-h-[44px] items-center text-xs text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
                 >
