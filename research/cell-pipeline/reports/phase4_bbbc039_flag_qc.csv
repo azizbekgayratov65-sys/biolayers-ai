@@ -1,0 +1,8 @@
+label_detail,merge of >=2 real nuclei,no matching real nucleus,one real nucleus (IoU>=0.5),All
+abnormal morphology (area),7,79,385,471
+abnormal morphology (circularity),1,0,33,34
+abnormal morphology (solidity),134,63,1400,1597
+apoptotic/dead,13,35,365,413
+not assessable (cut by image edge),34,200,4196,4430
+not assessable (single frame),74,53,15603,15730
+All,263,430,21982,22675

@@ -1,0 +1,3 @@
+sequence,frames,detection_recall,detection_precision,link_accuracy,identity_switches,gt_links,ctc_seg,seg_gt_objects,raw_tracks,raw_detection_precision,raw_identity_switches,raw_division_events,pred_tracks,gt_tracks,pred_division_events,gt_division_events,pred_mean_speed_um_min,gt_mean_speed_um_min
+01,115,0.9986928104575163,0.928311057108141,0.9986754966887417,1,755,0.9399272586403252,100,47,0.8957845433255269,7,6,10,8,1,0,0.18271287067762626,0.20508131382444855
+02,115,0.9869942196531792,0.8573298429319371,0.9954954954954955,3,666,0.8668235756590638,110,31,0.8421052631578947,6,2,13,12,1,0,0.13739848381173914,0.1581760918854153

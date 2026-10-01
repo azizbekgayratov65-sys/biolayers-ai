@@ -1,0 +1,15 @@
+sequence,gt_track,pred_track,label_on_gt_trajectory,label_on_our_trajectory
+01,1,2,migrating,migrating
+01,2,1,migrating,migrating
+01,3,3,indeterminate,indeterminate
+01,4,5,migrating,migrating
+01,5,6,migrating,migrating
+01,6,4,quiescent,quiescent
+01,7,10,indeterminate,migrating
+02,1,4,indeterminate,migrating
+02,3,3,quiescent,quiescent
+02,4,2,migrating,migrating
+02,5,5,indeterminate,indeterminate
+02,11,7,migrating,migrating
+02,14,16,quiescent,migrating
+02,18,16,indeterminate,migrating

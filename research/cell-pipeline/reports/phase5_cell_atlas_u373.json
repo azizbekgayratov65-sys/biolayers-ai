@@ -1,0 +1,1916 @@
+{
+  "title": "BioLayers AI cell atlas: U373 migration case study",
+  "generated": "2026-09-30",
+  "disclaimer": "Research and educational system. Not a clinical diagnostic.",
+  "dataset": {
+    "name": "Cell Tracking Challenge PhC-C2DH-U373, training sequences 01 and 02",
+    "pixel_size_um": 0.65,
+    "frame_interval_min": 15,
+    "caveats": [
+      {
+        "level": "supported_by_literature",
+        "statement": "Many cell stocks labelled U-373 are the glioblastoma line U-251 due to an earlier cross-contamination, and long-term subclones drift genetically.",
+        "source": "literature_linker",
+        "caveat_id": "C1",
+        "citations": [
+          {
+            "key": "torsvik2014",
+            "citation": "Torsvik A, Stieber D, Enger PO, et al. U-251 revisited: genetic drift and phenotypic consequences of long-term cultures of glioblastoma cells. Cancer Med. 2014;3(4):812-24.",
+            "pmid": "24810477",
+            "doi": "10.1002/cam4.219"
+          }
+        ]
+      }
+    ]
+  },
+  "evidence_levels": {
+    "observed_directly_in_image": "Observed directly in the image (measured from segmented pixels)",
+    "supported_by_literature": "Supported by published literature (not observed in this image)",
+    "inferred_by_model": "Inferred by a model or rule (not an experimental fact)"
+  },
+  "model_cards": {
+    "segmentation": {
+      "model": "Cellpose, pretrained cpsam_v2 weights (zero-shot, no fine-tuning)",
+      "version": "cellpose 4.2.1.1",
+      "confidence": "per cell: mean Cellpose cell probability inside the mask (uncalibrated, tends to saturate near 0.95-0.97)",
+      "dataset": "BBBC039 (200 images, U2OS nuclei, Hoechst) and CTC PhC-C2DH-U373 (2 sequences)",
+      "evaluation_metric": {
+        "BBBC039 pixel IoU": 0.942,
+        "BBBC039 pixel Dice": 0.97,
+        "BBBC039 object precision @IoU0.5": 0.98,
+        "BBBC039 object recall @IoU0.5": 0.966,
+        "U373 CTC SEG (mean Jaccard)": {
+          "seq01": 0.94,
+          "seq02": 0.867
+        }
+      },
+      "limitations": [
+        "Benchmarked on two public datasets only; performance on other stains, magnifications or cell types is unmeasured.",
+        "The cell probability is the model's own score, not a calibrated error rate."
+      ]
+    },
+    "tracking": {
+      "model": "BioLayers overlap tracker (Hungarian assignment on mask IoU + gap/flicker clean-up)",
+      "version": "code 73984e8",
+      "confidence": "per track: mean IoU between the cell's masks in consecutive frames",
+      "dataset": "CTC PhC-C2DH-U373, training sequences 01 and 02 (230 frames)",
+      "evaluation_metric": {
+        "seq01": {
+          "link accuracy": 0.9987,
+          "identity switches": 1,
+          "detection precision": 0.928,
+          "detection recall": 0.999
+        },
+        "seq02": {
+          "link accuracy": 0.9955,
+          "identity switches": 3,
+          "detection precision": 0.857,
+          "detection recall": 0.987
+        }
+      },
+      "limitations": [
+        "Own CTC-style metrics, not the official CTC evaluation software.",
+        "Division detection is only shown not to invent divisions; these sequences contain no real divisions, so its recall is unmeasured.",
+        "Mean speeds run ~12% below ground truth (centroid vs hand-placed marker jitter)."
+      ]
+    },
+    "phenotype_rules": {
+      "model": "Rule-based phenotype classifier (transparent thresholds, not a learned model)",
+      "version": "rules 0.1.0, code 73984e8",
+      "confidence": "per label: rule margin, the deciding feature's distance from its threshold mapped to 0.5-0.99 (not a probability)",
+      "dataset": "no labelled phenotype data exists for these classes; thresholds set from cell-size units, not fitted to data",
+      "evaluation_metric": {
+        "motility label agreement, rule applied to ground-truth vs our trajectories": "10/14 tracks",
+        "note": "checks that tracking errors do not change the label; it does not validate the biology"
+      },
+      "limitations": [
+        "No biological ground truth: the rules have not been validated against expert labels.",
+        "'quiescent' means not migrating and not seen dividing; cell-cycle quiescence (G0) is not observable in phase contrast.",
+        "Abnormal-morphology flags are population outliers, so they depend on which cells are in the population."
+      ]
+    },
+    "literature_linker": {
+      "model": "Curated knowledge base, manual curation (no text mining, no language model)",
+      "version": "knowledge base 0.2.0 (2026-09-30)",
+      "confidence": "not scored: each link cites the PubMed-verified paper it rests on",
+      "dataset": "5 papers, 4 phenotype-entity links",
+      "evaluation_metric": "each statement checked against its PubMed abstract",
+      "limitations": [
+        "Links describe what is known about the cell type or pathway in general; they are never evidence about the specific cell in the image.",
+        "Only the 'migrating' phenotype has curated links in this release."
+      ]
+    }
+  },
+  "flagship_cell": "U373-02-T7",
+  "cells": [
+    {
+      "cell_id": "U373-01-T1",
+      "sequence": "01",
+      "track_id": 1,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.855
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 40.5 um, path length 206.0 um, mean speed 0.120 um/min, directionality 0.20.",
+          "source": "tracking",
+          "confidence": 0.855,
+          "values": {
+            "net_displacement_um": 40.5,
+            "path_length_um": 206.0,
+            "mean_speed_um_per_min": 0.12,
+            "directionality": 0.2
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.961.",
+          "source": "segmentation",
+          "confidence": 0.961
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.578,
+          "evidence": {
+            "net_displacement_diameters": 1.16,
+            "cell_diameter_um": 34.9
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-01-T2",
+      "sequence": "01",
+      "track_id": 2,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.843
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 68.4 um, path length 251.8 um, mean speed 0.147 um/min, directionality 0.27.",
+          "source": "tracking",
+          "confidence": 0.843,
+          "values": {
+            "net_displacement_um": 68.4,
+            "path_length_um": 251.8,
+            "mean_speed_um_per_min": 0.147,
+            "directionality": 0.27
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.962.",
+          "source": "segmentation",
+          "confidence": 0.962
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.852,
+          "evidence": {
+            "net_displacement_diameters": 1.72,
+            "cell_diameter_um": 39.8
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-01-T3",
+      "sequence": "01",
+      "track_id": 3,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.875
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 35.6 um, path length 202.7 um, mean speed 0.119 um/min, directionality 0.18.",
+          "source": "tracking",
+          "confidence": 0.875,
+          "values": {
+            "net_displacement_um": 35.6,
+            "path_length_um": 202.7,
+            "mean_speed_um_per_min": 0.119,
+            "directionality": 0.18
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.964.",
+          "source": "segmentation",
+          "confidence": 0.964
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule net displacement between 0.5 and 1 cell diameter: net displacement between 0.5 and 1 cell diameter).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "net_displacement_diameters": 0.8,
+            "cell_diameter_um": 44.3
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-01-T4",
+      "sequence": "01",
+      "track_id": 4,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.807
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 30.6 um, path length 414.0 um, mean speed 0.242 um/min, directionality 0.07.",
+          "source": "tracking",
+          "confidence": 0.807,
+          "values": {
+            "net_displacement_um": 30.6,
+            "path_length_um": 414.0,
+            "mean_speed_um_per_min": 0.242,
+            "directionality": 0.07
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.958.",
+          "source": "segmentation",
+          "confidence": 0.958
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: quiescent (rule R-QUI: net displacement < 0.5 cell diameter over >= 20 frames, no division).",
+          "source": "phenotype_rules",
+          "confidence": 0.554,
+          "evidence": {
+            "net_displacement_diameters": 0.44,
+            "cell_diameter_um": 68.8
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: abnormal morphology (rule R-ABN: median area, circularity or solidity has |robust z| >= 3.5 against the population).",
+          "source": "phenotype_rules",
+          "confidence": 0.561,
+          "evidence": {
+            "feature": "area",
+            "robust_z": 3.94,
+            "cell_diameter_um": 68.8
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-01-T5",
+      "sequence": "01",
+      "track_id": 5,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.745
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 67.8 um, path length 537.6 um, mean speed 0.314 um/min, directionality 0.13.",
+          "source": "tracking",
+          "confidence": 0.745,
+          "values": {
+            "net_displacement_um": 67.8,
+            "path_length_um": 537.6,
+            "mean_speed_um_per_min": 0.314,
+            "directionality": 0.13
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.961.",
+          "source": "segmentation",
+          "confidence": 0.961
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.637,
+          "evidence": {
+            "net_displacement_diameters": 1.28,
+            "cell_diameter_um": 53.0
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-01-T6",
+      "sequence": "01",
+      "track_id": 6,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 78 frames (19.2 h).",
+          "source": "tracking",
+          "confidence": 0.796
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 156.6 um, path length 225.4 um, mean speed 0.195 um/min, directionality 0.69.",
+          "source": "tracking",
+          "confidence": 0.796,
+          "values": {
+            "net_displacement_um": 156.6,
+            "path_length_um": 225.4,
+            "mean_speed_um_per_min": 0.195,
+            "directionality": 0.69
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.959.",
+          "source": "segmentation",
+          "confidence": 0.959
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.99,
+          "evidence": {
+            "net_displacement_diameters": 3.29,
+            "cell_diameter_um": 47.6
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-01-T10",
+      "sequence": "01",
+      "track_id": 10,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 113 frames (28.0 h).",
+          "source": "tracking",
+          "confidence": 0.78
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 52.5 um, path length 319.5 um, mean speed 0.189 um/min, directionality 0.16.",
+          "source": "tracking",
+          "confidence": 0.78,
+          "values": {
+            "net_displacement_um": 52.5,
+            "path_length_um": 319.5,
+            "mean_speed_um_per_min": 0.189,
+            "directionality": 0.16
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.932.",
+          "source": "segmentation",
+          "confidence": 0.932
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.704,
+          "evidence": {
+            "net_displacement_diameters": 1.42,
+            "cell_diameter_um": 37.1
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-01-T30",
+      "sequence": "01",
+      "track_id": 30,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 19 frames (4.5 h).",
+          "source": "tracking",
+          "confidence": 0.757
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 3.7 um, path length 45.8 um, mean speed 0.161 um/min, directionality 0.08.",
+          "source": "tracking",
+          "confidence": 0.757,
+          "values": {
+            "net_displacement_um": 3.7,
+            "path_length_um": 45.8,
+            "mean_speed_um_per_min": 0.161,
+            "directionality": 0.08
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.814.",
+          "source": "segmentation",
+          "confidence": 0.814
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 19,
+            "cell_diameter_um": 26.9
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-01-T32",
+      "sequence": "01",
+      "track_id": 32,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 37 frames (9.0 h).",
+          "source": "tracking",
+          "confidence": 0.805
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 32.7 um, path length 85.0 um, mean speed 0.157 um/min, directionality 0.38.",
+          "source": "tracking",
+          "confidence": 0.805,
+          "values": {
+            "net_displacement_um": 32.7,
+            "path_length_um": 85.0,
+            "mean_speed_um_per_min": 0.157,
+            "directionality": 0.38
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.948.",
+          "source": "segmentation",
+          "confidence": 0.948
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule net displacement between 0.5 and 1 cell diameter: net displacement between 0.5 and 1 cell diameter).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "net_displacement_diameters": 0.78,
+            "cell_diameter_um": 42.1
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: apoptotic/dead (rule R-DEAD: over the last 8 frames, area <= 60% of the track median and circularity >= 0.85).",
+          "source": "phenotype_rules",
+          "confidence": 0.775,
+          "evidence": {
+            "area_ratio": 0.26,
+            "circularity": 0.94,
+            "cell_diameter_um": 42.1
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: abnormal morphology (rule R-ABN: median area, circularity or solidity has |robust z| >= 3.5 against the population).",
+          "source": "phenotype_rules",
+          "confidence": 0.57,
+          "evidence": {
+            "feature": "solidity",
+            "robust_z": -4.0,
+            "cell_diameter_um": 42.1
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T2",
+      "sequence": "02",
+      "track_id": 2,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 114 frames (28.2 h).",
+          "source": "tracking",
+          "confidence": 0.825
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 68.4 um, path length 249.0 um, mean speed 0.146 um/min, directionality 0.27.",
+          "source": "tracking",
+          "confidence": 0.825,
+          "values": {
+            "net_displacement_um": 68.4,
+            "path_length_um": 249.0,
+            "mean_speed_um_per_min": 0.146,
+            "directionality": 0.27
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.924.",
+          "source": "segmentation",
+          "confidence": 0.924
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.849,
+          "evidence": {
+            "net_displacement_diameters": 1.71,
+            "cell_diameter_um": 39.9
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-02-T3",
+      "sequence": "02",
+      "track_id": 3,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.851
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 1.9 um, path length 141.1 um, mean speed 0.082 um/min, directionality 0.01.",
+          "source": "tracking",
+          "confidence": 0.851,
+          "values": {
+            "net_displacement_um": 1.9,
+            "path_length_um": 141.1,
+            "mean_speed_um_per_min": 0.082,
+            "directionality": 0.01
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.902.",
+          "source": "segmentation",
+          "confidence": 0.902
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: quiescent (rule R-QUI: net displacement < 0.5 cell diameter over >= 20 frames, no division).",
+          "source": "phenotype_rules",
+          "confidence": 0.941,
+          "evidence": {
+            "net_displacement_diameters": 0.05,
+            "cell_diameter_um": 37.5
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T4",
+      "sequence": "02",
+      "track_id": 4,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.83
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 46.4 um, path length 251.7 um, mean speed 0.147 um/min, directionality 0.18.",
+          "source": "tracking",
+          "confidence": 0.83,
+          "values": {
+            "net_displacement_um": 46.4,
+            "path_length_um": 251.7,
+            "mean_speed_um_per_min": 0.147,
+            "directionality": 0.18
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.922.",
+          "source": "segmentation",
+          "confidence": 0.922
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.559,
+          "evidence": {
+            "net_displacement_diameters": 1.12,
+            "cell_diameter_um": 41.5
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-02-T5",
+      "sequence": "02",
+      "track_id": 5,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.786
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 29.6 um, path length 262.3 um, mean speed 0.153 um/min, directionality 0.11.",
+          "source": "tracking",
+          "confidence": 0.786,
+          "values": {
+            "net_displacement_um": 29.6,
+            "path_length_um": 262.3,
+            "mean_speed_um_per_min": 0.153,
+            "directionality": 0.11
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.912.",
+          "source": "segmentation",
+          "confidence": 0.912
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule net displacement between 0.5 and 1 cell diameter: net displacement between 0.5 and 1 cell diameter).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "net_displacement_diameters": 0.82,
+            "cell_diameter_um": 36.1
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T6",
+      "sequence": "02",
+      "track_id": 6,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 36 frames (8.8 h).",
+          "source": "tracking",
+          "confidence": 0.807
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 68.6 um, path length 108.6 um, mean speed 0.207 um/min, directionality 0.63.",
+          "source": "tracking",
+          "confidence": 0.807,
+          "values": {
+            "net_displacement_um": 68.6,
+            "path_length_um": 108.6,
+            "mean_speed_um_per_min": 0.207,
+            "directionality": 0.63
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.950.",
+          "source": "segmentation",
+          "confidence": 0.95
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: proliferating (rule R-PRO: track is the parent of a division whose daughters both persist >= 3 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.99,
+          "evidence": {
+            "daughters": [
+              16,
+              17
+            ],
+            "shortest_daughter_frames": 8,
+            "cell_diameter_um": 50.8
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.671,
+          "evidence": {
+            "net_displacement_diameters": 1.35,
+            "cell_diameter_um": 50.8
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-02-T7",
+      "sequence": "02",
+      "track_id": 7,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 115 frames (28.5 h).",
+          "source": "tracking",
+          "confidence": 0.783
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 175.9 um, path length 330.7 um, mean speed 0.193 um/min, directionality 0.53.",
+          "source": "tracking",
+          "confidence": 0.783,
+          "values": {
+            "net_displacement_um": 175.9,
+            "path_length_um": 330.7,
+            "mean_speed_um_per_min": 0.193,
+            "directionality": 0.53
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.932.",
+          "source": "segmentation",
+          "confidence": 0.932
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.99,
+          "evidence": {
+            "net_displacement_diameters": 4.28,
+            "cell_diameter_um": 41.1
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-02-T9",
+      "sequence": "02",
+      "track_id": 9,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 5 frames (1.0 h).",
+          "source": "tracking",
+          "confidence": 0.786
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 1.3 um, path length 4.0 um, mean speed 0.066 um/min, directionality 0.32.",
+          "source": "tracking",
+          "confidence": 0.786,
+          "values": {
+            "net_displacement_um": 1.3,
+            "path_length_um": 4.0,
+            "mean_speed_um_per_min": 0.066,
+            "directionality": 0.32
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.794.",
+          "source": "segmentation",
+          "confidence": 0.794
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 5,
+            "cell_diameter_um": 12.0
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T10",
+      "sequence": "02",
+      "track_id": 10,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 10 frames (2.2 h).",
+          "source": "tracking",
+          "confidence": 0.871
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 0.3 um, path length 2.7 um, mean speed 0.020 um/min, directionality 0.11.",
+          "source": "tracking",
+          "confidence": 0.871,
+          "values": {
+            "net_displacement_um": 0.3,
+            "path_length_um": 2.7,
+            "mean_speed_um_per_min": 0.02,
+            "directionality": 0.11
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.643.",
+          "source": "segmentation",
+          "confidence": 0.643
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 10,
+            "cell_diameter_um": 10.8
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: abnormal morphology (rule R-ABN: median area, circularity or solidity has |robust z| >= 3.5 against the population).",
+          "source": "phenotype_rules",
+          "confidence": 0.672,
+          "evidence": {
+            "feature": "circularity",
+            "robust_z": 4.73,
+            "cell_diameter_um": 10.8
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T13",
+      "sequence": "02",
+      "track_id": 13,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 6 frames (1.2 h).",
+          "source": "tracking",
+          "confidence": 0.486
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 24.9 um, path length 30.4 um, mean speed 0.406 um/min, directionality 0.82.",
+          "source": "tracking",
+          "confidence": 0.486,
+          "values": {
+            "net_displacement_um": 24.9,
+            "path_length_um": 30.4,
+            "mean_speed_um_per_min": 0.406,
+            "directionality": 0.82
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.844.",
+          "source": "segmentation",
+          "confidence": 0.844
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 6,
+            "cell_diameter_um": 23.4
+          }
+        },
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: abnormal morphology (rule R-ABN: median area, circularity or solidity has |robust z| >= 3.5 against the population).",
+          "source": "phenotype_rules",
+          "confidence": 0.508,
+          "evidence": {
+            "feature": "circularity",
+            "robust_z": 3.56,
+            "cell_diameter_um": 23.4
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T16",
+      "sequence": "02",
+      "track_id": 16,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 71 frames (17.5 h).",
+          "source": "tracking",
+          "confidence": 0.851
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 64.8 um, path length 160.1 um, mean speed 0.152 um/min, directionality 0.40.",
+          "source": "tracking",
+          "confidence": 0.851,
+          "values": {
+            "net_displacement_um": 64.8,
+            "path_length_um": 160.1,
+            "mean_speed_um_per_min": 0.152,
+            "directionality": 0.4
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.908.",
+          "source": "segmentation",
+          "confidence": 0.908
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: migrating (rule R-MIG: net displacement >= 1.0 cell diameter over >= 20 frames).",
+          "source": "phenotype_rules",
+          "confidence": 0.666,
+          "evidence": {
+            "net_displacement_diameters": 1.34,
+            "cell_diameter_um": 48.4
+          }
+        }
+      ],
+      "literature": [
+        {
+          "level": "supported_by_literature",
+          "statement": "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16 lines) and its ligand SDF-1/CXCL12 induces glioma cell chemotaxis.",
+          "source": "literature_linker",
+          "entity": "CXCR4",
+          "entity_type": "receptor",
+          "link_id": "L1",
+          "context": "16 human glioma cell lines and 6 resected glioma specimens, in vitro",
+          "citations": [
+            {
+              "key": "zhou2002",
+              "citation": "Zhou Y, Larsen PH, Hao C, Yong VW. CXCR4 is a major chemokine receptor on glioma cells and mediates their survival. J Biol Chem. 2002;277(51):49481-7.",
+              "pmid": "12388552",
+              "doi": "10.1074/jbc.M206222200"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Invasive glioma cell populations overexpress CXCR4, blocking CXCR4 impairs their in vitro invasion, and glioma cells invade toward a CXCL12 gradient.",
+          "source": "literature_linker",
+          "entity": "CXCL12/CXCR4 axis",
+          "entity_type": "pathway",
+          "link_id": "L2",
+          "context": "malignant glioma cells, in vitro invasion assays and in vivo",
+          "citations": [
+            {
+              "key": "ehtesham2006",
+              "citation": "Ehtesham M, Winston JA, Kabos P, Thompson RC. CXCR4 expression mediates glioma cell invasiveness. Oncogene. 2006;25(19):2801-6.",
+              "pmid": "16407848",
+              "doi": "10.1038/sj.onc.1209302"
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "SDF1 and CXCR4 expression increases with astrocytoma grade and co-localizes in glioblastoma regions of necrosis and angiogenesis.",
+          "source": "literature_linker",
+          "entity": "CXCL12 (SDF1) / CXCR4",
+          "entity_type": "pathway",
+          "link_id": "L3",
+          "context": "immunohistochemistry of human astrocytoma tissue, grades II-IV",
+          "citations": [
+            {
+              "key": "rempel2000",
+              "citation": "Rempel SA, Dudas S, Ge S, Gutierrez JA. Identification and localization of the cytokine SDF1 and its receptor, CXC chemokine receptor 4, to regions of necrosis and angiogenesis in human glioblastoma. Clin Cancer Res. 2000;6(1):102-11.",
+              "pmid": "10656438",
+              "doi": null
+            }
+          ]
+        },
+        {
+          "level": "supported_by_literature",
+          "statement": "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which acts through CXCR4 on carcinoma cells to promote tumor growth and recruits endothelial progenitors.",
+          "source": "literature_linker",
+          "entity": "cancer-associated fibroblasts (CAFs) as CXCL12 source",
+          "entity_type": "cell type",
+          "link_id": "L4",
+          "context": "human breast carcinoma CAFs, co-implantation xenograft model; not glioma",
+          "citations": [
+            {
+              "key": "orimo2005",
+              "citation": "Orimo A, Gupta PB, Sgroi DC, et al. Stromal fibroblasts present in invasive human breast carcinomas promote tumor growth and angiogenesis through elevated SDF-1/CXCL12 secretion. Cell. 2005;121(3):335-48.",
+              "pmid": "15882617",
+              "doi": "10.1016/j.cell.2005.02.034"
+            }
+          ]
+        }
+      ],
+      "hypothesis": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Hypothesis only: this cell's migration may involve CXCL12/CXCR4 signalling, possibly with CXCL12 supplied by stromal cells such as CAFs. Not tested here: the movie contains no CXCL12 gradient, no CXCR4 label and no fibroblasts, and a single persistent cell in an unstimulated 2D culture is not evidence of chemotaxis.",
+          "source": "literature_linker",
+          "how_to_test": "Repeat the time-lapse with a CXCL12 gradient and with a CXCR4 antagonist, and compare net displacement and directionality against untreated cells."
+        }
+      ]
+    },
+    {
+      "cell_id": "U373-02-T17",
+      "sequence": "02",
+      "track_id": 17,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 8 frames (1.8 h).",
+          "source": "tracking",
+          "confidence": 0.822
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 8.9 um, path length 10.1 um, mean speed 0.097 um/min, directionality 0.88.",
+          "source": "tracking",
+          "confidence": 0.822,
+          "values": {
+            "net_displacement_um": 8.9,
+            "path_length_um": 10.1,
+            "mean_speed_um_per_min": 0.097,
+            "directionality": 0.88
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.888.",
+          "source": "segmentation",
+          "confidence": 0.888
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 8,
+            "cell_diameter_um": 23.9
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T24",
+      "sequence": "02",
+      "track_id": 24,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 36 frames (8.8 h).",
+          "source": "tracking",
+          "confidence": 0.898
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 17.8 um, path length 25.0 um, mean speed 0.046 um/min, directionality 0.71.",
+          "source": "tracking",
+          "confidence": 0.898,
+          "values": {
+            "net_displacement_um": 17.8,
+            "path_length_um": 25.0,
+            "mean_speed_um_per_min": 0.046,
+            "directionality": 0.71
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.864.",
+          "source": "segmentation",
+          "confidence": 0.864
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule net displacement between 0.5 and 1 cell diameter: net displacement between 0.5 and 1 cell diameter).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "net_displacement_diameters": 0.7,
+            "cell_diameter_um": 25.5
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    },
+    {
+      "cell_id": "U373-02-T30",
+      "sequence": "02",
+      "track_id": 30,
+      "observations": [
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Cell tracked for 18 frames (4.2 h).",
+          "source": "tracking",
+          "confidence": 0.852
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Net displacement 3.4 um, path length 18.9 um, mean speed 0.070 um/min, directionality 0.18.",
+          "source": "tracking",
+          "confidence": 0.852,
+          "values": {
+            "net_displacement_um": 3.4,
+            "path_length_um": 18.9,
+            "mean_speed_um_per_min": 0.07,
+            "directionality": 0.18
+          }
+        },
+        {
+          "level": "observed_directly_in_image",
+          "statement": "Segmented in every tracked frame; mean cell probability 0.796.",
+          "source": "segmentation",
+          "confidence": 0.796
+        }
+      ],
+      "phenotype": [
+        {
+          "level": "inferred_by_model",
+          "statement": "Phenotype: indeterminate (rule track shorter than 20 frames: track shorter than 20 frames).",
+          "source": "phenotype_rules",
+          "evidence": {
+            "n_frames": 18,
+            "cell_diameter_um": 23.5
+          }
+        }
+      ],
+      "literature": [],
+      "hypothesis": []
+    }
+  ]
+}
