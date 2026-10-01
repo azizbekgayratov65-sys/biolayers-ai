@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BioLayers AI Sprint Report</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  :root { --ink:#1b1f24; --muted:#5b6470; --line:#dde1e6; --soft:#f4f6f8;
+          --green:#2e7d32; --blue:#1565c0; --orange:#e65100; --accent:#0f4c81; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: var(--ink); font-size: 10.2pt;
+         line-height: 1.45; margin: 0; background: #fff; }
+  h1 { font-size: 20pt; margin: 0 0 2px; color: var(--accent); }
+  h2 { font-size: 13pt; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--accent);
+       color: var(--accent); break-after: avoid; }
+  h3 { font-size: 10.8pt; margin: 12px 0 4px; break-after: avoid; }
+  p { margin: 4px 0 6px; }
+  ul { margin: 4px 0 6px; padding-left: 18px; }
+  li { margin: 2px 0; }
+  .sub { color: var(--muted); font-size: 9.5pt; margin-bottom: 10px; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 8px; font-size: 9.2pt; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 600; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .status { display: inline-block; padding: 1px 7px; border-radius: 9px; font-size: 8.4pt; font-weight: 600; }
+  .done { background: #e3f1e4; color: var(--green); }
+  .part { background: #fff1e0; color: #a14a00; }
+  .todo { background: #eceff3; color: var(--muted); }
+  .box { background: var(--soft); border-left: 3px solid var(--accent); padding: 7px 10px; margin: 8px 0; break-inside: avoid; }
+  .warn { border-left-color: var(--orange); }
+  figure { margin: 8px 0; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); }
+  figcaption { font-size: 8.8pt; color: var(--muted); margin-top: 3px; }
+  .lvl { font-weight: 600; }
+  .g { color: var(--green); } .b { color: var(--blue); } .o { color: var(--orange); }
+  .chain { display: grid; grid-template-columns: 47% 1fr; gap: 10px; align-items: start; break-inside: avoid; margin: 8px 0; }
+  .chain figure { margin: 0; }
+  .step { border-left: 3px solid; padding: 4px 8px; margin-bottom: 5px; font-size: 8.9pt; line-height: 1.35; }
+  .step i { font-style: normal; font-size: 7.8pt; text-transform: uppercase; letter-spacing: .03em; margin-left: 4px; }
+  .sg { border-color: var(--green); background: #eef6ee; } .sg i { color: var(--green); }
+  .sb { border-color: var(--blue); background: #edf3fb; } .sb i { color: var(--blue); }
+  .so { border-color: var(--orange); background: #fdf1e8; } .so i { color: var(--orange); }
+  code { font-family: Consolas, monospace; font-size: 8.8pt; background: var(--soft); padding: 0 3px; }
+  .foot { color: var(--muted); font-size: 8.6pt; margin-top: 14px; border-top: 1px solid var(--line); padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<h1>BioLayers AI: Microscopy AI Layer, Sprint Report</h1>
+<div class="sub">AI Model Developer sprint, Sep 8 – Oct 1, 2026 &nbsp;·&nbsp; Status as of Sep 28, 2026 &nbsp;·&nbsp; Research and educational system, not a clinical diagnostic</div>
+
+<div class="box">
+  <b>Summary.</b> All six phases of the brief now have a working, benchmarked implementation.
+  Segmentation (Phase 1), tracking (Phase 2) and phenotype measurement (Phase 3) are validated on public
+  benchmark data with ground truth. Phenotype classification (Phase 4), biological linking (Phase 5) and
+  confidence reporting (Phase 6) are built for the flagship case study: <b>glioblastoma cell migration →
+  CXCL12/CXCR4 axis, with cancer-associated fibroblasts (CAFs) as the CXCL12 source</b>. No team imaging data
+  (A549 or CAF) was available, so all results use public datasets. What remains is the website validation
+  report, a one-command demo, the overlay handoff to the Software team, and the demo recording.
+</div>
+
+<h2>1. Status against the sprint plan</h2>
+<table>
+  <tr><th style="width:30%">Sprint step (dates)</th><th style="width:12%">Status</th><th>What was delivered</th></tr>
+  <tr><td>1. Foundation (Sep 8–11)</td><td><span class="status done">Done</span></td>
+      <td>Cellpose 4.2.1.1 (pretrained cpsam_v2) on GPU; benchmark datasets BBBC039 + Cell Tracking Challenge PhC-C2DH-U373; evaluation code for IoU, Dice, precision, recall.</td></tr>
+  <tr><td>2. First working Cell Atlas (Sep 12–16)</td><td><span class="status done">Done</span></td>
+      <td>Segmentation on all 200 BBBC039 images (the full dataset; the plan asked for 250–350) with first metrics.</td></tr>
+  <tr><td>3. AI Microscopy (Sep 17–21)</td><td><span class="status part">Mostly done</span></td>
+      <td>Morphology extraction for 22,675 nuclei; metrics report with limitations. Overlay images exist, but a formal overlay handoff to the Software team is still open.</td></tr>
+  <tr><td>4. Time-lapse + Biological Linking (Sep 22–25)</td><td><span class="status done">Done</span></td>
+      <td>Tracking and migration on U373 time-lapse; Image → Cell → Phenotype → Biological Entity chain for the CAF/CXCL12 case study with evidence levels. (Finished Sep 28, 3 days late.)</td></tr>
+  <tr><td>5. Validation (Sep 26–28)</td><td><span class="status part">In progress</span></td>
+      <td>Per-phase validation reports exist (listed in section 9). The compact website version is not written yet.</td></tr>
+  <tr><td>6. Final polish (Sep 29–30)</td><td><span class="status todo">Not started</span></td>
+      <td>One-command demo, stability check, 90-second recording.</td></tr>
+</table>
+
+<h2>2. Phase 1: Cell segmentation</h2>
+<p><b>Approach.</b> Pretrained Cellpose model, used zero-shot (no fine-tuning), per the brief's direction to use
+proven models rather than train from scratch.</p>
+<p><b>Benchmark.</b> BBBC039: 200 fluorescence images of U2OS nuclei (Hoechst stain) with hand-annotated masks,
+CC0 license. Detection is scored by matching each predicted nucleus to a real one (Hungarian matching, IoU ≥ 0.5).</p>
+<table>
+  <tr><th>Metric (mean over 200 images)</th><th class="n">Value</th><th>Metric</th><th class="n">Value</th></tr>
+  <tr><td>Pixel IoU</td><td class="n">0.942 ± 0.017</td><td>Object precision</td><td class="n">0.980</td></tr>
+  <tr><td>Pixel Dice</td><td class="n">0.970 ± 0.009</td><td>Object recall</td><td class="n">0.966</td></tr>
+  <tr><td>Nuclei: correct / false / missed</td><td class="n">22,212 / 463 / 766</td><td>Object F1</td><td class="n">0.972</td></tr>
+  <tr><td>Inference time (RTX 5060)</td><td class="n">723 ms / image</td><td>Mean IoU of matched nuclei</td><td class="n">0.928</td></tr>
+</table>
+<figure>
+  <img src="../../results/phase1_bbbc039_IXMtest_A02_s1_w1051DAA7C-7042-435F-99F0-1E847D9B42CB.png">
+  <figcaption>BBBC039 example: input image, hand-annotated ground truth (110 nuclei), Cellpose prediction (108 nuclei).</figcaption>
+</figure>
+<p><b>Limits.</b> This measures nuclei in a DNA stain only. Whole-cell phase-contrast segmentation is
+scored separately in Phase 2 (CTC SEG 0.94 and 0.87).</p>
+
+<h2>3. Phase 2: Cell tracking and migration</h2>
+<p><b>Data.</b> Cell Tracking Challenge PhC-C2DH-U373: phase-contrast time-lapse of glioblastoma-astrocytoma cells,
+2 sequences × 115 frames (15 min/frame, 28.5 h each), with ground-truth tracks.</p>
+<p><b>Method.</b> Cellpose segments every frame. Cells are linked frame to frame by mask overlap (Hungarian matching),
+then brief segmentation flicker and short gaps are cleaned up. Each cell's migration distance, speed and
+directionality (net displacement ÷ path length) are measured.</p>
+<table>
+  <tr><th>Seq</th><th class="n">Detection precision</th><th class="n">Detection recall</th><th class="n">Link accuracy</th>
+      <th class="n">ID switches</th><th class="n">CTC SEG</th><th class="n">Divisions (pred / real)</th><th class="n">Mean speed µm/min (pred / real)</th></tr>
+  <tr><td>01</td><td class="n">0.928</td><td class="n">0.999</td><td class="n">0.999</td><td class="n">1</td><td class="n">0.940</td><td class="n">1 / 0</td><td class="n">0.183 / 0.205</td></tr>
+  <tr><td>02</td><td class="n">0.857</td><td class="n">0.987</td><td class="n">0.995</td><td class="n">3</td><td class="n">0.867</td><td class="n">1 / 0</td><td class="n">0.137 / 0.158</td></tr>
+</table>
+<figure>
+  <img src="../../results/phase2_trajectories_seq01.png" style="width:72%; display:block; margin:0 auto;">
+  <figcaption style="text-align:center">Sequence 01: tracked cell trajectories over 28.5 h.</figcaption>
+</figure>
+<div class="box warn">
+  <b>Limitations.</b>
+  <ul>
+    <li><b>Metric source.</b> We implemented the metrics following the CTC definitions. They are not scores from the
+        official CTC evaluation software, so they are not comparable to the CTC leaderboard.</li>
+    <li><b>Division detection is not validated.</b> These sequences contain no real divisions. The detector
+        reports 1 false division per sequence, and whether it finds real divisions is unmeasured. That needs a
+        dataset with divisions, such as CTC Fluo-N2DL-HeLa.</li>
+    <li><b>Speeds read low.</b> Measured speeds are about 12% below ground truth. Speed is path length over time,
+        so it is sensitive to position jitter, and ground-truth positions are hand-placed markers while ours are mask
+        centroids.</li>
+    <li><b>Small sample.</b> Each sequence has only 6–12 cells, so one tracking error visibly moves the metrics.</li>
+  </ul>
+</div>
+
+<h2>4. Phase 3: Phenotype extraction</h2>
+<p>Features were measured from the segmentation masks for <b>22,675 nuclei</b> (BBBC039) and for every tracked
+U373 cell in every frame. All of these are direct measurements from segmented pixels.</p>
+<table>
+  <tr><th>Feature (BBBC039 nuclei)</th><th class="n">Mean ± SD</th><th>Feature</th><th class="n">Mean ± SD</th></tr>
+  <tr><td>Area (px)</td><td class="n">627 ± 256</td><td>Aspect ratio</td><td class="n">1.71 ± 0.61</td></tr>
+  <tr><td>Perimeter (px)</td><td class="n">95.0 ± 23.6</td><td>Solidity</td><td class="n">0.958 ± 0.025</td></tr>
+  <tr><td>Circularity</td><td class="n">0.830 ± 0.092</td><td>Mean intensity</td><td class="n">648 ± 217</td></tr>
+  <tr><td>Eccentricity</td><td class="n">0.746 ± 0.138</td><td>Texture (GLCM)</td><td>contrast, homogeneity, energy, correlation</td></tr>
+</table>
+<p>Migration distance, speed and division events come from Phase 2.</p>
+<p><b>Not computed:</b> nuclear/cytoplasmic ratio. It needs paired nucleus and cytoplasm channels, and neither
+dataset has both. It is reported as missing rather than approximated.</p>
+
+<h2>5. Phase 4: Phenotype classification</h2>
+<p><b>Approach.</b> No labelled data exists for the five target classes, so classification is a set of
+<b>transparent threshold rules</b>, not a trained model. Each label records the rule that produced it. Its score
+is a <b>rule margin</b>: how far the deciding measurement is from its threshold. This is not a probability.</p>
+<table>
+  <tr><th style="width:22%">Class</th><th>Rule</th></tr>
+  <tr><td>Migrating</td><td>Net displacement ≥ 1 own cell diameter over ≥ 20 frames (5 h)</td></tr>
+  <tr><td>Quiescent</td><td>Net displacement &lt; 0.5 cell diameter over ≥ 20 frames, no division. An operational definition: true cell-cycle arrest is not visible in phase contrast.</td></tr>
+  <tr><td>Proliferating</td><td>Cell divides and both daughters persist ≥ 3 frames</td></tr>
+  <tr><td>Apoptotic/dead</td><td>Time-lapse: shrinks to ≤ 60% of its usual area and rounds up over its last 2 h. Single images: small, very bright nucleus (pyknotic-like).</td></tr>
+  <tr><td>Abnormal morphology</td><td>Area, circularity or solidity is a strong outlier in its population (robust z ≥ 3.5)</td></tr>
+</table>
+<p><b>Results, U373 time-lapse (22 tracked cells):</b> 10 migrating, 2 quiescent, 1 apoptotic/dead,
+1 proliferating, 4 abnormal morphology, 10 indeterminate (track too short, or moved between 0.5 and 1 diameter).
+A cell can carry more than one label.</p>
+<p><b>Results, BBBC039 single images (22,675 nuclei):</b> only shape-based classes can be judged from one image.
+2,102 nuclei were flagged abnormal morphology and 413 apoptotic-like. Another 4,430 are cut by the image edge
+and were not classified.</p>
+<div class="box warn">
+  <b>How reliable are the labels?</b> There are no expert labels to score them against. Two indirect checks were run, and one known error is listed:
+  <ul>
+    <li><b>Tracking errors vs labels:</b> applying the same rule to the hand-annotated trajectories gives the same
+        label for <b>10 of 14</b> matched cells. Of the 4 differences, 2 are one of our tracks following two different
+        cells (an identity switch).</li>
+    <li><b>Flags vs segmentation errors:</b> 86% of abnormal-morphology flags are a single real nucleus in the
+        BBBC039 annotations. However, 6.8% are two touching nuclei merged by segmentation, against 0.5% of
+        unflagged nuclei, so part of the flag reflects segmentation error rather than biology.</li>
+    <li><b>Known false positive:</b> the one "proliferating" label comes from the false division detection in
+        Phase 2.</li>
+  </ul>
+</div>
+
+<h2>6. Phase 5: Biological linking (flagship case study)</h2>
+<p><b>Case study choice.</b> The sprint plan names CAF/CXCL12. The brief's other example, A549 → EGFR, would need
+A549 imaging we don't have. The public U373 migration movies fit the CXCL12/CXCR4 literature on glioma cell
+migration, so the chain was built on them.</p>
+<p><b>Three evidence levels, never merged:</b></p>
+<ul>
+  <li><span class="lvl g">Observed in image:</span> measured from segmented pixels (for example distance travelled).</li>
+  <li><span class="lvl b">Supported by literature:</span> published findings about the cell type or pathway, never about the specific imaged cell.</li>
+  <li><span class="lvl o">Inferred by model:</span> rule labels and hypotheses.</li>
+</ul>
+<div class="chain">
+  <figure>
+    <img src="flagship_trajectory.png">
+    <figcaption>Flagship cell U373-02-T7 (orange): 115 frames, 28.5 h. Other tracked cells in grey.</figcaption>
+  </figure>
+  <div>
+    <div class="step sg"><b>Image → Cell</b> <i>observed in image</i><br>Segmented in every frame; mean cell probability 0.93.</div>
+    <div class="step sg"><b>Cell → Measured phenotype</b> <i>observed in image</i><br>Net displacement 176 µm (4.3 cell diameters), path 331 µm, speed 0.19 µm/min, directionality 0.53.</div>
+    <div class="step so"><b>Phenotype label</b> <i>inferred by model</i><br>Migrating (rule: moved ≥ 1 cell diameter). Rule margin 0.99.</div>
+    <div class="step sb"><b>Biological entity: CXCL12/CXCR4</b> <i>supported by literature</i><br>Glioma cells express CXCR4, and CXCL12 drives their chemotaxis and invasion (Zhou 2002; Ehtesham 2006; Rempel 2000).</div>
+    <div class="step sb"><b>Biological entity: CAFs</b> <i>supported by literature</i><br>CAFs secrete CXCL12, which acts through CXCR4 (Orimo 2005, breast carcinoma).</div>
+    <div class="step so"><b>Hypothesis</b> <i>inferred by model</i><br>This cell's migration may involve CXCL12/CXCR4 signalling. Not tested in these images.</div>
+  </div>
+</div>
+<p><b>Literature base.</b> A curated knowledge base of 5 papers. Every statement was checked against the paper's
+PubMed abstract.</p>
+<table>
+  <tr><th style="width:30%">Link</th><th>Source</th></tr>
+  <tr><td>CXCR4 on glioma cells; CXCL12 drives chemotaxis</td><td>Zhou et al., J Biol Chem 2002 (PMID 12388552)</td></tr>
+  <tr><td>CXCR4 mediates glioma invasion toward CXCL12</td><td>Ehtesham et al., Oncogene 2006 (PMID 16407848)</td></tr>
+  <tr><td>CXCL12/CXCR4 rise with glioma grade</td><td>Rempel et al., Clin Cancer Res 2000 (PMID 10656438)</td></tr>
+  <tr><td>CAFs secrete CXCL12 acting via CXCR4</td><td>Orimo et al., Cell 2005 (PMID 15882617). Shown in breast carcinoma, not glioma.</td></tr>
+  <tr><td>Caveat: cell line identity</td><td>Torsvik et al., Cancer Med 2014 (PMID 24810477). Many "U-373" stocks are actually U-251.</td></tr>
+</table>
+<div class="box warn">
+  <b>What this does not show.</b> The movies contain no CXCL12, no CXCR4 staining and no fibroblasts, and one
+  cell moving persistently in an unstimulated dish is not evidence of chemotaxis. The per-cell link is therefore
+  stated only as a hypothesis. Testing it would need a CXCL12 gradient experiment and a CXCR4-blocking control.
+</div>
+
+<h2>7. Phase 6: AI confidence and provenance</h2>
+<p>Every AI-derived value in the output points to a model card with the six fields the brief requires.
+Benchmark numbers are read directly from the Phase 1–2 result files.</p>
+<table>
+  <tr><th style="width:14%">Component</th><th style="width:20%">Model / version</th><th style="width:22%">Confidence shown</th><th style="width:22%">Evaluated on / metric</th><th>Main limitation</th></tr>
+  <tr><td>Segmentation</td><td>Cellpose cpsam_v2, v4.2.1.1</td><td>Per cell: mean Cellpose cell probability</td><td>BBBC039 IoU 0.942, P 0.980, R 0.966; U373 SEG 0.94 / 0.87</td><td>Score is uncalibrated; only two datasets tested</td></tr>
+  <tr><td>Tracking</td><td>Overlap tracker, code 44ec666</td><td>Per track: mean mask overlap between frames</td><td>U373 link accuracy 0.999 / 0.995</td><td>Division recall unmeasured</td></tr>
+  <tr><td>Phenotype rules</td><td>Rules v0.1.0</td><td>Per label: rule margin</td><td>10/14 agreement with ground-truth trajectories</td><td>No expert labels</td></tr>
+  <tr><td>Literature links</td><td>Knowledge base v0.1.0</td><td>Citation per statement</td><td>Checked against PubMed abstracts</td><td>Only "migrating" has links so far</td></tr>
+</table>
+<p>The per-cell output (<code>reports/phase5_cell_atlas_u373.json</code>) lists every tracked cell with its
+measurements, labels, literature links and hypotheses. Each item is tagged with its evidence level and model card.</p>
+
+<h2>8. Remaining work and open items</h2>
+<table>
+  <tr><th style="width:18%">When</th><th>Work</th></tr>
+  <tr><td>Sep 29</td><td>Compact validation report for the website; one-command demo (image → cells → phenotype → linked biology); segmentation overlay package for the Software team.</td></tr>
+  <tr><td>Sep 30</td><td>Stability run of the demo; 90-second video recording.</td></tr>
+  <tr><td>Oct 1</td><td>Release.</td></tr>
+</table>
+<p><b>Open items for the team:</b></p>
+<ul>
+  <li><b>Website:</b> who publishes the validation report on the website, and in what format (Markdown, PDF or web page)?</li>
+  <li><b>Software handoff:</b> which overlay format the Software team needs (PNG overlays, label masks, or per-cell JSON).</li>
+  <li><b>Team data:</b> if A549 or CAF co-culture imaging becomes available, the pipeline can run on it directly.
+      The nuclear/cytoplasmic ratio also needs two-channel images.</li>
+  <li><b>Repository:</b> the code is currently in <code>github.com/Maksatb07/biolayers-ai</code> and can be moved to a shared team repository.</li>
+</ul>
+
+<h2>9. Known gaps after release</h2>
+<ul>
+  <li>Validate division detection on a dataset that contains divisions (e.g. CTC Fluo-N2DL-HeLa).</li>
+  <li>Get expert-labelled cells to measure phenotype label accuracy; the rules are currently unvalidated.</li>
+  <li>Test segmentation on further stains and cell types; only two public datasets are benchmarked.</li>
+  <li>Add literature links for phenotypes beyond migration, and the A549 → EGFR example.</li>
+</ul>
+<p><b>Per-phase reports in the repository:</b> <code>phase1_validation_report.md</code>,
+<code>phase2_tracking_report.md</code>, <code>phase3_phenotype_report.md</code>,
+<code>phase4_classification_report.md</code>, <code>phase5_6_case_study_report.md</code> (all in <code>reports/</code>).</p>
+
+<div class="foot">BioLayers AI · AI Model Developer workstream · Maksat Babageldiyev · Sep 28, 2026</div>
+</body>
+</html>
