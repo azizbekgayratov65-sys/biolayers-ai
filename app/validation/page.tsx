@@ -275,7 +275,7 @@ export default function ValidationPage() {
               alt="Image to cell to phenotype to biological entity chain for flagship cell U373-02-T7"
               width={1950}
               height={1118}
-              sizes="(min-width: 1024px) 480px, 100vw"
+              unoptimized
               className="h-auto w-full rounded-2xl"
             />
             <figcaption className="mt-3 text-xs leading-5 text-slate-400">
