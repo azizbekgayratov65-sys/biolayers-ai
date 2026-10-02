@@ -98,6 +98,49 @@ const biomedizonePillars = [
   },
 ];
 
+
+const nchPillars = [
+  {
+    title: "Pediatric Oncology",
+    desc: "Applying precision AI knowledge graphs to pediatric cancer research and therapies.",
+    icon: Microscope,
+    badge: "Pediatrics",
+  },
+  {
+    title: "Translational Research",
+    desc: "Accelerating the path from molecular discovery to targeted patient care.",
+    icon: Network,
+    badge: "Translation",
+  },
+  {
+    title: "Clinical Innovation",
+    desc: "Translating complex biomedical pathways into actionable clinical models.",
+    icon: ShieldCheck,
+    badge: "Clinical AI",
+  },
+];
+
+const osuPillars = [
+  {
+    title: "Clinical Research Integration",
+    desc: "Bridging computational AI models with advanced clinical oncology research.",
+    icon: Microscope,
+    badge: "Oncology",
+  },
+  {
+    title: "Medical AI Innovation",
+    desc: "Collaborating on AI-driven diagnostics and biological knowledge representation.",
+    icon: Cpu,
+    badge: "AI Innovation",
+  },
+  {
+    title: "Academic Excellence",
+    desc: "Leveraging world-class medical, engineering, and bioinformatics expertise.",
+    icon: GraduationCap,
+    badge: "Academia",
+  },
+];
+
 export default function PartnersPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
@@ -558,6 +601,201 @@ export default function PartnersPage() {
             </div>
           </div>
         </div>
+
+        
+          {/* ACADEMIC PARTNER: OHIO STATE UNIVERSITY */}
+          <div className="rounded-[28px] border border-red-500/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-300">
+            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
+              <div className="flex items-center gap-4 sm:gap-5">
+                {/* OSU Themed Emblem */}
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-red-400/40 bg-gradient-to-br from-[#ba0c2f] via-[#a00000] to-[#666666] p-2 shadow-[0_0_30px_rgba(186,12,47,0.35)] sm:h-20 sm:w-20">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <span className="font-mono text-sm font-black tracking-widest text-white sm:text-base drop-shadow-sm">
+                      OSU
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/30 bg-red-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-red-200">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                      Academic & Clinical Partner
+                    </span>
+                    <span className="font-mono text-[9px] text-teal-300/70">
+                      The Ohio State University
+                    </span>
+                  </div>
+
+                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                    Ohio State University
+                  </h2>
+                  <div className="font-mono text-[11px] text-slate-400">
+                    osu.edu · Leading Academic Research Institution
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="https://www.osu.edu/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/btn inline-flex items-center gap-2 rounded-xl border border-red-200/30 bg-red-300/[0.08] px-4 py-2.5 text-xs font-bold text-red-50 transition hover:border-red-200/60 hover:bg-red-300/[0.18]"
+              >
+                <span>Visit osu.edu</span>
+                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+              </a>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div>
+                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-red-300">
+                  Research & Clinical Integration Scope
+                </div>
+                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
+                  Accelerating Medical AI and Oncology Research
+                </h3>
+                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+                  The Ohio State University partners with BioLayers AI to drive the integration of computational knowledge graphs into advanced oncology research, bridging the gap between frontier AI and world-class clinical expertise.
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {["Clinical Research", "Medical AI", "Oncology", "Bioinformatics"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-red-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {osuPillars.map((pillar) => {
+                  const Icon = pillar.icon;
+                  return (
+                    <div
+                      key={pillar.title}
+                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-red-200/25 hover:bg-[#0a121c]/80"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-red-300">
+                          <Icon className="h-4 w-4" />
+                          <span className="text-xs font-bold text-teal-50">
+                            {pillar.title}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-red-300/60">
+                          {pillar.badge}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                        {pillar.desc}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* CLINICAL PARTNER: NATIONWIDE CHILDRENS HOSPITAL */}
+          <div className="rounded-[28px] border border-blue-400/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-400">
+            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
+              <div className="flex items-center gap-4 sm:gap-5">
+                {/* NCH Themed Emblem */}
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-blue-400/40 bg-gradient-to-br from-[#005a9c] via-[#0073CF] to-[#00a3e0] p-2 shadow-[0_0_30px_rgba(0,90,156,0.35)] sm:h-20 sm:w-20">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <span className="font-mono text-[10px] font-black tracking-wider text-white sm:text-xs drop-shadow-sm">
+                      NCH
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-300/30 bg-blue-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-blue-200">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                      Clinical & Research Partner
+                    </span>
+                    <span className="font-mono text-[9px] text-teal-300/70">
+                      Nationwide Children&apos;s Hospital
+                    </span>
+                  </div>
+
+                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                    Nationwide Children&apos;s
+                  </h2>
+                  <div className="font-mono text-[11px] text-slate-400">
+                    nationwidechildrens.org · Pediatric Healthcare & Research
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="https://www.nationwidechildrens.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/btn inline-flex items-center gap-2 rounded-xl border border-blue-200/30 bg-blue-300/[0.08] px-4 py-2.5 text-xs font-bold text-blue-50 transition hover:border-blue-200/60 hover:bg-blue-300/[0.18]"
+              >
+                <span>Visit nationwidechildrens.org</span>
+                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+              </a>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div>
+                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-blue-300">
+                  Pediatric Research & Clinical Scope
+                </div>
+                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
+                  Transforming Pediatric Oncology via AI Knowledge Graphs
+                </h3>
+                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
+                  BioLayers AI partners with Nationwide Children&apos;s Hospital to apply frontier AI and computational knowledge maps to pediatric cancer research, facilitating translational discovery from molecular mechanisms to targeted pediatric therapies.
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {["Pediatric Oncology", "Clinical Research", "Precision Medicine", "Translational AI"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-blue-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {nchPillars.map((pillar) => {
+                  const Icon = pillar.icon;
+                  return (
+                    <div
+                      key={pillar.title}
+                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-blue-200/25 hover:bg-[#0a121c]/80"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-blue-300">
+                          <Icon className="h-4 w-4" />
+                          <span className="text-xs font-bold text-teal-50">
+                            {pillar.title}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-blue-300/60">
+                          {pillar.badge}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                        {pillar.desc}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
         {/* BOTTOM PARTNER INQUIRY CTA */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100/[0.08] bg-white/[0.015] px-5 py-3.5 text-xs backdrop-blur-xl">
