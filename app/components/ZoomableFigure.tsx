@@ -92,12 +92,16 @@ export default function ZoomableFigure({
       {isZoomed && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm md:p-12 cursor-zoom-out"
-          onClick={() => setIsZoomed(false)}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            // Don't close if they clicked the overlay toggle label or input
+            if (target.tagName.toLowerCase() === "label" || target.tagName.toLowerCase() === "input") {
+              return;
+            }
+            setIsZoomed(false);
+          }}
         >
-          <div
-            className="relative flex max-h-full max-w-full flex-col items-center justify-center cursor-default"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative flex max-h-full max-w-full flex-col items-center justify-center">
             <button
               onClick={() => setIsZoomed(false)}
               className="absolute -right-4 -top-12 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 md:-right-12"
