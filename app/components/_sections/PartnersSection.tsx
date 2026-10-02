@@ -175,8 +175,35 @@ export default function PartnersSection() {
           </div>
         </div>
 
+        {/* ALL PARTNERS LOGO STRIP */}
+        <div className="mt-12 flex flex-col items-center justify-center border-t border-teal-100/[0.08] pt-10">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            Trusted By & Partnered With
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-10 sm:gap-16 opacity-75 transition hover:opacity-100">
+            <Link href="https://nxthorizon.org" target="_blank" className="relative h-10 w-32 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/nxthorizon-logo.png" alt="NXT Horizon" fill className="object-contain" />
+            </Link>
+            <Link href="https://stemise.org" target="_blank" className="relative h-10 w-32 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/stemise-logo.png" alt="STEMise" fill className="object-contain" />
+            </Link>
+            <Link href="https://www.biomedizone.org/" target="_blank" className="relative h-12 w-36 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/biomedizone-logo.png" alt="BioMedizone" fill className="object-contain" />
+            </Link>
+            <Link href="https://compbiosocucla.wixsite.com/my-site" target="_blank" className="relative h-10 w-24 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/ucla-logo.svg" alt="UCLA CompBio" fill className="object-contain" />
+            </Link>
+            <Link href="https://www.osu.edu/" target="_blank" className="relative h-12 w-12 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/osu-logo.svg" alt="Ohio State University" fill className="object-contain" />
+            </Link>
+            <Link href="https://www.nationwidechildrens.org/" target="_blank" className="relative h-10 w-40 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+              <Image src="/branding/nch-logo.svg" alt="Nationwide Children's Hospital" fill className="object-contain" />
+            </Link>
+          </div>
+        </div>
+
         {/* BOTTOM PARTNER INQUIRY CTA */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100/[0.08] bg-white/[0.015] px-5 py-3.5 text-xs backdrop-blur-xl">
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100/[0.08] bg-white/[0.015] px-5 py-3.5 text-xs backdrop-blur-xl">
           <div className="flex items-center gap-2.5 text-slate-300">
             <Handshake className="h-4 w-4 text-teal-300" />
             <span>Interested in research, clinical, or AI safety collaborations?</span>
