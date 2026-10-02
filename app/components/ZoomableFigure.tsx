@@ -50,7 +50,7 @@ export default function ZoomableFigure({
         alt={alt}
         width={width}
         height={height}
-        className={`h-auto w-full ${isLightbox ? "max-h-[90vh] object-contain" : ""}`}
+        className={`h-auto w-full ${isLightbox ? "max-h-[75vh] object-contain" : ""}`}
       />
       {overlaySrc && (
         <>
@@ -60,7 +60,7 @@ export default function ZoomableFigure({
             alt={overlayAlt || ""}
             width={width}
             height={height}
-            className={`absolute inset-0 h-auto w-full opacity-0 transition-opacity peer-checked:opacity-100 ${isLightbox ? "max-h-[90vh] object-contain" : ""}`}
+            className={`absolute inset-0 h-auto w-full opacity-0 transition-opacity peer-checked:opacity-100 ${isLightbox ? "max-h-[75vh] object-contain" : ""}`}
           />
           <label
             htmlFor={`${idPrefix}-toggle${isLightbox ? "-lb" : ""}`}
@@ -91,7 +91,7 @@ export default function ZoomableFigure({
 
       {isZoomed && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm md:p-12 cursor-zoom-out"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 p-4 pt-24 backdrop-blur-sm md:p-12 md:pt-28 cursor-zoom-out"
           onClick={(e) => {
             const target = e.target as HTMLElement;
             // Don't close if they clicked the overlay toggle label or input
