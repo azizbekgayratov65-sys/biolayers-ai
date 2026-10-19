@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { FileText, User, Clock, Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
+
+import { btnSecondary, pageShell } from "../../components/ui/styles";
+import { AmbientGlow } from "../../components/ui/Chrome";
 
 export type SavedPaper = {
   id: string;
@@ -24,6 +26,16 @@ export type UserProfile = {
   email?: string | null;
 };
 
+const LIMIT = 20;
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default function UserLibraryClient({
   profile,
   initialPapers,
@@ -35,248 +47,141 @@ export default function UserLibraryClient({
   username: string;
   userNotFound?: boolean;
 }) {
-  const router = useRouter();
   const [papers, setPapers] = useState<SavedPaper[]>(initialPapers);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(initialPapers.length >= 20);
+  const [hasMore, setHasMore] = useState(initialPapers.length >= LIMIT);
   const [error, setError] = useState<string | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(initialPapers.length);
-  const LIMIT = 20;
 
-  const handlePaperClick = (paper: SavedPaper) => {
-    router.push(`/mindmap/${paper.id}`);
-  };
-
-  const fetchMorePapers = useCallback(async () => {
+  const fetchMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     try {
       setLoadingMore(true);
       setError(null);
 
-      const res = await fetch(
+      const response = await fetch(
         `/api/library/username/${username}?limit=${LIMIT}&offset=${offsetRef.current}`,
       );
+      if (!response.ok) throw new Error("request failed");
 
-      if (!res.ok) {
-        throw new Error("Failed to load more papers");
-      }
+      const data = await response.json();
+      const page: SavedPaper[] = data.papers || [];
 
-      const data = await res.json();
-      const newPapers: SavedPaper[] = data.papers || [];
-
-      if (newPapers.length < LIMIT) {
-        setHasMore(false);
-      }
-
-      setPapers((prev) => [...prev, ...newPapers]);
-      offsetRef.current += newPapers.length;
-    } catch (err) {
-      console.error("[UserLibrary] Fetch more error:", err);
-      setError("Failed to load more papers. Please try again.");
+      if (page.length < LIMIT) setHasMore(false);
+      setPapers((current) => [...current, ...page]);
+      offsetRef.current += page.length;
+    } catch {
+      setError("More maps could not be loaded. Check your connection and try again.");
     } finally {
       setLoadingMore(false);
     }
   }, [loadingMore, hasMore, username]);
 
   useEffect(() => {
-    if (!sentinelRef.current) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          void fetchMorePapers();
-        }
-      },
-      { threshold: 0.1 },
-    );
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore && !error) {
+        void fetchMore();
+      }
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchMore, hasMore, loadingMore, error]);
 
-    observerRef.current.observe(sentinelRef.current);
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [fetchMorePapers, hasMore, loadingMore]);
-
-  const displayName =
-    profile.username ?? profile.fullName ?? username ?? "Researcher";
+  const displayName = profile.fullName ?? profile.username ?? username;
 
   return (
-    <div className="relative isolate min-h-screen bg-transparent">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(77,141,255,.07),transparent_62%)]"
-      />
+    <div className={`relative isolate ${pageShell} max-w-4xl pt-24 pb-24 sm:pt-28`}>
+      <AmbientGlow />
+      <nav aria-label="Breadcrumb" className="text-sm text-graphite">
+        <Link href="/library" className="hover:text-ink">
+          Library
+        </Link>
+        <span aria-hidden="true" className="mx-2">/</span>
+        <span aria-current="page" className="text-ink">@{username}</span>
+      </nav>
 
-      <div className="relative z-10 px-4 pb-16 pt-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl animate-fade-up">
-          {/* BACK LINK */}
-          <Link
-            href="/library"
-            className="mb-8 inline-flex items-center gap-2 min-h-[44px] text-sm font-medium text-slate-400 hover:text-emerald-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg px-2 -ml-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Public Library
+      {userNotFound ? (
+        <div className="mt-10">
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-white md:text-3xl">No researcher called @{username}</h1>
+          <p className="mt-3 text-graphite">The name may be misspelled, or the account was removed.</p>
+          <Link href="/library" className={`${btnSecondary} mt-6`}>
+            Browse the library
           </Link>
+        </div>
+      ) : (
+        <>
+          <header className="mt-8 flex items-center gap-5">
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-hoechst/15 text-2xl font-semibold text-hoechst-strong">
+              {profile.avatarUrl ? (
+                <Image
+                  src={profile.avatarUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  unoptimized
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span aria-hidden="true">{displayName.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate font-serif text-2xl font-bold tracking-tight text-white md:text-3xl">{displayName}</h1>
+              <p className="mt-1 text-graphite">
+                @{username}, {papers.length} {papers.length === 1 ? "map" : "maps"}
+                {hasMore ? " so far" : ""}
+              </p>
+            </div>
+          </header>
 
-          {/* USER HEADER */}
-          <div className="mb-10 rounded-2xl border border-slate-800/80 bg-slate-900/50 backdrop-blur-xl p-6">
-            <div className="flex flex-col md:flex-row md:items-center gap-5">
-              <div className="relative h-20 w-20 shrink-0 rounded-full border border-emerald-500/30 bg-emerald-950/40 flex items-center justify-center overflow-hidden shadow-inner">
-                {profile.avatarUrl ? (
-                  <Image
-                    src={profile.avatarUrl}
-                    alt={displayName}
-                    width={80}
-                    height={80}
-                    unoptimized
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <User className="h-10 w-10 text-emerald-400/80" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-white truncate">
-                    {displayName}
-                  </h1>
-                  <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
-                    <span className="tabular-nums font-bold mr-1">{papers.length}</span> {papers.length === 1 ? "Paper" : "Papers"}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm font-mono text-slate-400">@{username}</p>
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mb-6 rounded-xl border border-rose-500/30 bg-rose-950/20 p-4 text-center text-sm text-rose-200">
-              {error}
-            </div>
-          )}
-
-          {userNotFound ? (
-            <div className="py-16 text-center rounded-2xl border border-slate-800/60 bg-slate-900/30 p-8">
-              <p className="text-base text-slate-300">Researcher @{username} was not found.</p>
-              <div className="mt-4">
-                <Link
-                  href="/library"
-                  className="inline-flex items-center gap-2 min-h-[44px] rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-2.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Browse Public Papers
-                </Link>
-              </div>
-            </div>
-          ) : papers.length === 0 ? (
-            <div className="py-16 text-center text-slate-400 rounded-2xl border border-slate-800/50 bg-slate-900/20 p-8">
-              This researcher has not published any public mind maps yet.
-            </div>
+          {papers.length === 0 ? (
+            <p className="mt-12 text-graphite">@{username} has not saved any mind maps yet.</p>
           ) : (
             <>
-              <div className="space-y-4">
+              <ul className="mt-12 divide-y divide-rule border-y border-rule">
                 {papers.map((paper) => (
-                  <PaperCard
-                    key={paper.id}
-                    paper={paper}
-                    onClick={handlePaperClick}
-                  />
+                  <li key={paper.id} className="relative py-6">
+                    <h2 className="font-sans text-lg font-semibold leading-snug text-ink-strong">
+                      <Link
+                        href={`/mindmap/${paper.id}`}
+                        className="transition-colors after:absolute after:inset-0 hover:text-hoechst-strong"
+                      >
+                        {paper.title ?? paper.fileName ?? "Untitled paper"}
+                      </Link>
+                    </h2>
+                    <p className="mt-2 flex flex-wrap gap-x-4 text-sm text-graphite">
+                      <time dateTime={paper.createdAt}>{formatDate(paper.createdAt)}</time>
+                      {paper.fileType && <span>{paper.fileType.toUpperCase()}</span>}
+                    </p>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
-              <div ref={sentinelRef} className="h-20" aria-hidden="true">
+              {error && (
+                <div role="alert" className="mt-6">
+                  <p className="text-ink">{error}</p>
+                  <button type="button" onClick={() => void fetchMore()} className={`${btnSecondary} mt-3`}>
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              <div ref={sentinelRef} className="py-8 text-center text-sm text-graphite">
                 {loadingMore && (
-                  <div className="flex items-center justify-center gap-2 py-8">
-                    <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
-                    <span className="text-sm text-slate-400">Loading more…</span>
-                  </div>
-                )}
-                {hasMore === false && papers.length > 0 && (
-                  <p className="text-center text-xs text-slate-500 py-4 tabular-nums">
-                    End of library • {papers.length} papers loaded
-                  </p>
+                  <span role="status" className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Loading more
+                  </span>
                 )}
               </div>
             </>
           )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
-}
-
-function PaperCard({
-  paper,
-  onClick,
-}: {
-  paper: SavedPaper;
-  onClick: (paper: SavedPaper) => void;
-}) {
-  return (
-    <article
-      onClick={() => onClick(paper)}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-900/60 backdrop-blur-md p-5 md:p-6 transition-all duration-200 hover:border-emerald-500/30 hover:bg-slate-900/90 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-      role="button"
-      tabIndex={0}
-      aria-label={`Open mind map for ${paper.title ?? paper.fileName ?? "Untitled Paper"}`}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick(paper);
-        }
-      }}
-    >
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start gap-3.5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-400">
-              <FileText className="h-5 w-5" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base md:text-lg font-serif font-semibold text-slate-100 group-hover:text-emerald-300 transition-colors line-clamp-2">
-                {paper.title ?? paper.fileName ?? "Untitled Paper"}
-              </h3>
-              <p className="mt-1 text-xs text-slate-400">
-                <span className="font-medium text-slate-300">{paper.fileType ?? "Mind Map"}</span> • <span className="tabular-nums font-mono">{formatChars(paper.characterCount)}</span> chars
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5 font-mono tabular-nums">
-              <Clock className="h-3 w-3 text-slate-400" />
-              {formatDate(paper.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center shrink-0 self-end md:self-center">
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-300 group-hover:border-emerald-500/40 group-hover:bg-emerald-500/20 transition-all">
-            Open Map
-          </span>
-        </div>
-      </div>
-
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-r from-emerald-500/[0.04] to-transparent" />
-    </article>
-  );
-}
-
-function formatDate(iso: string) {
-  const date = new Date(iso);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatChars(count: number | null) {
-  if (!count) return "—";
-  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-  return count.toString();
 }

@@ -1,591 +1,228 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
-import {
-  ExternalLink,
-  Microscope,
-} from "lucide-react";
+import Link from "next/link";
+import { Microscope } from "lucide-react";
+
+import { pageShell, textLink } from "../components/ui/styles";
+import { AmbientGlow, Eyebrow } from "../components/ui/Chrome";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Who builds BioLayers AI, the physician-scientists who advise it, and how we handle your data.",
+};
+
+type Person = {
+  name: string;
+  role: string;
+  focus: string;
+  training: string;
+  photo: string;
+  linkedin: string;
+};
+
+const mentors: Person[] = [
+  {
+    name: "John-William Sidhom, MD, PhD",
+    role: "Physician-scientist in medical oncology, Weill Cornell Medicine and NewYork-Presbyterian",
+    focus: "Grounds BioLayers in clinically meaningful oncology workflows, multi-omics genomics and translational evidence.",
+    training: "MD and PhD, Johns Hopkins",
+    photo: "/mentorship/john-william-sidhom.png",
+    linkedin: "https://www.linkedin.com/in/john-william-sidhom-md-phd-b685abb/",
+  },
+  {
+    name: "Eric E. Gardner, PhD",
+    role: "Assistant Professor, Thoracic/Head and Neck Medical Oncology, MD Anderson; James P. Allison Institute",
+    focus: "Cancer plasticity, airway damage and new therapeutic targets in lung cancer.",
+    training: "PhD, Johns Hopkins",
+    photo: "/mentorship/eric-e-gardner.jpg",
+    linkedin: "https://www.linkedin.com/in/eric-edison-gardner-7b44a8120/",
+  },
+  {
+    name: "John Paul Shen, MD",
+    role: "Assistant Professor, Gastrointestinal Medical Oncology, MD Anderson; CPRIT Scholar",
+    focus: "Cancer genomics, CRISPR screens, synthetic lethality and machine-learning biomarkers in GI cancers.",
+    training: "PhD and fellowship, UC San Diego",
+    photo: "/mentorship/john-paul-shen.jpg",
+    linkedin: "https://www.linkedin.com/in/john-paul-shen-393a2ab/",
+  },
+  {
+    name: "Kathleen M. Schieffer, PhD",
+    role: "Assistant Professor, Nationwide Children's Hospital and The Ohio State University",
+    focus: "Pediatric tumour genomics and turning sequencing into clinical precision oncology.",
+    training: "PhD, Penn State College of Medicine",
+    photo: "/mentorship/kathleen-m-schieffer.jpg",
+    linkedin: "https://www.linkedin.com/in/kathleenmschieffer/",
+  },
+  {
+    name: "Bailey Glen, PhD",
+    role: "Senior Bioinformatics Scientist and Director, Hollings Cancer Center, MUSC",
+    focus: "Sequencing informatics, multi-omics architecture and reproducible pipelines.",
+    training: "PhD, Clemson University",
+    photo: "/mentorship/bailey-glen.jpg",
+    linkedin: "https://www.linkedin.com/in/bailey-glen-24a65b85/",
+  },
+];
 
 export default function AboutPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/3 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.045] blur-[170px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-20 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.035] blur-[150px]"
-      />
+    <div className={`relative isolate ${pageShell} pt-28 pb-24 sm:pt-32`}>
+      <AmbientGlow />
+      <header className="mx-auto max-w-3xl text-center animate-fade-up">
+        <Eyebrow icon={Microscope}>Leadership &amp; Scientific Mentorship</Eyebrow>
+        <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+          About <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">BioLayers AI</span>
+        </h1>
+        <p className="mx-auto mt-5 text-lg leading-relaxed text-ink">
+          BioLayers AI started in Tashkent in 2026. Its founder read more than a hundred cancer
+          papers and kept losing track of which mechanism came from which study, so he built the
+          tool he was missing: one that keeps every claim tied to its source.
+        </p>
+      </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
-            <Microscope className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
-              Leadership & Scientific Mentorship
-            </span>
-          </div>
+      <section aria-labelledby="founder-heading" className="mt-16 grid gap-8 md:grid-cols-[12rem_1fr] md:gap-12">
+        <div className="relative aspect-square w-40 overflow-hidden rounded-[20px] bg-slide md:w-48">
+          <Image
+            src="/mentorship/founder.png"
+            alt="Azizbek Gayratov"
+            fill
+            sizes="192px"
+            className="object-cover object-top"
+            priority
+          />
+        </div>
+        <div>
+          <h2 id="founder-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            Azizbek Gayratov
+          </h2>
+          <p className="mt-1 text-graphite">Founder and lead engineer. Graduate of Abu Ali Ibn Sina Specialized School, Tashkent.</p>
+          <p className="mt-4 max-w-prose leading-relaxed text-ink">
+            Builds the product and the science behind it: the mind map workspace, the cell atlas and
+            the flagship CAF, CXCL12 and CXCR4 case study. Works on computational oncology, knowledge
+            graphs and biomedical AI.
+          </p>
+          <a
+            href="https://www.linkedin.com/in/azizbekgayratov/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${textLink} mt-4 inline-flex min-h-10 items-center`}
+          >
+            LinkedIn
+          </a>
+        </div>
+      </section>
 
-          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Building BioLayers at the Intersection of{" "}
-            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
-              AI & Oncology
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
-            Developed by a passionate computational researcher in Tashkent with
-            guidance from leading physician-scientists in precision oncology and biomedical engineering.
+      <section aria-labelledby="mentors-heading" className="mt-24">
+        <div className="max-w-2xl">
+          <h2 id="mentors-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            Scientific mentors
+          </h2>
+          <p className="mt-4 leading-relaxed text-graphite">
+            Physician-scientists and computational biologists who review our direction and our
+            claims. Their guidance is personal: institutions are named for context and do not
+            endorse BioLayers AI.
           </p>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-75">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-teal-200/30 bg-teal-950/40 shadow-[0_0_25px_rgba(77,141,255,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/founder.png"
-                    alt="Azizbek Gayratov - Co-Founder of BioLayers AI"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/25 bg-teal-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
-                    <span className="h-1 w-1 rounded-full bg-teal-300" />
-                    Co-Founder & Lead Architect
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    Azizbek Gayratov
-                  </h2>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <p className="font-mono text-[10px] text-teal-300/80">
-                      Co-Founder of BioLayers AI · Tashkent
-                    </p>
-                    <span className="text-slate-600">·</span>
-                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-teal-200">
-                      <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-white shadow-sm">
-                        <Image
-                          src="/branding/ibn-sina.jpg"
-                          alt="Abu Ali Ibn Sina Specialized School"
-                          width={14}
-                          height={14}
-                          className="h-full w-full object-cover"
-                        />
-                      </span>
-                      Ibn Sina School Graduate
-                    </span>
-                  </div>
-                </div>
+        <ul className="mt-10 divide-y divide-rule border-y border-rule">
+          {mentors.map((person) => (
+            <li key={person.name} className="grid gap-5 py-8 sm:grid-cols-[6rem_1fr]">
+              <div className="relative h-24 w-24 overflow-hidden rounded-[20px] bg-slide">
+                <Image
+                  src={person.photo}
+                  alt={person.name}
+                  fill
+                  sizes="96px"
+                  className="object-cover object-top"
+                />
               </div>
-
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Read over 100 cancer manuscripts to engineer the tool he was missing —
-                reconstructing fragmented biomedical literature into explorable,
-                evidence-linked computational mind maps that empower oncologists to reason across disease layers.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-white p-0.5 shadow-sm">
-                    <Image
-                      src="/branding/ibn-sina.jpg"
-                      alt="Abu Ali Ibn Sina Specialized School"
-                      width={32}
-                      height={32}
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-teal-300/70">Secondary Education</div>
-                    <div className="truncate text-[10px] font-bold text-white">Ibn Sina School Graduate</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-teal-300/40 bg-[#070c14] p-0.5 shadow-sm">
-                    <Image
-                      src="/branding/biolayers-logo.png"
-                      alt="BioLayers AI"
-                      width={32}
-                      height={32}
-                      className="h-full w-full rounded-full object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-teal-300/70">Venture Leadership</div>
-                    <div className="truncate text-[10px] font-bold text-white">BioLayers AI · Tashkent</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {["Computational Oncology", "Knowledge Graphs", "Biomedical AI", "Graph Theory"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-slate-300"
+              <div>
+                <h3 className="text-xl font-semibold">{person.name}</h3>
+                <p className="mt-1 text-graphite">{person.role}</p>
+                <p className="mt-3 max-w-prose leading-relaxed text-ink">{person.focus}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+                  <span className="text-graphite-soft">{person.training}</span>
+                  <a
+                    href={person.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${textLink} inline-flex min-h-10 items-center`}
                   >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/azizbekgayratov/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-teal-300 transition hover:text-teal-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Lead Research & Engineering
-              </span>
-            </div>
-          </article>
-
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121c]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-150">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-teal-200/30 bg-teal-950/40 shadow-[0_0_25px_rgba(77,141,255,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/john-william-sidhom.png"
-                    alt="John-William Sidhom, M.D., Ph.D. - Scientific Mentor"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300/25 bg-sky-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-sky-200">
-                    <span className="h-1 w-1 rounded-full bg-sky-300" />
-                    Scientific Mentor
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    John-William Sidhom, M.D., Ph.D.
-                  </h2>
-                  <p className="font-mono text-[10px] text-sky-300/80">
-                    Physician-Scientist in Medical Oncology
-                  </p>
+                    LinkedIn
+                    <span className="sr-only">: {person.name}</span>
+                  </a>
                 </div>
               </div>
+            </li>
+          ))}
+        </ul>
 
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Providing scientific mentorship to ground BioLayers AI in clinically
-                meaningful oncology workflows, multi-omics genomics, and rigorous translational evidence.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/weill-cornell-medicine.png"
-                      alt="Weill Cornell Medicine"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-teal-300/70">Clinical Training</div>
-                    <div className="truncate text-[10px] font-bold text-white">Weill Cornell / NYP</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/johns-hopkins-school-of-medicine.png"
-                      alt="Johns Hopkins School of Medicine"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-teal-300/70">MD / PhD Training</div>
-                    <div className="truncate text-[10px] font-bold text-white">Johns Hopkins</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/john-william-sidhom-md-phd-b685abb/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-sky-300 transition hover:text-sky-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Precision Oncology Mentorship
-              </span>
-            </div>
-          </article>
-
-          {/* Card 3: Eric E. Gardner */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-amber-200/35 animate-fade-up delay-200">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-amber-400/30 bg-amber-950/40 shadow-[0_0_25px_rgba(245,158,11,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/eric-e-gardner.jpg"
-                    alt="Eric E. Gardner - Scientific Guidance & Thoracic Oncology"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/25 bg-amber-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-amber-200">
-                    <span className="h-1 w-1 rounded-full bg-amber-300" />
-                    Thoracic Oncology & Allison Institute
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    Eric E. Gardner
-                  </h2>
-                  <p className="font-mono text-[10px] text-amber-300/80">
-                    Assistant Professor, Thoracic/Head & Neck Medical Oncology · MD Anderson
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Principal Investigator at the James P. Allison Institute and MD Anderson Department of Thoracic/Head & Neck Medical Oncology,
-                investigating cancer plasticity, airway damage, and novel therapeutic targets in lung cancer.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/md-anderson.png"
-                      alt="MD Anderson Cancer Center"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-amber-300/70">Faculty Appointment</div>
-                    <div className="truncate text-[10px] font-bold text-white">MD Anderson</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/johns-hopkins-school-of-medicine.png"
-                      alt="Johns Hopkins School of Medicine"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-amber-300/70">Doctoral Training</div>
-                    <div className="truncate text-[10px] font-bold text-white">Johns Hopkins</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/eric-edison-gardner-7b44a8120/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-amber-300 transition hover:text-amber-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Thoracic Oncology & Allison Institute
-              </span>
-            </div>
-          </article>
-
-          {/* Card 4: John Paul Shen, M.D. */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-emerald-200/35 animate-fade-up delay-250">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-emerald-400/30 bg-emerald-950/40 shadow-[0_0_25px_rgba(16,185,129,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/john-paul-shen.jpg"
-                    alt="John Paul Shen, M.D. - Scientific Advisor & GI Oncology"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/25 bg-emerald-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-200">
-                    <span className="h-1 w-1 rounded-full bg-emerald-300" />
-                    GI Oncology & CPRIT Scholar
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    John Paul Shen
-                  </h2>
-                  <p className="font-mono text-[10px] text-emerald-300/80">
-                    Assistant Professor, Gastrointestinal Medical Oncology · MD Anderson
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Physician-scientist leading the Shen Laboratory at MD Anderson, specializing in cancer genomics,
-                CRISPR screening, synthetic lethal interactions, and machine learning biomarkers in colorectal and gastrointestinal cancers.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/md-anderson.png"
-                      alt="MD Anderson Cancer Center"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">Faculty Appointment</div>
-                    <div className="truncate text-[10px] font-bold text-white">MD Anderson</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/uc-san-diego.png"
-                      alt="UC San Diego"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-emerald-300/70">PhD & Fellowship</div>
-                    <div className="truncate text-[10px] font-bold text-white">UC San Diego</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/john-paul-shen-393a2ab/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-emerald-300 transition hover:text-emerald-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Gastrointestinal Precision Oncology
-              </span>
-            </div>
-          </article>
-
-          {/* Card 5: Kathleen M. Schieffer, Ph.D. */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-purple-200/35 animate-fade-up delay-300">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-purple-400/30 bg-purple-950/40 shadow-[0_0_25px_rgba(192,132,252,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/kathleen-m-schieffer.jpg"
-                    alt="Kathleen M. Schieffer, Ph.D. - Clinical Genomics & Pediatric Oncology"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300/25 bg-purple-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-purple-200">
-                    <span className="h-1 w-1 rounded-full bg-purple-300" />
-                    Clinical Genomics & Pediatric Oncology
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    Kathleen M. Schieffer
-                  </h2>
-                  <p className="font-mono text-[10px] text-purple-300/80">
-                    Assistant Professor · Nationwide Children&apos;s &amp; Ohio State University
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Clinical and translational genomicist at the Steve and Cindy Rasmussen Institute for Genomic Medicine,
-                investigating pediatric tumor genomics, transcriptomic complexity, and translating high-throughput sequencing into clinical precision oncology.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] p-1">
-                    <span className="font-mono text-[8.5px] font-bold text-purple-200 text-center leading-tight">NCH / OSU</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-purple-300/70">Faculty Appointment</div>
-                    <div className="truncate text-[10px] font-bold text-white">Nationwide Children&apos;s / OSU</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/penn-state.svg"
-                      alt="Penn State College of Medicine"
-                      width={50}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-purple-300/70">Doctoral Training</div>
-                    <div className="truncate text-[10px] font-bold text-white">Penn State Medicine</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/kathleenmschieffer/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-purple-300 transition hover:text-purple-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                Pediatric Cancer Genomics
-              </span>
-            </div>
-          </article>
-
-          {/* Card 6: Bailey Glen, Ph.D. */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/80 to-[#04080e]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all hover:border-cyan-200/35 animate-fade-up delay-350">
-            <div>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-400/30 bg-cyan-950/40 shadow-[0_0_25px_rgba(6,182,212,0.2)] sm:h-24 sm:w-24">
-                  <Image
-                    src="/mentorship/bailey-glen.jpg"
-                    alt="Bailey Glen, Ph.D. - Bioinformatics & NGS Architecture"
-                    fill
-                    sizes="96px"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04080e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/25 bg-cyan-400/[0.08] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-cyan-200">
-                    <span className="h-1 w-1 rounded-full bg-cyan-300" />
-                    Bioinformatics &amp; NGS Architecture
-                  </span>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                    Bailey Glen
-                  </h2>
-                  <p className="font-mono text-[10px] text-cyan-300/80">
-                    Senior Bioinformatics Scientist &amp; Director · Hollings Cancer Center, MUSC
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                Bioinformatics scientist directing high-throughput next-generation sequencing informatics,
-                multi-omics architecture, and reproducible computational pipelines supporting translational cancer genomics at Hollings Cancer Center.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] p-1">
-                    <span className="font-mono text-[8.5px] font-bold text-cyan-200 text-center leading-tight">MUSC</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-cyan-300/70">Faculty / Directorship</div>
-                    <div className="truncate text-[10px] font-bold text-white">Hollings Cancer Center · MUSC</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-                  <div className="relative flex h-8 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                    <Image
-                      src="/mentorship/clemson.svg"
-                      alt="Clemson University"
-                      width={36}
-                      height={20}
-                      className="h-auto max-h-6 w-auto object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[7px] uppercase text-cyan-300/70">Doctoral Training</div>
-                    <div className="truncate text-[10px] font-bold text-white">Clemson University</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between border-t border-teal-100/[0.06] pt-3 text-xs">
-              <a
-                href="https://www.linkedin.com/in/bailey-glen-24a65b85/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-cyan-300 transition hover:text-cyan-100"
-              >
-                <span>LinkedIn Profile</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-
-              <span className="font-mono text-[10px] text-slate-500">
-                NGS Informatics &amp; Multi-Omics
-              </span>
-            </div>
-          </article>
-        </div>
-
-        <p className="mx-auto mt-6 text-center text-[10px] text-slate-500 max-w-3xl">
-          Institutional and academic names (Abu Ali Ibn Sina Specialized School, MD Anderson Cancer Center, Weill Cornell Medicine, Johns Hopkins University School of Medicine, UC San Diego, Nationwide Children&apos;s Hospital, The Ohio State University, Penn State College of Medicine, Hollings Cancer Center / MUSC, Clemson University) are presented as biographical context for founders and mentors, and do not imply institutional endorsement of BioLayers AI.
+        <p className="mt-6 text-graphite">
+          We also work with partner organisations.{" "}
+          <Link href="/partners" className={textLink}>
+            See our partners
+          </Link>
         </p>
-      </div>
+      </section>
 
-      <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">
-        <span>BioLayers AI — Leadership & Research</span>
-        <div className="flex items-center gap-4">
-          <Link href="/journey" className="hover:text-slate-300">Mechanism Journey</Link>
-          <span>·</span>
-          <Link href="/partners" className="hover:text-slate-300">Partners & NXT Horizon</Link>
-          <span>·</span>
-          <Link href="/press" className="hover:text-slate-300">Press</Link>
+      <section id="privacy" aria-labelledby="privacy-heading" className="mt-24 scroll-mt-24 grid gap-8 lg:grid-cols-3">
+        <h2 id="privacy-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          Privacy
+        </h2>
+        <div className="max-w-prose space-y-4 leading-relaxed text-ink lg:col-span-2">
+          <p>
+            When you create an account we store your email, name and avatar from your sign-in
+            provider. For each mind map you save we store the map and the file name. We do not keep
+            the text of the paper you uploaded.
+          </p>
+          <p>
+            <strong className="text-ink-strong">Saved mind maps are public.</strong> Every map you
+            save appears in the Library, where anyone can read it. There is no private option yet, so
+            only map papers you are allowed to share. You can delete a saved map at any time from{" "}
+            <Link href="/settings" className={textLink}>
+              Settings
+            </Link>
+            .
+          </p>
+          <p>
+            Your Gemini API key is encrypted with AES-256-GCM before it is stored, and it is used only
+            to send your requests to Google Gemini. Those requests are covered by Google&rsquo;s terms.
+            You can remove the key from Settings.
+          </p>
+          <p>
+            We measure page visits with Vercel Analytics and Speed Insights. To delete your account
+            and everything attached to it, email{" "}
+            <a href="mailto:biolayers.ai@gmail.com" className={textLink}>
+              biolayers.ai@gmail.com
+            </a>
+            .
+          </p>
         </div>
-      </div>
+      </section>
+
+      <section id="terms" aria-labelledby="terms-heading" className="mt-20 scroll-mt-24 grid gap-8 lg:grid-cols-3">
+        <h2 id="terms-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          Terms
+        </h2>
+        <div className="max-w-prose space-y-4 leading-relaxed text-ink lg:col-span-2">
+          <p>
+            BioLayers AI is for research and education. It is not a medical device and must not be
+            used to diagnose or treat anyone.
+          </p>
+          <p>
+            Mind maps are generated by a language model and can be wrong. Each statement links to the
+            sentence it came from: check it there before you rely on it.
+          </p>
+          <p>
+            Atlas images keep the licence of the dataset they come from, shown on every record. Some
+            are for non-commercial research only.
+          </p>
+          <p>
+            Only upload papers you have the right to use. Anything you save is published to the
+            Library under your name.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

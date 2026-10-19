@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Error({
   error,
   reset,
@@ -15,16 +17,26 @@ export default function Error({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-slate-100">Something went wrong</h2>
+        <h1 className="text-lg font-semibold text-slate-100">This page failed to load</h1>
         <p className="text-sm leading-relaxed text-slate-400">
-          An unexpected error occurred. Please try again.
+          Something went wrong on our side while building this page. Trying again usually fixes it.
+          If it keeps happening, email biolayers.ai@gmail.com with the page address.
         </p>
-        <button
-          onClick={() => reset()}
-          className="rounded-[12px] border border-teal-200/25 bg-teal-300/[0.08] px-5 py-2.5 text-sm font-semibold text-teal-50 transition hover:border-teal-200/40 hover:bg-teal-300/[0.14]"
-        >
-          Try again
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="rounded-[12px] border border-teal-200/25 bg-teal-300/[0.08] px-5 py-2.5 text-sm font-semibold text-teal-50 transition hover:border-teal-200/40 hover:bg-teal-300/[0.14]"
+          >
+            Try again
+          </button>
+          <Link
+            href="/"
+            className="rounded-[12px] border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+          >
+            Go to the homepage
+          </Link>
+        </div>
       </div>
     </div>
   );

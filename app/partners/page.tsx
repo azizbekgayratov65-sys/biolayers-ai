@@ -1,830 +1,140 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
-import {
-  ExternalLink,
-  Globe2,
-  Cpu,
-  Handshake,
-  Mail,
-  Network,
-  ShieldCheck,
-  GraduationCap,
-  BookOpen,
-  Binary,
-  Microscope,
-} from "lucide-react";
+import { Globe2 } from "lucide-react";
 
-const nxtPillars = [
-  {
-    title: "Spectral Graph Theory",
-    desc: "Advancing directional graph algorithms, topological mechanism synthesis, and multi-scale causal networks.",
-    icon: Network,
-    badge: "Graph Theory",
-  },
-  {
-    title: "AI Safety & Verification",
-    desc: "Engineering robust, zero-hallucination mathematical architectures with verifiable evidence grounding.",
-    icon: ShieldCheck,
-    badge: "AI Safety",
-  },
-  {
-    title: "Frontier AI Ecosystem",
-    desc: "Connecting frontier AI benchmarks, open mathematical research, and precision oncology globally.",
-    icon: Cpu,
-    badge: "Frontier AI",
-  },
-];
+import { btnSecondary, pageShell, textLink } from "../components/ui/styles";
+import { AmbientGlow, Eyebrow } from "../components/ui/Chrome";
 
-const stemisePillars = [
-  {
-    title: "Hands-On STEM Access",
-    desc: "Democratizing practical biomedical and computational inquiry for students and learners worldwide.",
-    icon: GraduationCap,
-    badge: "STEM Access",
-  },
-  {
-    title: "Open Curriculum & Workshops",
-    desc: "Integrating interactive cancer knowledge graphs and causal diagrams into youth research programs.",
-    icon: BookOpen,
-    badge: "Curriculum",
-  },
-  {
-    title: "Global Youth Research",
-    desc: "Empowering the next generation of scientific leaders to explore molecular biology without barriers.",
-    icon: Globe2,
-    badge: "Global Reach",
-  },
-];
+export const metadata: Metadata = {
+  title: "Partners",
+  description: "Organisations BioLayers AI works with on research, education and outreach.",
+};
 
-const cbsUclaPillars = [
-  {
-    title: "Student Research & Seminars",
-    desc: "Connecting students across UCLA Computational and Systems Biology (CaSB) and bioinformatics.",
-    icon: Binary,
-    badge: "Seminars",
-  },
-  {
-    title: "Faculty & Peer Networking",
-    desc: "Fostering interdisciplinary dialogues across computational genomics, systems biology, and AI.",
-    icon: Network,
-    badge: "Networking",
-  },
-  {
-    title: "Literature Exploration",
-    desc: "Leveraging evidence-grounded oncology knowledge maps for student research workflows and hackathons.",
-    icon: Cpu,
-    badge: "CompBio Tools",
-  },
-];
+type Partner = {
+  name: string;
+  kind: string;
+  logo: string;
+  href: string;
+  site: string;
+  work: string;
+};
 
-const biomedizonePillars = [
+const partners: Partner[] = [
   {
-    title: "Global Research Scholars",
-    desc: "Empowering students across 68 countries through virtual biomedical research programs and capstones.",
-    icon: Microscope,
-    badge: "68+ Countries",
+    name: "NXT Horizon",
+    kind: "Strategic partner",
+    logo: "/branding/nxthorizon-logo.png",
+    href: "https://nxthorizon.org",
+    site: "nxthorizon.org",
+    work: "Research collaboration on graph methods and causal reasoning for the mechanism maps, including Project Cipher.",
   },
   {
-    title: "Open Biomedical Education",
-    desc: "Democratizing free educational resources, research journals, and mentorship for underserved communities.",
-    icon: BookOpen,
-    badge: "Open Education",
+    name: "STEMise",
+    kind: "Education nonprofit",
+    logo: "/branding/stemise-logo.png",
+    href: "https://stemise.org",
+    site: "stemise.org",
+    work: "Brings BioLayers maps into open STEM curricula and hands-on student workshops.",
   },
   {
-    title: "Youth Research Innovation",
-    desc: "Connecting rising investigators to interactive cancer genomics and computational knowledge graphs.",
-    icon: Globe2,
-    badge: "Youth Leadership",
-  },
-];
-
-
-const nchPillars = [
-  {
-    title: "Pediatric Oncology",
-    desc: "Applying precision AI knowledge graphs to pediatric cancer research and therapies.",
-    icon: Microscope,
-    badge: "Pediatrics",
+    name: "BioMedizone",
+    kind: "Student biomedical nonprofit",
+    logo: "/branding/biomedizone-logo.png",
+    href: "https://www.biomedizone.org/",
+    site: "biomedizone.org",
+    work: "A student research network of more than 3,000 students in 68 countries. Its scholars use BioLayers to explore cancer literature.",
   },
   {
-    title: "Translational Research",
-    desc: "Accelerating the path from molecular discovery to targeted patient care.",
-    icon: Network,
-    badge: "Translation",
+    name: "Computational Biologists Society at UCLA",
+    kind: "University student society",
+    logo: "/branding/ucla-logo.svg",
+    href: "https://compbiosocucla.wixsite.com/my-site",
+    site: "compbiosocucla.wixsite.com",
+    work: "Seminars, hackathons and literature workshops for students in computational and systems biology.",
   },
   {
-    title: "Clinical Innovation",
-    desc: "Translating complex biomedical pathways into actionable clinical models.",
-    icon: ShieldCheck,
-    badge: "Clinical AI",
-  },
-];
-
-const osuPillars = [
-  {
-    title: "Clinical Research Integration",
-    desc: "Bridging computational AI models with advanced clinical oncology research.",
-    icon: Microscope,
-    badge: "Oncology",
+    name: "The Ohio State University",
+    kind: "University",
+    logo: "/branding/osu-logo.svg",
+    href: "https://www.osu.edu/",
+    site: "osu.edu",
+    work: "Collaboration on applying knowledge graphs to oncology research.",
   },
   {
-    title: "Medical AI Innovation",
-    desc: "Collaborating on AI-driven diagnostics and biological knowledge representation.",
-    icon: Cpu,
-    badge: "AI Innovation",
-  },
-  {
-    title: "Academic Excellence",
-    desc: "Leveraging world-class medical, engineering, and bioinformatics expertise.",
-    icon: GraduationCap,
-    badge: "Academia",
+    name: "Nationwide Children's Hospital",
+    kind: "Children's hospital",
+    logo: "/branding/nch-logo.svg",
+    href: "https://www.nationwidechildrens.org/",
+    site: "nationwidechildrens.org",
+    work: "Collaboration on pediatric cancer research questions.",
   },
 ];
 
 export default function PartnersPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
-      {/* Ambient background glow atmospheres */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.045] blur-[170px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-10 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.035] blur-[150px]"
-      />
+    <div className={`relative isolate ${pageShell} pt-28 pb-24 sm:pt-32`}>
+      <AmbientGlow />
+      <header className="mx-auto max-w-3xl text-center animate-fade-up">
+        <Eyebrow icon={Globe2}>Ecosystem &amp; Strategic Alliances</Eyebrow>
+        <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">Partners</span>
+        </h1>
+        <p className="mx-auto mt-5 text-lg leading-relaxed text-ink">
+          Organisations we work with on research, teaching and outreach. Each entry says what the
+          collaboration covers.
+        </p>
+      </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        {/* HEADER */}
-        <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
-            <Globe2 className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
-              Ecosystem & Strategic Alliances
-            </span>
-          </div>
-
-          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Strategic Partnerships &{" "}
-            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
-              Frontier Innovation
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
-            BioLayers AI collaborates with leading innovation catalysts and frontier AI
-            organizations to advance precision oncology knowledge graphs and verifiable AI architectures.
-          </p>
-        </div>
-
-        <div className="mt-8 space-y-6">
-          {/* FEATURED STRATEGIC PARTNER: NXT HORIZON */}
-          <div className="rounded-[28px] border border-teal-200/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-75">
-            {/* Top Bar: Emblem + Brand Info + CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* Premium Emblem Card */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-white/20 bg-white p-2 shadow-[0_0_30px_rgba(0,210,255,0.25)] sm:h-20 sm:w-20">
-                  <Image
-                    src="/branding/nxthorizon-logo.png"
-                    alt="NXT Horizon Emblem"
-                    width={72}
-                    height={72}
-                    className="h-full w-full object-contain"
-                    style={{ width: "auto", height: "auto" }}
-                    priority
-                  />
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/30 bg-emerald-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-emerald-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                      Featured Strategic Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      AI Safety & Spectral Graph Theory
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    NXT Horizon
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    nxthorizon.org · Frontier AI Research Organization
-                  </div>
-                </div>
-              </div>
-
-              {/* Visit Website CTA */}
-              <a
-                href="https://nxthorizon.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-teal-200/30 bg-teal-300/[0.08] px-4 py-2.5 text-xs font-bold text-teal-50 transition hover:border-teal-200/60 hover:bg-teal-300/[0.18]"
-              >
-                <span>Explore nxthorizon.org</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
+      <ul className="mt-14 divide-y divide-rule border-y border-rule">
+        {partners.map((partner) => (
+          <li key={partner.name} className="grid gap-6 py-8 md:grid-cols-[10rem_1fr_auto] md:items-start">
+            <div className="flex h-20 w-40 items-center justify-center rounded-md bg-ink-strong p-3">
+              <Image
+                src={partner.logo}
+                alt=""
+                width={136}
+                height={56}
+                className="max-h-14 w-auto object-contain"
+              />
             </div>
-
-            {/* Core Collaboration Narrative & 3 Research Pillars */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
-                  Strategic Research Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Advancing Graph Theory & Zero-Hallucination Biological Reasoning
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  NXT Horizon collaborates with BioLayers AI to explore next-generation
-                  spectral graph theory, AI safety architectures, and causal reasoning networks —
-                  accelerating how computational knowledge graphs extract and verify complex oncology mechanisms.
-                </p>
-
-                {/* Badges strip */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["Spectral Graph Theory", "AI Safety", "AI4Math", "Causal Networks"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-teal-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3 Pillars Cards */}
-              <div className="space-y-2.5">
-                {nxtPillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-teal-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-teal-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-teal-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+            <div>
+              <h2 className="font-sans text-xl font-semibold text-ink-strong">{partner.name}</h2>
+              <p className="mt-0.5 text-graphite">{partner.kind}</p>
+              <p className="mt-3 max-w-prose leading-relaxed text-ink">{partner.work}</p>
             </div>
-          </div>
+            <a
+              href={partner.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${textLink} inline-flex min-h-10 items-center md:justify-end`}
+            >
+              {partner.site}
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </li>
+        ))}
+      </ul>
 
-          {/* STRATEGIC PARTNER: STEMise */}
-          <div className="rounded-[28px] border border-cyan-200/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-150">
-            {/* Top Bar: Emblem + Brand Info + CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* Emblem Card */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-cyan-300/30 bg-[#080d1a] p-2 shadow-[0_0_30px_rgba(34,211,238,0.2)] sm:h-20 sm:w-20">
-                  <Image
-                    src="/branding/stemise-logo.png"
-                    alt="STEMise Emblem"
-                    width={72}
-                    height={72}
-                    className="h-full w-full object-contain"
-                    style={{ width: "auto", height: "auto" }}
-                  />
-                </div>
+      <p className="mt-6 max-w-3xl text-sm leading-relaxed text-graphite">
+        Logos and names are used to identify the organisations we work with. They do not mean an
+        organisation endorses BioLayers AI or its results.
+      </p>
 
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-cyan-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-cyan-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                      Global STEM Education Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      Youth-Led Nonprofit · Open Curriculum
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    STEMise
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    stemise.org · Hands-On STEM & Global Technology Initiative
-                  </div>
-                </div>
-              </div>
-
-              {/* Visit Website CTA */}
-              <a
-                href="https://stemise.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-cyan-200/30 bg-cyan-300/[0.08] px-4 py-2.5 text-xs font-bold text-cyan-50 transition hover:border-cyan-200/60 hover:bg-cyan-300/[0.18]"
-              >
-                <span>Explore stemise.org</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-            </div>
-
-            {/* Core Collaboration Narrative & 3 Research Pillars */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-cyan-300">
-                  Educational Outreach & Curriculum Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Democratizing Hands-On Cancer Science & AI Literacy Globally
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  STEMise collaborates with BioLayers AI to make computational oncology and biological inquiry accessible to students and young researchers worldwide. By integrating visual knowledge maps into open STEM programs, learners can explore complex signaling pathways and cancer mechanisms through interactive, hands-on science.
-                </p>
-
-                {/* Badges strip */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["STEM Education", "Youth in STEM", "Open Curriculum", "AI Literacy"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-cyan-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3 Pillars Cards */}
-              <div className="space-y-2.5">
-                {stemisePillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-cyan-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-cyan-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-cyan-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* ACADEMIC PARTNER: COMPUTATIONAL BIOLOGISTS SOCIETY AT UCLA */}
-          <div className="rounded-[28px] border border-sky-300/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-200">
-            {/* Top Bar: Emblem + Brand Info + CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* UCLA Themed Emblem */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-sky-400/40 bg-gradient-to-br from-[#003B5C] via-[#005587] to-[#2774AE] p-2 shadow-[0_0_30px_rgba(39,116,174,0.35)] sm:h-20 sm:w-20">
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <span className="font-mono text-sm font-black tracking-widest text-[#FFD100] sm:text-base drop-shadow-sm">
-                      UCLA
-                    </span>
-                    <span className="font-mono text-[7px] font-bold uppercase tracking-wider text-sky-100">
-                      CompBio
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300/30 bg-sky-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-sky-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
-                      Academic Society Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      University of California, Los Angeles
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    Computational Biologists Society at UCLA
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    compbiosocucla.wixsite.com/my-site · UCLA Student Organization
-                  </div>
-                </div>
-              </div>
-
-              {/* Visit Website CTA */}
-              <a
-                href="https://compbiosocucla.wixsite.com/my-site"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-sky-200/30 bg-sky-300/[0.08] px-4 py-2.5 text-xs font-bold text-sky-50 transition hover:border-sky-200/60 hover:bg-sky-300/[0.18]"
-              >
-                <span>Visit compbiosocucla.wixsite.com</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-            </div>
-
-            {/* Core Collaboration Narrative & 3 Research Pillars */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-300">
-                  Academic Research & Community Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Advancing Student Research in Computational & Systems Biology
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  The Computational Biologists Society at UCLA connects students and researchers across Computational and Systems Biology (CaSB), bioinformatics, and genomics. BioLayers AI collaborates with the society to support student research workshops, literature synthesis seminars, and interactive oncology graph exploration.
-                </p>
-
-                {/* Badges strip */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["UCLA", "Computational Biology", "Bioinformatics", "Systems Biology", "Student Seminars"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-sky-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3 Pillars Cards */}
-              <div className="space-y-2.5">
-                {cbsUclaPillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-sky-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sky-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-sky-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* STRATEGIC PARTNER: BIOMEDIZONE */}
-          <div className="rounded-[28px] border border-teal-200/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-250">
-            {/* Top Bar: Emblem + Brand Info + CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* Emblem Card */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-teal-300/30 bg-[#081324] p-1.5 shadow-[0_0_30px_rgba(20,184,166,0.25)] sm:h-20 sm:w-20">
-                  <Image
-                    src="/branding/biomedizone-logo.png"
-                    alt="BioMedizone Emblem"
-                    width={72}
-                    height={72}
-                    className="h-full w-full object-contain"
-                    style={{ width: "auto", height: "auto" }}
-                  />
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-300/30 bg-teal-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-teal-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
-                      Global Biomedical Education Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      68+ Countries · Youth-Led Nonprofit
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    BioMedizone
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    biomedizone.org · International Biomedical Research & Education
-                  </div>
-                </div>
-              </div>
-
-              {/* Visit Website CTA */}
-              <a
-                href="https://www.biomedizone.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-teal-200/30 bg-teal-300/[0.08] px-4 py-2.5 text-xs font-bold text-teal-50 transition hover:border-teal-200/60 hover:bg-teal-300/[0.18]"
-              >
-                <span>Explore biomedizone.org</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-            </div>
-
-            {/* Core Collaboration Narrative & 3 Research Pillars */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
-                  Global Research & Education Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Expanding Access to Biomedical Research & Oncology Science
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  One of the world&apos;s largest student-led biomedical research and education nonprofits, impacting over 3,000 students across 68 countries. BioLayers AI collaborates with BioMedizone to empower youth research scholars with interactive cancer knowledge graphs, virtual biomedical instruction, and evidence-grounded literature tools.
-                </p>
-
-                {/* Badges strip */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["Biomedical Research", "68+ Countries", "Research Scholars", "Youth Empowerment", "Open Science"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-teal-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3 Pillars Cards */}
-              <div className="space-y-2.5">
-                {biomedizonePillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-teal-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-teal-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-teal-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        
-          {/* ACADEMIC PARTNER: OHIO STATE UNIVERSITY */}
-          <div className="rounded-[28px] border border-red-500/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-300">
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* OSU Themed Emblem */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-red-400/40 bg-gradient-to-br from-[#ba0c2f] via-[#a00000] to-[#666666] p-2 shadow-[0_0_30px_rgba(186,12,47,0.35)] sm:h-20 sm:w-20">
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <span className="font-mono text-sm font-black tracking-widest text-white sm:text-base drop-shadow-sm">
-                      OSU
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/30 bg-red-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-red-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                      Academic & Clinical Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      The Ohio State University
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    Ohio State University
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    osu.edu · Leading Academic Research Institution
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href="https://www.osu.edu/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-red-200/30 bg-red-300/[0.08] px-4 py-2.5 text-xs font-bold text-red-50 transition hover:border-red-200/60 hover:bg-red-300/[0.18]"
-              >
-                <span>Visit osu.edu</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-            </div>
-
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-red-300">
-                  Research & Clinical Integration Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Accelerating Medical AI and Oncology Research
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  The Ohio State University partners with BioLayers AI to drive the integration of computational knowledge graphs into advanced oncology research, bridging the gap between frontier AI and world-class clinical expertise.
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["Clinical Research", "Medical AI", "Oncology", "Bioinformatics"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-red-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                {osuPillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-red-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-red-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-red-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* CLINICAL PARTNER: NATIONWIDE CHILDRENS HOSPITAL */}
-          <div className="rounded-[28px] border border-blue-400/25 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8 animate-fade-up delay-400">
-            <div className="flex flex-wrap items-center justify-between gap-5 border-b border-teal-100/[0.08] pb-6">
-              <div className="flex items-center gap-4 sm:gap-5">
-                {/* NCH Themed Emblem */}
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-blue-400/40 bg-gradient-to-br from-[#005a9c] via-[#0073CF] to-[#00a3e0] p-2 shadow-[0_0_30px_rgba(0,90,156,0.35)] sm:h-20 sm:w-20">
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <span className="font-mono text-[10px] font-black tracking-wider text-white sm:text-xs drop-shadow-sm">
-                      NCH
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-300/30 bg-blue-400/[0.1] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-blue-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                      Clinical & Research Partner
-                    </span>
-                    <span className="font-mono text-[9px] text-teal-300/70">
-                      Nationwide Children&apos;s Hospital
-                    </span>
-                  </div>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    Nationwide Children&apos;s
-                  </h2>
-                  <div className="font-mono text-[11px] text-slate-400">
-                    nationwidechildrens.org · Pediatric Healthcare & Research
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href="https://www.nationwidechildrens.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-xl border border-blue-200/30 bg-blue-300/[0.08] px-4 py-2.5 text-xs font-bold text-blue-50 transition hover:border-blue-200/60 hover:bg-blue-300/[0.18]"
-              >
-                <span>Visit nationwidechildrens.org</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-            </div>
-
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div>
-                <div className="font-mono text-[9px] font-bold uppercase tracking-wider text-blue-300">
-                  Pediatric Research & Clinical Scope
-                </div>
-                <h3 className="mt-1 text-base font-bold text-teal-50 sm:text-lg">
-                  Transforming Pediatric Oncology via AI Knowledge Graphs
-                </h3>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                  BioLayers AI partners with Nationwide Children&apos;s Hospital to apply frontier AI and computational knowledge maps to pediatric cancer research, facilitating translational discovery from molecular mechanisms to targeted pediatric therapies.
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["Pediatric Oncology", "Clinical Research", "Precision Medicine", "Translational AI"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-blue-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                {nchPillars.map((pillar) => {
-                  const Icon = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.title}
-                      className="rounded-xl border border-teal-100/[0.08] bg-[#070d14]/70 p-3.5 transition hover:border-blue-200/25 hover:bg-[#0a121c]/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-blue-300">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-xs font-bold text-teal-50">
-                            {pillar.title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-blue-300/60">
-                          {pillar.badge}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        {pillar.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-        {/* BOTTOM PARTNER INQUIRY CTA */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100/[0.08] bg-white/[0.015] px-5 py-3.5 text-xs backdrop-blur-xl">
-          <div className="flex items-center gap-2.5 text-slate-300">
-            <Handshake className="h-4 w-4 text-teal-300" />
-            <span>Interested in research, clinical, or AI safety collaborations?</span>
-          </div>
-
-          <a
-            href="mailto:biolayers.ai@gmail.com?subject=Partnership%20Inquiry%20-%20BioLayers%20AI"
-            className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            <span>biolayers.ai@gmail.com</span>
-          </a>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">
-        <span>BioLayers AI Ecosystem & Alliances</span>
-        <div className="flex items-center gap-4">
-          <Link href="/about" className="hover:text-slate-300">About & Mentorship</Link>
-          <span>·</span>
-          <Link href="/press" className="hover:text-slate-300">Press & Coverage</Link>
-          <span>·</span>
-          <Link href="/mindmap" className="text-teal-300 hover:text-teal-200">Open Mind Map →</Link>
-        </div>
-      </div>
+      <section aria-labelledby="join-heading" className="mt-20 rounded-[24px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl px-6 py-10 sm:px-10">
+        <h2 id="join-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          Work with us
+        </h2>
+        <p className="mt-3 max-w-xl leading-relaxed text-graphite">
+          Labs, schools and student organisations can use BioLayers for teaching or research. Tell
+          us what you study and we will reply within a week.
+        </p>
+        <a
+          href="mailto:biolayers.ai@gmail.com?subject=Partnership%20with%20BioLayers%20AI"
+          className={`${btnSecondary} mt-6`}
+        >
+          Email biolayers.ai@gmail.com
+        </a>
+      </section>
     </div>
   );
 }

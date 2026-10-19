@@ -1,18 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import {
-  Play,
-  Pause,
-  RotateCcw,
-  Activity,
-  Compass,
-  Zap,
-  Layers,
-  Sparkles,
-  Info,
-  ShieldCheck,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Pause, Play, RotateCcw } from "lucide-react";
+
 import { FLAGSHIP_TRAJECTORY_POINTS } from "../../lib/atlasMasterCatalog";
 import type { TrajectoryPoint } from "../../lib/atlasTypes";
 
@@ -20,223 +10,139 @@ interface MigrationTrajectoryViewerProps {
   backgroundImageUrl?: string;
 }
 
+const TOTAL_FRAMES = 48;
+
+/*
+  Plays back the CAF migration series frame by frame.
+  The series has no traceable source recording (see lib/atlasIntegrity.ts),
+  so it is labelled illustrative and only values computed from the
+  points themselves are shown.
+*/
 export default function MigrationTrajectoryViewer({
   backgroundImageUrl = "/atlas/caf_specimen_reference.png",
 }: MigrationTrajectoryViewerProps) {
-  const [currentFrame, setCurrentFrame] = useState<number>(1);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
-  const [selectedTrackId, setSelectedTrackId] = useState<number | "all">("all");
-  const [showTrails, setShowTrails] = useState<boolean>(true);
-  const [showGradientVector, setShowGradientVector] = useState<boolean>(true);
+  const [frame, setFrame] = useState(1);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [selectedTrack, setSelectedTrack] = useState<number | "all">("all");
+  const [showTrails, setShowTrails] = useState(true);
 
-  const totalFrames = 48;
-
-  // Group trajectories by track ID
   const tracks = useMemo(() => {
     const map = new Map<number, TrajectoryPoint[]>();
-    for (const pt of FLAGSHIP_TRAJECTORY_POINTS) {
-      if (!map.has(pt.cell_track_id)) {
-        map.set(pt.cell_track_id, []);
-      }
-      map.get(pt.cell_track_id)!.push(pt);
+    for (const point of FLAGSHIP_TRAJECTORY_POINTS) {
+      const list = map.get(point.cell_track_id) ?? [];
+      list.push(point);
+      map.set(point.cell_track_id, list);
     }
-    // Sort each track by frame number
-    for (const [id, list] of map.entries()) {
-      list.sort((a, b) => a.frame_number - b.frame_number);
-    }
+    for (const list of map.values()) list.sort((a, b) => a.frame_number - b.frame_number);
     return map;
   }, []);
 
   const trackIds = useMemo(() => Array.from(tracks.keys()).sort((a, b) => a - b), [tracks]);
 
-  // Points at current frame
-  const currentPoints = useMemo(() => {
-    return FLAGSHIP_TRAJECTORY_POINTS.filter((pt) => pt.frame_number === currentFrame);
-  }, [currentFrame]);
+  const pointsNow = useMemo(
+    () => FLAGSHIP_TRAJECTORY_POINTS.filter((point) => point.frame_number === frame),
+    [frame],
+  );
 
-  // Current selected track metrics
-  const activeMetrics = useMemo(() => {
-    if (selectedTrackId === "all") {
-      const avgVel =
-        currentPoints.reduce((acc, p) => acc + p.instantaneous_velocity_um_min, 0) /
-        (currentPoints.length || 1);
-      const avgDisp =
-        currentPoints.reduce((acc, p) => acc + p.net_displacement_um, 0) /
-        (currentPoints.length || 1);
-      return {
-        velocity: avgVel.toFixed(2),
-        displacement: avgDisp.toFixed(1),
-        trackCount: currentPoints.length,
-        timestampMin: ((currentPoints[0]?.timestamp_sec ?? 0) / 60).toFixed(1),
-      };
-    } else {
-      const pt = currentPoints.find((p) => p.cell_track_id === selectedTrackId);
-      return {
-        velocity: (pt?.instantaneous_velocity_um_min ?? 0).toFixed(2),
-        displacement: (pt?.net_displacement_um ?? 0).toFixed(1),
-        angle: (pt?.trajectory_angle_deg ?? 0).toFixed(1),
-        trackCount: 1,
-        timestampMin: ((pt?.timestamp_sec ?? 0) / 60).toFixed(1),
-      };
-    }
-  }, [currentPoints, selectedTrackId]);
+  const metrics = useMemo(() => {
+    const shown =
+      selectedTrack === "all"
+        ? pointsNow
+        : pointsNow.filter((point) => point.cell_track_id === selectedTrack);
+    const count = shown.length || 1;
+    return {
+      speed: shown.reduce((sum, p) => sum + p.instantaneous_velocity_um_min, 0) / count,
+      displacement: shown.reduce((sum, p) => sum + p.net_displacement_um, 0) / count,
+      minutes: (shown[0]?.timestamp_sec ?? 0) / 60,
+      cells: shown.length,
+    };
+  }, [pointsNow, selectedTrack]);
 
-  // Animation playback loop
   useEffect(() => {
-    if (!isPlaying) return;
-    const interval = setInterval(() => {
-      setCurrentFrame((prev) => {
-        if (prev >= totalFrames) {
-          return 1;
-        }
-        return prev + 1;
-      });
-    }, 180 / playbackSpeed);
+    if (!playing) return;
+    const timer = setInterval(() => {
+      setFrame((current) => (current >= TOTAL_FRAMES ? 1 : current + 1));
+    }, 180 / speed);
+    return () => clearInterval(timer);
+  }, [playing, speed]);
 
-    return () => clearInterval(interval);
-  }, [isPlaying, playbackSpeed, totalFrames]);
+  const segmentButton = (active: boolean) =>
+    `min-h-10 rounded-md px-3 text-sm transition-colors ${
+      active ? "bg-white/[0.08] font-medium text-ink-strong" : "text-graphite hover:text-ink"
+    }`;
 
   return (
-    <div className="rounded-[24px] border border-teal-500/25 bg-[#050b14]/95 p-6 shadow-2xl backdrop-blur-xl">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-teal-500/15 pb-5">
+    <div>
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-0.5 text-xs font-semibold text-teal-200 mb-2">
-            <Activity className="h-3.5 w-3.5 text-teal-300" />
-            <span className="font-mono text-[9.5px] uppercase tracking-widest text-teal-100">
-              Live Migration Trajectory Analysis
-            </span>
-          </div>
-          <h3 className="text-xl font-bold text-white tracking-tight">
-            Pancreatic CAF CXCL12 Directional Chemotaxis Series
-          </h3>
-          <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-            48-frame multi-target single-cell tracking under a CXCL12 recombinant gradient (100 ng/mL).
-            Coordinates measured at 0.645 µm/px calibrated spatial resolution over 4 hours.
+          <h2 className="text-2xl">Migration time-lapse</h2>
+          <p className="mt-2 max-w-2xl leading-relaxed text-graphite">
+            {trackIds.length} tracked cells over {TOTAL_FRAMES} frames. Speed and displacement are
+            computed from the tracked positions.
           </p>
-        </div>
-
-        {/* Status badges */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-lg border border-teal-400/30 bg-teal-500/10 px-3 py-1 font-mono text-xs font-semibold text-teal-200">
-            Frame {currentFrame} / {totalFrames}
-          </span>
-          <span className="rounded-lg border border-white/10 bg-black/50 px-3 py-1 font-mono text-xs font-semibold text-slate-300">
-            T = {activeMetrics.timestampMin} min
-          </span>
         </div>
       </div>
 
-      {/* Main Interactive Stage */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Visualizer Canvas & Trajectory Overlay */}
-        <div className="lg:col-span-8 flex flex-col items-center">
-          <div className="relative aspect-[4/3] w-full max-w-[650px] overflow-hidden rounded-[20px] border border-teal-500/30 bg-black shadow-inner select-none">
-            {/* Background Reference Specimen Image */}
+      <p className="mt-4 rounded-[20px] border border-stain-yfp/30 bg-stain-yfp/[0.06] px-4 py-3 text-sm leading-relaxed text-ink">
+        Illustrative series. We could not trace these tracks to a recorded experiment, and the
+        background image is a different specimen. Use it to see how the viewer works, not as data.
+      </p>
+
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div>
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] border border-teal-500/25 bg-black shadow-2xl select-none">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={backgroundImageUrl}
-              alt="CAF Specimen Phase Reference"
-              className="h-full w-full object-cover opacity-80 filter brightness-95"
+              alt=""
+              className="h-full w-full object-cover opacity-60"
             />
-
-            {/* Gradient Overlay Vector */}
-            {showGradientVector && (
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-lg border border-cyan-400/40 bg-black/80 px-3 py-1.5 backdrop-blur-md">
-                <Compass className="h-4 w-4 text-cyan-300 animate-pulse" />
-                <div className="flex flex-col">
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-cyan-200 font-bold">
-                    CXCL12 Gradient Flow
-                  </span>
-                  <span className="font-mono text-[10px] text-slate-300">Vector: 45° · 100 ng/mL</span>
-                </div>
-              </div>
-            )}
-
-            {/* SVG Trajectory Overlay */}
             <svg
               viewBox="0 0 650 487"
-              className="absolute inset-0 h-full w-full pointer-events-none"
               preserveAspectRatio="none"
+              className="pointer-events-none absolute inset-0 h-full w-full"
+              role="img"
+              aria-label={`Cell positions at frame ${frame}`}
             >
-              <defs>
-                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {/* Trajectory Trails up to current frame */}
               {showTrails &&
-                Array.from(tracks.entries()).map(([tId, pts]) => {
-                  if (selectedTrackId !== "all" && selectedTrackId !== tId) return null;
-                  const visiblePts = pts.filter((p) => p.frame_number <= currentFrame);
-                  if (visiblePts.length < 2) return null;
-
-                  const color = visiblePts[0]?.cell_color || "#38bdf8";
-                  const pathD = visiblePts
-                    .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.coord_x_px} ${p.coord_y_px}`)
-                    .join(" ");
-
+                Array.from(tracks.entries()).map(([id, points]) => {
+                  if (selectedTrack !== "all" && selectedTrack !== id) return null;
+                  const visible = points.filter((p) => p.frame_number <= frame);
+                  if (visible.length < 2) return null;
                   return (
                     <path
-                      key={`trail-${tId}`}
-                      d={pathD}
+                      key={`trail-${id}`}
+                      d={visible
+                        .map((p, i) => `${i === 0 ? "M" : "L"} ${p.coord_x_px} ${p.coord_y_px}`)
+                        .join(" ")}
                       fill="none"
-                      stroke={color}
-                      strokeWidth="2.5"
+                      stroke={visible[0]?.cell_color || "#7ea6ff"}
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeOpacity="0.85"
-                      filter="url(#glow)"
                     />
                   );
                 })}
-
-              {/* Current Cell Marker Points */}
-              {currentPoints.map((pt) => {
-                const isSelected = selectedTrackId === "all" || selectedTrackId === pt.cell_track_id;
-                if (!isSelected) return null;
-
-                const color = pt.cell_color || "#38bdf8";
-
+              {pointsNow.map((point) => {
+                if (selectedTrack !== "all" && selectedTrack !== point.cell_track_id) return null;
                 return (
-                  <g key={`marker-${pt.cell_track_id}`}>
-                    {/* Pulsing ring */}
+                  <g key={`marker-${point.cell_track_id}`}>
                     <circle
-                      cx={pt.coord_x_px}
-                      cy={pt.coord_y_px}
-                      r="9"
-                      fill="none"
-                      stroke={color}
-                      strokeWidth="2"
-                      strokeOpacity="0.6"
-                      className="animate-ping"
-                    />
-                    {/* Solid center dot */}
-                    <circle
-                      cx={pt.coord_x_px}
-                      cy={pt.coord_y_px}
-                      r="5.5"
-                      fill={color}
-                      stroke="#ffffff"
+                      cx={point.coord_x_px}
+                      cy={point.coord_y_px}
+                      r="5"
+                      fill={point.cell_color || "#7ea6ff"}
+                      stroke="#f2f5f7"
                       strokeWidth="1.5"
                     />
-                    {/* Track ID tag */}
                     <text
-                      x={pt.coord_x_px + 8}
-                      y={pt.coord_y_px - 8}
-                      fill="#ffffff"
-                      fontSize="10"
-                      fontFamily="monospace"
-                      fontWeight="bold"
-                      className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                      x={point.coord_x_px + 8}
+                      y={point.coord_y_px - 8}
+                      fill="#f2f5f7"
+                      fontSize="11"
                     >
-                      C{pt.cell_track_id}
+                      {point.cell_track_id}
                     </text>
                   </g>
                 );
@@ -244,205 +150,122 @@ export default function MigrationTrajectoryViewer({
             </svg>
           </div>
 
-          {/* Player & Scrubber Controls */}
-          <div className="mt-4 w-full max-w-[650px] rounded-[16px] border border-teal-500/20 bg-[#081322] p-4 backdrop-blur-md">
-            {/* Scrubber slider */}
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs text-slate-400">01</span>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPlaying((on) => !on)}
+              aria-label={playing ? "Pause" : "Play"}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-hoechst text-field transition-colors hover:bg-hoechst-strong"
+            >
+              {playing ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
+            </button>
+            <input
+              type="range"
+              min={1}
+              max={TOTAL_FRAMES}
+              value={frame}
+              onChange={(event) => setFrame(Number(event.target.value))}
+              aria-label="Frame"
+              className="flex-1"
+            />
+            <span className="w-20 text-right text-sm tabular-nums text-ink">
+              {frame} / {TOTAL_FRAMES}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setPlaying(false);
+                setFrame(1);
+              }}
+              aria-label="Back to first frame"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-graphite transition-colors hover:bg-white/[0.06] hover:text-ink"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-1" role="group" aria-label="Playback speed">
+              {[1, 2, 4].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={speed === value}
+                  onClick={() => setSpeed(value)}
+                  className={segmentButton(speed === value)}
+                >
+                  {value}×
+                </button>
+              ))}
+            </div>
+            <label className="inline-flex min-h-10 items-center gap-2 text-sm text-ink">
               <input
-                type="range"
-                min="1"
-                max={totalFrames}
-                value={currentFrame}
-                onChange={(e) => setCurrentFrame(Number(e.target.value))}
-                aria-label="Time-lapse frame scrubber"
-                className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-teal-950/60 accent-teal-400 focus:outline-none"
+                type="checkbox"
+                checked={showTrails}
+                onChange={(event) => setShowTrails(event.target.checked)}
+                className="h-4 w-4"
               />
-              <span className="font-mono text-xs text-slate-400">{totalFrames}</span>
-            </div>
-
-            {/* Buttons Row */}
-            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  style={{ touchAction: "manipulation" }}
-                  className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[10px] border border-teal-400/40 bg-teal-500/20 px-4 py-1.5 text-xs font-bold text-teal-100 hover:bg-teal-500/30 transition shadow-sm"
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="h-3.5 w-3.5" /> Pause
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-3.5 w-3.5" /> Play Time-Lapse
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsPlaying(false);
-                    setCurrentFrame(1);
-                  }}
-                  title="Reset to frame 1"
-                  className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-[10px] border border-white/10 bg-white/5 p-2 text-slate-300 hover:bg-white/10 hover:text-white transition"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </button>
-
-                {/* Speed selector */}
-                <div className="flex items-center rounded-[10px] border border-white/10 bg-black/40 p-0.5">
-                  {[1, 2, 4].map((spd) => (
-                    <button
-                      key={spd}
-                      type="button"
-                      onClick={() => setPlaybackSpeed(spd)}
-                      className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-lg transition ${
-                        playbackSpeed === spd
-                          ? "bg-teal-500/30 text-teal-200"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {spd}x
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Toggles */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={showTrails}
-                    onChange={(e) => setShowTrails(e.target.checked)}
-                    className="rounded border-teal-500/30 bg-black text-teal-400 focus:ring-teal-400"
-                  />
-                  <span>Trails</span>
-                </label>
-
-                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={showGradientVector}
-                    onChange={(e) => setShowGradientVector(e.target.checked)}
-                    className="rounded border-teal-500/30 bg-black text-teal-400 focus:ring-teal-400"
-                  />
-                  <span>Gradient</span>
-                </label>
-              </div>
-            </div>
+              Show trails
+            </label>
           </div>
         </div>
 
-        {/* Sidebar: Quantitative Morphodynamics & Track Selector */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Track Filter Tabs */}
-          <div className="rounded-[18px] border border-teal-500/20 bg-[#070e1a] p-4">
-            <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-teal-300 block mb-2.5">
-              Select Cell Track
-            </span>
-            <div className="grid grid-cols-3 gap-1.5">
+        <div>
+          <p className="text-sm text-graphite">Cells</p>
+          <div className="mt-2 flex flex-wrap gap-1" role="group" aria-label="Choose a cell">
+            <button
+              type="button"
+              aria-pressed={selectedTrack === "all"}
+              onClick={() => setSelectedTrack("all")}
+              className={segmentButton(selectedTrack === "all")}
+            >
+              All
+            </button>
+            {trackIds.map((id) => (
               <button
+                key={id}
                 type="button"
-                onClick={() => setSelectedTrackId("all")}
-                className={`px-2.5 py-1.5 text-xs font-mono font-semibold rounded-lg border transition ${
-                  selectedTrackId === "all"
-                    ? "border-teal-400/50 bg-teal-500/20 text-teal-200"
-                    : "border-white/5 bg-white/[0.02] text-slate-400 hover:text-white"
-                }`}
+                aria-pressed={selectedTrack === id}
+                onClick={() => setSelectedTrack(id)}
+                className={`${segmentButton(selectedTrack === id)} inline-flex items-center gap-2`}
               >
-                All (5 Cells)
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: tracks.get(id)?.[0]?.cell_color || "#7ea6ff" }}
+                />
+                Cell {id}
               </button>
-              {trackIds.map((tId) => {
-                const samplePt = tracks.get(tId)?.[0];
-                return (
-                  <button
-                    key={tId}
-                    type="button"
-                    onClick={() => setSelectedTrackId(tId)}
-                    className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-mono font-semibold rounded-lg border transition ${
-                      selectedTrackId === tId
-                        ? "border-teal-400/50 bg-teal-500/20 text-white"
-                        : "border-white/5 bg-white/[0.02] text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: samplePt?.cell_color || "#38bdf8" }}
-                    />
-                    Cell #{tId}
-                  </button>
-                );
-              })}
-            </div>
+            ))}
           </div>
 
-          {/* Real-time Dynamic Metrics Card */}
-          <div className="rounded-[18px] border border-teal-500/20 bg-[#070e1a] p-4 space-y-3">
-            <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-teal-300 block">
-              Kinematic Metrics · Frame {currentFrame}
-            </span>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <span className="text-slate-400 text-[10px] font-mono block">VELOCITY</span>
-                <span className="text-lg font-bold font-mono text-teal-200">
-                  {activeMetrics.velocity}{" "}
-                  <span className="text-xs text-slate-400 font-normal">µm/min</span>
-                </span>
-              </div>
-
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                <span className="text-slate-400 text-[10px] font-mono block">DISPLACEMENT</span>
-                <span className="text-lg font-bold font-mono text-teal-200">
-                  {activeMetrics.displacement}{" "}
-                  <span className="text-xs text-slate-400 font-normal">µm</span>
-                </span>
-              </div>
+          <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-rule pt-4" aria-live="polite">
+            <div>
+              <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Speed</dt>
+              <dd className="text-xl tabular-nums text-ink-strong">
+                {metrics.speed.toFixed(2)} <span className="text-sm text-graphite">µm/min</span>
+              </dd>
             </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 space-y-1 text-xs">
-              <div className="flex justify-between text-slate-300">
-                <span className="text-slate-400">Tracked Targets:</span>
-                <span className="font-mono font-semibold text-white">
-                  {activeMetrics.trackCount} {activeMetrics.trackCount === 1 ? "cell" : "cells"}
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-300">
-                <span className="text-slate-400">Chemotactic Index:</span>
-                <span className="font-mono font-semibold text-emerald-300">0.86 ± 0.04 (High)</span>
-              </div>
-              <div className="flex justify-between text-slate-300">
-                <span className="text-slate-400">CXCR4 Activation:</span>
-                <span className="font-mono font-semibold text-cyan-300">Phosphorylated (+2.4x)</span>
-              </div>
+            <div>
+              <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Net displacement</dt>
+              <dd className="text-xl tabular-nums text-ink-strong">
+                {metrics.displacement.toFixed(1)} <span className="text-sm text-graphite">µm</span>
+              </dd>
             </div>
-          </div>
-
-          {/* Biological Provenance Note */}
-          <div className="rounded-[18px] border border-white/10 bg-white/[0.02] p-4 text-xs text-slate-300 space-y-2">
-            <div className="flex items-center gap-1.5 font-bold text-teal-300">
-              <ShieldCheck className="h-4 w-4" />
-              <span>Scientific Rigor & Provenance</span>
+            <div>
+              <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Time</dt>
+              <dd className="text-xl tabular-nums text-ink-strong">
+                {metrics.minutes.toFixed(0)} <span className="text-sm text-graphite">min</span>
+              </dd>
             </div>
-            <p className="text-[11px] leading-relaxed text-slate-400">
-              Tracks generated using TrackMate v7 Laplacian of Gaussian (LoG) detector and Simple LAP Tracker on
-              time-lapse DIC/fluorescence series. Reference DOI:{" "}
-              <a
-                href="https://doi.org/10.1158/0008-5472.CAN-18-2067"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-teal-300 hover:underline font-mono"
-              >
-                10.1158/0008-5472.CAN-18-2067
-              </a>
-              .
-            </p>
-          </div>
+            <div>
+              <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Cells shown</dt>
+              <dd className="text-xl tabular-nums text-ink-strong">{metrics.cells}</dd>
+            </div>
+          </dl>
+          {selectedTrack === "all" && (
+            <p className="mt-2 text-sm text-graphite-soft">Averages across the cells shown.</p>
+          )}
         </div>
       </div>
     </div>

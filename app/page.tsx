@@ -1,456 +1,398 @@
 import Link from "next/link";
-import Image from "next/image";
-import {
-  ArrowRight,
-  Workflow,
-  Sparkles,
-  Network,
-  Globe2,
-  BookOpen,
-  Microscope,
-  Compass,
-  FileText,
-  CheckCircle2,
-  Activity,
-  Layers,
-  ShieldCheck,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, Microscope, Sparkles, Workflow } from "lucide-react";
+
+import SpecimenViewer from "./components/home/SpecimenViewer";
+import EvidenceTag, { type EvidenceLevel } from "./components/home/EvidenceTag";
+import ZoomableFigure from "./components/ZoomableFigure";
+import { Eyebrow } from "./components/ui/Chrome";
+import { btnPrimary, btnSecondary, pageShell, textLink } from "./components/ui/styles";
 
 export const metadata = {
-  title: "BioLayers AI — Computational Oncology & Mind Map Workspace",
+  title: "BioLayers AI: from papers to living cells",
   description:
-    "Transform complex cancer biology literature into explorable, evidence-grounded mechanistic knowledge graphs and multi-channel microscopy views.",
+    "BioLayers AI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.",
 };
 
-const highlights = [
+type ChainStep = {
+  claim: string;
+  level: EvidenceLevel;
+  detail: string;
+  sources: { label: string; href: string }[];
+  context?: string;
+};
+
+// From research/cell-pipeline/knowledge/literature.json (v0.2.0) and the
+// flagship cell U373-02-T7 in research/cell-pipeline/handoff/u373_seq02.
+const flagshipChain: ChainStep[] = [
   {
-    icon: Compass,
-    title: "4-Step Mechanism Journey",
-    desc: "Interactive computational walkthrough: from raw manuscript tokens to directional causal graphs.",
-    href: "/journey",
-    action: "Explore Journey",
-    badge: "Interactive Walkthrough",
+    claim: "Fibroblasts in tumours secrete CXCL12",
+    level: "literature",
+    detail:
+      "Carcinoma-associated fibroblasts secrete elevated CXCL12, which acts through CXCR4 on carcinoma cells.",
+    sources: [{ label: "Orimo et al., Cell 2005", href: "https://pubmed.ncbi.nlm.nih.gov/15882617/" }],
+    context: "Shown in breast carcinoma, not glioma.",
   },
   {
-    icon: BookOpen,
-    title: "Leadership & Mentorship",
-    desc: "Founded in Tashkent with precision oncology and biomedical engineering mentorship.",
-    href: "/about",
-    action: "Meet the Team",
-    badge: "Precision Oncology",
+    claim: "CXCL12 acts on CXCR4 on glioma cells",
+    level: "literature",
+    detail:
+      "CXCR4 is the main chemokine receptor on 13 of 16 human glioma cell lines, and CXCL12 makes those cells move toward it.",
+    sources: [{ label: "Zhou et al., J Biol Chem 2002", href: "https://pubmed.ncbi.nlm.nih.gov/12388552/" }],
+    context: "Glioma cell lines and resected tumours, in vitro.",
   },
   {
-    icon: Globe2,
-    title: "Strategic Alliances",
-    desc: "Partnered with NXT Horizon to scale AI-driven oncology knowledge mapping globally.",
-    href: "/partners",
-    action: "View Partners",
-    badge: "Global Initiative",
+    claim: "CXCR4 drives glioma invasion",
+    level: "literature",
+    detail:
+      "Invasive glioma cells overexpress CXCR4, and blocking it impairs invasion. CXCL12 and CXCR4 rise with tumour grade.",
+    sources: [
+      { label: "Ehtesham et al., Oncogene 2006", href: "https://pubmed.ncbi.nlm.nih.gov/16407848/" },
+      { label: "Rempel et al., Clin Cancer Res 2000", href: "https://pubmed.ncbi.nlm.nih.gov/10656438/" },
+    ],
+  },
+  {
+    claim: "This cell migrates",
+    level: "observed",
+    detail:
+      "Glioblastoma cell U373-02-T7, tracked for 28.5 hours: 175.9 µm net displacement, 0.193 µm per minute, directionality 0.53.",
+    sources: [
+      {
+        label: "Cell Tracking Challenge, PhC-C2DH-U373",
+        href: "https://celltrackingchallenge.net/2d-datasets/",
+      },
+    ],
+  },
+];
+
+const tools = [
+  {
+    name: "Mind map",
+    href: "/mindmap",
+    action: "Map a paper",
+    body: "Upload a PDF or DOCX and get a structured map of its mechanisms, each linked to the sentence it came from. Uses your own Gemini API key.",
+  },
+  {
+    name: "Cell atlas",
+    href: "/cells",
+    action: "Browse the atlas",
+    body: "634 catalogued microscopy records from the Broad Bioimage Benchmark Collection and the Cell Tracking Challenge, each with its source and licence.",
+  },
+  {
+    name: "Cipher",
+    href: "/cipher",
+    action: "Open Cipher",
+    body: "Cause-and-effect maps of cancer pathways such as KRAS G12D resistance, readable in plain language or with full terminology.",
+  },
+  {
+    name: "Library",
+    href: "/library",
+    action: "Read the library",
+    body: "Mind maps that other researchers have saved, newest first, with a page for each author.",
+  },
+];
+
+const partners = [
+  { name: "NXT Horizon", role: "Strategic partner", href: "https://nxthorizon.org" },
+  { name: "STEMise", role: "Open STEM curricula", href: "https://stemise.org" },
+  { name: "BioMedizone", role: "Student biomedical network", href: "https://www.biomedizone.org/" },
+  {
+    name: "Computational Biologists Society at UCLA",
+    role: "Seminars and hackathons",
+    href: "https://compbiosocucla.wixsite.com/my-site",
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-4 pt-28 pb-12 sm:px-8 sm:pt-32 lg:px-12 lg:pt-36">
+    <div className="relative isolate overflow-hidden">
       {/* Dark-field fluorescence ambient backdrops */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-20 h-[550px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(43,255,136,0.06),transparent_70%)] blur-[140px]"
+        className="pointer-events-none absolute left-1/2 top-[18rem] -z-20 h-[550px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(43,255,136,0.06),transparent_70%)] blur-[140px]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-4 top-1/3 -z-20 h-[480px] w-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(77,141,255,0.05),transparent_70%)] blur-[150px]"
+        className="pointer-events-none absolute right-4 top-[30rem] -z-20 h-[480px] w-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(77,141,255,0.05),transparent_70%)] blur-[150px]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-8 bottom-1/4 -z-20 h-[400px] w-[450px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(161,92,255,0.04),transparent_70%)] blur-[160px]"
+        className="pointer-events-none absolute left-8 top-[70rem] -z-20 h-[400px] w-[450px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(161,92,255,0.04),transparent_70%)] blur-[160px]"
       />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
-        {/* =========================================================================
-            HERO SECTION: Hick's & Fitts's Law Dominant Primary Action
-            ========================================================================= */}
-        <section className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/25 bg-teal-300/[0.06] px-4 py-1.5 backdrop-blur-xl shadow-[0_0_20px_rgba(43,255,136,0.08)]">
-            <Sparkles className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-teal-100/90">
-              AI-Driven Computational Oncology
-            </span>
+      {/* Hero: the real specimen is the first thing you see */}
+      <section className={`${pageShell} pt-28 sm:pt-32 lg:pt-36`}>
+        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <div className="animate-fade-up lg:sticky lg:top-32">
+            <Eyebrow icon={Sparkles}>AI-Driven Computational Oncology</Eyebrow>
+            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+              From papers to <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">living cells</span>
+            </h1>
+            <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-ink">
+              BioLayers AI connects biomedical literature, biological mechanisms, real microscopy,
+              and cellular phenotypes into evidence-grounded maps for computational oncology.
+            </p>
+            <p className="mt-4 max-w-[34rem] leading-relaxed text-graphite">
+              Every statement carries its source: a PubMed ID, a dataset accession, or a measurement
+              you can check in the image yourself.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/mindmap" className={`group ${btnPrimary}`}>
+                <Workflow className="h-5 w-5 text-emerald-300" aria-hidden="true" />
+                Map a paper
+                <ArrowRight className="h-4 w-4 text-emerald-300 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+              <Link href="/cells" className={btnSecondary}>
+                <Microscope className="h-4 w-4 text-sky-300" aria-hidden="true" />
+                Browse the cell atlas
+              </Link>
+            </div>
+            <p className="mt-10 max-w-[34rem] border-t border-rule pt-5 text-sm leading-relaxed text-graphite">
+              On 200 benchmark images, the segmentation model matched 22,212 hand-annotated nuclei
+              with a pixel overlap (IoU) of 0.942.{" "}
+              <Link href="/validation" className={textLink}>
+                Read the validation report
+              </Link>
+            </p>
           </div>
 
-          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-            Reconstruct cancer biology from{" "}
-            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
-              fragmented literature
-            </span>
-          </h1>
+          <SpecimenViewer />
+        </div>
+      </section>
 
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-slate-300/85 sm:text-base">
-            BioLayers AI transforms scientific papers into explorable,
-            evidence-grounded mechanistic knowledge graphs — connecting genes,
-            proteins, pathways, and therapeutic targets with verbatim manuscript grounding.
+      {/* Flagship case: a real sequence, so it is numbered */}
+      <section className={`${pageShell} mt-32`} aria-labelledby="flagship-heading">
+        <div className="max-w-2xl">
+          <h2 id="flagship-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            One mechanism, followed from paper to cell
+          </h2>
+          <p className="mt-5 text-lg leading-relaxed text-graphite">
+            Our flagship case links a glioblastoma cell we tracked for 28.5 hours to the
+            CXCL12/CXCR4 signalling axis. Each step shows where its evidence comes from, and the
+            last link is a hypothesis, not a measurement.
           </p>
+        </div>
 
-          {/* Primary Action + Secondary Group */}
-          <div className="mt-8 flex flex-col items-center justify-center gap-4">
-            {/* Dominant Primary CTA (Fitts's Law compliant >= 48px hit target, high contrast FITC emerald) */}
-            <Link
-              href="/mindmap"
-              className="group relative inline-flex min-h-[52px] items-center justify-center gap-3 rounded-[16px] border-2 border-emerald-400/50 bg-emerald-400/15 px-8 py-3.5 text-sm sm:text-base font-bold text-emerald-100 shadow-[0_0_30px_rgba(43,255,136,0.22)] backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white hover:shadow-[0_0_45px_rgba(43,255,136,0.38)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2bff88] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+        <div className="mt-14 grid gap-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16">
+          <ol className="relative">
+            {flagshipChain.map((step, index) => (
+              <li key={step.claim} className="relative grid grid-cols-[2.5rem_1fr] gap-x-4 pb-10 last:pb-0">
+                {index < flagshipChain.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-[1.25rem] top-10 bottom-0 w-px bg-rule-strong"
+                  />
+                )}
+                <span
+                  aria-hidden="true"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full border border-rule-strong bg-field font-serif text-lg text-ink"
+                >
+                  {index + 1}
+                </span>
+                <div className="pt-1.5">
+                  <h3 className="text-lg font-semibold">{step.claim}</h3>
+                  <div className="mt-1.5">
+                    <EvidenceTag level={step.level} />
+                  </div>
+                  <p className="mt-2 max-w-prose leading-relaxed text-ink">{step.detail}</p>
+                  {step.context && (
+                    <p className="mt-1.5 text-sm text-graphite">{step.context}</p>
+                  )}
+                  <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                    {step.sources.map((source) => (
+                      <li key={source.href}>
+                        <a
+                          href={source.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={textLink}
+                        >
+                          {source.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div>
+            <ZoomableFigure
+              idPrefix="flagship-figure"
+              src="/validation/u373_flagship.png"
+              alt="Flagship figure: a phase-contrast frame of U373 glioblastoma cells with the tracked cell outlined, its migration path, measured phenotype, and the CXCL12/CXCR4 literature links."
+              width={1950}
+              height={1118}
+              caption="The image, cell, phenotype and literature chain for cell U373-02-T7, produced by the BioLayers pipeline."
+            />
+            <div className="mt-6 rounded-[20px] border border-stain-yfp/30 bg-stain-yfp/[0.06] p-4">
+              <p className="text-sm font-medium text-stain-yfp-bright">What this does not show</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink">
+                We did not measure CXCR4 in this cell. Many cell stocks labelled U-373 are actually
+                the line U-251 (
+                <a
+                  href="https://pubmed.ncbi.nlm.nih.gov/24810477/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={textLink}
+                >
+                  Torsvik et al., 2014
+                </a>
+                ). The link from this cell to CXCR4 is a hypothesis the literature makes plausible.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tools */}
+      <section className={`${pageShell} mt-32`} aria-labelledby="tools-heading">
+        <h2 id="tools-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          What you can do here
+        </h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          {tools.map((tool) => (
+            <article
+              key={tool.name}
+              className="group flex flex-col justify-between rounded-[24px] border border-teal-100/[0.08] bg-[#070c12]/70 p-6 backdrop-blur-xl transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-teal-200/30 hover:bg-[#0a121a]/85"
             >
-              <Workflow className="h-5 w-5 text-emerald-300 group-hover:text-emerald-200" aria-hidden="true" />
-              <span>Launch Mind Map Workspace</span>
-              <ArrowRight className="h-4 w-4 text-emerald-300 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-            </Link>
-
-            {/* Secondary Actions Cluster (Hick's Law chunked, >= 44px touch targets) */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-              <Link
-                href="/cells"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-[12px] border border-sky-400/25 bg-sky-400/[0.06] px-4 py-2 text-xs font-semibold text-sky-100 transition-[background-color,border-color,color] duration-150 hover:border-sky-300/40 hover:bg-sky-400/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-              >
-                <Microscope className="h-4 w-4 text-sky-300" aria-hidden="true" />
-                <span>Explore Cell Atlas</span>
+              <h3 className="text-xl font-semibold">{tool.name}</h3>
+              <p className="mt-2 max-w-md leading-relaxed text-graphite">{tool.body}</p>
+              <Link href={tool.href} className={`${textLink} mt-3 inline-flex min-h-10 items-center`}>
+                {tool.action}
               </Link>
+            </article>
+          ))}
+        </div>
+        <p className="mt-6 text-graphite">
+          New to the biology?{" "}
+          <Link href="/journey" className={textLink}>
+            Take the 3D journey
+          </Link>{" "}
+          from a paper to a mechanism.
+        </p>
+      </section>
 
-              <Link
-                href="/cipher"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-[12px] border border-teal-200/25 bg-teal-300/[0.06] px-4 py-2 text-xs font-semibold text-teal-100 transition-[background-color,border-color,color] duration-150 hover:border-teal-200/40 hover:bg-teal-300/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+      {/* House rules */}
+      <section className={`${pageShell} mt-32`} aria-labelledby="rules-heading">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <h2 id="rules-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            Three kinds of statement, never mixed
+          </h2>
+          <div>
+            <dl className="divide-y divide-rule border-y border-rule">
+              <div className="py-5">
+                <dt>
+                  <EvidenceTag level="observed" />
+                </dt>
+                <dd className="mt-1.5 leading-relaxed text-ink">
+                  Measured from segmented pixels: area, shape, intensity, speed.
+                </dd>
+              </div>
+              <div className="py-5">
+                <dt>
+                  <EvidenceTag level="literature" />
+                </dt>
+                <dd className="mt-1.5 leading-relaxed text-ink">
+                  Checked against a PubMed abstract, with the system the finding was made in.
+                </dd>
+              </div>
+              <div className="py-5">
+                <dt>
+                  <EvidenceTag level="inferred" />
+                </dt>
+                <dd className="mt-1.5 leading-relaxed text-ink">
+                  A label from a transparent rule or a model score. Useful, never an experimental
+                  fact.
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-6 leading-relaxed text-graphite">
+              The cell atlas holds no AI-generated microscopy. Every record names its public
+              dataset, accession and licence, and records we cannot verify are marked for review.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners */}
+      <section className={`${pageShell} mt-32`} aria-labelledby="partners-heading">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <div>
+            <h2 id="partners-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+              Built with partners
+            </h2>
+            <p className="mt-5 leading-relaxed text-graphite">
+              BioLayers AI started in Tashkent and is guided by oncologists and computational
+              biologists. Featured by{" "}
+              <a
+                href="https://hundred.org/en/innovations/biolayers-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={textLink}
               >
-                <Network className="h-4 w-4 text-teal-300" aria-hidden="true" />
-                <span>Project Cipher (Visual Maps)</span>
+                HundrED
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://aibusiness.vc/startups/biolayers-ai-cancer-literature-maps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={textLink}
+              >
+                AI Business
+              </a>
+              .
+            </p>
+          </div>
+          <div>
+            <ul className="divide-y divide-rule border-y border-rule">
+              {partners.map((partner) => (
+                <li key={partner.name}>
+                  <a
+                    href={partner.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-14 flex-wrap items-baseline justify-between gap-x-4 py-3 transition-colors hover:text-hoechst-strong"
+                  >
+                    <span className="font-medium text-ink-strong">{partner.name}</span>
+                    <span className="text-sm text-graphite">{partner.role}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
+              <Link href="/partners" className={textLink}>
+                All partners
               </Link>
-
-              <Link
-                href="/journey"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-[12px] border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-slate-300 transition-[background-color,border-color,color] duration-150 hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-              >
-                <Compass className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                <span>3D Mechanism Journey</span>
+              <Link href="/about" className={textLink}>
+                Team and mentors
               </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* =========================================================================
-            PROGRESSIVE FEATURE PREVIEWS (Below the Fold)
-            Concentric nested radii: R_inner = R_outer - padding
-            Full card surface clickability: no dead zones
-            ========================================================================= */}
-        <section className="mt-20 space-y-10" aria-label="Platform feature previews">
-          <div className="text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-teal-300/80">
-              Interactive Instruments
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
-              Precision oncology workflow at a glance
-            </h2>
-            <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-slate-400">
-              From raw literature ingestion to multi-channel confocal microscopy and causal pathway inference.
-            </p>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* -------------------------------------------------------------------
-                PREVIEW 1: Automated Literature Deconstruction (Mind Map)
-                Outer: rounded-[28px], padding p-5 (20px) -> Inner: rounded-[8px]
-                ------------------------------------------------------------------- */}
-            <Link
-              href="/mindmap"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-[28px] border border-emerald-400/20 bg-[#070c12]/80 p-5 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-[border-color,background-color,transform] duration-200 hover:-translate-y-1 hover:border-emerald-400/40 hover:bg-[#0a131b]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2bff88] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-            >
-              <div>
-                {/* Header Badge */}
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/[0.08] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-200">
-                    <Workflow className="h-3 w-3 text-emerald-300" aria-hidden="true" />
-                    Section 01 · Mind Map
-                  </span>
-                  <span className="font-mono text-[9px] text-slate-500">Stage 01</span>
-                </div>
-
-                <h3 className="mt-4 text-lg font-bold text-white group-hover:text-emerald-100 transition-colors">
-                  Automated Literature Deconstruction
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                  Deconstruct 40-page oncology papers into structured hierarchical maps with verbatim manuscript citation anchors and zero information loss.
-                </p>
-
-                {/* Concentric Inner Simulation Container: R_inner = 28px - 20px = 8px */}
-                <div className="mt-5 rounded-[8px] border border-emerald-500/15 bg-black/40 p-3.5 text-left font-mono">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-[10px]">
-                    <span className="flex items-center gap-1.5 text-emerald-300 font-semibold">
-                      <FileText className="h-3 w-3" aria-hidden="true" />
-                      Nature Cancer 2024
-                    </span>
-                    <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-400/90">
-                      <CheckCircle2 className="h-2.5 w-2.5" aria-hidden="true" />
-                      Verbatim Grounded
-                    </span>
-                  </div>
-
-                  <div className="mt-2.5 space-y-2 text-[10px]">
-                    <div className="rounded-[4px] bg-emerald-400/[0.05] p-2 border border-emerald-400/15">
-                      <p className="text-slate-300 font-sans text-[11px] leading-tight font-semibold">
-                        KRAS G12D Oncogenic Signalling
-                      </p>
-                      <p className="mt-1 text-[9.5px] text-slate-400 font-sans italic">
-                        &ldquo;MRTX1133 selectively binds the switch-II pocket, preventing RAF interaction.&rdquo;
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[9px] text-slate-400 pt-1">
-                      <span>• 5 Key Mechanism Nodes</span>
-                      <span className="text-emerald-300 font-semibold">100% In-Context</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between border-t border-white/[0.06] pt-3 text-xs font-semibold text-emerald-300 group-hover:text-emerald-200">
-                <span>Launch Mind Map Workspace</span>
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </div>
+      {/* Closing */}
+      <section className={`${pageShell} mb-32 mt-32`} aria-labelledby="start-heading">
+        <div className="rounded-[24px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl px-6 py-12 sm:px-12">
+          <h2 id="start-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            Start with one paper
+          </h2>
+          <p className="mt-4 max-w-xl text-lg leading-relaxed text-graphite">
+            Upload a PDF or DOCX. You get a map of its mechanisms, with the sentence each one came
+            from.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/mindmap" className={btnPrimary}>
+              Map a paper
             </Link>
-
-            {/* -------------------------------------------------------------------
-                PREVIEW 2: Causal Biological Networks (Project Cipher)
-                Outer: rounded-[28px], padding p-5 (20px) -> Inner: rounded-[8px]
-                ------------------------------------------------------------------- */}
-            <Link
-              href="/cipher"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-[28px] border border-cyan-400/20 bg-[#070c12]/80 p-5 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-[border-color,background-color,transform] duration-200 hover:-translate-y-1 hover:border-cyan-400/40 hover:bg-[#0a131b]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-            >
-              <div>
-                {/* Header Badge */}
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.08] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-cyan-200">
-                    <Network className="h-3 w-3 text-cyan-300" aria-hidden="true" />
-                    Section 02 · Project Cipher
-                  </span>
-                  <span className="font-mono text-[9px] text-slate-500">Stage 02</span>
-                </div>
-
-                <h3 className="mt-4 text-lg font-bold text-white group-hover:text-cyan-100 transition-colors">
-                  Causal Biological Networks
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                  Interactive directed causal graphs depicting molecular cascades, feedback loops, and pharmacological targets with dual plain/academic decoding.
-                </p>
-
-                {/* Concentric Inner Simulation Container: R_inner = 28px - 20px = 8px */}
-                <div className="mt-5 rounded-[8px] border border-cyan-500/15 bg-black/40 p-3.5 text-left font-mono">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-[10px]">
-                    <span className="flex items-center gap-1.5 text-cyan-300 font-semibold">
-                      <Activity className="h-3 w-3" aria-hidden="true" />
-                      MAPK / ERK Cascade
-                    </span>
-                    <span className="rounded bg-cyan-400/10 px-1.5 py-0.5 text-[8.5px] font-bold text-cyan-200">
-                      Plain Decoder Active
-                    </span>
-                  </div>
-
-                  <div className="mt-2.5 space-y-1.5 text-[10px]">
-                    <div className="flex items-center gap-2 text-slate-300 text-[10px]">
-                      <span className="rounded-[4px] bg-sky-400/20 px-1.5 py-0.5 text-sky-200 font-bold">EGFR</span>
-                      <span className="text-slate-500">→</span>
-                      <span className="rounded-[4px] bg-rose-400/20 px-1.5 py-0.5 text-rose-200 font-bold">KRAS</span>
-                      <span className="text-slate-500">→</span>
-                      <span className="rounded-[4px] bg-teal-400/20 px-1.5 py-0.5 text-teal-200 font-bold">BRAF</span>
-                      <span className="text-slate-500">→</span>
-                      <span className="rounded-[4px] bg-emerald-400/20 px-1.5 py-0.5 text-emerald-200 font-bold">ERK1/2</span>
-                    </div>
-
-                    <p className="mt-1 rounded-[4px] bg-white/[0.02] p-1.5 text-[9.5px] text-slate-400 font-sans">
-                      <strong className="text-cyan-200">Mechanism:</strong> Sustained GTP loading drives proliferation signaling via transcription factors.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between border-t border-white/[0.06] pt-3 text-xs font-semibold text-cyan-300 group-hover:text-cyan-200">
-                <span>Explore Project Cipher</span>
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </div>
-            </Link>
-
-            {/* -------------------------------------------------------------------
-                PREVIEW 3: High-Resolution Microscopy Atlas (Cell Atlas)
-                Outer: rounded-[28px], padding p-5 (20px) -> Inner: rounded-[8px]
-                ------------------------------------------------------------------- */}
-            <Link
-              href="/cells"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-[28px] border border-violet-400/20 bg-[#070c12]/80 p-5 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-[border-color,background-color,transform] duration-200 hover:-translate-y-1 hover:border-violet-400/40 hover:bg-[#0a131b]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a15cff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-            >
-              <div>
-                {/* Header Badge */}
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-400/[0.08] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-violet-200">
-                    <Microscope className="h-3 w-3 text-violet-300" aria-hidden="true" />
-                    Section 03 · Cell Atlas
-                  </span>
-                  <span className="font-mono text-[9px] text-slate-500">Stage 03</span>
-                </div>
-
-                <h3 className="mt-4 text-lg font-bold text-white group-hover:text-violet-100 transition-colors">
-                  High-Resolution Microscopy Atlas
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                  Explore multiplexed histology and spatial transcriptomics with independent DAPI, FITC, and Cy5 channel controls across diverse human malignancies.
-                </p>
-
-                {/* Concentric Inner Simulation Container: R_inner = 28px - 20px = 8px */}
-                <div className="mt-5 rounded-[8px] border border-violet-500/15 bg-black/40 p-3.5 text-left font-mono">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-[10px]">
-                    <span className="flex items-center gap-1.5 text-violet-300 font-semibold">
-                      <Layers className="h-3 w-3" aria-hidden="true" />
-                      Multi-Channel Staining
-                    </span>
-                    <span className="text-[9px] text-slate-400">40x Confocal</span>
-                  </div>
-
-                  <div className="mt-2.5 flex items-center justify-between gap-1.5 text-[9px]">
-                    <span className="flex items-center gap-1 rounded-[4px] border border-sky-400/30 bg-sky-400/10 px-2 py-1 font-bold text-sky-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#4d8dff]" />
-                      DAPI (461nm)
-                    </span>
-                    <span className="flex items-center gap-1 rounded-[4px] border border-emerald-400/30 bg-emerald-400/10 px-2 py-1 font-bold text-emerald-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#2bff88]" />
-                      FITC (520nm)
-                    </span>
-                    <span className="flex items-center gap-1 rounded-[4px] border border-violet-400/30 bg-violet-400/10 px-2 py-1 font-bold text-violet-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#a15cff]" />
-                      Cy5 (670nm)
-                    </span>
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between text-[9px] text-slate-400 pt-1">
-                    <span>Specimen: Pancreatic Ductal FFPE</span>
-                    <span className="font-mono text-violet-300">Scale: 50 µm</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between border-t border-white/[0.06] pt-3 text-xs font-semibold text-violet-300 group-hover:text-violet-200">
-                <span>Open Cell Atlas Viewer</span>
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            INSTITUTIONAL HIGHLIGHTS GRID (Full Card Surface Clickability)
-            Outer: rounded-[24px], padding p-5 (20px) -> Inner icon: rounded-[4px]
-            ========================================================================= */}
-        <section className="mt-16" aria-label="Institutional highlights">
-          <div className="grid gap-4 md:grid-cols-3">
-            {highlights.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="group relative flex flex-col justify-between rounded-[24px] border border-teal-100/[0.08] bg-[#070c12]/70 p-5 backdrop-blur-xl transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-teal-200/30 hover:bg-[#0a121a]/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-3">
-                      {/* Concentric geometry: R_inner = 24px - 20px = 4px */}
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] border border-teal-200/25 bg-teal-300/[0.08] text-teal-300 transition-colors group-hover:border-teal-200/40 group-hover:bg-teal-300/[0.14]">
-                        <Icon className="h-4 w-4" aria-hidden="true" />
-                      </div>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-slate-500">
-                        {item.badge}
-                      </span>
-                    </div>
-
-                    <h2 className="mt-4 text-sm font-bold text-teal-50 group-hover:text-white transition-colors">
-                      {item.title}
-                    </h2>
-                    <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                      {item.desc}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 flex items-center gap-1.5 border-t border-white/[0.05] pt-3 text-[11px] font-bold text-teal-300 transition group-hover:text-teal-100">
-                    <span>{item.action}</span>
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-
-      {/* =========================================================================
-          BOTTOM PROOF STRIP: Partner trust badges optically aligned
-          Touch targets >= 44px on all interactive links
-          ========================================================================= */}
-      <footer className="mx-auto mt-16 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.08] pt-6 text-xs">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Strategic Partner: NXT Horizon */}
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] text-slate-400">
-              Strategic Partner:
-            </span>
-            <Link
-              href="/partners"
-              aria-label="View strategic partnership with NXT Horizon"
-              className="group inline-flex min-h-[44px] items-center gap-2.5 rounded-[12px] border border-teal-200/20 bg-white/[0.02] px-3 py-1.5 transition-[background-color,border-color] hover:border-teal-200/40 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-            >
-              <div className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-[3px] border border-white/20 bg-white p-0.5">
-                <Image
-                  src="/branding/nxthorizon-logo.png"
-                  alt="NXT Horizon logo"
-                  width={20}
-                  height={20}
-                  className="h-full w-full object-contain"
-                  style={{ width: "auto", height: "auto" }}
-                />
-              </div>
-              <span className="text-[11px] font-bold text-teal-100 group-hover:text-white">
-                NXT Horizon
-              </span>
-            </Link>
-          </div>
-
-          <span className="hidden sm:inline text-slate-700" aria-hidden="true">·</span>
-
-          {/* Press & Coverage: HundrED */}
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] text-slate-400">
-              Press & Coverage:
-            </span>
-            <Link
-              href="/press"
-              aria-label="View HundrED press coverage and recognition"
-              className="group inline-flex min-h-[44px] items-center gap-2 rounded-[12px] border border-sky-200/20 bg-white/[0.02] px-3 py-1.5 transition-[background-color,border-color] hover:border-sky-200/40 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-            >
-              <span className="text-[11px] font-bold text-sky-100 group-hover:text-white">
-                HundrED
-              </span>
+            <Link href="/library" className={btnSecondary}>
+              See published maps
             </Link>
           </div>
         </div>
-
-        {/* Ontology & BYOK Grounding Badges */}
-        <div className="flex flex-wrap items-center gap-3 font-mono text-[9px] uppercase tracking-wider text-slate-400">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.02] px-2.5 py-1">
-            <ShieldCheck className="h-3 w-3 text-emerald-400" aria-hidden="true" />
-            PubMed Grounded
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.02] px-2.5 py-1">
-            <ShieldCheck className="h-3 w-3 text-sky-400" aria-hidden="true" />
-            Cell Ontology
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.02] px-2.5 py-1">
-            <ShieldCheck className="h-3 w-3 text-violet-400" aria-hidden="true" />
-            BYOK Gemini
-          </span>
-        </div>
-      </footer>
+      </section>
     </div>
   );
 }

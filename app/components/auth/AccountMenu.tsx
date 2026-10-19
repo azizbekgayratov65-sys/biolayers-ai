@@ -193,7 +193,7 @@ export function AccountMenu({
             className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-white/[0.12] bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-white/80 transition hover:border-white/[0.22] hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
           >
             <LogIn className="h-4 w-4" />
-            <span>Sign In</span>
+            <span>Sign in</span>
           </Link>
 
           <Link
@@ -201,7 +201,7 @@ export function AccountMenu({
             className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-400/[0.1] px-4 py-2.5 text-xs font-bold text-teal-100 shadow-[0_0_15px_rgba(77,141,255,0.12)] transition hover:border-teal-200/40 hover:bg-teal-400/[0.18] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
           >
             <UserPlus className="h-4 w-4" />
-            <span>Get Started</span>
+            <span>Create account</span>
           </Link>
         </div>
       );
@@ -214,7 +214,7 @@ export function AccountMenu({
           className="flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.09] bg-white/[0.03] px-4 text-xs font-semibold text-slate-200 transition hover:border-white/[0.2] hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
         >
           <LogIn className="h-3.5 w-3.5" />
-          <span>Sign In</span>
+          <span>Sign in</span>
         </Link>
 
         <Link
@@ -222,13 +222,13 @@ export function AccountMenu({
           className="group flex h-10 items-center gap-2 rounded-[13px] border border-teal-200/25 bg-teal-300/[0.08] px-4 text-xs font-bold text-teal-100 transition hover:border-teal-200/40 hover:bg-teal-300/[0.16] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
         >
           <UserPlus className="h-3.5 w-3.5" />
-          <span>Get Started</span>
+          <span>Create account</span>
         </Link>
       </div>
     );
   }
 
-  const displayName = user.fullName || "BioLayers Researcher";
+  const displayName = user.fullName || "BioLayers researcher";
 
   // Authenticated state — Mobile drawer view (Inline Card)
   if (variant === "mobile") {
@@ -266,7 +266,7 @@ export function AccountMenu({
             className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
           >
             <Settings className="h-4 w-4 text-teal-300/80" />
-            <span>Account &amp; Profile Settings</span>
+            <span>Account settings</span>
           </Link>
 
           <Link
@@ -274,7 +274,7 @@ export function AccountMenu({
             className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
           >
             <KeyRound className="h-4 w-4 text-teal-300/80" />
-            <span>AI BYOK Key Settings</span>
+            <span>Gemini API key</span>
           </Link>
 
           <button
@@ -288,7 +288,7 @@ export function AccountMenu({
             ) : (
               <LogOut className="h-4 w-4" />
             )}
-            <span>Sign Out</span>
+            <span>Sign out</span>
           </button>
         </div>
       </div>
@@ -372,12 +372,12 @@ export function AccountMenu({
               <MenuItem
                 href="/settings"
                 icon={<Settings className="h-4 w-4" />}
-                label="Account & Settings"
+                label="Account settings"
               />
               <MenuItem
                 href="/settings#ai"
                 icon={<KeyRound className="h-4 w-4" />}
-                label="AI Key Settings"
+                label="Gemini API key"
               />
             </div>
 
@@ -394,7 +394,7 @@ export function AccountMenu({
                 ) : (
                   <LogOut className="h-4 w-4 text-rose-400" />
                 )}
-                <span>Sign Out</span>
+                <span>Sign out</span>
               </button>
             </div>
           </div>,

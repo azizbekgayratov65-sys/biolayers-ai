@@ -10,7 +10,6 @@ import {
   X,
   Dna,
   Binary,
-  Compass,
   BookOpen,
 } from "lucide-react";
 import {
@@ -77,12 +76,12 @@ export type NavItem = {
 
 const toolNavItems: NavItem[] = [
   {
-    label: "Cell Atlas",
+    label: "Cell atlas",
     href: "/cells",
     path: "/cells",
     category: "tools",
     icon: <Dna className="h-4 w-4 text-teal-300" />,
-    description: "Multichannel fluorescence morphology & spatial stains",
+    description: "Real microscopy with source and licence on every record",
   },
   {
     label: "Cipher",
@@ -90,15 +89,7 @@ const toolNavItems: NavItem[] = [
     path: "/cipher",
     category: "tools",
     icon: <Binary className="h-4 w-4 text-sky-300" />,
-    description: "Causal oncology networks & mechanistic paths",
-  },
-  {
-    label: "Journey",
-    href: "/journey",
-    path: "/journey",
-    category: "tools",
-    icon: <Compass className="h-4 w-4 text-violet-300" />,
-    description: "Interactive oncology walkthrough & mechanisms",
+    description: "Cause-and-effect maps of cancer pathways",
   },
   {
     label: "Library",
@@ -106,15 +97,20 @@ const toolNavItems: NavItem[] = [
     path: "/library",
     category: "tools",
     icon: <BookOpen className="h-4 w-4 text-amber-300" />,
-    description: "Peer-reviewed papers & synthesized knowledge maps",
+    description: "Mind maps saved by BioLayers users",
   },
 ];
 
 const institutionalNavItems: NavItem[] = [
-  { label: "About", href: "/about", path: "/about", category: "institutional" },
   { label: "Validation", href: "/validation", path: "/validation", category: "institutional" },
+  { label: "About", href: "/about", path: "/about", category: "institutional" },
+];
+
+// Shown only in the mobile menu; on desktop they live in the footer.
+const mobileExtraNavItems: NavItem[] = [
   { label: "Partners", href: "/partners", path: "/partners", category: "institutional" },
   { label: "Press", href: "/press", path: "/press", category: "institutional" },
+  { label: "3D journey", href: "/journey", path: "/journey", category: "institutional" },
 ];
 
 export default function Navbar() {
@@ -329,7 +325,7 @@ export default function Navbar() {
                 className="group relative flex h-10 items-center gap-2 rounded-[13px] border border-emerald-400/40 bg-emerald-500/15 px-4 text-xs font-bold text-emerald-200 shadow-[0_0_20px_rgba(43,255,136,0.18)] transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-500/25 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
               >
                 <Workflow className="h-3.5 w-3.5 text-emerald-300 transition-transform duration-300 group-hover:rotate-12" />
-                <span>Mind Map</span>
+                <span>Mind map</span>
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
 
@@ -408,7 +404,7 @@ export default function Navbar() {
               className="flex min-h-[48px] items-center justify-center gap-2.5 rounded-[14px] border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-bold text-emerald-100 shadow-[0_0_24px_rgba(43,255,136,0.2)] transition-all hover:bg-emerald-500/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
             >
               <Workflow className="h-4 w-4 text-emerald-300" />
-              <span>Open Mind Map Workspace</span>
+              <span>Map a paper</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -455,7 +451,7 @@ export default function Navbar() {
             <div className="px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
               Institutional &amp; Labs
             </div>
-            {institutionalNavItems.map((item) => {
+            {[...institutionalNavItems, ...mobileExtraNavItems].map((item) => {
               const active = isItemActive(item);
               return (
                 <Link
@@ -483,12 +479,7 @@ export default function Navbar() {
             <AccountMenu variant="mobile" />
           </div>
 
-          {/* Footer note inside drawer */}
-          <div className="mt-4 flex items-center justify-between px-2 pt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-slate-500">
-            <span>BioLayers AI v2.4</span>
-            <span>PubMed &amp; OLS Connected</span>
-          </div>
-        </div>
+</div>
       </div>
     </>
   );

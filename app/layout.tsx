@@ -42,59 +42,48 @@ const plexMono = IBM_Plex_Mono({
   preload: false,
 });
 
+const description =
+  "BioLayers AI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.";
+
 export const metadata: Metadata = {
   title: {
     default: "BioLayers AI",
     template: "%s | BioLayers AI",
   },
-
-  description:
-    "AI-driven computational oncology platform for biological mechanism mapping, evidence synthesis, precision oncology research, and hypothesis generation.",
-
+  description,
   applicationName: "BioLayers AI",
-
   keywords: [
     "BioLayers AI",
     "computational oncology",
-    "precision oncology",
-    "precision medicine",
     "cancer research",
+    "cell atlas",
+    "microscopy",
+    "cell segmentation",
     "biological knowledge graph",
-    "mechanism mapping",
-    "cancer genomics",
     "PubMed",
-    "biomedical AI",
-    "research copilot",
   ],
-
   creator: "BioLayers AI",
   publisher: "BioLayers AI",
   category: "science",
-
   robots: {
     index: true,
     follow: true,
   },
-
   icons: {
     icon: "/biolayers-logo.svg",
     shortcut: "/biolayers-logo.svg",
     apple: "/biolayers-logo.svg",
   },
-
   openGraph: {
     type: "website",
-    title: "BioLayers AI",
-    description:
-      "AI-driven computational oncology for evidence-linked biological mechanism mapping.",
+    title: "BioLayers AI: from papers to living cells",
+    description,
     siteName: "BioLayers AI",
   },
-
   twitter: {
     card: "summary_large_image",
-    title: "BioLayers AI",
-    description:
-      "AI-driven computational oncology for evidence-linked biological mechanism mapping.",
+    title: "BioLayers AI: from papers to living cells",
+    description,
   },
 };
 

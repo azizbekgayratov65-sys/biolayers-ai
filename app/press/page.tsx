@@ -1,217 +1,90 @@
-import Link from "next/link";
-import {
-  ExternalLink,
-  Newspaper,
-  Mail,
-} from "lucide-react";
+import type { Metadata } from "next";
+import { Newspaper } from "lucide-react";
+
+import { btnSecondary, pageShell } from "../components/ui/styles";
+import { AmbientGlow, Eyebrow } from "../components/ui/Chrome";
+
+export const metadata: Metadata = {
+  title: "Press",
+  description: "Coverage and recognition of BioLayers AI.",
+};
+
+const coverage = [
+  {
+    outlet: "HundrED",
+    date: "2026-09-02",
+    dateLabel: "September 2026",
+    headline: "BioLayers AI",
+    href: "https://hundred.org/en/innovations/biolayers-ai",
+    summary:
+      "Listed as an education innovation: interactive maps that turn cancer research into knowledge students, researchers and educators can explore.",
+  },
+  {
+    outlet: "AI Business",
+    date: "2026-08-25",
+    dateLabel: "25 August 2026",
+    headline: "BioLayers AI: A Teenager in Tashkent Read 100 Cancer Papers and Built the Tool He Was Missing",
+    href: "https://aibusiness.vc/startups/biolayers-ai-cancer-literature-maps",
+    summary:
+      "A profile of the founder and of how BioLayers turns fragmented cancer literature into maps of mechanisms.",
+  },
+];
 
 export default function PressPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col justify-between overflow-hidden bg-transparent px-6 pt-28 pb-8 sm:px-10 sm:pt-32 lg:px-16 lg:pt-36">
-      {/* Background ambient glows */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/3 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.045] blur-[170px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-10 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.035] blur-[150px]"
-      />
+    <div className={`relative isolate ${pageShell} pt-28 pb-24 sm:pt-32`}>
+      <AmbientGlow />
+      <header className="mx-auto max-w-3xl text-center animate-fade-up">
+        <Eyebrow icon={Newspaper}>Media, Recognition &amp; Spotlights</Eyebrow>
+        <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">Press</span>
+        </h1>
+        <p className="mx-auto mt-5 text-lg leading-relaxed text-ink">
+          Where BioLayers AI has been written about.
+        </p>
+      </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center">
-        {/* HEADER */}
-        <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-xl">
-            <Newspaper className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">
-              Media, Recognition & Spotlights
-            </span>
-          </div>
-
-          <h1 className="mt-4 text-3xl font-serif font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Recognition &{" "}
-            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
-              Global Coverage
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
-            BioLayers AI featured across global education innovation catalogs and technology
-            publications for reconstructing cancer literature into explorable AI knowledge graphs.
-          </p>
-        </div>
-
-        {/* PRESS & SPOTLIGHT CARDS */}
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          {/* CARD 1: HUNDRED GLOBAL INNOVATION */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-75">
+      <ol className="mt-14 divide-y divide-rule border-y border-rule">
+        {coverage.map((item) => (
+          <li key={item.href} className="grid gap-3 py-8 md:grid-cols-[12rem_1fr] md:gap-10">
             <div>
-              {/* Card Header: Brand Logo & Date */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/[0.08] pb-4">
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full border border-teal-300/30 bg-teal-400/[0.1] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-teal-300">
-                    HundrED
-                  </span>
-                  <span className="inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-wider text-slate-400">
-                    Global Innovation Spotlight
-                  </span>
-                </div>
-
-                <time
-                  dateTime="2026-09-02"
-                  className="font-mono text-[10px] uppercase tracking-wider text-slate-400"
-                >
-                  September 2026
-                </time>
-              </div>
-
-              {/* Title & Quote */}
-              <h2 className="mt-5 text-xl font-bold tracking-tight text-white sm:text-2xl leading-snug">
-                BioLayers AI: Selected Global Education Innovation
-              </h2>
-
-              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                &ldquo;Biomedical knowledge is locked in dense papers that few people can easily use.
-                BioLayers AI converts cancer research and scientific literature into interactive visual
-                knowledge maps. Students, researchers, and educators can quickly explore genes, pathways,
-                diseases, and therapies.&rdquo;
-              </p>
-
-              {/* Badges strip */}
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {[
-                  "17+ Countries Reach",
-                  "AI & Oncology",
-                  "STEM Education",
-                  "EdTech Innovation",
-                  "Helsinki · Global",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-teal-200"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <p className="font-medium text-ink-strong">{item.outlet}</p>
+              <time dateTime={item.date} className="text-sm text-graphite">
+                {item.dateLabel}
+              </time>
             </div>
-
-            {/* Card Footer CTA */}
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-teal-100/[0.08] pt-4">
-              <a
-                href="https://hundred.org/en/innovations/biolayers-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 text-xs font-bold text-teal-300 transition hover:text-teal-100"
-              >
-                <span>View Full Innovation on hundred.org</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-
-              <span className="font-mono text-[9px] text-slate-500">
-                hundred.org/en/innovations/biolayers-ai
-              </span>
-            </div>
-          </article>
-
-          {/* CARD 2: AI BUSINESS */}
-          <article className="group relative flex flex-col justify-between overflow-hidden rounded-[26px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition-all hover:border-teal-200/35 animate-fade-up delay-150">
             <div>
-              {/* Card Header: Brand & Date */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/[0.08] pb-4">
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full border border-emerald-300/30 bg-emerald-400/[0.1] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-300">
-                    AI Business
-                  </span>
-                  <span className="inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-wider text-slate-400">
-                    Startup & Research Profile
-                  </span>
-                </div>
-
-                <time
-                  dateTime="2026-08-25"
-                  className="font-mono text-[10px] uppercase tracking-wider text-slate-400"
+              <h2 className="text-2xl leading-snug">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-rule-strong underline-offset-[6px] transition-colors hover:text-hoechst-strong hover:decoration-hoechst"
                 >
-                  August 25, 2026
-                </time>
-              </div>
-
-              {/* Title & Quote */}
-              <h2 className="mt-5 text-xl font-bold tracking-tight text-white sm:text-2xl leading-snug">
-                BioLayers AI: Cancer Literature Maps
+                  {item.headline}
+                </a>
               </h2>
-
-              <p className="mt-3 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                &ldquo;A teenager in Tashkent read 100 cancer papers and built the tool he was missing —
-                transforming fragmented literature into explorable mechanistic maps that empower researchers
-                and oncologists to discover connections across biological layers.&rdquo;
-              </p>
-
-              {/* Badges strip */}
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {[
-                  "Founder Story",
-                  "Computational Oncology",
-                  "Knowledge Graphs",
-                  "Tashkent",
-                  "PubMed Grounding",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-lg border border-teal-100/10 bg-white/[0.025] px-2.5 py-1 font-mono text-[9px] font-semibold text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <p className="mt-3 max-w-prose leading-relaxed text-graphite">{item.summary}</p>
             </div>
+          </li>
+        ))}
+      </ol>
 
-            {/* Card Footer CTA */}
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-teal-100/[0.08] pt-4">
-              <a
-                href="https://aibusiness.vc/startups/biolayers-ai-cancer-literature-maps"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/btn inline-flex items-center gap-2 text-xs font-bold text-emerald-300 transition hover:text-emerald-100"
-              >
-                <span>Read Full Story on AI Business</span>
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </a>
-
-              <span className="font-mono text-[9px] text-slate-500">
-                aibusiness.vc/startups/biolayers-ai
-              </span>
-            </div>
-          </article>
-        </div>
-
-        {/* INQUIRIES & MEDIA CONTACT BANNER */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100/[0.08] bg-white/[0.015] px-5 py-4 text-xs backdrop-blur-xl">
-          <div className="flex items-center gap-2.5 text-slate-300">
-            <Mail className="h-4 w-4 text-teal-300" />
-            <span>Journalists, educators, or researchers seeking media kit / interviews:</span>
-          </div>
-
-          <a
-            href="mailto:biolayers.ai@gmail.com?subject=Press%20Inquiry%20-%20BioLayers%20AI"
-            className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
-          >
-            <span>biolayers.ai@gmail.com</span>
-          </a>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div className="mx-auto mt-8 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">
-        <span>BioLayers AI Press Office & Global Recognition</span>
-        <div className="flex items-center gap-4">
-          <Link href="/about" className="hover:text-slate-300">About & Mentorship</Link>
-          <span>·</span>
-          <Link href="/partners" className="hover:text-slate-300">Partners</Link>
-          <span>·</span>
-          <Link href="/" className="text-teal-300 hover:text-teal-200">Back to Home →</Link>
-        </div>
-      </div>
+      <section aria-labelledby="contact-heading" className="mt-20 max-w-2xl">
+        <h2 id="contact-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          Writing about us?
+        </h2>
+        <p className="mt-3 leading-relaxed text-graphite">
+          For interviews, images or a demo, email us. We can share the validation report, the demo
+          video and photos of the team.
+        </p>
+        <a
+          href="mailto:biolayers.ai@gmail.com?subject=Press%20enquiry%3A%20BioLayers%20AI"
+          className={`${btnSecondary} mt-6`}
+        >
+          Email biolayers.ai@gmail.com
+        </a>
+      </section>
     </div>
   );
 }

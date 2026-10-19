@@ -367,16 +367,15 @@ export default function MindMapPage() {
               </div>
 
               <h1 className="text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl">
-                Turn research literature into a{" "}
+                Map a{" "}
                 <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
-                  mind map
+                  paper
                 </span>
               </h1>
 
               <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300/85">
-                Upload a research paper and BioLayers compresses it into a compact,
-                interactive reading document — every biological relationship preserved,
-                every idea anchored to its verbatim manuscript quote.
+                Upload a research paper. You get a structured map of its ideas and mechanisms, each
+                one linked to the sentence in the paper it came from.
               </p>
             </div>
 

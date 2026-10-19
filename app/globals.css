@@ -1263,3 +1263,57 @@ canvas {
     display: none;
   }
 }
+/* =========================================================
+   NAMED TOKENS FOR NEWER PAGES
+   Aliases onto the dark-field fluorescence palette above, so
+   pages written with these names share the same look.
+   ========================================================= */
+
+@theme {
+  --color-field: #04070a;
+  --color-field-deep: #030507;
+  --color-slide: #0a0f14;
+  --color-slide-raised: #0d141b;
+  --color-ink: #dbe4ea;
+  --color-ink-strong: #e8edf2;
+  --color-graphite: #93a4b0;
+  --color-graphite-soft: #64798a;
+  --color-hoechst: #8db2ff;
+  --color-hoechst-strong: #b7cfff;
+  --color-rule: rgba(141, 178, 255, 0.09);
+  --color-rule-strong: rgba(141, 178, 255, 0.18);
+}
+
+@keyframes bl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: bl-fade-in 0.25s ease-out both;
+}
+
+/* Homepage specimen: segmentation outlines appear left to right */
+@keyframes specimen-outline-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.specimen-outline {
+  animation: specimen-outline-in 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .specimen-outline,
+  .animate-fade-in {
+    animation: none !important;
+  }
+}

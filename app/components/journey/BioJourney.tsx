@@ -290,7 +290,7 @@ export default function BioJourney() {
           <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
             How BioLayers AI{" "}
             <span className="bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
-              actually works
+              works
             </span>
           </h1>
 

@@ -68,11 +68,10 @@ export default async function SettingsPage() {
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-white">
-            Researcher Profile & BYOK
+            Settings
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-400">
-            Manage your researcher identity, configure your Google Gemini API key securely,
-            and review your analyzed oncology manuscripts.
+            Your profile, your Gemini API key and the mind maps you have saved.
           </p>
         </div>
 

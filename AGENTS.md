@@ -19,7 +19,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `npx tsc --noEmit` — typecheck. `npm run build` already runs TypeScript + Turbopack build.
 - `npm run lint` (eslint, flat config `eslint.config.mjs`). Scoped: `npx eslint <file>`.
 - No test framework/suite exists. Don't invent one; verify via `tsc` + `build`.
-- **Known pre-existing lint errors** in `app/components/journey/BioJourney.tsx` (react-hooks/immutability, purity, set-state-in-effect, ~8 errors) — present on clean checkout, not caused by new work. Don't "fix" them as part of unrelated edits.
+- Lint is at 0 errors (only warnings). Keep it there.
+- Dev server is in `.claude/launch.json` as `biolayers-dev` (port 3000) for the browser preview.
 
 ## Architecture
 - **Auth**: Supabase PKCE. `proxy.ts` refreshes session and guards `/mindmap*`, `/explore*`, `/settings*` (redirects to `/login?next=...`). 
@@ -30,11 +31,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Gemini BYOK**: users supply their own Gemini key (stored encrypted); per-user key decrypt + model fallback rank in `app/lib/aiModels.ts`. `GEMINI_API_KEY` is NOT a global requirement.
 - **`papers.mindmap` stores only the JSONB map, NOT the source text.** Reopened saved papers pass `extractedText: ""`, so verbatim quotes render without highlight (see `app/mindmap/[id]/page.tsx`). `MindMapDocument` needs `onReset` → server can't pass a function; use a client wrapper (`app/components/mindmap/SavedMindMapClient.tsx`).
 - **Integrations actually wired**: PubMed (`/api/pubmed`, NCBI eutils) and Cell Ontology (`/api/cells`, EBI OLS). Reactome/UniProt/HPA/NCBI Gene are **marketing roadmap only** — don't present them as live in copy.
-- **Marketing truth**: homepage sections (`app/components/sections/`, `hero/`, `journey/`) overclaim vs the product. Keep claims aligned with actual features; label demo/illustrative UI explicitly.
-- **PDF/DOCX**: `pdf-parse` + `mammoth` are `serverExternalPackages` in `next.config.ts`; pdfjs worker is warmed before parsing for Vercel. `pdf.worker.mjs`/DOMMatrix fixes are deliberate.
+- **Marketing truth**: keep claims aligned with actual features; label demo/illustrative UI explicitly. Saved mind maps are public by default (`papers.is_public` defaults true, and no UI toggles it yet), so never describe them as private.
+- **Atlas integrity**: `app/lib/atlasIntegrity.ts` lists records whose provenance failed verification (the CAF/CXCL12 case cites an unrelated accession and shows a U2OS image). The UI marks them "under review"; remove entries only once a source is verified.
+
+## Design system (dark-field fluorescence, glass)
+- Tokens and stain remaps live in `app/globals.css` (teal/sky/indigo = DAPI blue, emerald = FITC green, cyan/violet = Cy5, rose = RFP, amber = YFP). Named aliases at the end of the file (`field`, `slide`, `ink`, `graphite`, `hoechst`, `rule`) map onto the same palette for newer pages.
+- Fonts: Spectral (headings), Instrument Sans (UI), IBM Plex Mono (labels and identifiers). Background microscopy video via `BackgroundVideo`.
+- Look: glass cards (`rounded-[24px]`, teal borders, gradient fill, backdrop blur), glowing emerald primary action, mono uppercase eyebrow pills, gradient headline words, ambient glow blobs. Shared pieces: `app/components/ui/styles.ts` (buttons, panels, labels) and `app/components/ui/Chrome.tsx` (`AmbientGlow`, `Eyebrow`). Evidence tags: `app/components/home/EvidenceTag.tsx`.
+- Use native `<dialog>` for modals.
 
 ## Gotchas
 - `@/*` alias exists in `tsconfig.json` but app code uses **relative imports** — follow that.
-- Stray untracked files at repo root (`logo.jpg`, `rsob-11-200358.pdf`, `session-ses_fe48.md`) — not app assets, don't commit.
-- `README.md` is default create-next-app boilerplate; not a source of truth.
+- Untracked pitch/LinkedIn/zip files at repo root are the founder's, not app assets: don't commit or delete them.
+- `app/components/_sections/PartnersSection.tsx` is unused but holds uncommitted founder edits; leave it until they decide.
+- Team task briefs live in `docs/tasks/`; the plan-vs-state audit is `docs/TEAM_TASKS.md`.
 - Deploy is Vercel; commit directly to `main` and push (no PR workflow, no CI, no branch protections).

@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  Dna,
-  Layers,
-  Microscope,
-  BookOpen,
-  Activity,
-  ShieldCheck,
-  ExternalLink,
-  Sparkles,
-  GitFork,
-} from "lucide-react";
+
 import MicroscopyViewer from "../../components/atlas/MicroscopyViewer";
 import MigrationTrajectoryViewer from "../../components/atlas/MigrationTrajectoryViewer";
+import EvidenceTag, { fromPipelineLevel } from "../../components/home/EvidenceTag";
+import { btnSecondary, pageShell, textLink } from "../../components/ui/styles";
+import { AmbientGlow } from "../../components/ui/Chrome";
+import { CELL_TYPES_UNDER_REVIEW } from "../../lib/atlasIntegrity";
 import { getCellAtlasDetailById } from "../../lib/atlasSeedData";
-import { EVIDENCE_BADGES, type EvidenceLevel } from "../../lib/atlasTypes";
+import type { AssociatedBiologicalEntity } from "../../lib/atlasTypes";
+import { MODALITY_LABELS } from "../../lib/atlasTypes";
 
 type PageProps = {
   params: Promise<{ cell_id: string }>;
@@ -27,13 +21,60 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const detail = getCellAtlasDetailById(cell_id);
 
   if (!detail) {
-    return { title: "Cell Not Found · BioLayers Cell Atlas" };
+    return { title: "Cell not found" };
   }
 
   return {
-    title: `${detail.cellType.name} · BioLayers Cell Atlas`,
+    title: `${detail.cellType.name}, cell atlas`,
     description: detail.cellType.biologicalContext,
   };
+}
+
+function EntityList({
+  title,
+  items,
+  refLabel,
+  showEvidence = true,
+}: {
+  title: string;
+  items: AssociatedBiologicalEntity[];
+  refLabel?: string;
+  showEvidence?: boolean;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <section aria-labelledby={`${title}-heading`} className="border-t border-rule pt-6">
+      <h3 id={`${title}-heading`} className="text-base font-semibold">
+        {title} <span className="font-normal text-graphite">({items.length})</span>
+      </h3>
+      <ul className="mt-3 space-y-5">
+        {items.map((item) => (
+          <li key={item.id}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-medium text-ink-strong">{item.label || item.identifier}</span>
+              {showEvidence && <EvidenceTag level={fromPipelineLevel(item.evidenceLevel)} />}
+            </div>
+            <p className="mt-1 max-w-prose leading-relaxed text-graphite">{item.description}</p>
+            {item.externalRef && (
+              <p className="mt-1 text-sm text-graphite-soft">
+                {refLabel ?? "Reference"} <span className="font-mono text-[13px]">{item.externalRef}</span>
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function SourceField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="border-t border-rule py-3 first:border-t-0 first:pt-0">
+      <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</dt>
+      <dd className="mt-0.5 text-ink">{children}</dd>
+    </div>
+  );
 }
 
 export default async function CellCardPage({ params }: PageProps) {
@@ -45,441 +86,187 @@ export default async function CellCardPage({ params }: PageProps) {
   }
 
   const { cellType, image, morphologySummary, entities } = detail;
+  const underReview = CELL_TYPES_UNDER_REVIEW.has(cellType.id);
+  const ontologyUrl = cellType.ontologyId?.startsWith("CL:")
+    ? `https://www.ebi.ac.uk/ols4/ontologies/cl/classes?obo_id=${encodeURIComponent(cellType.ontologyId)}`
+    : null;
 
   return (
-    <div className="relative isolate min-h-screen bg-transparent text-slate-100 selection:bg-teal-500/30 selection:text-teal-200">
-      {/* Ambient background glow atmospheres */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.04] blur-[170px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-10 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.03] blur-[150px]"
-      />
+    <div className={`relative isolate ${pageShell} pt-28 pb-28`}>
+      <AmbientGlow />
+      <nav aria-label="Breadcrumb" className="font-mono text-xs text-slate-400">
+        <Link href="/cells" className="hover:text-ink">
+          Cell atlas
+        </Link>
+        <span aria-hidden="true" className="mx-2">/</span>
+        <span aria-current="page" className="text-ink">{cellType.name}</span>
+      </nav>
 
-      <div className="mx-auto max-w-6xl px-4 pt-28 pb-28 sm:px-6 lg:px-8">
-        {/* Breadcrumb Navigation */}
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/cells"
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-teal-300 transition"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Cell Atlas
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-slate-500">ID: {cellType.id}</span>
-            {cellType.ontologyId && (
-              <span className="rounded bg-teal-500/10 border border-teal-400/30 px-2 py-0.5 font-mono text-[11px] text-teal-300">
-                {cellType.ontologyId}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Page Title & Subtitle */}
-        <div className="border-b border-teal-500/15 pb-8 mb-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs font-mono uppercase tracking-widest text-teal-400">
-                  {cellType.tissue} · {cellType.organism}
-                </span>
-                {image.isFlagship && (
-                  <span className="rounded bg-teal-500/20 border border-teal-400/40 px-2 py-0.5 font-mono text-[10px] text-teal-200 uppercase font-bold">
-                    Flagship Case Study
-                  </span>
-                )}
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                {cellType.name}
-              </h1>
-              <p className="mt-1 text-sm text-slate-400 font-mono">
-                Cell Line: {image.cellLine} · {cellType.disease || "Non-pathological baseline"}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href="/mindmap"
-                style={{ touchAction: "manipulation" }}
-                className="inline-flex min-h-[42px] items-center gap-2 rounded-[14px] border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-xs font-bold text-emerald-100 hover:bg-emerald-500/25 transition-[background-color,border-color,transform] shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2bff88]"
-              >
-                <GitFork className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" /> Explore in Mind Map
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* ====================================================================
-            STRICT 10-BLOCK SEQUENTIAL LAYOUT (PRIORITY 2 REQUIREMENT)
-            ==================================================================== */}
-
-        {/* BLOCK 1: Microscopy Image (Interactive Viewer) */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300">
-              <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-                01
-              </span>
-              Microscopy Image
-            </h2>
-            <span className="text-[11px] font-mono text-slate-400">
-              {image.channelCount} Channels · {image.widthPx} × {image.heightPx} px · {image.pixelSizeUm} µm/px
-            </span>
-          </div>
-
-          <MicroscopyViewer image={image} />
-        </section>
-
-        {/* FLAGSHIP DYNAMICS SECTION: Time-Lapse Single-Cell Migration Trajectory Viewer */}
-        {(image.isFlagship || cellType.id === "caf-cxcl12") && (
-          <section className="mb-12">
-            <MigrationTrajectoryViewer backgroundImageUrl={image.thumbnailUrl} />
-          </section>
-        )}
-
-        {/* BLOCK 2: Metadata (Acquisition, Hardware, Staining, Provenance) */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              02
-            </span>
-            Acquisition & Provenance Metadata
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">MICROSCOPE</span>
-              <span className="text-slate-200 font-medium">{image.microscope}</span>
-            </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">OBJECTIVE</span>
-              <span className="text-slate-200 font-medium">{image.objective}</span>
-            </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">PIXEL RESOLUTION</span>
-              <span className="text-slate-200 font-medium">{image.pixelSizeUm} µm / pixel</span>
-            </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">STAINING PROTOCOL</span>
-              <span className="text-slate-200 font-medium">{image.staining}</span>
-            </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">EXPERIMENTAL TREATMENT</span>
-              <span className="text-slate-200 font-medium">{image.treatment}</span>
-            </div>
-
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <span className="text-slate-500 block text-[10px]">ACCESSION & LICENSE</span>
-              <span className="text-teal-300 font-medium">
-                {image.datasetAccession} · {image.license}
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* BLOCK 3: Biological Context */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-3">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              03
-            </span>
-            Biological Context & Oncology Function
-          </h2>
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {cellType.biologicalContext}
+      <header className="mt-6 flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{cellType.name}</h1>
+          <p className="mt-2 font-mono text-sm text-slate-400">
+            {image.cellLine}, {cellType.tissue.toLowerCase()}, {cellType.organism}
+            {cellType.disease ? `. ${cellType.disease}` : ""}
           </p>
-          {cellType.lineage && (
-            <p className="mt-3 text-xs font-mono text-slate-400">
-              <span className="text-slate-500">Lineage:</span> {cellType.lineage}
+          {cellType.ontologyId && (
+            <p className="mt-2 text-sm text-graphite">
+              Cell Ontology{" "}
+              {ontologyUrl ? (
+                <a href={ontologyUrl} target="_blank" rel="noopener noreferrer" className={`${textLink} font-mono`}>
+                  {cellType.ontologyId}
+                </a>
+              ) : (
+                <span className="font-mono text-ink">{cellType.ontologyId}</span>
+              )}
             </p>
           )}
-        </section>
+          {underReview && (
+            <p
+              role="note"
+              className="mt-4 max-w-2xl rounded-[20px] border border-stain-rfp/35 bg-stain-rfp/[0.07] px-4 py-3 text-sm leading-relaxed text-ink"
+            >
+              <strong className="font-medium text-stain-rfp-bright">Provenance under review.</strong>{" "}
+              The accession cited for this record belongs to an unrelated study, and the image shown
+              is of U2OS nuclei from BBBC039, not fibroblasts. Do not cite this record until its
+              source is verified.
+            </p>
+          )}
+        </div>
+        <Link href="/mindmap" className={btnSecondary}>
+          Map a related paper
+        </Link>
+      </header>
 
-        {/* BLOCK 4: Associated Genes */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              04
-            </span>
-            Associated Genes ({entities.genes.length})
+      <section aria-labelledby="image-heading" className="mt-10">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="image-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+            {image.title}
           </h2>
+          <p className="text-sm tabular-nums text-graphite">
+            {MODALITY_LABELS[image.microscopyModality]}, {image.widthPx} × {image.heightPx} px,{" "}
+            {image.pixelSizeUm} µm per pixel
+          </p>
+        </div>
+        <div className="mt-4">
+          <MicroscopyViewer image={image} />
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {entities.genes.map((gene) => (
-              <div
-                key={gene.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-teal-200">{gene.identifier}</span>
-                    <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                        EVIDENCE_BADGES[gene.evidenceLevel].tone
-                      }`}
-                    >
-                      {EVIDENCE_BADGES[gene.evidenceLevel].symbol}{" "}
-                      {EVIDENCE_BADGES[gene.evidenceLevel].label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">{gene.description}</p>
-                </div>
-                {gene.externalRef && (
-                  <span className="mt-3 font-mono text-[10px] text-slate-500">
-                    Ref: {gene.externalRef}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+      {(image.isFlagship || cellType.id === "caf-cxcl12") && (
+        <section className="mt-14">
+          <MigrationTrajectoryViewer backgroundImageUrl={image.thumbnailUrl} />
         </section>
+      )}
 
-        {/* BLOCK 5: Associated Proteins */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              05
-            </span>
-            Associated Proteins ({entities.proteins.length})
-          </h2>
+      <div className="mt-14 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="space-y-8">
+          <section aria-labelledby="context-heading">
+            <h2 id="context-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+              Biological context
+            </h2>
+            <p className="mt-3 max-w-prose text-lg leading-relaxed text-ink">
+              {cellType.biologicalContext}
+            </p>
+            {cellType.lineage && (
+              <p className="mt-2 text-graphite">Lineage: {cellType.lineage}</p>
+            )}
+          </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {entities.proteins.map((protein) => (
-              <div
-                key={protein.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-cyan-200">{protein.label}</span>
-                    <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                        EVIDENCE_BADGES[protein.evidenceLevel].tone
-                      }`}
-                    >
-                      {EVIDENCE_BADGES[protein.evidenceLevel].symbol}{" "}
-                      {EVIDENCE_BADGES[protein.evidenceLevel].label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">{protein.description}</p>
-                </div>
-                {protein.externalRef && (
-                  <span className="mt-3 font-mono text-[10px] text-slate-500">
-                    Ref: {protein.externalRef}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* BLOCK 6: Pathways */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              06
-            </span>
-            Biological Pathways ({entities.pathways.length})
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {entities.pathways.map((pathway) => (
-              <div
-                key={pathway.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-sky-200">{pathway.label}</span>
-                    <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                        EVIDENCE_BADGES[pathway.evidenceLevel].tone
-                      }`}
-                    >
-                      {EVIDENCE_BADGES[pathway.evidenceLevel].symbol}{" "}
-                      {EVIDENCE_BADGES[pathway.evidenceLevel].label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">{pathway.description}</p>
-                </div>
-                {pathway.externalRef && (
-                  <span className="mt-3 font-mono text-[10px] text-slate-500">
-                    Reactome: {pathway.externalRef}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* BLOCK 7: Diseases */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              07
-            </span>
-            Associated Diseases & Pathologies ({entities.diseases.length})
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {entities.diseases.map((disease) => (
-              <div
-                key={disease.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <span className="font-bold text-sm text-rose-200">{disease.label}</span>
-                  <p className="text-xs text-slate-400 mt-2">{disease.description}</p>
-                </div>
-                {disease.externalRef && (
-                  <span className="mt-3 font-mono text-[10px] text-slate-500">
-                    DOID: {disease.externalRef}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* BLOCK 8: Phenotypes (Morphological & Functional) */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              08
-            </span>
-            Phenotypic Profiles & Morphology Metrics
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-            {entities.phenotypes.map((phenotype) => (
-              <div
-                key={phenotype.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-amber-200">{phenotype.label}</span>
-                    <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                        EVIDENCE_BADGES[phenotype.evidenceLevel].tone
-                      }`}
-                    >
-                      {EVIDENCE_BADGES[phenotype.evidenceLevel].symbol}{" "}
-                      {EVIDENCE_BADGES[phenotype.evidenceLevel].label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">{phenotype.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Morphometric Quantitative Summary */}
-          <div className="rounded-xl border border-teal-500/20 bg-[#070f1c] p-4 text-xs">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-teal-400 block mb-2">
-              Model-Derived Nuclear Morphometry ({morphologySummary.benchmarkModel})
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono">
+          <section aria-labelledby="measures-heading" className="border-t border-rule pt-6">
+            <h3 id="measures-heading" className="text-base font-semibold">
+              Measured in the image
+            </h3>
+            <div className="mt-1.5">
+              {underReview ? (
+                <span className="text-sm font-medium text-stain-rfp-bright">
+                  Not verified: source under review
+                </span>
+              ) : (
+                <EvidenceTag level="observed" />
+              )}
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div>
-                <span className="text-slate-500 block text-[10px]">OBJECTS SEGMENTED</span>
-                <span className="text-white font-bold text-sm">
+                <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Objects segmented</dt>
+                <dd className="text-xl tabular-nums text-ink-strong">
                   {morphologySummary.totalSegmentedObjects}
-                </span>
+                </dd>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">MEAN CIRCULARITY</span>
-                <span className="text-teal-300 font-bold text-sm">
+                <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Mean circularity</dt>
+                <dd className="text-xl tabular-nums text-ink-strong">
                   {morphologySummary.meanCircularity.toFixed(3)}
-                </span>
+                </dd>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">MEAN ASPECT RATIO</span>
-                <span className="text-teal-300 font-bold text-sm">
+                <dt className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Mean aspect ratio</dt>
+                <dd className="text-xl tabular-nums text-ink-strong">
                   {morphologySummary.meanAspectRatio.toFixed(2)}
-                </span>
+                </dd>
               </div>
-              <div>
-                <span className="text-slate-500 block text-[10px]">EVIDENCE LEVEL</span>
-                <span className="text-teal-400 font-bold text-sm">□ Observed</span>
-              </div>
-            </div>
+            </dl>
+            <p className="mt-2 text-sm text-graphite-soft">
+              Segmentation model: {morphologySummary.benchmarkModel}
+            </p>
+          </section>
+
+          <EntityList title="Phenotypes" items={entities.phenotypes} />
+          <EntityList title="Genes" items={entities.genes} />
+          <EntityList title="Proteins" items={entities.proteins} />
+          <EntityList title="Pathways" items={entities.pathways} refLabel="Reactome ID" />
+          <EntityList title="Diseases" items={entities.diseases} refLabel="Disease Ontology ID" showEvidence={false} />
+
+          {entities.literature.length > 0 && (
+            <section aria-labelledby="literature-heading" className="border-t border-rule pt-6">
+              <h3 id="literature-heading" className="text-base font-semibold">
+                Literature <span className="font-normal text-graphite">({entities.literature.length})</span>
+              </h3>
+              <ul className="mt-3 space-y-5">
+                {entities.literature.map((paper) => (
+                  <li key={paper.id}>
+                    <p className="font-medium text-ink-strong">{paper.label}</p>
+                    <p className="mt-1 max-w-prose leading-relaxed text-graphite">{paper.description}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <EvidenceTag level="literature" />
+                      {paper.pmid && (
+                        <a
+                          href={`https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`${textLink} text-sm`}
+                        >
+                          PubMed {paper.pmid}
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        <aside aria-labelledby="source-heading" className="lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-[24px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl p-5">
+            <h2 id="source-heading" className="font-sans text-base font-semibold">
+              Source and licence
+            </h2>
+            <dl className="mt-4">
+              <SourceField label="Repository">{image.source}</SourceField>
+              <SourceField label="Accession">
+                <span className="font-mono text-[13px]">{image.datasetAccession}</span>
+              </SourceField>
+              <SourceField label="Licence">{image.license}</SourceField>
+              <SourceField label="Attribution">{image.attribution}</SourceField>
+              {image.doiPmid && <SourceField label="Publication">{image.doiPmid}</SourceField>}
+              <SourceField label="Microscope">{image.microscope}</SourceField>
+              <SourceField label="Objective">{image.objective}</SourceField>
+              <SourceField label="Stain">{image.staining}</SourceField>
+              <SourceField label="Treatment">{image.treatment}</SourceField>
+            </dl>
           </div>
-        </section>
-
-        {/* BLOCK 9: Literature Evidence */}
-        <section className="mb-12 rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              09
-            </span>
-            Literature Evidence ({entities.literature.length})
-          </h2>
-
-          <div className="space-y-3">
-            {entities.literature.map((lit) => (
-              <div
-                key={lit.id}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{lit.label}</span>
-                  {lit.pmid && (
-                    <a
-                      href={`https://pubmed.ncbi.nlm.nih.gov/${lit.pmid}/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-mono text-[11px] text-teal-300 hover:underline"
-                    >
-                      PubMed:{lit.pmid} <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </div>
-                <p className="text-slate-300 mt-2 leading-relaxed">{lit.description}</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-sky-400/30 bg-sky-500/10 text-sky-200">
-                    ▤ Supported by literature
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* BLOCK 10: Dataset / Source */}
-        <section className="rounded-2xl border border-teal-500/20 bg-[#060b14] p-6 shadow-xl">
-          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-teal-300 mb-4">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-teal-500/20 text-teal-300 text-[10px]">
-              10
-            </span>
-            Dataset & Source Repository
-          </h2>
-
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-xs space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Dataset Repository:</span>
-              <span className="font-medium text-white">{image.source}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Accession Identifier:</span>
-              <span className="font-mono text-teal-300">{image.datasetAccession}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Licensing Terms:</span>
-              <span className="font-mono text-slate-300">{image.license}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Scientific Attribution:</span>
-              <span className="text-slate-300 text-right">{image.attribution}</span>
-            </div>
-          </div>
-        </section>
+        </aside>
       </div>
     </div>
   );

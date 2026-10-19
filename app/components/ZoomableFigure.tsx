@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import Image from "next/image";
-import { X, ZoomIn } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 
 type ZoomableFigureProps = {
   src: string;
@@ -15,6 +15,11 @@ type ZoomableFigureProps = {
   idPrefix: string;
 };
 
+/*
+  A figure that opens full-size in a native <dialog> (focus trap and
+  Escape come from the browser). An optional overlay, such as a
+  segmentation mask, can be switched on and off in both views.
+*/
 export default function ZoomableFigure({
   src,
   alt,
@@ -25,98 +30,106 @@ export default function ZoomableFigure({
   overlayAlt,
   idPrefix,
 }: ZoomableFigureProps) {
-  const [isZoomed, setIsZoomed] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [showOverlay, setShowOverlay] = useState(true);
+  const captionId = useId();
 
-  const handleClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName.toLowerCase() !== "input" && target.tagName.toLowerCase() !== "label") {
-      setIsZoomed(true);
-    }
-  };
+  const openDialog = () => dialogRef.current?.showModal();
+  const closeDialog = () => dialogRef.current?.close();
 
-  const renderContent = (isLightbox: boolean) => (
-    <div className="relative overflow-hidden rounded-2xl">
-      {overlaySrc && (
-        <input
-          id={`${idPrefix}-toggle${isLightbox ? "-lb" : ""}`}
-          type="checkbox"
-          defaultChecked
-          className="peer sr-only"
-        />
-      )}
+  const picture = (large: boolean) => (
+    <div className="relative">
       <Image
         src={src}
         unoptimized
         alt={alt}
         width={width}
         height={height}
-        className={`h-auto w-full ${isLightbox ? "max-h-[75vh] object-contain" : ""}`}
+        className={`h-auto w-full ${large ? "max-h-[78vh] object-contain" : ""}`}
       />
       {overlaySrc && (
-        <>
-          <Image
-            src={overlaySrc}
-            unoptimized
-            alt={overlayAlt || ""}
-            width={width}
-            height={height}
-            className={`absolute inset-0 h-auto w-full opacity-0 transition-opacity peer-checked:opacity-100 ${isLightbox ? "max-h-[75vh] object-contain" : ""}`}
-          />
-          <label
-            htmlFor={`${idPrefix}-toggle${isLightbox ? "-lb" : ""}`}
-            className="absolute right-3 top-3 cursor-pointer rounded-full border border-teal-200/30 bg-[#04080e]/80 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-teal-200 backdrop-blur-xl transition hover:border-teal-200/60 peer-focus-visible:ring-2 peer-focus-visible:ring-teal-300"
-          >
-            Toggle overlay
-          </label>
-        </>
+        <Image
+          src={overlaySrc}
+          unoptimized
+          alt={overlayAlt || ""}
+          width={width}
+          height={height}
+          className={`absolute inset-0 h-auto w-full transition-opacity duration-200 ${
+            showOverlay ? "opacity-100" : "opacity-0"
+          } ${large ? "max-h-[78vh] object-contain" : ""}`}
+        />
       )}
     </div>
   );
 
+  const overlaySwitch = overlaySrc ? (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={showOverlay}
+      onClick={() => setShowOverlay((on) => !on)}
+      className="inline-flex min-h-10 items-center gap-2.5 rounded-md px-2 text-sm text-ink transition-colors hover:bg-white/[0.05]"
+    >
+      <span
+        aria-hidden="true"
+        className={`relative h-5 w-9 rounded-full transition-colors ${
+          showOverlay ? "bg-hoechst" : "bg-slate-700"
+        }`}
+      >
+        <span
+          className={`absolute left-0 top-0.5 h-4 w-4 rounded-full bg-field transition-transform ${
+            showOverlay ? "translate-x-4" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+      Segmentation overlay
+    </button>
+  ) : null;
+
   return (
     <>
-      <figure className="overflow-hidden rounded-[26px] border border-teal-200/20 bg-[#04080e]/90 p-4 backdrop-blur-2xl">
-        <div className="group relative cursor-zoom-in" onClick={handleClick}>
-          {renderContent(false)}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/20 group-hover:opacity-100">
-            <div className="rounded-full bg-[#0a121d]/80 p-3 text-teal-300 backdrop-blur-md">
-              <ZoomIn className="h-6 w-6" />
-            </div>
-          </div>
+      <figure id={idPrefix}>
+        <div className="overflow-hidden rounded-[20px] border border-teal-500/25 bg-black shadow-2xl">
+          {picture(false)}
         </div>
-        <figcaption className="mt-3 text-xs leading-5 text-slate-400">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          {overlaySwitch}
+          <button
+            type="button"
+            onClick={openDialog}
+            className="ml-auto inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm text-graphite transition-colors hover:bg-white/[0.05] hover:text-ink"
+          >
+            <Maximize2 className="h-4 w-4" aria-hidden="true" />
+            View full size
+          </button>
+        </div>
+        <figcaption id={captionId} className="mt-2 max-w-prose text-sm leading-relaxed text-graphite">
           {caption}
         </figcaption>
       </figure>
 
-      {isZoomed && (
-        <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 p-4 pt-24 backdrop-blur-sm md:p-12 md:pt-28 cursor-zoom-out"
-          onClick={(e) => {
-            const target = e.target as HTMLElement;
-            // Don't close if they clicked the overlay toggle label or input
-            if (target.tagName.toLowerCase() === "label" || target.tagName.toLowerCase() === "input") {
-              return;
-            }
-            setIsZoomed(false);
-          }}
-        >
-          <div className="relative flex max-h-full max-w-full flex-col items-center justify-center">
-            <button
-              onClick={() => setIsZoomed(false)}
-              className="absolute -right-4 -top-12 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 md:-right-12"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-              {renderContent(true)}
-            </div>
-            <div className="mt-4 max-w-3xl text-center text-sm text-slate-300">
-              {caption}
-            </div>
-          </div>
+      <dialog
+        ref={dialogRef}
+        aria-describedby={captionId}
+        onClick={(event) => {
+          if (event.target === dialogRef.current) closeDialog();
+        }}
+        className="m-auto max-h-[96vh] w-[min(96vw,1400px)] rounded-[24px] border border-teal-400/35 bg-[#060c16]/95 shadow-2xl backdrop-blur-2xl p-0 text-ink backdrop:bg-black/85"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-rule px-4 py-2">
+          {overlaySwitch ?? <span />}
+          <button
+            type="button"
+            onClick={closeDialog}
+            aria-label="Close full-size view"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-graphite transition-colors hover:bg-white/[0.06] hover:text-ink"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
-      )}
+        <div className="p-4">{picture(true)}</div>
+        <p className="px-4 pb-4 text-sm text-graphite">{caption}</p>
+      </dialog>
     </>
   );
 }
