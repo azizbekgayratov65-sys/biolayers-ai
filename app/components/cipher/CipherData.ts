@@ -1,452 +1,583 @@
-import type { CipherDataset } from "./CipherTypes";
+import type { Citation, CipherDataset } from "./CipherTypes";
+
+/*
+  Project Cipher content.
+
+  Every citation below was checked against PubMed (October 2026): the PMID,
+  title and DOI match. Plain-language text simplifies on purpose; the
+  technical text is our own summary in field terms, not a quotation.
+  When you add or change a claim, add the paper that supports it.
+*/
+
+const ref = (label: string, pmid: string, doi?: string, context?: string): Citation => ({
+  label,
+  pmid,
+  doi,
+  context,
+});
+
+const C = {
+  // RAS / KRAS
+  simanshu2017: ref("Simanshu et al., Cell 2017 (review)", "28666118", "10.1016/j.cell.2017.06.009"),
+  hunter2015: ref("Hunter et al., Mol Cancer Res 2015", "26037647", "10.1158/1541-7786.MCR-15-0203"),
+  rodriguezViciana1994: ref("Rodriguez-Viciana et al., Nature 1994", "8052307", "10.1038/370527a0"),
+  datta1997: ref("Datta et al., Cell 1997", "9346240", "10.1016/s0092-8674(00)80405-5"),
+  sears2000: ref("Sears et al., Genes Dev 2000", "11018017", "10.1101/gad.836800"),
+  ying2012: ref(
+    "Ying et al., Cell 2012",
+    "22541435",
+    "10.1016/j.cell.2012.01.058",
+    "Mouse models of pancreatic cancer.",
+  ),
+  pylayevaGupta2012: ref(
+    "Pylayeva-Gupta et al., Cancer Cell 2012",
+    "22698407",
+    "10.1016/j.ccr.2012.04.024",
+    "Mouse models of pancreatic cancer.",
+  ),
+  wang2022: ref("Wang et al., J Med Chem 2022", "34889605", "10.1021/acs.jmedchem.1c01688"),
+  hallin2022: ref(
+    "Hallin et al., Nat Med 2022",
+    "36216931",
+    "10.1038/s41591-022-02007-7",
+    "Cell lines and mouse tumour models, not patients.",
+  ),
+  canon2019: ref("Canon et al., Nature 2019", "31666701", "10.1038/s41586-019-1694-1"),
+  blumenschein2015: ref(
+    "Blumenschein et al., Ann Oncol 2015",
+    "25722381",
+    "10.1093/annonc/mdv072",
+    "Randomised phase II trial in KRAS-mutant lung cancer.",
+  ),
+  hanahan2022: ref("Hanahan, Cancer Discov 2022 (review)", "35022204", "10.1158/2159-8290.CD-21-1059"),
+
+  // Plasticity / dedifferentiation
+  senga2021: ref("Senga & Grose, Open Biol 2021 (review)", "33465324", "10.1098/rsob.200358"),
+  kim2016: ref("Kim & Roberts, Nat Med 2016 (review)", "26845405", "10.1038/nm.4036"),
+  cao2008: ref("Cao et al., Oncogene 2008", "18806826", "10.1038/onc.2008.333"),
+  thiery2009: ref("Thiery et al., Cell 2009 (review)", "19945376", "10.1016/j.cell.2009.11.007"),
+  mani2008: ref("Mani et al., Cell 2008", "18485877", "10.1016/j.cell.2008.03.027"),
+  benPorath2008: ref(
+    "Ben-Porath et al., Nat Genet 2008",
+    "18443585",
+    "10.1038/ng.127",
+    "An association in patient tumours, not a demonstrated cause.",
+  ),
+  dean2005: ref("Dean et al., Nat Rev Cancer 2005 (review)", "15803154", "10.1038/nrc1590"),
+  gounder2020: ref(
+    "Gounder et al., Lancet Oncol 2020",
+    "33035459",
+    "10.1016/S1470-2045(20)30451-4",
+    "Phase 2 trial in epithelioid sarcoma with INI1 loss.",
+  ),
+
+  // p53
+  leePaull2005: ref("Lee & Paull, Science 2005", "15790808", "10.1126/science.1108297"),
+  banin1998: ref("Banin et al., Science 1998", "9733514", "10.1126/science.281.5383.1674"),
+  shieh1997: ref("Shieh et al., Cell 1997", "9363941", "10.1016/s0092-8674(00)80416-x"),
+  elDeiry1993: ref("el-Deiry et al., Cell 1993", "8242752", "10.1016/0092-8674(93)90500-p"),
+  nakano2001: ref("Nakano & Vousden, Mol Cell 2001", "11463392", "10.1016/s1097-2765(01)00214-3"),
+  chipuk2004: ref("Chipuk et al., Science 2004", "14963330", "10.1126/science.1092734"),
+  olivier2010: ref("Olivier et al., Cold Spring Harb Perspect Biol 2010 (review)", "20182602", "10.1101/cshperspect.a001008"),
+  kandoth2013: ref("Kandoth et al., Nature 2013", "24132290", "10.1038/nature12634"),
+  vassilev2004: ref(
+    "Vassilev et al., Science 2004",
+    "14704432",
+    "10.1126/science.1092472",
+    "Cell lines and mouse tumour models.",
+  ),
+
+  // Flagship: CAF / CXCL12 / CXCR4 (from research/cell-pipeline/knowledge/literature.json)
+  orimo2005: ref(
+    "Orimo et al., Cell 2005",
+    "15882617",
+    "10.1016/j.cell.2005.02.034",
+    "Human breast carcinoma fibroblasts in a co-implantation mouse model; not glioma.",
+  ),
+  rempel2000: ref(
+    "Rempel et al., Clin Cancer Res 2000",
+    "10656438",
+    undefined,
+    "Immunohistochemistry of human astrocytoma tissue, grades II to IV.",
+  ),
+  zhou2002: ref(
+    "Zhou et al., J Biol Chem 2002",
+    "12388552",
+    "10.1074/jbc.M206222200",
+    "16 human glioma cell lines and 6 resected gliomas, in vitro.",
+  ),
+  ehtesham2006: ref(
+    "Ehtesham et al., Oncogene 2006",
+    "16407848",
+    "10.1038/sj.onc.1209302",
+    "Malignant glioma cells, in vitro invasion assays and in vivo.",
+  ),
+  rubin2003: ref(
+    "Rubin et al., PNAS 2003",
+    "14595012",
+    "10.1073/pnas.2235846100",
+    "Mouse models of brain tumours.",
+  ),
+  torsvik2014: ref("Torsvik et al., Cancer Med 2014", "24810477", "10.1002/cam4.219"),
+};
 
 export const CIPHER_DATASETS: CipherDataset[] = [
+  /* ---------------------------------------------------------------
+     KRAS G12D
+     --------------------------------------------------------------- */
   {
     id: "kras-g12d",
-    title: "KRAS G12D Oncogenic Signaling Cascade",
-    subtitle: "From a Single DNA Letter Swap to Uncontrolled Tumor Proliferation",
-    paperDoiOrPmc: "10.1016/j.cell.2023.08.012",
+    title: "KRAS G12D signalling",
+    subtitle: "How one changed amino acid keeps a growth switch turned on",
     difficulty: "Beginner",
-    estimatedReadTime: "4 min exploration",
+    estimatedReadTime: "4 min",
     oneLineSummary:
-      "See how a single amino acid substitution locks a cellular molecular switch into the 'ALWAYS ON' state, triggering a domino effect of tumor growth.",
+      "A single change in the KRAS protein stops it switching itself off, so growth and survival signals keep firing.",
+    primarySources: [C.simanshu2017, C.hunter2015],
+    reviewed: "October 2026",
     tour: [
       {
         nodeId: "kras-mutation",
-        stepNumber: 1,
-        title: "Step 1: The Root Trigger",
+        title: "The root cause",
         concept:
-          "It all begins with a single typo in the KRAS gene at codon 12. A glycine is replaced with aspartate (G12D), physically jamming the cellular 'OFF switch'.",
-        questionPrompt: "What happens when a molecular switch can't turn off?",
+          "KRAS is a switch protein. In the G12D mutation, the amino acid at position 12 changes from glycine to aspartic acid, and the switch becomes very hard to turn off.",
+        questionPrompt: "What happens when a switch that should turn itself off cannot?",
       },
       {
         nodeId: "gtp-jam",
-        stepNumber: 2,
-        title: "Step 2: Molecular Jamming",
+        title: "Stuck in the on position",
         concept:
-          "Normally, KRAS burns its GTP fuel and clicks shut. With the G12D mutation, water molecules cannot reach the fuel pocket, trapping KRAS in permanent hyperactive signaling.",
+          "KRAS is on while it holds GTP and off once it breaks GTP down to GDP. The mutant protein breaks GTP down far more slowly, and helper proteins that normally speed this up no longer work on it.",
       },
       {
         nodeId: "mapk-cascade",
-        stepNumber: 3,
-        title: "Step 3: The Domino Chain (MAPK/ERK)",
+        title: "The relay to the nucleus",
         concept:
-          "Hyperactive KRAS recruits RAF, which phosphorylates MEK, which activates ERK. Like a telephone chain, the panic signal multiplies 1000-fold as it rushes into the nucleus.",
+          "Active KRAS switches on RAF, which switches on MEK, which switches on ERK. ERK carries the growth message into the nucleus.",
       },
       {
         nodeId: "uncontrolled-division",
-        stepNumber: 4,
-        title: "Step 4: The Pathological Effect",
+        title: "The effect: division without pause",
         concept:
-          "Inside the cell nucleus, the flood of ERK signals forces cyclins to ramp up, instructing the cell to bypass normal safety checkpoints and divide continuously without stopping.",
+          "ERK signals push the cell past the checkpoint that normally decides whether it should divide, so it keeps dividing.",
       },
       {
         nodeId: "kras-inhibitor",
-        stepNumber: 5,
-        title: "Step 5: Precision Therapy (The Solution)",
+        title: "Treating the cause",
         concept:
-          "Modern oncology researchers designed miniature synthetic lock-picks (such as MRTX1133 and Sotorasib derivatives) that slip directly into the mutated pocket, turning the switch off chemically.",
+          "MRTX1133 was designed to fit a pocket on KRAS G12D and switch it off. It shrinks tumours in mouse models but is still experimental. Sotorasib, an approved drug, targets a different mutation (G12C), not G12D.",
       },
     ],
     quiz: {
-      question: "Why is KRAS G12D constantly stuck in the active state?",
+      question: "Why does KRAS G12D stay switched on?",
       options: [
-        "It lacks a cell membrane to bind to",
-        "The G12D mutation prevents GTP hydrolysis, so it cannot turn off its fuel",
-        "It produces too many ribosomes",
-        "It destroys all surrounding white blood cells",
+        "It cannot attach to the cell membrane",
+        "It breaks down GTP far more slowly, so it stays in its active form",
+        "It makes too many ribosomes",
+        "It destroys nearby immune cells",
       ],
       correctIndex: 1,
       explanation:
-        "Correct! The G12D mutation replaces glycine with aspartic acid, sterically blocking water molecules from hydrolyzing GTP to GDP, trapping KRAS in the active signaling conformation.",
+        "The answer is B. KRAS is active while bound to GTP. The G12D change slows both its own GTP breakdown and the speed-up normally provided by helper proteins (GAPs), so the protein stays active.",
     },
     nodes: [
       {
-        id: "kras-mutation",
-        label: "KRAS G12D Mutation",
+        id: "egfr-stimulus",
+        label: "Growth-factor signal (EGFR)",
         category: "trigger",
-        level: 1,
-        weight: 5,
-        plainTitle: "The Jammed Accelerator Pedal",
+        plainTitle: "The knock at the door",
         plainExplanation:
-          "Imagine a car's gas pedal welded to the floorboard. A single letter change in DNA replaces glycine with aspartate, turning a careful traffic cop into an unstoppable engine.",
-        academicExcerpt:
-          "The oncogenic KRAS G12D substitution impairs both intrinsic and GAP-mediated GTP hydrolysis, maintaining the GTPase in a constitutively active state.",
-        pronunciation: "KAY-rass G-12-D",
-        keyMolecules: ["KRAS", "Codon 12", "Aspartate"],
+          "Growth signals from outside the cell land on receptors such as EGFR at its surface, and the receptor passes the message inside.",
+        technical:
+          "Ligand-bound EGFR recruits the adaptor GRB2 and the exchange factor SOS1, which swaps GDP for GTP on RAS proteins.",
+        keyMolecules: ["EGF", "EGFR", "SOS1"],
+        sources: [C.simanshu2017],
       },
       {
-        id: "egfr-stimulus",
-        label: "EGFR Extracellular Signal",
+        id: "kras-mutation",
+        label: "KRAS G12D mutation",
         category: "trigger",
-        level: 1,
-        weight: 3,
-        plainTitle: "The Knock at the Door",
+        plainTitle: "A switch that sticks",
         plainExplanation:
-          "Outside growth factors bind to cell-surface antennae, sending the initial electrical signal across the cell membrane.",
-        academicExcerpt:
-          "Epidermal growth factor receptor (EGFR) dimerization initiates downstream nucleotide exchange factors like SOS1 to activate RAS family proteins.",
-        keyMolecules: ["EGF", "EGFR", "SOS1"],
+          "One DNA letter change swaps glycine for aspartic acid at position 12 of KRAS. KRAS should switch itself off after each signal; this version barely can.",
+        technical:
+          "The G12D substitution impairs both intrinsic and GAP-stimulated GTP hydrolysis, so KRAS accumulates in its active, GTP-bound state.",
+        pronunciation: "KAY-rass, G-twelve-D",
+        keyMolecules: ["KRAS", "Codon 12", "Aspartic acid"],
+        sources: [C.hunter2015],
       },
       {
         id: "gtp-jam",
-        label: "Defective GTP Hydrolysis",
+        label: "KRAS stuck in the GTP-bound state",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "Battery Won't Turn Off",
+        plainTitle: "The on light stays lit",
         plainExplanation:
-          "Cells use energy packets called GTP to power switches. KRAS G12D refuses to let go of its battery, broadcasting a non-stop 'GROW' command.",
-        academicExcerpt:
-          "Structural sterics of the D12 side chain disrupt the catalytic water molecule orientation required for nucleophilic attack on the gamma-phosphate of GTP.",
-        keyMolecules: ["GTP", "p21-Ras", "GAP"],
+          "KRAS is on while holding a GTP molecule and off after breaking it down. The mutant breaks GTP down so slowly that it spends most of its time on.",
+        technical:
+          "Reduced GTPase activity and insensitivity to GAPs such as NF1 keep KRAS-GTP high, leaving its effector-binding regions available to RAF and PI3K.",
+        keyMolecules: ["GTP", "GDP", "GAPs"],
+        sources: [C.hunter2015, C.simanshu2017],
       },
       {
         id: "mapk-cascade",
-        label: "RAF ➔ MEK ➔ ERK Cascade",
+        label: "RAF → MEK → ERK cascade",
         category: "mechanism",
-        level: 2,
-        weight: 5,
-        plainTitle: "The Megaphone Relay Chain",
+        plainTitle: "The relay chain",
         plainExplanation:
-          "KRAS whispers to RAF, RAF shouts to MEK, and MEK uses a megaphone to alert ERK. Each step amplifies the signal so the cell cannot ignore it.",
-        academicExcerpt:
-          "RAS-GTP promotes RAF kinase dimerization, driving sequential dual-specificity phosphorylation of MEK1/2 and subsequent activation of ERK1/2 MAP kinases.",
-        keyMolecules: ["BRAF", "MEK1", "ERK2"],
+          "KRAS switches on RAF, RAF switches on MEK, and MEK switches on ERK. Each step passes the message along until it reaches the nucleus.",
+        technical:
+          "KRAS-GTP recruits RAF kinases to the membrane. RAF phosphorylates MEK1/2, which phosphorylates ERK1/2; active ERK enters the nucleus and phosphorylates transcription factors.",
+        keyMolecules: ["RAF", "MEK1/2", "ERK1/2"],
+        sources: [C.simanshu2017],
       },
       {
         id: "pi3k-survival",
-        label: "PI3K-AKT-mTOR Axis",
+        label: "PI3K → AKT survival signal",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "The 'Do Not Die' Shield",
+        plainTitle: "The do-not-die signal",
         plainExplanation:
-          "A secondary parallel pathway activates that forbids the damaged cell from initiating its built-in self-destruct mechanism.",
-        academicExcerpt:
-          "Active KRAS binds directly to the p110 catalytic subunit of PI3K, generating PIP3 second messengers that recruit and phosphorylate AKT at Thr308 and Ser473.",
-        keyMolecules: ["PI3K", "AKT", "mTORC1"],
+          "A second pathway switched on by KRAS tells the cell to stay alive, even when it would normally self-destruct.",
+        technical:
+          "KRAS-GTP binds the p110 catalytic subunit of PI3K directly, raising PIP3 and activating AKT. AKT phosphorylates the pro-death protein BAD and blocks it.",
+        keyMolecules: ["PI3K p110", "AKT", "BAD"],
+        sources: [C.rodriguezViciana1994, C.datta1997],
       },
       {
         id: "myc-activation",
-        label: "MYC Transcription Reprogramming",
+        label: "MYC stabilised",
         category: "mechanism",
-        level: 2,
-        weight: 3,
-        plainTitle: "The Factory Master Plan",
+        plainTitle: "The master growth gene",
         plainExplanation:
-          "ERK travels into the nucleus and wakes up MYC, a master gene regulator that orders the cell to construct new proteins and organelles 24/7.",
-        academicExcerpt:
-          "Phosphorylation of MYC at Ser62 stabilizes the oncoprotein, facilitating global transcriptional rewiring and ribosome biogenesis.",
-        keyMolecules: ["c-MYC", "RNA Pol I", "Cyclin D1"],
+          "ERK protects MYC, a protein that switches on hundreds of genes for growth, so more of it stays in the cell.",
+        technical:
+          "ERK phosphorylates MYC on Ser62, which stabilises the protein; MYC then drives genes for cell growth and cell-cycle entry.",
+        keyMolecules: ["MYC", "Ser62"],
+        sources: [C.sears2000],
       },
       {
         id: "uncontrolled-division",
-        label: "Hyperactive Cell Division",
+        label: "Continuous cell division",
         category: "effect",
-        level: 3,
-        weight: 5,
-        plainTitle: "Unchecked Tumor Growth",
+        plainTitle: "Growth without a pause",
         plainExplanation:
-          "The cell skips normal rest intervals and divides rapidly, forming a solid tumor mass that crowds out healthy organ tissue.",
-        academicExcerpt:
-          "Hyperactivated Cyclin D-CDK4/6 complexes hyperphosphorylate the retinoblastoma (Rb) protein, unleashing E2F transcription factors to drive continuous S-phase entry.",
-        keyMolecules: ["CDK4/6", "pRb", "E2F1"],
+          "The cell skips the checkpoint that decides whether it should divide, and keeps dividing.",
+        technical:
+          "Sustained MAPK signalling raises cyclin D–CDK4/6 activity, which inactivates RB and frees E2F to push cells into S phase.",
+        keyMolecules: ["Cyclin D", "CDK4/6", "RB", "E2F"],
+        sources: [C.simanshu2017, C.hanahan2022],
+      },
+      {
+        id: "cell-survival",
+        label: "Damaged cells avoid death",
+        category: "effect",
+        plainTitle: "Cells that should die, don't",
+        plainExplanation:
+          "Cells carrying dangerous changes keep living instead of switching on their self-destruct programme.",
+        technical:
+          "AKT-driven inhibition of pro-apoptotic proteins raises the threshold for apoptosis in KRAS-mutant cells.",
+        keyMolecules: ["AKT", "BAD"],
+        sources: [C.datta1997],
       },
       {
         id: "glycolysis-shift",
-        label: "Warburg Metabolic Shift",
+        label: "Glucose-hungry metabolism",
         category: "effect",
-        level: 3,
-        weight: 3,
-        plainTitle: "Sugar-Addicted Cancer Cells",
+        plainTitle: "Burning sugar for building blocks",
         plainExplanation:
-          "Cancer cells voraciously absorb glucose to fuel rapid construction, generating lactic acid waste that damages surrounding healthy tissue.",
-        academicExcerpt:
-          "KRAS rewires carbon flux into the non-oxidative pentose phosphate pathway (PPP) and upregulates GLUT1 glucose transporters to meet macromolecular synthesis demands.",
-        keyMolecules: ["GLUT1", "LDHA", "Hexokinase 2"],
+          "Tumour cells take in extra sugar and use it to build new cell parts quickly.",
+        technical:
+          "In pancreatic tumour models, mutant KRAS raises glucose uptake (GLUT1) and hexokinase expression and channels glucose into the non-oxidative pentose phosphate pathway.",
+        keyMolecules: ["GLUT1", "Hexokinase", "Pentose phosphate pathway"],
+        sources: [C.ying2012],
       },
       {
         id: "immune-evasion",
-        label: "T-Cell Immune Exclusion",
+        label: "Immune attack held back",
         category: "effect",
-        level: 3,
-        weight: 4,
-        plainTitle: "The Stealth Invisibility Cloak",
+        plainTitle: "Calling in the wrong guards",
         plainExplanation:
-          "The tumor pumps out chemical smokescreens that prevent immune hunter cells (cytotoxic T-lymphocytes) from entering the tumor boundary.",
-        academicExcerpt:
-          "Oncogenic KRAS induces immunosuppressive cytokine production (IL-6, CXCL8) and recruits myeloid-derived suppressor cells (MDSCs) to exclude CD8+ T cells.",
-        keyMolecules: ["CD8+", "CXCL8", "MDSCs"],
+          "The tumour releases a signal that attracts immune cells which calm the immune system down, so killer T cells do less damage to the tumour.",
+        technical:
+          "In pancreatic models, oncogenic KRAS induces GM-CSF secretion, recruiting immunosuppressive myeloid cells that inhibit CD8+ T cells.",
+        keyMolecules: ["GM-CSF", "Myeloid cells", "CD8+ T cells"],
+        sources: [C.pylayevaGupta2012],
       },
       {
         id: "kras-inhibitor",
-        label: "Targeted KRAS-G12D Inhibitor",
+        label: "KRAS G12D inhibitor (MRTX1133)",
         category: "therapy",
-        level: 4,
-        weight: 5,
-        plainTitle: "The Precision Molecular Wedge",
+        drugStatus: "experimental",
+        plainTitle: "A key cut for the broken lock",
         plainExplanation:
-          "A custom-designed pill (like MRTX1133) slips into the tiny mutated cleft, locking the jammed switch back into an inactive state.",
-        academicExcerpt:
-          "Non-covalent, highly selective small molecules reversibly bind the Switch-II pocket of KRAS G12D, trapping the protein in its GDP-bound inactive conformation.",
-        keyMolecules: ["MRTX1133", "Switch-II Pocket"],
+          "A drug molecule designed to fit a pocket on the mutant KRAS protein and stop it signalling. It works in lab and mouse models but is not yet an approved treatment.",
+        technical:
+          "MRTX1133 binds the switch-II pocket of KRAS G12D non-covalently and selectively, suppresses downstream signalling and causes tumour regression in pancreatic cancer models.",
+        keyMolecules: ["MRTX1133", "Switch-II pocket"],
+        sources: [C.wang2022, C.hallin2022, C.canon2019],
       },
       {
         id: "mek-inhibitor",
-        label: "MEK/ERK Targeted Blocker",
+        label: "MEK inhibitor (trametinib)",
         category: "therapy",
-        level: 4,
-        weight: 3,
-        plainTitle: "Cutting the Signal Wire",
+        drugStatus: "approved",
+        plainTitle: "Cutting the relay",
         plainExplanation:
-          "If the switch at the top cannot be turned off, doctors use drugs like Trametinib to cut the electrical wire further downstream.",
-        academicExcerpt:
-          "Allosteric MEK1/2 inhibitors (Trametinib) block ERK phosphorylation, preventing downstream nuclear transcriptional output.",
+          "Blocks the relay further down the chain. Trametinib is approved for some BRAF-mutant cancers, but on its own it did not beat chemotherapy in KRAS-mutant lung cancer.",
+        technical:
+          "Trametinib is an allosteric MEK1/2 inhibitor. In a randomised phase II trial in KRAS-mutant non-small-cell lung cancer, its progression-free survival was similar to docetaxel.",
         keyMolecules: ["Trametinib", "MEK1/2"],
+        sources: [C.blumenschein2015],
       },
     ],
     edges: [
       {
         source: "egfr-stimulus",
-        target: "kras-mutation",
-        label: "Transmits signal to",
+        target: "gtp-jam",
+        label: "Loads GTP onto KRAS",
         relationshipType: "activates",
-        mechanismDetail:
-          "EGFR recruits SOS1, attempting to cycle GDP for GTP on the mutant KRAS protein.",
+        mechanismDetail: "SOS1, recruited by active EGFR, swaps GDP for GTP on KRAS.",
+        evidence: [C.simanshu2017],
       },
       {
         source: "kras-mutation",
         target: "gtp-jam",
-        label: "Directly causes",
+        label: "Slows GTP breakdown",
         relationshipType: "activates",
-        mechanismDetail:
-          "G12D mutation physically blocks water attack, freezing the molecule in the active GTP-bound form.",
+        mechanismDetail: "G12D reduces both intrinsic and GAP-stimulated GTP hydrolysis.",
+        evidence: [C.hunter2015],
       },
       {
         source: "gtp-jam",
         target: "mapk-cascade",
-        label: "Hyperactivates",
+        label: "Recruits RAF",
         relationshipType: "activates",
-        mechanismDetail:
-          "Persistent GTP conformation exposes the effector binding loop that binds and unleashes RAF kinases.",
+        mechanismDetail: "GTP-bound KRAS binds RAF and brings it to the membrane, where RAF is activated.",
+        evidence: [C.simanshu2017],
       },
       {
         source: "gtp-jam",
         target: "pi3k-survival",
-        label: "Recruits & stimulates",
+        label: "Binds PI3K",
         relationshipType: "activates",
-        mechanismDetail:
-          "Direct physical interaction with the PI3K regulatory domain activates lipid kinase cascade.",
+        mechanismDetail: "GTP-bound RAS binds the p110 catalytic subunit of PI3K directly.",
+        evidence: [C.rodriguezViciana1994],
       },
       {
         source: "mapk-cascade",
         target: "myc-activation",
-        label: "Phosphorylates & stabilizes",
+        label: "Stabilises MYC",
         relationshipType: "activates",
-        mechanismDetail:
-          "Active ERK migrates into the nucleus and phosphorylates MYC, preventing its normal destruction.",
+        mechanismDetail: "ERK phosphorylates MYC on Ser62, protecting it from rapid breakdown.",
+        evidence: [C.sears2000],
+      },
+      {
+        source: "mapk-cascade",
+        target: "uncontrolled-division",
+        label: "Drives cell-cycle entry",
+        relationshipType: "activates",
+        mechanismDetail: "ERK signalling raises cyclin D, which starts the chain that releases E2F.",
+        evidence: [C.simanshu2017],
       },
       {
         source: "myc-activation",
         target: "uncontrolled-division",
-        label: "Forces cycle into",
+        label: "Switches on growth genes",
         relationshipType: "activates",
-        mechanismDetail:
-          "MYC directly transcribes Cyclin D, forcing the cell past the restriction point into mitosis.",
+        mechanismDetail: "MYC drives genes for growth and cell-cycle entry, a hallmark of sustained proliferation.",
+        evidence: [C.hanahan2022],
       },
       {
         source: "pi3k-survival",
-        target: "uncontrolled-division",
-        label: "Suppresses checkpoints for",
-        relationshipType: "activates",
-        mechanismDetail:
-          "AKT blocks pro-apoptotic proteins Bad and Caspase-9, ensuring the mutant cell does not perish.",
+        target: "cell-survival",
+        label: "Blocks death signals",
+        relationshipType: "inhibits",
+        mechanismDetail: "AKT phosphorylates BAD, preventing it from promoting apoptosis.",
+        evidence: [C.datta1997],
       },
       {
         source: "gtp-jam",
         target: "glycolysis-shift",
-        label: "Shifts metabolism to",
+        label: "Rewires glucose use",
         relationshipType: "transforms",
-        mechanismDetail:
-          "KRAS activates hexokinase, diverting glucose toward fast building blocks rather than slow respiration.",
+        mechanismDetail: "Mutant KRAS raises glucose uptake and sends glucose into building-block pathways.",
+        evidence: [C.ying2012],
       },
       {
-        source: "mapk-cascade",
+        source: "gtp-jam",
         target: "immune-evasion",
-        label: "Releases cytokines for",
+        label: "Recruits suppressive cells",
         relationshipType: "transforms",
-        mechanismDetail:
-          "ERK signaling drives production of suppressive chemokines that blind incoming immune T-cells.",
+        mechanismDetail: "KRAS-induced GM-CSF attracts myeloid cells that suppress CD8+ T cells.",
+        evidence: [C.pylayevaGupta2012],
       },
       {
         source: "kras-inhibitor",
         target: "gtp-jam",
-        label: "Chemically locks & shuts off",
+        label: "Blocks mutant KRAS",
         relationshipType: "inhibits",
-        mechanismDetail:
-          "The drug binds Switch-II, stabilizing the off-state and depriving the cascade of its main spark.",
+        mechanismDetail: "MRTX1133 occupies the switch-II pocket of KRAS G12D and stops it signalling.",
+        evidence: [C.wang2022, C.hallin2022],
       },
       {
         source: "mek-inhibitor",
         target: "mapk-cascade",
-        label: "Severely blocks",
+        label: "Blocks MEK",
         relationshipType: "inhibits",
-        mechanismDetail:
-          "Allosterically wedges inside MEK kinase, neutralizing signal before it reaches the cell nucleus.",
+        mechanismDetail: "Trametinib binds MEK1/2 allosterically and stops it activating ERK.",
+        evidence: [C.blumenschein2015],
       },
     ],
   },
+
+  /* ---------------------------------------------------------------
+     Dedifferentiation and plasticity
+     --------------------------------------------------------------- */
   {
     id: "hallmarks-dedifferentiation",
-    title: "Epigenetic Rewiring & Cellular Dedifferentiation",
-    subtitle: "Hallmarks of Cancer: When Mature Cells Forget Their Identity",
-    paperDoiOrPmc: "10.1098/rsob.210358",
+    title: "Dedifferentiation and cell plasticity",
+    subtitle: "How tumour cells lose their identity and gain stem-like traits",
     difficulty: "Intermediate",
-    estimatedReadTime: "5 min exploration",
+    estimatedReadTime: "5 min",
     oneLineSummary:
-      "Explore how tumors erase their cell identity (dedifferentiation) using epigenetic molecular tags to become untargetable shapeshifters.",
+      "Epigenetic changes silence the genes that keep a cell specialised, opening the way to stem-like, mobile and drug-resistant states.",
+    primarySources: [C.senga2021, C.hanahan2022],
+    reviewed: "October 2026",
     tour: [
       {
         nodeId: "epigenetic-disruption",
-        stepNumber: 1,
-        title: "Step 1: The Epigenetic Scramble",
+        title: "Scrambled bookmarks",
         concept:
-          "DNA isn't just a code; it is wrapped on molecular spools called histones. Cancer enzymes chemically modify these spools to lock away normal tissue programs.",
+          "Epigenetic marks tell a cell which genes to read. When regulators such as EZH2 go wrong, genes that keep the cell specialised get switched off.",
       },
       {
         nodeId: "lineage-loss",
-        stepNumber: 2,
-        title: "Step 2: Identity Amnesia",
+        title: "Losing identity",
         concept:
-          "As healthy identity markers turn off, a breast, lung, or skin cell forgets what organ it was built to serve.",
+          "With those genes silenced, a breast or lung cell stops behaving like one. EZH2, for example, switches off E-cadherin, a protein that holds epithelial cells together.",
+      },
+      {
+        nodeId: "emt-activation",
+        title: "From sheet to wanderer",
+        concept:
+          "In the epithelial-to-mesenchymal transition (EMT), cells loosen their connections and start to move.",
       },
       {
         nodeId: "stemness-acquisition",
-        stepNumber: 3,
-        title: "Step 3: Gaining Stem Cell Plasticity",
+        title: "Stem-like traits",
         concept:
-          "Reverting into an embryonic-like 'cancer stem cell', it gains the terrifying superpower to morph into multiple cell types on demand.",
+          "EMT can give cells stem-like abilities, and the most aggressive tumours carry gene signatures resembling embryonic stem cells.",
       },
       {
         nodeId: "chemo-resistance",
-        stepNumber: 4,
-        title: "Step 4: Therapy Resistance",
+        title: "Surviving treatment",
         concept:
-          "Standard chemotherapies look for specific targets. Because these shapeshifting cells change form, chemotherapy bounces right off them.",
+          "Stem-like tumour cells can pump drugs out and divide slowly, which helps them survive chemotherapy.",
       },
       {
         nodeId: "epigenetic-therapy",
-        stepNumber: 5,
-        title: "Step 5: Epigenetic Re-education",
+        title: "A drug against the cause",
         concept:
-          "By inhibiting chromatin silencers like EZH2, oncologists can force the mutant cell to re-learn its identity and regain sensitivity to drugs.",
+          "Tazemetostat blocks EZH2. It is approved for a rare sarcoma; whether drugs like it can make other tumours re-differentiate is still being studied.",
       },
     ],
     quiz: {
-      question: "What superpower does cellular dedifferentiation give to cancer cells?",
+      question: "What does EMT do to an epithelial cell?",
       options: [
-        "It forces the tumor to generate healthy hemoglobin",
-        "It erases adult cell identity and confers drug-resistant stem cell plasticity",
-        "It locks the cancer cells permanently into apoptosis",
-        "It makes the cell vulnerable to every known antibiotic",
+        "It makes the cell divide faster without moving",
+        "It loosens the cell's connections and lets it move, and can give it stem-like traits",
+        "It locks the cell permanently into apoptosis",
+        "It makes the cell produce red blood cells",
       ],
       correctIndex: 1,
       explanation:
-        "Correct! Dedifferentiation allows specialized cells to revert into plastic, stem-like states, letting them morph shapes, crawl into blood vessels, and survive toxic chemotherapies.",
+        "The answer is B. During EMT, epithelial cells lose junction proteins such as E-cadherin, become motile, and in experiments can acquire stem-like properties.",
     },
     nodes: [
       {
         id: "epigenetic-disruption",
-        label: "Epigenetic Modifier Dysregulation",
+        label: "Epigenetic regulators go wrong",
         category: "trigger",
-        level: 1,
-        weight: 5,
-        plainTitle: "The Scrambled Instruction Bookmarks",
+        plainTitle: "Scrambled bookmarks",
         plainExplanation:
-          "Think of DNA as a massive library. Epigenetics places bookmarks telling cells which pages to read. Cancer mutates the bookmarks so the cell reads the wrong pages.",
-        academicExcerpt:
-          "Alterations in histone methyltransferases (e.g. EZH2) and chromatin remodelers facilitate widespread genome-wide chromatin remodeling in carcinomas.",
-        pronunciation: "ep-i-jen-ET-ik / ee-ZEE-aych-too",
-        keyMolecules: ["EZH2", "DNMT3A", "H3K27me3"],
+          "Think of DNA as a library and epigenetic marks as bookmarks saying which pages to read. In cancer the bookmarks move, and the cell reads the wrong pages.",
+        technical:
+          "Non-mutational epigenetic reprogramming, for example overactive EZH2 depositing repressive H3K27me3, silences genes that maintain differentiation.",
+        pronunciation: "E-Z-H-2",
+        keyMolecules: ["EZH2", "H3K27me3", "DNA methylation"],
+        sources: [C.hanahan2022, C.kim2016],
       },
       {
         id: "lineage-loss",
-        label: "Loss of Tissue Lineage Markers",
+        label: "Loss of cell identity genes",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "Cellular Amnesia",
+        plainTitle: "Forgetting the job",
         plainExplanation:
-          "A specialized lung cell stops producing surfactant; a pancreatic cell stops producing enzymes. They forget their original specialty.",
-        academicExcerpt:
-          "Repression of terminal differentiation transcription factors causes loss of lineage fidelity, a hallmark of malignant progression.",
-        keyMolecules: ["CDH1", "GATA3", "Cytokeratins"],
-      },
-      {
-        id: "stemness-acquisition",
-        label: "Stem Cell Plasticity & Oct4/Sox2",
-        category: "mechanism",
-        level: 2,
-        weight: 5,
-        plainTitle: "Reverting to Embryonic Stem State",
-        plainExplanation:
-          "The cell wakes up embryonic genes that are supposed to sleep after birth, granting the cancer cell infinite rejuvenation powers.",
-        academicExcerpt:
-          "Re-expression of pluripotency circuit transcription factors (OCT4, SOX2, NANOG) confers self-renewal capability and stem-like tumorigenicity.",
-        keyMolecules: ["OCT4", "SOX2", "NANOG"],
+          "A specialised cell stops making the proteins of its tissue and forgets what it was built to do.",
+        technical:
+          "Silencing of differentiation programmes erodes lineage identity. EZH2 directly represses E-cadherin (CDH1), a core epithelial gene.",
+        keyMolecules: ["CDH1 (E-cadherin)", "Lineage transcription factors"],
+        sources: [C.hanahan2022, C.cao2008],
       },
       {
         id: "emt-activation",
-        label: "Epithelial-to-Mesenchymal Shift (EMT)",
+        label: "Epithelial-to-mesenchymal transition (EMT)",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "From Bricks to Mobile Crawlers",
+        plainTitle: "From bricks to wanderers",
         plainExplanation:
-          "Cells usually stay locked together like building bricks. EMT unglues them, letting individual cancer cells crawl through blood vessels.",
-        academicExcerpt:
-          "SNAIL and TWIST induce loss of E-cadherin, promoting cytoskeleton reorganization and dynamic mesenchymal motility.",
+          "Cells that normally sit together like bricks loosen their grip and start crawling on their own.",
+        technical:
+          "EMT transcription factors such as SNAIL and TWIST repress E-cadherin, so epithelial cells lose junctions, reorganise their cytoskeleton and become motile.",
         keyMolecules: ["SNAIL", "TWIST", "Vimentin"],
+        sources: [C.thiery2009],
+      },
+      {
+        id: "stemness-acquisition",
+        label: "Stem-cell-like state",
+        category: "mechanism",
+        plainTitle: "Turning the clock back",
+        plainExplanation:
+          "Some tumour cells switch on genes usually used by embryonic stem cells, which lets them renew themselves and change form.",
+        technical:
+          "EMT can confer stem-like properties, and poorly differentiated aggressive tumours show embryonic stem cell–like expression signatures (NANOG, OCT4, SOX2 targets).",
+        keyMolecules: ["OCT4", "SOX2", "NANOG"],
+        sources: [C.mani2008, C.benPorath2008],
       },
       {
         id: "chemo-resistance",
-        label: "Chemotherapeutic Drug Resistance",
+        label: "Resistance to chemotherapy",
         category: "effect",
-        level: 3,
-        weight: 5,
-        plainTitle: "Chemotherapy Bounces Off",
+        plainTitle: "Treatment slides off",
         plainExplanation:
-          "Because the cells can change their shape and hide in slow-cycling dormant states, conventional chemotherapies cannot find or kill them.",
-        academicExcerpt:
-          "Dedifferentiated cancer stem cells express high levels of ABC-family drug efflux pumps and maintain elevated antioxidant buffering.",
-        keyMolecules: ["ABCB1", "ALDH1", "GSH"],
+          "Stem-like cells pump drugs back out and divide slowly, so treatments that target fast-dividing cells miss them.",
+        technical:
+          "Stem-like tumour cells can resist chemotherapy through ABC-family efflux pumps and slow cycling.",
+        keyMolecules: ["ABCB1", "ABCG2"],
+        sources: [C.dean2005],
       },
       {
         id: "metastasis",
-        label: "Distant Metastatic Seeding",
+        label: "Spread to other organs",
         category: "effect",
-        level: 3,
-        weight: 4,
-        plainTitle: "Spreading to Other Organs",
+        plainTitle: "Leaving home",
         plainExplanation:
-          "The unglued shapeshifting cells break into the bloodstream, travel to distant organs like the brain, liver, or bone, and form secondary colonies.",
-        academicExcerpt:
-          "Disseminated tumor cells colonize distant pre-metastatic niches, resisting detachment-induced apoptosis (anoikis).",
-        keyMolecules: ["MMP9", "VEGF-A", "Integrins"],
+          "Mobile tumour cells enter blood vessels, travel and form new tumours in other organs.",
+        technical:
+          "EMT-driven motility and invasion help carcinoma cells disseminate, although how often a full EMT is needed in patients is still debated.",
+        keyMolecules: ["MMPs", "Integrins"],
+        sources: [C.thiery2009],
       },
       {
         id: "epigenetic-therapy",
-        label: "EZH2 / HDAC Epigenetic Inhibitor",
+        label: "EZH2 inhibitor (tazemetostat)",
         category: "therapy",
-        level: 4,
-        weight: 4,
-        plainTitle: "Re-educating the Cell",
+        drugStatus: "approved",
+        plainTitle: "Resetting the bookmarks",
         plainExplanation:
-          "Drugs like Tazemetostat inhibit the enzymes that scrambled the bookmarks, forcing the cancer cell to mature and remember how to die.",
-        academicExcerpt:
-          "Selective EZH2 catalytic inhibition decreases repressive H3K27me3 marks, derepressing lineage-defining differentiation gene cassettes.",
-        keyMolecules: ["Tazemetostat", "Vorinostat"],
+          "Blocks EZH2. It is approved for a rare sarcoma whose tumours depend on EZH2; using it to make other tumours re-differentiate is still being studied.",
+        technical:
+          "Tazemetostat inhibits EZH2 catalytic activity and lowers H3K27me3. It produced responses in epithelioid sarcoma with INI1 loss in a phase 2 trial.",
+        keyMolecules: ["Tazemetostat", "EZH2"],
+        sources: [C.gounder2020, C.kim2016],
       },
     ],
     edges: [
@@ -454,231 +585,471 @@ export const CIPHER_DATASETS: CipherDataset[] = [
         source: "epigenetic-disruption",
         target: "lineage-loss",
         label: "Silences identity genes",
+        relationshipType: "inhibits",
+        mechanismDetail: "Repressive marks such as H3K27me3 switch off differentiation genes, including E-cadherin.",
+        evidence: [C.hanahan2022, C.cao2008],
+      },
+      {
+        source: "lineage-loss",
+        target: "emt-activation",
+        label: "Opens the door to EMT",
         relationshipType: "transforms",
-        mechanismDetail:
-          "Hyper-methylation locks promoter regions of adult tissue differentiation markers.",
+        mechanismDetail: "Losing E-cadherin and epithelial programmes is a core step of EMT.",
+        evidence: [C.thiery2009],
       },
       {
         source: "lineage-loss",
         target: "stemness-acquisition",
-        label: "Releases barrier to",
+        label: "Goes with stem-like signatures",
         relationshipType: "activates",
-        mechanismDetail:
-          "Absence of lineage repressors derepresses primitive embryonic gene networks.",
+        mechanismDetail: "Poorly differentiated tumours carry embryonic stem cell–like gene signatures.",
+        evidence: [C.benPorath2008],
+        hypothesis: true,
       },
       {
-        source: "stemness-acquisition",
-        target: "emt-activation",
-        label: "Drives migratory program",
+        source: "emt-activation",
+        target: "stemness-acquisition",
+        label: "Gives stem-like traits",
         relationshipType: "activates",
-        mechanismDetail:
-          "Embryonic factors induce SNAIL and SLUG, dissolving tight junctions.",
+        mechanismDetail: "Inducing EMT in mammary epithelial cells gave them stem cell properties.",
+        evidence: [C.mani2008],
       },
       {
         source: "stemness-acquisition",
         target: "chemo-resistance",
-        label: "Confers multi-drug survival",
+        label: "Helps survive drugs",
         relationshipType: "activates",
-        mechanismDetail:
-          "Plastic cells activate ABC transporters and slow their cell cycle to evade antimitotics.",
+        mechanismDetail: "Stem-like cells express drug efflux pumps and cycle slowly.",
+        evidence: [C.dean2005],
       },
       {
         source: "emt-activation",
         target: "metastasis",
-        label: "Enables tissue invasion",
+        label: "Enables invasion",
         relationshipType: "transforms",
-        mechanismDetail:
-          "Detached mesenchymal cells secrete collagenases and invade vascular walls.",
+        mechanismDetail: "Motile mesenchymal-like cells invade tissue and enter vessels.",
+        evidence: [C.thiery2009],
       },
       {
         source: "epigenetic-therapy",
         target: "epigenetic-disruption",
-        label: "Blocks repressive methyltransferase",
+        label: "Blocks EZH2",
         relationshipType: "inhibits",
-        mechanismDetail:
-          "Restores normal chromatin opening so cells resume standard programmed senescence.",
+        mechanismDetail: "Tazemetostat inhibits EZH2 and lowers repressive H3K27me3 marks.",
+        evidence: [C.gounder2020, C.kim2016],
       },
     ],
   },
+
+  /* ---------------------------------------------------------------
+     p53
+     --------------------------------------------------------------- */
   {
     id: "p53-checkpoint",
-    title: "p53 DNA Damage Checkpoint & Apoptosis",
-    subtitle: "Guardian of the Genome: What Happens When the Smoke Detector Fails",
-    paperDoiOrPmc: "10.1038/s41568-022-00508-3",
+    title: "p53 and the DNA damage checkpoint",
+    subtitle: "What a healthy cell does with broken DNA, and what happens when p53 is lost",
     difficulty: "Beginner",
-    estimatedReadTime: "3 min exploration",
+    estimatedReadTime: "4 min",
     oneLineSummary:
-      "Witness how healthy cells use p53 to self-destruct when their DNA is damaged — and how cancer turns off this guardian to survive with scrambled chromosomes.",
+      "Healthy cells use p53 to pause for repair or self-destruct after DNA damage. Tumours that lose p53 keep dividing with damaged DNA.",
+    primarySources: [C.olivier2010, C.kandoth2013],
+    reviewed: "October 2026",
     tour: [
       {
         nodeId: "dna-breaks",
-        stepNumber: 1,
-        title: "Step 1: Severe DNA Damage",
+        title: "Broken DNA",
         concept:
-          "Ultraviolet radiation, chemical carcinogens, or replication stress rip double-stranded cuts in DNA.",
+          "Radiation, some chemicals and errors while copying DNA can break both strands of the double helix.",
       },
       {
         nodeId: "atm-sensor",
-        stepNumber: 2,
-        title: "Step 2: Sounding the Alarm",
+        title: "The alarm",
         concept:
-          "Sensor kinases ATM and ATR detect the broken ends and phosphorylate p53, preventing its normal recycling.",
+          "A protein complex finds the broken ends and switches on the ATM kinase, which marks p53 so it is no longer destroyed.",
+      },
+      {
+        nodeId: "p53-activation",
+        title: "The guardian decides",
+        concept:
+          "Stable p53 switches on genes that either pause the cell cycle for repair (p21) or start self-destruction (PUMA).",
+        questionPrompt: "Why might a cell choose death over repair?",
       },
       {
         nodeId: "tp53-mutation",
-        stepNumber: 3,
-        title: "Step 3: The Broken Guardian (Cancer)",
+        title: "The guardian is lost",
         concept:
-          "Over 50% of human cancers mutate TP53. The protein becomes a broken key that can no longer bind DNA.",
-      },
-      {
-        nodeId: "apoptosis-failure",
-        stepNumber: 4,
-        title: "Step 4: Evading Self-Destruction",
-        concept:
-          "Without functional p53, death enzymes (BAX/BAK) are never ordered to poke holes in mitochondria. The damaged cell refuses to die.",
+          "TP53 is the most frequently mutated gene in human cancer. Most mutations stop p53 binding DNA, so neither repair nor self-destruction is ordered.",
       },
       {
         nodeId: "mdm2-antagonist",
-        stepNumber: 5,
-        title: "Step 5: Awakening Dormant p53",
+        title: "Freeing p53",
         concept:
-          "In tumors where p53 is intact but suppressed by MDM2, molecular drugs called Nutlins pull off the suppressor to trigger tumor suicide.",
+          "In tumours whose p53 is intact but held down by MDM2, experimental drugs called nutlins can release it. They cannot help tumours whose p53 is mutated.",
       },
     ],
     quiz: {
-      question: "Under normal healthy conditions, what does p53 do when double-strand DNA breaks occur?",
+      question: "What does healthy p53 do after DNA double-strand breaks?",
       options: [
-        "It speeds up cell division without fixing errors",
-        "It halts the cell cycle to allow repair, or triggers apoptosis if damage is irreparable",
-        "It suppresses white blood cells and immune surveillance",
-        "It creates glucose molecules out of lactic acid",
+        "Speeds up division without fixing the DNA",
+        "Pauses the cell cycle for repair, or triggers apoptosis if the damage is too great",
+        "Suppresses the immune system",
+        "Turns lactic acid back into glucose",
       ],
       correctIndex: 1,
       explanation:
-        "Correct! Known as the 'Guardian of the Genome', p53 holds the cell at the G1/S checkpoint to fix DNA or commands the cell to self-destruct (apoptosis) via BAX/PUMA if the damage is beyond repair.",
+        "The answer is B. Activated p53 switches on p21 to pause the cell cycle and PUMA to start apoptosis, depending on the damage.",
     },
     nodes: [
       {
         id: "dna-breaks",
-        label: "Double-Strand DNA Breaks",
+        label: "DNA double-strand breaks",
         category: "trigger",
-        level: 1,
-        weight: 5,
-        plainTitle: "Ripped DNA Strands",
+        plainTitle: "A torn blueprint",
         plainExplanation:
-          "UV light or toxic chemicals snap the double helix, like tearing a critical blueprint in half.",
-        academicExcerpt:
-          "Ionizing radiation and replication fork stalling induce DNA double-strand breaks (DSBs) exposing free DNA ends.",
-        pronunciation: "D-N-A breaks",
-        keyMolecules: ["DSB", "gamma-H2AX", "ROS"],
+          "Radiation, some chemicals and copying errors can snap both strands of DNA, like tearing a blueprint in two.",
+        technical:
+          "Double-strand breaks arise from ionising radiation, some chemotherapies and collapsed replication forks; the MRN complex binds the broken ends.",
+        keyMolecules: ["DSB", "MRN complex", "γH2AX"],
+        sources: [C.leePaull2005],
       },
       {
         id: "atm-sensor",
-        label: "ATM / CHK2 Sensor Kinases",
+        label: "ATM alarm kinase",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "The Emergency Smoke Alarm",
+        plainTitle: "The smoke alarm",
         plainExplanation:
-          "Patrolling security proteins clamp onto the broken DNA ends and immediately sound an alarm throughout the nucleus.",
-        academicExcerpt:
-          "Mre11-Rad50-Nbs1 (MRN) complex recruits ATM kinase, triggering autophosphorylation and activation of checkpoint kinase CHK2.",
-        keyMolecules: ["ATM", "ATR", "CHK2"],
+          "Sensor proteins grab the broken DNA ends and switch on an alarm protein, ATM, which alerts p53.",
+        technical:
+          "MRN recruits and activates ATM at double-strand breaks. ATM phosphorylates p53 on Ser15.",
+        keyMolecules: ["ATM", "CHK2"],
+        sources: [C.leePaull2005, C.banin1998],
       },
       {
-        id: "tp53-mutation",
-        label: "p53 Guardian Activation / Loss",
+        id: "p53-activation",
+        label: "p53 activated",
         category: "mechanism",
-        level: 2,
-        weight: 5,
-        plainTitle: "Guardian of the Genome",
+        plainTitle: "The guardian wakes up",
         plainExplanation:
-          "Healthy p53 halts cell division to fix DNA or orders suicide. When cancer mutates p53, the guardian is handcuffed.",
-        academicExcerpt:
-          "Phosphorylation at Ser15 and Ser20 prevents MDM2-mediated polyubiquitination, elevating p53 tetrameric transcription factor levels.",
-        keyMolecules: ["TP53", "MDM2", "p21"],
+          "Normally p53 is destroyed as fast as it is made. After the alarm, it stops being destroyed and builds up.",
+        technical:
+          "Phosphorylation weakens p53 binding to MDM2, its main inhibitor, so p53 accumulates and activates target genes such as p21 and PUMA.",
+        keyMolecules: ["p53", "MDM2"],
+        sources: [C.shieh1997],
+      },
+      {
+        id: "cell-cycle-arrest",
+        label: "Cell cycle paused for repair",
+        category: "effect",
+        plainTitle: "Stop and fix",
+        plainExplanation: "The cell stops dividing so the DNA can be repaired first.",
+        technical: "p53 induces p21 (WAF1/CIP1), a CDK inhibitor that halts the cell cycle.",
+        keyMolecules: ["p21", "CDK2"],
+        sources: [C.elDeiry1993],
       },
       {
         id: "bax-mitochondria",
-        label: "BAX/PUMA Mitochondrial Perforation",
+        label: "PUMA and BAX open mitochondria",
         category: "mechanism",
-        level: 2,
-        weight: 4,
-        plainTitle: "The Self-Destruct Switch",
+        plainTitle: "The self-destruct switch",
         plainExplanation:
-          "p53 transcribes pore-forming proteins that punch microscopic holes into mitochondria, leaking Cytochrome C to begin apoptosis.",
-        academicExcerpt:
-          "p53 directly upregulates BH3-only proteins PUMA and NOXA, neutralizing BCL-2 and promoting BAX/BAK mitochondrial outer membrane permeabilization (MOMP).",
-        keyMolecules: ["BAX", "PUMA", "Cytochrome C"],
+          "p53 switches on proteins that punch holes in the cell's power stations, which starts self-destruction.",
+        technical:
+          "p53 induces the BH3-only protein PUMA and can activate BAX directly, leading to mitochondrial outer membrane permeabilisation.",
+        keyMolecules: ["PUMA", "BAX", "Cytochrome c"],
+        sources: [C.nakano2001, C.chipuk2004],
       },
       {
-        id: "apoptosis-failure",
-        label: "Evasion of Programmed Cell Death",
+        id: "apoptosis",
+        label: "Damaged cell self-destructs",
         category: "effect",
-        level: 3,
-        weight: 5,
-        plainTitle: "The Immortal Zombie Cell",
+        plainTitle: "A safe ending",
+        plainExplanation: "A cell with DNA too damaged to fix removes itself before it can become a tumour.",
+        technical: "Cytochrome c release activates caspases and the cell undergoes apoptosis.",
+        keyMolecules: ["Caspase-9", "Caspase-3"],
+        sources: [C.chipuk2004],
+      },
+      {
+        id: "tp53-mutation",
+        label: "TP53 mutation",
+        category: "trigger",
+        plainTitle: "The broken guardian",
         plainExplanation:
-          "Even with shredded DNA, the cancer cell continues living and dividing, accumulating catastrophic chromosomal errors.",
-        academicExcerpt:
-          "Loss of p53 eliminates the intrinsic apoptotic threshold, enabling propagation of structurally deranged, aneuploid genomes.",
-        keyMolecules: ["Caspase-3", "Aneuploidy", "PARP"],
+          "The most commonly mutated gene in cancer. A mutated p53 usually cannot read DNA, so it cannot give any orders.",
+        technical:
+          "TP53 is the most frequently mutated gene across human cancers; most mutations hit the DNA-binding domain and abolish transcriptional activity.",
+        keyMolecules: ["TP53", "DNA-binding domain"],
+        sources: [C.kandoth2013, C.olivier2010],
+      },
+      {
+        id: "survival-damaged",
+        label: "Damaged cells keep dividing",
+        category: "effect",
+        plainTitle: "Errors pile up",
+        plainExplanation:
+          "Without p53, cells with broken DNA neither stop nor die, so mistakes build up with every division.",
+        technical:
+          "Loss of p53 lets cells with DNA damage avoid arrest and apoptosis, allowing genomic instability to accumulate.",
+        keyMolecules: ["Aneuploidy"],
+        sources: [C.olivier2010],
       },
       {
         id: "mdm2-antagonist",
-        label: "MDM2-p53 Antagonist (Nutlins)",
+        label: "MDM2 blocker (nutlin)",
         category: "therapy",
-        level: 4,
-        weight: 4,
-        plainTitle: "Freeing the Handcuffed Guardian",
+        drugStatus: "experimental",
+        plainTitle: "Releasing the guardian",
         plainExplanation:
-          "In cancers where p53 is trapped by MDM2, Nutlins block the trap, allowing p53 to break free and trigger cancer death.",
-        academicExcerpt:
-          "Cis-imidazoline analogs (Nutlin-3a / Idasanutlin) competitively displace MDM2 from the transactivation domain of wild-type p53.",
-        keyMolecules: ["Idasanutlin", "Nutlin-3a"],
+          "In tumours where p53 is healthy but held down by MDM2, these drugs pull MDM2 off. They do nothing if p53 itself is mutated, and none is approved yet.",
+        technical:
+          "Nutlins bind the p53 pocket of MDM2, stabilising wild-type p53 and activating its pathway in tumour models.",
+        keyMolecules: ["Nutlin-3", "MDM2"],
+        sources: [C.vassilev2004],
       },
     ],
     edges: [
       {
         source: "dna-breaks",
         target: "atm-sensor",
-        label: "Triggers kinase sensor",
+        label: "Activates ATM",
         relationshipType: "activates",
-        mechanismDetail:
-          "Free DNA ends recruit the MRN complex, activating ATM autophosphorylation.",
+        mechanismDetail: "Broken DNA ends recruit the MRN complex, which activates ATM.",
+        evidence: [C.leePaull2005],
       },
       {
         source: "atm-sensor",
-        target: "tp53-mutation",
-        label: "Phosphorylates & stabilizes",
+        target: "p53-activation",
+        label: "Phosphorylates p53",
         relationshipType: "activates",
-        mechanismDetail:
-          "Phosphorylation blocks MDM2 from tagging p53 for proteasomal destruction.",
+        mechanismDetail: "ATM phosphorylates p53, which weakens MDM2 binding so p53 is no longer destroyed.",
+        evidence: [C.banin1998, C.shieh1997],
       },
       {
-        source: "tp53-mutation",
-        target: "bax-mitochondria",
-        label: "Transcribes death effectors",
+        source: "p53-activation",
+        target: "cell-cycle-arrest",
+        label: "Switches on p21",
         relationshipType: "activates",
-        mechanismDetail:
-          "Functional p53 binds PUMA promoters, causing mitochondrial outer membrane leakage.",
+        mechanismDetail: "p53 induces p21, a CDK inhibitor that pauses the cell cycle.",
+        evidence: [C.elDeiry1993],
+      },
+      {
+        source: "p53-activation",
+        target: "bax-mitochondria",
+        label: "Switches on PUMA",
+        relationshipType: "activates",
+        mechanismDetail: "p53 induces PUMA and can activate BAX directly.",
+        evidence: [C.nakano2001, C.chipuk2004],
       },
       {
         source: "bax-mitochondria",
-        target: "apoptosis-failure",
-        label: "If intact: triggers death (If mutated: fails)",
+        target: "apoptosis",
+        label: "Starts apoptosis",
+        relationshipType: "activates",
+        mechanismDetail: "Permeabilised mitochondria release cytochrome c, activating caspases.",
+        evidence: [C.chipuk2004],
+      },
+      {
+        source: "tp53-mutation",
+        target: "p53-activation",
+        label: "Disables p53",
         relationshipType: "inhibits",
-        mechanismDetail:
-          "When p53 is mutated or missing, BAX never opens, blocking caspase execution.",
+        mechanismDetail: "Mutant p53 cannot bind its target genes, so the response never starts.",
+        evidence: [C.olivier2010],
+      },
+      {
+        source: "tp53-mutation",
+        target: "survival-damaged",
+        label: "Lets damaged cells survive",
+        relationshipType: "transforms",
+        mechanismDetail: "Without p53, damaged cells avoid both arrest and apoptosis.",
+        evidence: [C.olivier2010],
       },
       {
         source: "mdm2-antagonist",
-        target: "tp53-mutation",
-        label: "Liberates from MDM2 suppression",
+        target: "p53-activation",
+        label: "Frees p53 from MDM2",
         relationshipType: "activates",
+        mechanismDetail: "Nutlins displace MDM2, so intact p53 accumulates and acts.",
+        evidence: [C.vassilev2004],
+      },
+    ],
+  },
+
+  /* ---------------------------------------------------------------
+     Flagship: CAF → CXCL12 → CXCR4 → migration
+     --------------------------------------------------------------- */
+  {
+    id: "caf-cxcl12-migration",
+    title: "CAF → CXCL12 → CXCR4 → migration",
+    subtitle: "The BioLayers flagship: from published papers to a cell we tracked ourselves",
+    difficulty: "Intermediate",
+    estimatedReadTime: "4 min",
+    oneLineSummary:
+      "Fibroblasts release a guidance signal, glioma cells sense it, and invasion follows. The last link is a real tracked cell, and the map says exactly what is hypothesis.",
+    primarySources: [C.orimo2005, C.zhou2002, C.ehtesham2006, C.rempel2000],
+    reviewed: "October 2026",
+    tour: [
+      {
+        nodeId: "cafs",
+        title: "The neighbours",
+        concept:
+          "Fibroblasts inside tumours release CXCL12. This was shown in breast cancer, so for brain tumours it is a borrowed idea worth testing.",
+      },
+      {
+        nodeId: "cxcl12",
+        title: "The guidance signal",
+        concept:
+          "CXCL12 is a chemokine: a signal that cells follow. In human astrocytomas, it rises with tumour grade.",
+      },
+      {
+        nodeId: "cxcr4",
+        title: "The receiver",
+        concept:
+          "Most glioma cell lines carry CXCR4, the receptor for CXCL12, and move towards CXCL12 in the lab.",
+      },
+      {
+        nodeId: "invasion",
+        title: "Invasion",
+        concept:
+          "Glioma cells with more CXCR4 invade more, and blocking CXCR4 reduces invasion in experiments.",
+      },
+      {
+        nodeId: "observed-migration",
+        title: "A real cell",
+        concept:
+          "We tracked glioblastoma cell U373-02-T7 for 28.5 hours and measured its migration. We did not measure CXCR4 in it, so the link to this pathway is a hypothesis.",
+        questionPrompt: "What experiment would turn this hypothesis into evidence?",
+      },
+    ],
+    quiz: {
+      question: "Which part of this map is a hypothesis rather than a published finding?",
+      options: [
+        "That fibroblasts in breast tumours secrete CXCL12",
+        "That most glioma cell lines carry CXCR4",
+        "That the migration we tracked in cell U373-02-T7 is driven by CXCR4",
+        "That CXCL12 rises with astrocytoma grade",
+      ],
+      correctIndex: 2,
+      explanation:
+        "The answer is C. We measured how cell U373-02-T7 moved, but not its CXCR4 or the CXCL12 around it, so linking its migration to this pathway is a hypothesis. The other three are published findings.",
+    },
+    nodes: [
+      {
+        id: "cafs",
+        label: "Cancer-associated fibroblasts",
+        category: "trigger",
+        plainTitle: "The tumour's neighbours",
+        plainExplanation:
+          "Support cells inside a tumour that, instead of keeping order, release signals that help the tumour.",
+        technical:
+          "Carcinoma-associated fibroblasts secrete elevated SDF-1/CXCL12, which promotes tumour growth through CXCR4 on carcinoma cells.",
+        keyMolecules: ["CAFs", "α-SMA"],
+        sources: [C.orimo2005],
+      },
+      {
+        id: "cxcl12",
+        label: "CXCL12 (SDF-1)",
+        category: "mechanism",
+        plainTitle: "A scent trail",
+        plainExplanation: "A signal molecule that cells follow, like a scent getting stronger towards its source.",
+        technical:
+          "A chemokine that directs cell migration along its gradient. In human astrocytoma, CXCL12 and CXCR4 rise with grade and co-localise in regions of necrosis and angiogenesis.",
+        pronunciation: "C-X-C-L-twelve",
+        keyMolecules: ["CXCL12", "SDF-1"],
+        sources: [C.rempel2000],
+      },
+      {
+        id: "cxcr4",
+        label: "CXCR4 on glioma cells",
+        category: "mechanism",
+        plainTitle: "The nose that follows the scent",
+        plainExplanation: "A receptor on the tumour cell's surface that senses CXCL12 and points the cell towards it.",
+        technical:
+          "CXCR4 is the predominant chemokine receptor on human glioma cell lines (13 of 16), and CXCL12 induces their chemotaxis.",
+        pronunciation: "C-X-C-R-four",
+        keyMolecules: ["CXCR4"],
+        sources: [C.zhou2002],
+      },
+      {
+        id: "invasion",
+        label: "Glioma cell invasion",
+        category: "effect",
+        plainTitle: "Moving into healthy brain",
+        plainExplanation: "Tumour cells crawl away from the main tumour into surrounding brain tissue.",
+        technical:
+          "Invasive glioma cell populations overexpress CXCR4, and blocking CXCR4 impairs their invasion in vitro.",
+        keyMolecules: ["CXCR4"],
+        sources: [C.ehtesham2006],
+      },
+      {
+        id: "observed-migration",
+        label: "Tracked cell U373-02-T7 migrates",
+        category: "effect",
+        observed: true,
+        plainTitle: "A cell we watched move",
+        plainExplanation:
+          "In a real phase-contrast time-lapse, this glioblastoma cell moved 175.9 µm in 28.5 hours. Our pipeline measured that directly from the images.",
+        technical:
+          "Cell Tracking Challenge PhC-C2DH-U373, sequence 02. Net displacement 175.9 µm, mean speed 0.193 µm/min, directionality 0.53; labelled migrating by rule R-MIG. Many U-373 stocks are in fact U-251.",
+        keyMolecules: ["U373", "Phase contrast"],
+        sources: [C.torsvik2014],
+        link: { href: "/validation", label: "See the tracking in the validation report" },
+      },
+      {
+        id: "cxcr4-antagonist",
+        label: "CXCR4 blocker (AMD3100)",
+        category: "therapy",
+        drugStatus: "experimental",
+        plainTitle: "Blocking the receiver",
+        plainExplanation:
+          "A drug that blocks CXCR4. It slowed brain tumour growth in mice. As plerixafor it is approved for collecting stem cells, not for treating brain tumours.",
+        technical:
+          "AMD3100 (plerixafor) is a CXCR4 antagonist; it inhibited intracranial growth of primary brain tumour models in mice.",
+        keyMolecules: ["AMD3100", "Plerixafor"],
+        sources: [C.rubin2003],
+      },
+    ],
+    edges: [
+      {
+        source: "cafs",
+        target: "cxcl12",
+        label: "Secrete",
+        relationshipType: "activates",
+        mechanismDetail: "Carcinoma-associated fibroblasts release elevated CXCL12.",
+        evidence: [C.orimo2005],
+      },
+      {
+        source: "cxcl12",
+        target: "cxcr4",
+        label: "Binds and activates",
+        relationshipType: "activates",
+        mechanismDetail: "CXCL12 is the ligand for CXCR4 and induces glioma cell chemotaxis.",
+        evidence: [C.zhou2002],
+      },
+      {
+        source: "cxcr4",
+        target: "invasion",
+        label: "Drives invasion",
+        relationshipType: "activates",
+        mechanismDetail: "Blocking CXCR4 reduces glioma cell invasion towards CXCL12.",
+        evidence: [C.ehtesham2006],
+      },
+      {
+        source: "invasion",
+        target: "observed-migration",
+        label: "May explain",
+        relationshipType: "transforms",
         mechanismDetail:
-          "Displaces MDM2, allowing native p53 to accumulate and destroy the malignant cell.",
+          "We observed migration in this cell but did not measure CXCR4 or CXCL12 in it. The literature makes the link plausible; it is not shown.",
+        evidence: [C.zhou2002, C.ehtesham2006],
+        hypothesis: true,
+      },
+      {
+        source: "cxcr4-antagonist",
+        target: "cxcr4",
+        label: "Blocks CXCR4",
+        relationshipType: "inhibits",
+        mechanismDetail: "AMD3100 binds CXCR4 and prevents CXCL12 signalling.",
+        evidence: [C.rubin2003],
       },
     ],
   },

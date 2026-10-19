@@ -1,789 +1,759 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Maximize2, Minimize2, Leaf, Camera } from "lucide-react";
-import type { CipherNode, CipherEdge } from "./CipherTypes";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dagre from "@dagrejs/dagre";
+import { Camera, Maximize2, Minimize2, Minus, Plus, ScanSearch } from "lucide-react";
 
-type Point = { x: number; y: number };
+import type { CipherEdge, CipherNode, NodeCategory } from "./CipherTypes";
 
-type Particle = {
-  edgeIndex: number;
-  progress: number;
-  speed: number;
-};
+export type CipherSelection = { kind: "node"; id: string } | { kind: "edge"; key: string } | null;
 
-type CanvasProps = {
+export const edgeKey = (edge: Pick<CipherEdge, "source" | "target">) => `${edge.source}->${edge.target}`;
+
+type Props = {
   nodes: CipherNode[];
   edges: CipherEdge[];
-  selectedNodeId: string | null;
-  activeFilter: string | null;
-  isTourActive?: boolean;
-  onSelectNode: (nodeId: string | null) => void;
+  selection: CipherSelection;
+  focusNodeId: string | null; // the camera glides here (guided tour)
+  activeFilter: NodeCategory | null;
+  searchMatches: Set<string> | null; // null = no search running
+  onSelect: (selection: CipherSelection) => void;
 };
 
-const CATEGORY_COLORS: Record<string, { fill: string; stroke: string; halo: string; text: string; dot: string }> = {
-  trigger: {
-    fill: "#1f1015",
-    stroke: "#f43f5e",
-    halo: "rgba(244, 63, 94, 0.22)",
-    text: "#fecdd3",
-    dot: "#fb7185",
-  },
-  mechanism: {
-    fill: "#081622",
-    stroke: "#06b6d4",
-    halo: "rgba(6, 182, 212, 0.22)",
-    text: "#cffafe",
-    dot: "#22d3ee",
-  },
-  effect: {
-    fill: "#150e20",
-    stroke: "#a855f7",
-    halo: "rgba(168, 85, 247, 0.22)",
-    text: "#f3e8ff",
-    dot: "#c084fc",
-  },
-  therapy: {
-    fill: "#091c16",
-    stroke: "#10b981",
-    halo: "rgba(16, 185, 129, 0.22)",
-    text: "#d1fae5",
-    dot: "#34d399",
-  },
+type Box = { x: number; y: number; w: number; h: number; lines: string[] };
+type Point = { x: number; y: number };
+
+export const CATEGORY_COLORS: Record<NodeCategory, { fill: string; stroke: string; text: string; dot: string }> = {
+  trigger: { fill: "#1d0f15", stroke: "#f43f5e", text: "#ffe4e9", dot: "#fb7185" },
+  mechanism: { fill: "#071822", stroke: "#22d3ee", text: "#e0fbff", dot: "#67e8f9" },
+  effect: { fill: "#160f22", stroke: "#a855f7", text: "#f3e8ff", dot: "#c084fc" },
+  therapy: { fill: "#081c15", stroke: "#10b981", text: "#d1fae5", dot: "#34d399" },
 };
+
+const EDGE_COLORS: Record<CipherEdge["relationshipType"], string> = {
+  activates: "103, 232, 249",
+  targets: "103, 232, 249",
+  inhibits: "251, 113, 133",
+  transforms: "192, 132, 252",
+};
+
+const NODE_WIDTH = 176;
+const LINE_HEIGHT = 15;
+const MIN_SCALE = 0.25;
+const MAX_SCALE = 2.6;
+
+/* Word-wrap a label into at most two lines that fit the node. */
+function wrapLabel(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const attempt = current ? `${current} ${word}` : word;
+    if (ctx.measureText(attempt).width <= maxWidth || !current) {
+      current = attempt;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  if (lines.length <= 2) return lines;
+  let second = lines.slice(1).join(" ");
+  while (ctx.measureText(`${second}…`).width > maxWidth && second.length > 1) {
+    second = second.slice(0, -1);
+  }
+  return [lines[0], `${second}…`];
+}
+
+/* Where the line from a box's centre towards `toward` leaves the box. */
+function boxExit(box: Box, toward: Point): Point {
+  const dx = toward.x - box.x;
+  const dy = toward.y - box.y;
+  if (dx === 0 && dy === 0) return { x: box.x, y: box.y };
+  const sx = Math.abs(dx) / (box.w / 2 + 4);
+  const sy = Math.abs(dy) / (box.h / 2 + 4);
+  const s = Math.max(sx, sy);
+  return { x: box.x + dx / s, y: box.y + dy / s };
+}
+
+function distanceToSegment(p: Point, a: Point, b: Point) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lengthSq = dx * dx + dy * dy || 1;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSq));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
 
 export default function CipherNetworkCanvas({
   nodes,
   edges,
-  selectedNodeId,
+  selection,
+  focusNodeId,
   activeFilter,
-  isTourActive,
-  onSelectNode,
-}: CanvasProps) {
+  searchMatches,
+  onSelect,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Viewport transforms (stored in ref to prevent infinite React re-renders in 60fps loop)
-  const transformRef = useRef<{ x: number; y: number; scale: number }>({
-    x: 0,
-    y: 0,
-    scale: 1,
-  });
-
+  const reducedMotion = usePrefersReducedMotion();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [ecoMode, setEcoMode] = useState(false);
+  // Narrow containers (phones) lay the flow out top to bottom so it fits
+  const [narrow, setNarrow] = useState(false);
 
-  // Node runtime state (positions & velocities)
-  const nodePositions = useRef<Map<string, { x: number; y: number; vx: number; vy: number; radius: number }>>(
-    new Map(),
-  );
+  const transform = useRef({ x: 0, y: 0, scale: 1 });
+  const cameraTarget = useRef<{ x: number; y: number; scale: number } | null>(null);
+  const boxes = useRef<Map<string, Box>>(new Map());
+  const edgePaths = useRef<Map<string, Point[]>>(new Map());
+  const hovered = useRef<{ node: string | null; edge: string | null }>({ node: null, edge: null });
+  const pointers = useRef<Map<number, Point>>(new Map());
+  const gesture = useRef<{
+    mode: "none" | "pan" | "node" | "pinch";
+    nodeId?: string;
+    last?: Point;
+    moved?: boolean;
+    pinchDistance?: number;
+  }>({ mode: "none" });
+  const frame = useRef<number | null>(null);
+  const particleClock = useRef(0);
+  const fontFamily = useRef("sans-serif");
 
-  // Simulation & Power State
-  const isTabActiveRef = useRef<boolean>(true);
-  const cameraTarget = useRef<{ x: number; y: number; scale: number; active: boolean }>({
-    x: 0,
-    y: 0,
-    scale: 1,
-    active: false,
-  });
+  const nodeById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
 
-  // Interaction tracking
-  const isDraggingCanvas = useRef(false);
-  const isDraggingNode = useRef<string | null>(null);
-  const dragStart = useRef<Point>({ x: 0, y: 0 });
-  const hoveredNodeId = useRef<string | null>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const animFrameId = useRef<number | null>(null);
-  const lastFrameTime = useRef<number>(0);
-
-  // Initialize node layout positions in an organic, stable constellation fitting one window
-  useEffect(() => {
-    const width = containerRef.current?.clientWidth || 800;
-    const height = containerRef.current?.clientHeight || 500;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    const map = new Map<string, { x: number; y: number; vx: number; vy: number; radius: number }>();
-
-    const xSpan = Math.min(width * 0.32, 220);
-    const ySpan = Math.min(height * 0.22, 100);
-
-    const triggerNodes = nodes.filter((n) => n.category === "trigger");
-    const mechanismNodes = nodes.filter((n) => n.category === "mechanism");
-    const effectNodes = nodes.filter((n) => n.category === "effect");
-    const therapyNodes = nodes.filter((n) => n.category === "therapy");
-
-    nodes.forEach((node, i) => {
-      const radius = 13 + (node.weight || 3) * 2.5;
-      let targetX = centerX;
-      let targetY = centerY;
-
-      if (node.category === "trigger") {
-        const idx = triggerNodes.findIndex((n) => n.id === node.id);
-        const count = triggerNodes.length || 1;
-        targetX = centerX - xSpan;
-        targetY = centerY + (idx - (count - 1) / 2) * Math.min(65, (ySpan * 2) / count);
-      } else if (node.category === "mechanism") {
-        const idx = mechanismNodes.findIndex((n) => n.id === node.id);
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const totalRows = Math.ceil(mechanismNodes.length / 2) || 1;
-        targetX = centerX + (col === 0 ? -55 : 55);
-        targetY = centerY + (row - (totalRows - 1) / 2) * 55;
-      } else if (node.category === "effect") {
-        const idx = effectNodes.findIndex((n) => n.id === node.id);
-        const count = effectNodes.length || 1;
-        targetX = centerX + xSpan;
-        targetY = centerY + (idx - (count - 1) / 2) * Math.min(65, (ySpan * 2) / count);
-      } else if (node.category === "therapy") {
-        const idx = therapyNodes.findIndex((n) => n.id === node.id);
-        const count = therapyNodes.length || 1;
-        targetX = centerX + (idx - (count - 1) / 2) * 90;
-        targetY = centerY + ySpan + 35;
+  // Which nodes and edges sit on the selected node's or edge's path
+  const related = useMemo(() => {
+    const nodeIds = new Set<string>();
+    const edgeKeys = new Set<string>();
+    if (selection?.kind === "node") {
+      nodeIds.add(selection.id);
+      for (const edge of edges) {
+        if (edge.source === selection.id || edge.target === selection.id) {
+          edgeKeys.add(edgeKey(edge));
+          nodeIds.add(edge.source);
+          nodeIds.add(edge.target);
+        }
       }
+    } else if (selection?.kind === "edge") {
+      edgeKeys.add(selection.key);
+      const [source, target] = selection.key.split("->");
+      nodeIds.add(source);
+      nodeIds.add(target);
+    }
+    return { nodeIds, edgeKeys, active: Boolean(selection) };
+  }, [selection, edges]);
 
-      // 100% deterministic layout (no random jitter so positions never jump)
-      const stableOffset = ((i % 3) - 1) * 5;
-      targetY += stableOffset;
+  const scheduleDraw = useRef<() => void>(() => {});
 
-      map.set(node.id, {
-        x: targetX,
-        y: targetY,
-        vx: 0,
-        vy: 0,
-        radius,
-      });
-    });
+  /* ---------------- Layout ---------------- */
 
-    nodePositions.current = map;
-
-    // Reset camera transform on dataset change
-    transformRef.current = { x: 0, y: 0, scale: 1 };
-
-    // Initialize edge particles with slow, calm, predictable flow
-    const newParticles: Particle[] = [];
-    edges.forEach((_, idx) => {
-      newParticles.push({
-        edgeIndex: idx,
-        progress: (idx * 0.25) % 1,
-        speed: 0.0012, // slow, serene, and predictable
-      });
-    });
-    particlesRef.current = newParticles;
-  }, [nodes, edges]);
-
-  // Smooth Camera Fly-To ONLY during Guided Tour step changes (keeps free exploration rock-solid)
-  useEffect(() => {
-    if (!selectedNodeId || !isTourActive) return;
-    const pos = nodePositions.current.get(selectedNodeId);
+  const fitToView = useCallback((animate: boolean) => {
     const canvas = canvasRef.current;
-    if (!pos || !canvas) return;
-
-    const width = canvas.clientWidth || 800;
-    const height = canvas.clientHeight || 500;
-    const curScale = transformRef.current.scale;
-    const targetScale = Math.max(curScale, 1.0);
-
-    cameraTarget.current = {
-      x: width / 2 - pos.x * targetScale,
-      y: height / 2 - pos.y * targetScale,
-      scale: targetScale,
-      active: true,
+    if (!canvas || boxes.current.size === 0) return;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const box of boxes.current.values()) {
+      minX = Math.min(minX, box.x - box.w / 2);
+      maxX = Math.max(maxX, box.x + box.w / 2);
+      minY = Math.min(minY, box.y - box.h / 2);
+      maxY = Math.max(maxY, box.y + box.h / 2);
+    }
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const padding = 48;
+    const scale = Math.max(
+      MIN_SCALE,
+      Math.min(1.3, (width - padding * 2) / (maxX - minX), (height - padding * 2) / (maxY - minY)),
+    );
+    const target = {
+      x: width / 2 - ((minX + maxX) / 2) * scale,
+      y: height / 2 - ((minY + maxY) / 2) * scale,
+      scale,
     };
-  }, [selectedNodeId, isTourActive]);
+    if (animate && !reducedMotion) {
+      cameraTarget.current = target;
+    } else {
+      transform.current = target;
+      cameraTarget.current = null;
+    }
+    scheduleDraw.current();
+  }, [reducedMotion]);
 
-  // Low-Power Lifecycle: Pause when tab is backgrounded
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      isTabActiveRef.current = !document.hidden;
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
-  // Compute upstream & downstream for selected node
-  const activePathway = useCallback(() => {
-    if (!selectedNodeId) return null;
-
-    const upstream = new Set<string>();
-    const downstream = new Set<string>();
-    const activeEdges = new Set<string>();
-
-    edges.forEach((edge) => {
-      if (edge.target === selectedNodeId) {
-        upstream.add(edge.source);
-        activeEdges.add(`${edge.source}->${edge.target}`);
-      }
-      if (edge.source === selectedNodeId) {
-        downstream.add(edge.target);
-        activeEdges.add(`${edge.source}->${edge.target}`);
-      }
-    });
-
-    return { upstream, downstream, activeEdges };
-  }, [selectedNodeId, edges]);
-
-  // Main High-Performance, Low-Power 60FPS Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let running = true;
+    fontFamily.current = getComputedStyle(document.body).fontFamily || "sans-serif";
+    ctx.font = `600 12px ${fontFamily.current}`;
 
-    const render = (now: number) => {
-      if (!running) return;
+    const nodeWidth = narrow ? 140 : NODE_WIDTH;
+    const measured = new Map<string, Box>();
+    for (const node of nodes) {
+      const lines = wrapLabel(ctx, node.label, nodeWidth - 32);
+      measured.set(node.id, { x: 0, y: 0, w: nodeWidth, h: 22 + lines.length * LINE_HEIGHT, lines });
+    }
 
-      // Throttle for Eco Mode (saves battery on laptops and mobile devices)
-      const delta = now - lastFrameTime.current;
-      if (ecoMode && delta < 33) {
-        animFrameId.current = requestAnimationFrame(render);
-        return;
+    // Lay out the causal flow left to right; therapies hang below their target.
+    const g = new dagre.graphlib.Graph();
+    g.setGraph(
+      narrow
+        ? { rankdir: "TB", nodesep: 24, ranksep: 64, marginx: 16, marginy: 16 }
+        : { rankdir: "LR", nodesep: 34, ranksep: 96, marginx: 20, marginy: 20 },
+    );
+    g.setDefaultEdgeLabel(() => ({}));
+    const flowNodes = nodes.filter((node) => node.category !== "therapy");
+    for (const node of flowNodes) {
+      const box = measured.get(node.id)!;
+      g.setNode(node.id, { width: box.w, height: box.h });
+    }
+    for (const edge of edges) {
+      if (g.hasNode(edge.source) && g.hasNode(edge.target)) g.setEdge(edge.source, edge.target);
+    }
+    dagre.layout(g);
+
+    for (const node of flowNodes) {
+      const placed = g.node(node.id);
+      const box = measured.get(node.id)!;
+      box.x = placed.x;
+      box.y = placed.y;
+    }
+
+    // Treatments sit beside the flow: below it on wide screens, to its right on narrow ones
+    let lowest = -Infinity;
+    let rightmost = -Infinity;
+    for (const node of flowNodes) {
+      const box = measured.get(node.id)!;
+      lowest = Math.max(lowest, box.y + box.h / 2);
+      rightmost = Math.max(rightmost, box.x + box.w / 2);
+    }
+    const used: number[] = [];
+    for (const node of nodes.filter((n) => n.category === "therapy")) {
+      const target = edges.find((edge) => edge.source === node.id)?.target;
+      const targetBox = target ? measured.get(target) : undefined;
+      const box = measured.get(node.id)!;
+      if (narrow) {
+        let y = targetBox?.y ?? 0;
+        while (used.some((uy) => Math.abs(uy - y) < box.h + 14)) y += box.h + 14;
+        used.push(y);
+        box.x = rightmost + 56 + box.w / 2;
+        box.y = y;
+      } else {
+        let x = targetBox?.x ?? 0;
+        while (used.some((ux) => Math.abs(ux - x) < nodeWidth + 16)) x += nodeWidth + 16;
+        used.push(x);
+        box.x = x;
+        box.y = lowest + 70 + box.h / 2;
       }
-      lastFrameTime.current = now;
+    }
 
-      // Skip render if tab is hidden
-      if (!isTabActiveRef.current) {
-        animFrameId.current = requestAnimationFrame(render);
-        return;
+    boxes.current = measured;
+
+    const paths = new Map<string, Point[]>();
+    for (const edge of edges) {
+      const from = measured.get(edge.source);
+      const to = measured.get(edge.target);
+      if (!from || !to) continue;
+      const routed = g.hasEdge(edge.source, edge.target) ? g.edge(edge.source, edge.target)?.points : undefined;
+      const inner = routed && routed.length > 2 ? routed.slice(1, -1) : [];
+      const start = boxExit(from, inner[0] ?? to);
+      const end = boxExit(to, inner[inner.length - 1] ?? from);
+      paths.set(edgeKey(edge), [start, ...inner, end]);
+    }
+    edgePaths.current = paths;
+
+    fitToView(false);
+  }, [nodes, edges, fitToView, narrow]);
+
+  // Refit when the container changes size, and switch layout direction on phones
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setNarrow(entry.contentRect.width < 560);
+      fitToView(false);
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [fitToView]);
+
+  // Guided tour: glide to the step's node
+  useEffect(() => {
+    if (!focusNodeId) return;
+    const box = boxes.current.get(focusNodeId);
+    const canvas = canvasRef.current;
+    if (!box || !canvas) return;
+    const scale = Math.max(transform.current.scale, 1);
+    const target = {
+      x: canvas.clientWidth / 2 - box.x * scale,
+      y: canvas.clientHeight / 2 - box.y * scale,
+      scale,
+    };
+    if (reducedMotion) {
+      transform.current = target;
+    } else {
+      cameraTarget.current = target;
+    }
+    scheduleDraw.current();
+  }, [focusNodeId, reducedMotion]);
+
+  /* ---------------- Drawing ---------------- */
+
+  const draw = useCallback(() => {
+    frame.current = null;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+
+    let keepAnimating = false;
+    if (cameraTarget.current) {
+      const t = cameraTarget.current;
+      const c = transform.current;
+      c.x += (t.x - c.x) * 0.12;
+      c.y += (t.y - c.y) * 0.12;
+      c.scale += (t.scale - c.scale) * 0.12;
+      if (Math.abs(c.x - t.x) < 0.5 && Math.abs(c.y - t.y) < 0.5 && Math.abs(c.scale - t.scale) < 0.002) {
+        transform.current = { ...t };
+        cameraTarget.current = null;
+      } else {
+        keepAnimating = true;
       }
+    }
 
-      const dpr = window.devicePixelRatio || 1;
-      const width = canvas.clientWidth || 800;
-      const height = canvas.clientHeight || 500;
+    const { x, y, scale } = transform.current;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#04070a";
+    ctx.fillRect(0, 0, width, height);
 
-      if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-      }
+    // Faint grid
+    ctx.strokeStyle = "rgba(77, 141, 255, 0.035)";
+    ctx.lineWidth = 1;
+    const grid = 44 * scale;
+    ctx.beginPath();
+    for (let gx = x % grid; gx < width; gx += grid) {
+      ctx.moveTo(gx, 0);
+      ctx.lineTo(gx, height);
+    }
+    for (let gy = y % grid; gy < height; gy += grid) {
+      ctx.moveTo(0, gy);
+      ctx.lineTo(width, gy);
+    }
+    ctx.stroke();
 
-      // Camera Lerp Animation (mutates ref directly — zero React re-renders!)
-      if (cameraTarget.current.active) {
-        const tgt = cameraTarget.current;
-        const cur = transformRef.current;
-        const lerpFactor = 0.04;
+    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * x, dpr * y);
 
-        cur.x += (tgt.x - cur.x) * lerpFactor;
-        cur.y += (tgt.y - cur.y) * lerpFactor;
-        cur.scale += (tgt.scale - cur.scale) * lerpFactor;
+    const isDimmedNode = (node: CipherNode) =>
+      (activeFilter !== null && node.category !== activeFilter) ||
+      (searchMatches !== null && !searchMatches.has(node.id)) ||
+      (related.active && !related.nodeIds.has(node.id));
 
-        if (
-          Math.abs(cur.x - tgt.x) < 1 &&
-          Math.abs(cur.y - tgt.y) < 1 &&
-          Math.abs(cur.scale - tgt.scale) < 0.01
-        ) {
-          cur.x = tgt.x;
-          cur.y = tgt.y;
-          cur.scale = tgt.scale;
-          cameraTarget.current.active = false;
+    // Edges
+    for (const edge of edges) {
+      const key = edgeKey(edge);
+      const path = edgePaths.current.get(key);
+      const source = nodeById.get(edge.source);
+      const target = nodeById.get(edge.target);
+      if (!path || !source || !target) continue;
+
+      const highlighted = related.edgeKeys.has(key) || hovered.current.edge === key;
+      const dimmed =
+        (related.active && !related.edgeKeys.has(key)) ||
+        (activeFilter !== null && source.category !== activeFilter && target.category !== activeFilter) ||
+        (searchMatches !== null && !searchMatches.has(edge.source) && !searchMatches.has(edge.target));
+      const alpha = highlighted ? 0.95 : dimmed ? 0.1 : 0.45;
+      const rgb = EDGE_COLORS[edge.relationshipType];
+
+      ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
+      ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
+      ctx.lineWidth = (highlighted ? 2.4 : 1.4) / Math.max(scale, 0.6);
+      ctx.setLineDash(edge.hypothesis ? [6, 5] : []);
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      if (path.length > 2) {
+        for (let i = 1; i < path.length - 1; i++) {
+          const mid = { x: (path[i].x + path[i + 1].x) / 2, y: (path[i].y + path[i + 1].y) / 2 };
+          ctx.quadraticCurveTo(path[i].x, path[i].y, mid.x, mid.y);
         }
       }
-
-      const transform = transformRef.current;
-
-      ctx.save();
-      ctx.scale(dpr, dpr);
-
-      // Deep Space Background
-      ctx.fillStyle = "#04070a";
-      ctx.fillRect(0, 0, width, height);
-
-      // Background Grid (subtle cosmic coordinates)
-      ctx.save();
-      ctx.strokeStyle = "rgba(77, 141, 255, 0.03)";
-      ctx.lineWidth = 1;
-      const gridSize = 44 * Math.max(transform.scale, 0.5);
-      const offsetX = transform.x % gridSize;
-      const offsetY = transform.y % gridSize;
-
-      ctx.beginPath();
-      for (let x = offsetX; x < width; x += gridSize) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-      }
-      for (let y = offsetY; y < height; y += gridSize) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-      }
+      const end = path[path.length - 1];
+      ctx.lineTo(end.x, end.y);
       ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Arrow end: a head for "causes", a flat bar for "blocks"
+      const before = path[path.length - 2];
+      const angle = Math.atan2(end.y - before.y, end.x - before.x);
+      ctx.save();
+      ctx.translate(end.x, end.y);
+      ctx.rotate(angle);
+      if (edge.relationshipType === "inhibits") {
+        ctx.lineWidth = 3 / Math.max(scale, 0.6);
+        ctx.beginPath();
+        ctx.moveTo(0, -7);
+        ctx.lineTo(0, 7);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-10, -5);
+        ctx.lineTo(-10, 5);
+        ctx.closePath();
+        if (edge.relationshipType === "transforms") {
+          ctx.lineWidth = 1.5 / Math.max(scale, 0.6);
+          ctx.stroke();
+        } else {
+          ctx.fill();
+        }
+      }
       ctx.restore();
 
-      // Camera Transform
-      ctx.save();
-      ctx.translate(transform.x, transform.y);
-      ctx.scale(transform.scale, transform.scale);
-
-      const pathway = activePathway();
-      const posMap = nodePositions.current;
-
-      // Stable graph state (no erratic physics jitter)
-
-      // 1. DRAW EDGES
-      edges.forEach((edge) => {
-        const sourcePos = posMap.get(edge.source);
-        const targetPos = posMap.get(edge.target);
-        if (!sourcePos || !targetPos) return;
-
-        const isEdgeActive = pathway
-          ? pathway.activeEdges.has(`${edge.source}->${edge.target}`)
-          : true;
-
-        const isFiltered =
-          activeFilter &&
-          nodes.find((n) => n.id === edge.source)?.category !== activeFilter &&
-          nodes.find((n) => n.id === edge.target)?.category !== activeFilter;
-
-        const alpha = isFiltered ? 0.06 : isEdgeActive ? (pathway ? 0.95 : 0.3) : 0.1;
-
-        ctx.save();
+      // Signal pulse along highlighted edges
+      if (highlighted && !reducedMotion) {
+        keepAnimating = true;
+        const t = (particleClock.current / 1600) % 1;
+        const a = path[0];
+        const b = end;
+        ctx.fillStyle = `rgba(${rgb}, 1)`;
         ctx.beginPath();
-        ctx.moveTo(sourcePos.x, sourcePos.y);
-        ctx.lineTo(targetPos.x, targetPos.y);
+        ctx.arc(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
 
-        if (edge.relationshipType === "inhibits") {
-          ctx.strokeStyle = `rgba(244, 63, 94, ${alpha})`;
-          ctx.setLineDash([4, 4]);
-        } else if (edge.relationshipType === "transforms") {
-          ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
-          ctx.setLineDash([6, 3]);
-        } else {
-          ctx.strokeStyle = `rgba(6, 182, 212, ${alpha})`;
-          ctx.setLineDash([]);
-        }
+    // Nodes
+    for (const node of nodes) {
+      const box = boxes.current.get(node.id);
+      if (!box) continue;
+      const colors = CATEGORY_COLORS[node.category];
+      const isSelected = selection?.kind === "node" && selection.id === node.id;
+      const isHovered = hovered.current.node === node.id;
+      const dimmed = isDimmedNode(node) && !isSelected;
+      const left = box.x - box.w / 2;
+      const top = box.y - box.h / 2;
 
-        ctx.lineWidth = isEdgeActive && pathway ? 2.5 : 1.2;
-        ctx.stroke();
-        ctx.restore();
+      ctx.globalAlpha = dimmed ? 0.28 : 1;
 
-        // Edge label on illuminated pathway
-        if (isEdgeActive && pathway) {
-          const midX = (sourcePos.x + targetPos.x) / 2;
-          const midY = (sourcePos.y + targetPos.y) / 2;
-          ctx.save();
-          ctx.font = "9px 'IBM Plex Mono', monospace";
-          ctx.fillStyle = "rgba(203, 213, 225, 0.9)";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(edge.label, midX, midY - 6);
-          ctx.restore();
-        }
-      });
-
-      // 2. DIRECTIONAL PARTICLES (Low-Power Hardware-Accelerated Pulse)
-      if (!ecoMode) {
-        particlesRef.current.forEach((particle) => {
-          particle.progress += particle.speed;
-          if (particle.progress > 1) particle.progress = 0;
-
-          const edge = edges[particle.edgeIndex];
-          if (!edge) return;
-
-          const sourcePos = posMap.get(edge.source);
-          const targetPos = posMap.get(edge.target);
-          if (!sourcePos || !targetPos) return;
-
-          const px = sourcePos.x + (targetPos.x - sourcePos.x) * particle.progress;
-          const py = sourcePos.y + (targetPos.y - sourcePos.y) * particle.progress;
-
-          const isEdgeActive = pathway
-            ? pathway.activeEdges.has(`${edge.source}->${edge.target}`)
-            : true;
-
-          // Zero-cost concentric alpha halos (no costly shadowBlur!)
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(px, py, isEdgeActive ? 2.6 : 1.8, 0, Math.PI * 2);
-          ctx.fillStyle =
-            edge.relationshipType === "inhibits"
-              ? "rgba(251, 113, 133, 0.9)"
-              : "rgba(34, 211, 238, 0.9)";
-          ctx.fill();
-          ctx.restore();
-        });
+      if (isSelected || isHovered) {
+        ctx.fillStyle = `${colors.stroke}33`;
+        ctx.beginPath();
+        ctx.roundRect(left - 5, top - 5, box.w + 10, box.h + 10, 16);
+        ctx.fill();
       }
 
-      // 3. DRAW NODES
-      nodes.forEach((node) => {
-        const pos = posMap.get(node.id);
-        if (!pos) return;
-
-        const isSelected = selectedNodeId === node.id;
-        const isHovered = hoveredNodeId.current === node.id;
-        const isUpstream = pathway?.upstream.has(node.id);
-        const isDownstream = pathway?.downstream.has(node.id);
-
-        const isHighlighted =
-          !pathway || isSelected || isHovered || isUpstream || isDownstream;
-
-        const isFilteredOut = activeFilter && node.category !== activeFilter;
-        const colors = CATEGORY_COLORS[node.category] || CATEGORY_COLORS.mechanism;
-
-        ctx.save();
-
-        // Hardware-Accelerated Glow Rings (avoids battery-draining Gaussian blur)
-        if ((isSelected || isHovered || isUpstream || isDownstream) && !isFilteredOut) {
-          ctx.beginPath();
-          ctx.arc(pos.x, pos.y, pos.radius + (isSelected ? 9 : 5), 0, Math.PI * 2);
-          ctx.fillStyle = colors.halo;
-          ctx.fill();
-        }
-
-        // Main Node Body
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, pos.radius, 0, Math.PI * 2);
-        ctx.fillStyle = colors.fill;
-        ctx.globalAlpha = isFilteredOut ? 0.15 : isHighlighted ? 1 : 0.22;
-        ctx.fill();
-
-        // High-Contrast Border Stroke
-        ctx.strokeStyle = isSelected ? "#ffffff" : colors.stroke;
-        ctx.lineWidth = isSelected ? 2.5 : 1.5;
-        ctx.stroke();
-
-        // Center Molecular Pin
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = colors.dot;
-        ctx.fill();
-
-        // Node Label
-        ctx.globalAlpha = isFilteredOut ? 0.2 : isHighlighted ? 1 : 0.35;
-        ctx.font = isSelected
-          ? "bold 11px 'Instrument Sans', sans-serif"
-          : "500 10px 'Instrument Sans', sans-serif";
-        ctx.fillStyle = isSelected ? "#ffffff" : colors.text;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-
-        const displayLabel =
-          node.label.length > 22 ? `${node.label.slice(0, 20)}…` : node.label;
-        ctx.fillText(displayLabel, pos.x, pos.y + pos.radius + 6);
-
-        // Category Tag on Hover or Select
-        if (isSelected || isHovered) {
-          ctx.font = "bold 8px 'IBM Plex Mono', monospace";
-          ctx.fillStyle = colors.stroke;
-          ctx.fillText(node.category.toUpperCase(), pos.x, pos.y + pos.radius + 19);
-        }
-
-        ctx.restore();
-      });
-
-      ctx.restore(); // Restore camera transform
-
-      // 4. MINI-MAP (Radar HUD in bottom-right corner)
-      const mmWidth = 110;
-      const mmHeight = 70;
-      const mmPadding = 12;
-      const mmX = width - mmWidth - mmPadding;
-      const mmY = height - mmHeight - mmPadding;
-
-      ctx.save();
-      // Mini-map background
-      ctx.fillStyle = "rgba(7, 12, 20, 0.75)";
-      ctx.strokeStyle = "rgba(77, 141, 255, 0.15)";
-      ctx.lineWidth = 1;
+      ctx.fillStyle = colors.fill;
+      ctx.strokeStyle = isSelected ? "#ffffff" : colors.stroke;
+      ctx.lineWidth = isSelected ? 2 : 1.2;
+      ctx.setLineDash(node.observed ? [4, 3] : []);
       ctx.beginPath();
-
-      // Safe fallback for roundRect
-      if (typeof ctx.roundRect === "function") {
-        ctx.roundRect(mmX, mmY, mmWidth, mmHeight, 8);
-      } else {
-        ctx.rect(mmX, mmY, mmWidth, mmHeight);
-      }
+      ctx.roundRect(left, top, box.w, box.h, 12);
       ctx.fill();
       ctx.stroke();
+      ctx.setLineDash([]);
 
-      // Mini-map node dots
-      const scaleX = mmWidth / width;
-      const scaleY = mmHeight / height;
-      nodes.forEach((n) => {
-        const p = posMap.get(n.id);
-        if (!p) return;
-        const mx = mmX + p.x * scaleX;
-        const my = mmY + p.y * scaleY;
-        ctx.beginPath();
-        ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
-        ctx.fillStyle = CATEGORY_COLORS[n.category]?.dot || "#22d3ee";
-        ctx.fill();
-      });
+      ctx.fillStyle = colors.dot;
+      ctx.beginPath();
+      ctx.arc(left + 14, box.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Viewport Wireframe
-      const vpLeft = mmX - (transform.x / width) * mmWidth;
-      const vpTop = mmY - (transform.y / height) * mmHeight;
-      const vpW = (mmWidth / Math.max(transform.scale, 0.5)) * 0.75;
-      const vpH = (mmHeight / Math.max(transform.scale, 0.5)) * 0.75;
+      ctx.fillStyle = isSelected ? "#ffffff" : colors.text;
+      ctx.font = `${isSelected ? 700 : 600} 12px ${fontFamily.current}`;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      const firstLineY = box.y - ((box.lines.length - 1) * LINE_HEIGHT) / 2;
+      box.lines.forEach((line, i) => ctx.fillText(line, left + 26, firstLineY + i * LINE_HEIGHT));
 
-      ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
+      ctx.globalAlpha = 1;
+    }
+
+    // Labels on highlighted edges, drawn last so they sit on top
+    ctx.font = `500 11px ${fontFamily.current}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (const edge of edges) {
+      const key = edgeKey(edge);
+      if (!related.edgeKeys.has(key) && hovered.current.edge !== key) continue;
+      const path = edgePaths.current.get(key);
+      if (!path) continue;
+      const mid = path.length > 2 ? path[Math.floor(path.length / 2)] : {
+        x: (path[0].x + path[1].x) / 2,
+        y: (path[0].y + path[1].y) / 2,
+      };
+      const text = edge.hypothesis ? `${edge.label} (hypothesis)` : edge.label;
+      const w = ctx.measureText(text).width + 14;
+      ctx.fillStyle = "rgba(4, 7, 10, 0.92)";
+      ctx.strokeStyle = `rgba(${EDGE_COLORS[edge.relationshipType]}, 0.5)`;
       ctx.lineWidth = 1;
-      ctx.strokeRect(
-        Math.max(mmX, vpLeft),
-        Math.max(mmY, vpTop),
-        Math.min(mmWidth, vpW),
-        Math.min(mmHeight, vpH),
-      );
-      ctx.restore();
+      ctx.beginPath();
+      ctx.roundRect(mid.x - w / 2, mid.y - 10, w, 20, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#e8edf2";
+      ctx.fillText(text, mid.x, mid.y + 0.5);
+    }
 
-      ctx.restore(); // Restore dpr scale
+    if (keepAnimating) {
+      particleClock.current += 16;
+      scheduleDraw.current();
+    }
+  }, [nodes, edges, nodeById, selection, related, activeFilter, searchMatches, reducedMotion]);
 
-      animFrameId.current = requestAnimationFrame(render);
+  useEffect(() => {
+    scheduleDraw.current = () => {
+      if (frame.current === null) frame.current = requestAnimationFrame(draw);
     };
-
-    animFrameId.current = requestAnimationFrame(render);
-
+    scheduleDraw.current();
     return () => {
-      running = false;
-      if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+      frame.current = null;
     };
-  }, [nodes, edges, selectedNodeId, activeFilter, activePathway, ecoMode]);
+  }, [draw]);
 
-  // Coordinate helper: Canvas screen coords to graph space
-  const screenToGraph = useCallback((screenX: number, screenY: number): Point => {
-    const transform = transformRef.current;
-    return {
-      x: (screenX - transform.x) / transform.scale,
-      y: (screenY - transform.y) / transform.scale,
+  /* ---------------- Interaction ---------------- */
+
+  const toGraph = (clientX: number, clientY: number): Point => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const { x, y, scale } = transform.current;
+    return { x: (clientX - rect.left - x) / scale, y: (clientY - rect.top - y) / scale };
+  };
+
+  const hitTest = (point: Point): { node: string | null; edge: string | null } => {
+    for (const [id, box] of boxes.current) {
+      if (Math.abs(point.x - box.x) <= box.w / 2 && Math.abs(point.y - box.y) <= box.h / 2) {
+        return { node: id, edge: null };
+      }
+    }
+    const tolerance = 7 / transform.current.scale;
+    for (const [key, path] of edgePaths.current) {
+      for (let i = 0; i < path.length - 1; i++) {
+        if (distanceToSegment(point, path[i], path[i + 1]) <= tolerance) return { node: null, edge: key };
+      }
+    }
+    return { node: null, edge: null };
+  };
+
+  const zoomAt = (factor: number, screen: Point) => {
+    const c = transform.current;
+    const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, c.scale * factor));
+    c.x = screen.x - (screen.x - c.x) * (scale / c.scale);
+    c.y = screen.y - (screen.y - c.y) * (scale / c.scale);
+    c.scale = scale;
+    cameraTarget.current = null;
+    scheduleDraw.current();
+  };
+
+  // Wheel zoom needs a non-passive listener to stop the page scrolling
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      zoomAt(event.deltaY < 0 ? 1.1 : 0.9, { x: event.clientX - rect.left, y: event.clientY - rect.top });
     };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
-  // Pointer Interaction Handlers
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
 
-    const screenX = e.clientX - rect.left;
-    const screenY = e.clientY - rect.top;
-    const graphPt = screenToGraph(screenX, screenY);
+  const onPointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
-    // Check if pointer hit a node
-    let hitNodeId: string | null = null;
-    nodePositions.current.forEach((pos, id) => {
-      const dx = graphPt.x - pos.x;
-      const dy = graphPt.y - pos.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= pos.radius + 6) {
-        hitNodeId = id;
-      }
-    });
-
-    if (hitNodeId) {
-      isDraggingNode.current = hitNodeId;
-      onSelectNode(hitNodeId);
-      dragStart.current = { x: graphPt.x, y: graphPt.y };
-    } else {
-      isDraggingCanvas.current = true;
-      dragStart.current = { x: e.clientX, y: e.clientY };
-    }
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const screenX = e.clientX - rect.left;
-    const screenY = e.clientY - rect.top;
-    const graphPt = screenToGraph(screenX, screenY);
-
-    // Node dragging
-    if (isDraggingNode.current) {
-      const nodePos = nodePositions.current.get(isDraggingNode.current);
-      if (nodePos) {
-        nodePos.x = graphPt.x;
-        nodePos.y = graphPt.y;
-      }
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = { mode: "pinch", pinchDistance: Math.hypot(a.x - b.x, a.y - b.y) };
       return;
     }
 
-    // Canvas panning
-    if (isDraggingCanvas.current) {
-      const dx = e.clientX - dragStart.current.x;
-      const dy = e.clientY - dragStart.current.y;
-      transformRef.current.x += dx;
-      transformRef.current.y += dy;
-      dragStart.current = { x: e.clientX, y: e.clientY };
+    const hit = hitTest(toGraph(event.clientX, event.clientY));
+    gesture.current = hit.node
+      ? { mode: "node", nodeId: hit.node, last: { x: event.clientX, y: event.clientY }, moved: false }
+      : { mode: "pan", last: { x: event.clientX, y: event.clientY }, moved: false };
+  };
+
+  const onPointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (pointers.current.has(event.pointerId)) {
+      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+    const g = gesture.current;
+
+    if (g.mode === "pinch" && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      const rect = canvasRef.current!.getBoundingClientRect();
+      zoomAt(distance / (g.pinchDistance || distance), {
+        x: (a.x + b.x) / 2 - rect.left,
+        y: (a.y + b.y) / 2 - rect.top,
+      });
+      g.pinchDistance = distance;
       return;
     }
 
-    // Hover detection
-    let hit: string | null = null;
-    nodePositions.current.forEach((pos, id) => {
-      const dx = graphPt.x - pos.x;
-      const dy = graphPt.y - pos.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= pos.radius + 6) {
-        hit = id;
+    if ((g.mode === "pan" || g.mode === "node") && g.last) {
+      const dx = event.clientX - g.last.x;
+      const dy = event.clientY - g.last.y;
+      if (Math.abs(dx) + Math.abs(dy) > 3) g.moved = true;
+      if (!g.moved) return;
+      g.last = { x: event.clientX, y: event.clientY };
+      if (g.mode === "pan") {
+        transform.current.x += dx;
+        transform.current.y += dy;
+        cameraTarget.current = null;
+      } else if (g.nodeId) {
+        const box = boxes.current.get(g.nodeId);
+        if (box) {
+          box.x += dx / transform.current.scale;
+          box.y += dy / transform.current.scale;
+          // Re-route the node's edges as straight lines while dragging
+          for (const edge of edges) {
+            if (edge.source !== g.nodeId && edge.target !== g.nodeId) continue;
+            const from = boxes.current.get(edge.source);
+            const to = boxes.current.get(edge.target);
+            if (from && to) edgePaths.current.set(edgeKey(edge), [boxExit(from, to), boxExit(to, from)]);
+          }
+        }
       }
-    });
+      scheduleDraw.current();
+      return;
+    }
 
-    if (hoveredNodeId.current !== hit) {
-      hoveredNodeId.current = hit;
-      if (canvasRef.current) {
-        canvasRef.current.style.cursor = hit ? "pointer" : "grab";
-      }
+    // Hover feedback
+    const hit = hitTest(toGraph(event.clientX, event.clientY));
+    if (hit.node !== hovered.current.node || hit.edge !== hovered.current.edge) {
+      hovered.current = hit;
+      if (canvasRef.current) canvasRef.current.style.cursor = hit.node || hit.edge ? "pointer" : "grab";
+      scheduleDraw.current();
     }
   };
 
-  const handlePointerUp = () => {
-    isDraggingNode.current = null;
-    isDraggingCanvas.current = false;
+  const onPointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    pointers.current.delete(event.pointerId);
+    const g = gesture.current;
+    if (g.mode === "node" && !g.moved && g.nodeId) {
+      onSelect({ kind: "node", id: g.nodeId });
+    } else if (g.mode === "pan" && !g.moved) {
+      const hit = hitTest(toGraph(event.clientX, event.clientY));
+      onSelect(hit.edge ? { kind: "edge", key: hit.edge } : null);
+    }
+    gesture.current = { mode: pointers.current.size === 1 ? "pan" : "none", last: [...pointers.current.values()][0] };
   };
 
-  // Smooth Zoom with Wheel
-  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const cur = transformRef.current;
-    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(cur.scale * zoomFactor, 0.4), 2.8);
-
-    cur.x = mouseX - (mouseX - cur.x) * (newScale / cur.scale);
-    cur.y = mouseY - (mouseY - cur.y) * (newScale / cur.scale);
-    cur.scale = newScale;
-  };
-
-  const resetView = () => {
-    transformRef.current = { x: 0, y: 0, scale: 1 };
-  };
-
-  const zoomIn = () => {
-    transformRef.current.scale = Math.min(transformRef.current.scale * 1.2, 2.8);
-  };
-
-  const zoomOut = () => {
-    transformRef.current.scale = Math.max(transformRef.current.scale * 0.8, 0.4);
+  const zoomButton = (factor: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    zoomAt(factor, { x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 });
   };
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
-    }
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else containerRef.current.requestFullscreen().catch(() => {});
   };
 
-  const snapshotGraph = () => {
+  const downloadImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dataUrl = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `biolayers-cipher-network-${Date.now()}.png`;
-    a.click();
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "biolayers-cipher-map.png";
+    link.click();
   };
+
+  const controlClass =
+    "flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-200 transition hover:border-teal-200/30 hover:bg-teal-300/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff]";
 
   return (
     <div
       ref={containerRef}
-      className={`relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a] ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
-      }`}
+      className="relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a]"
     >
       <canvas
         ref={canvasRef}
-        className="h-full w-full touch-none"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        onWheel={handleWheel}
+        role="img"
+        aria-label={`Cause and effect map with ${nodes.length} steps and ${edges.length} links. Use the outline view for a text version.`}
+        className="h-full w-full cursor-grab touch-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={() => {
+          if (hovered.current.node || hovered.current.edge) {
+            hovered.current = { node: null, edge: null };
+            scheduleDraw.current();
+          }
+        }}
+        onDoubleClick={() => fitToView(true)}
       />
 
-      {/* Floating Canvas Controls (Zoom, Reset, Fullscreen, Eco Mode, Snapshot) */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-xl border border-teal-200/20 bg-[#070d14]/90 p-1.5 backdrop-blur-xl shadow-lg">
-        <button
-          type="button"
-          onClick={zoomIn}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-teal-200/20 bg-teal-300/[0.08] text-xs font-bold text-teal-200 hover:bg-teal-300/[0.2] transition"
-          title="Zoom In"
-        >
-          +
+      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-xl border border-teal-200/20 bg-[#070d14]/90 p-1.5 shadow-lg backdrop-blur-xl">
+        <button type="button" onClick={() => zoomButton(1.2)} aria-label="Zoom in" className={controlClass}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
-        <button
-          type="button"
-          onClick={zoomOut}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-teal-200/20 bg-teal-300/[0.08] text-xs font-bold text-teal-200 hover:bg-teal-300/[0.2] transition"
-          title="Zoom Out"
-        >
-          −
+        <button type="button" onClick={() => zoomButton(1 / 1.2)} aria-label="Zoom out" className={controlClass}>
+          <Minus className="h-4 w-4" aria-hidden="true" />
         </button>
-        <button
-          type="button"
-          onClick={resetView}
-          className="flex h-7 px-2.5 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] font-mono text-[10px] font-semibold text-slate-300 hover:text-white transition"
-          title="Reset Camera"
-        >
-          Reset
+        <button type="button" onClick={() => fitToView(true)} aria-label="Fit the whole map" className={controlClass}>
+          <ScanSearch className="h-4 w-4" aria-hidden="true" />
         </button>
-
-        <div className="h-4 w-px bg-white/10" />
-
-        {/* Eco Mode / Low Power Toggle */}
-        <button
-          type="button"
-          onClick={() => setEcoMode(!ecoMode)}
-          className={`flex h-7 items-center gap-1 px-2 rounded-lg border text-[10px] font-mono font-medium transition ${
-            ecoMode
-              ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-300"
-              : "border-white/10 bg-white/[0.04] text-slate-400 hover:text-slate-200"
-          }`}
-          title="Toggle Eco / Low Power Mode"
-        >
-          <Leaf className="h-3 w-3" />
-          <span className="hidden sm:inline">Eco</span>
+        <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/10" />
+        <button type="button" onClick={downloadImage} aria-label="Download the map as an image" className={controlClass}>
+          <Camera className="h-4 w-4" aria-hidden="true" />
         </button>
-
-        {/* Snapshot / Download */}
-        <button
-          type="button"
-          onClick={snapshotGraph}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition"
-          title="Download PNG Snapshot"
-        >
-          <Camera className="h-3.5 w-3.5" />
-        </button>
-
-        {/* Fullscreen */}
         <button
           type="button"
           onClick={toggleFullscreen}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition"
-          title="Toggle Fullscreen"
+          aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
+          className={controlClass}
         >
-          {isFullscreen ? (
-            <Minimize2 className="h-3.5 w-3.5" />
-          ) : (
-            <Maximize2 className="h-3.5 w-3.5" />
-          )}
+          {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden="true" /> : <Maximize2 className="h-4 w-4" aria-hidden="true" />}
         </button>
       </div>
 
-      {/* Mini Legend Overlay */}
-      <div className="absolute top-4 left-4 hidden sm:flex items-center gap-3 rounded-xl border border-white/10 bg-[#070c14]/85 px-3 py-1.5 text-[10px] font-mono backdrop-blur-xl">
-        <span className="flex items-center gap-1.5 text-rose-300">
-          <span className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
-          Trigger
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3 top-3 hidden flex-col gap-1 rounded-xl border border-white/10 bg-[#070c14]/85 px-3 py-2 font-mono text-[10px] text-slate-300 backdrop-blur-xl md:flex"
+      >
+        <span className="flex items-center gap-2">
+          <svg width="26" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#67e8f9" strokeWidth="1.6" /><path d="M26 4 L18 0 L18 8 Z" fill="#67e8f9" /></svg>
+          Causes
         </span>
-        <span className="flex items-center gap-1.5 text-cyan-300">
-          <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-          Mechanism
+        <span className="flex items-center gap-2">
+          <svg width="26" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#fb7185" strokeWidth="1.6" /><line x1="25" y1="0" x2="25" y2="10" stroke="#fb7185" strokeWidth="2.4" /></svg>
+          Blocks
         </span>
-        <span className="flex items-center gap-1.5 text-purple-300">
-          <span className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
-          Effect
+        <span className="flex items-center gap-2">
+          <svg width="26" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#c084fc" strokeWidth="1.6" /><path d="M26 4 L18 0 L18 8 Z" fill="none" stroke="#c084fc" strokeWidth="1.2" /></svg>
+          Reshapes
         </span>
-        <span className="flex items-center gap-1.5 text-emerald-300">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
-          Therapy
+        <span className="flex items-center gap-2">
+          <svg width="26" height="8"><line x1="0" y1="4" x2="26" y2="4" stroke="#cbd5e1" strokeWidth="1.6" strokeDasharray="4 3" /></svg>
+          Hypothesis
         </span>
       </div>
     </div>
