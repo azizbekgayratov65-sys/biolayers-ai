@@ -145,33 +145,28 @@ export default function AboutPage() {
           {team.map((member) => (
             <li
               key={member.name}
-              className="group overflow-hidden rounded-[24px] border border-teal-300/20 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur transition-colors hover:border-emerald-300/50"
+              className="group flex flex-col items-center rounded-[24px] border border-teal-300/20 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 text-center backdrop-blur transition-colors hover:border-emerald-300/50"
             >
-              <div className="relative aspect-square overflow-hidden bg-slide">
+              <div className="relative h-36 w-36 overflow-hidden rounded-full border-2 border-emerald-300/30 bg-slide shadow-[0_0_32px_-8px_rgba(52,211,153,0.5)]">
                 <Image
                   src={member.photo}
                   alt={member.name}
                   fill
-                  sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="144px"
+                  className="object-cover"
                 />
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
-              <div className="flex items-center justify-between gap-3 p-5">
-                <div>
-                  <h3 className="text-lg font-semibold leading-snug">{member.name}</h3>
-                  <p className="mt-1 font-mono text-xs uppercase tracking-wider text-emerald-200/80">{member.role}</p>
-                </div>
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-teal-300/30 px-3 text-xs font-medium text-emerald-100 hover:border-emerald-300 hover:bg-emerald-300/10"
-                >
-                  in
-                  <span className="sr-only"> LinkedIn: {member.name}</span>
-                </a>
-              </div>
+              <h3 className="mt-5 text-lg font-semibold leading-snug">{member.name}</h3>
+              <p className="mt-1 font-mono text-xs uppercase tracking-wider text-emerald-200/80">{member.role}</p>
+              <a
+                href={member.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex h-10 items-center justify-center rounded-full border border-teal-300/30 px-4 text-xs font-medium text-emerald-100 hover:border-emerald-300 hover:bg-emerald-300/10"
+              >
+                LinkedIn
+                <span className="sr-only">: {member.name}</span>
+              </a>
             </li>
           ))}
         </ul>
