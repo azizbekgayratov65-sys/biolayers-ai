@@ -73,12 +73,12 @@ type Member = {
 
 const team: Member[] = [
   { name: "Azizbek Gayratov", role: "Founder & Marketing", photo: "/mentorship/founder.png", linkedin: "https://www.linkedin.com/in/azizbekgayratov/" },
-  { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer" },
-  { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer" },
-  { name: "Orzugul Mukhtorova", role: "Data Analyst" },
-  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer" },
-  { name: "Maksat Babageldiyev", role: "AI/ML Engineer" },
-  { name: "Mirkomil Nozimkhojiyev", role: "SMM" },
+  { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
+  { name: "Orzugul Mukhtorova", role: "Data Analyst", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
+  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer", linkedin: "https://www.linkedin.com/in/alamiy/" },
+  { name: "Maksat Babageldiyev", role: "AI/ML Engineer", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
+  { name: "Mirkomil Nozimkhojiyev", role: "SMM", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
 ];
 
 function initials(name: string) {
