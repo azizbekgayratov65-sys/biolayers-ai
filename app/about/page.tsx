@@ -67,27 +67,18 @@ const mentors: Person[] = [
 type Member = {
   name: string;
   role: string;
-  photo?: string;
-  linkedin?: string;
+  photo: string;
+  linkedin: string;
 };
 
 const team: Member[] = [
-  { name: "Azizbek Gayratov", role: "Founder & Marketing", photo: "/mentorship/founder.png", linkedin: "https://www.linkedin.com/in/azizbekgayratov/" },
-  { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
-  { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
-  { name: "Orzugul Mukhtorova", role: "Data Analyst", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
-  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer", linkedin: "https://www.linkedin.com/in/alamiy/" },
-  { name: "Maksat Babageldiyev", role: "AI/ML Engineer", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
-  { name: "Mirkomil Nozimkhojiyev", role: "SMM", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
+  { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer", photo: "/team/bilolbek.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
+  { name: "Orzugul Mukhtorova", role: "Data Analyst", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
+  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer", photo: "/team/muhammad.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
+  { name: "Maksat Babageldiyev", role: "AI/ML Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
+  { name: "Mirkomil Nozimkhojiyev", role: "SMM", photo: "/team/mirkomil.jpg", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
 ];
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("");
-}
 
 export default function AboutPage() {
   return (
@@ -138,37 +129,49 @@ export default function AboutPage() {
       </section>
 
       <section aria-labelledby="team-heading" className="mt-24">
-        <h2 id="team-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
-          The team
-        </h2>
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto max-w-2xl text-center">
+          <Eyebrow icon={Microscope}>The team</Eyebrow>
+          <h2 id="team-heading" className="mt-4 font-serif text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            The people building{" "}
+            <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">
+              BioLayers
+            </span>
+          </h2>
+          <p className="mt-4 leading-relaxed text-graphite">
+            Engineers, data analysts and communicators working alongside our founder.
+          </p>
+        </div>
+        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {team.map((member) => (
-            <li key={member.name} className="rounded-[24px] border border-rule bg-slide/60 p-5 backdrop-blur">
-              <div className="relative h-20 w-20 overflow-hidden rounded-[20px] bg-slide">
-                {member.photo ? (
-                  <Image src={member.photo} alt={member.name} fill sizes="80px" className="object-cover object-top" />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="flex h-full w-full items-center justify-center font-mono text-xl text-emerald-200"
-                  >
-                    {initials(member.name)}
-                  </span>
-                )}
+            <li
+              key={member.name}
+              className="group overflow-hidden rounded-[24px] border border-teal-300/20 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur transition-colors hover:border-emerald-300/50"
+            >
+              <div className="relative aspect-square overflow-hidden bg-slide">
+                <Image
+                  src={member.photo}
+                  alt={member.name}
+                  fill
+                  sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold">{member.name}</h3>
-              <p className="mt-1 text-sm text-graphite">{member.role}</p>
-              {member.linkedin && (
+              <div className="flex items-center justify-between gap-3 p-5">
+                <div>
+                  <h3 className="text-lg font-semibold leading-snug">{member.name}</h3>
+                  <p className="mt-1 font-mono text-xs uppercase tracking-wider text-emerald-200/80">{member.role}</p>
+                </div>
                 <a
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${textLink} mt-2 inline-flex min-h-10 items-center text-sm`}
+                  className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-teal-300/30 px-3 text-xs font-medium text-emerald-100 hover:border-emerald-300 hover:bg-emerald-300/10"
                 >
-                  LinkedIn
-                  <span className="sr-only">: {member.name}</span>
+                  in
+                  <span className="sr-only"> LinkedIn: {member.name}</span>
                 </a>
-              )}
+              </div>
             </li>
           ))}
         </ul>
