@@ -141,7 +141,7 @@ export default function AboutPage() {
             Engineers, data analysts and communicators working alongside our founder.
           </p>
         </div>
-        <ul className="mx-auto mt-12 grid max-w-4xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {team.map((member) => (
             <li
               key={member.name}
