@@ -64,6 +64,31 @@ const mentors: Person[] = [
   },
 ];
 
+type Member = {
+  name: string;
+  role: string;
+  photo?: string;
+  linkedin?: string;
+};
+
+const team: Member[] = [
+  { name: "Azizbek Gayratov", role: "Founder & Marketing", photo: "/mentorship/founder.png", linkedin: "https://www.linkedin.com/in/azizbekgayratov/" },
+  { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer" },
+  { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer" },
+  { name: "Orzugul Mukhtorova", role: "Data Analyst" },
+  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer" },
+  { name: "Maksat Babageldiyev", role: "AI/ML Engineer" },
+  { name: "Mirkomil Nozimkhojiyev", role: "SMM" },
+];
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+}
+
 export default function AboutPage() {
   return (
     <div className={`relative isolate ${pageShell} pt-28 pb-24 sm:pt-32`}>
@@ -110,6 +135,43 @@ export default function AboutPage() {
             LinkedIn
           </a>
         </div>
+      </section>
+
+      <section aria-labelledby="team-heading" className="mt-24">
+        <h2 id="team-heading" className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+          The team
+        </h2>
+        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((member) => (
+            <li key={member.name} className="rounded-[24px] border border-rule bg-slide/60 p-5 backdrop-blur">
+              <div className="relative h-20 w-20 overflow-hidden rounded-[20px] bg-slide">
+                {member.photo ? (
+                  <Image src={member.photo} alt={member.name} fill sizes="80px" className="object-cover object-top" />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="flex h-full w-full items-center justify-center font-mono text-xl text-emerald-200"
+                  >
+                    {initials(member.name)}
+                  </span>
+                )}
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">{member.name}</h3>
+              <p className="mt-1 text-sm text-graphite">{member.role}</p>
+              {member.linkedin && (
+                <a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${textLink} mt-2 inline-flex min-h-10 items-center text-sm`}
+                >
+                  LinkedIn
+                  <span className="sr-only">: {member.name}</span>
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section aria-labelledby="mentors-heading" className="mt-24">
