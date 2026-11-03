@@ -4,6 +4,7 @@ import { ArrowRight, Microscope, Sparkles, Workflow } from "lucide-react";
 import SpecimenViewer from "./components/home/SpecimenViewer";
 import EvidenceTag, { type EvidenceLevel } from "./components/home/EvidenceTag";
 import ZoomableFigure from "./components/ZoomableFigure";
+import TrustedBy from "./components/home/TrustedBy";
 import { Eyebrow } from "./components/ui/Chrome";
 import { btnPrimary, btnSecondary, pageShell, textLink } from "./components/ui/styles";
 
@@ -102,27 +103,6 @@ const partners = [
   },
 ];
 
-const trustedBy = [
-  {
-    label: "Mentors from",
-    names: [
-      "MD Anderson Cancer Center",
-      "Weill Cornell Medicine",
-      "Nationwide Children's Hospital",
-      "The Ohio State University",
-      "Hollings Cancer Center, MUSC",
-    ],
-  },
-  {
-    label: "Partners",
-    names: ["NXT Horizon", "STEMise", "BioMedizone", "Computational Biologists Society at UCLA"],
-  },
-  {
-    label: "Featured by",
-    names: ["HundrED", "AI Business"],
-  },
-];
-
 export default function HomePage() {
   return (
     <div className="relative isolate overflow-hidden">
@@ -181,32 +161,7 @@ export default function HomePage() {
       </section>
 
       {/* Trusted by: only organisations named elsewhere on the site (partners, mentors, press) */}
-      <section className={`${pageShell} mt-20`} aria-labelledby="trusted-heading">
-        <h2
-          id="trusted-heading"
-          className="text-center font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-graphite"
-        >
-          Trusted by researchers and organisations
-        </h2>
-        <div className="mt-6 grid gap-6 border-y border-rule py-8 md:grid-cols-3">
-          {trustedBy.map((group) => (
-            <div key={group.label} className="text-center">
-              <p className="text-xs uppercase tracking-[0.18em] text-graphite">{group.label}</p>
-              <ul className="mt-3 space-y-1.5">
-                {group.names.map((name) => (
-                  <li key={name} className="font-medium text-ink-strong">
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <p className="mt-4 text-center text-xs text-graphite">
-          Mentors are affiliated with these institutions as individuals. Listing does not imply
-          institutional endorsement.
-        </p>
-      </section>
+      <TrustedBy />
 
       {/* Flagship case: a real sequence, so it is numbered */}
       <section className={`${pageShell} mt-32`} aria-labelledby="flagship-heading">
