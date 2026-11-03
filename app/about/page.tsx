@@ -76,7 +76,7 @@ type Member = {
 const team: Member[] = [
   {
     name: "Azizbek Gayratov",
-    role: "",
+    role: "Lead Engineer",
     tier: "founder",
     focus: "object-top",
     photo: "/mentorship/founder.png",
@@ -121,7 +121,7 @@ export default function AboutPage() {
           </p>
         </div>
         <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {team.map((member) => (
+          {team.map((member, i) => (
             <li
               key={member.name}
               className={`group flex flex-col items-center rounded-[24px] border bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 text-center backdrop-blur transition-colors hover:border-emerald-300/50 ${
@@ -130,6 +130,11 @@ export default function AboutPage() {
                   : member.tier === "cofounder"
                     ? "border-emerald-300/40"
                     : "border-teal-300/20"
+              } ${
+                // Centre a lone last card when the final grid row has a single item.
+                i === team.length - 1
+                  ? `${team.length % 2 === 1 ? "sm:max-lg:col-span-2 sm:max-lg:mx-auto sm:max-lg:w-[calc(50%-0.75rem)]" : ""} ${team.length % 3 === 1 ? "lg:col-start-2" : ""}`
+                  : ""
               }`}
             >
               <div className="relative h-36 w-36 overflow-hidden rounded-full border-2 border-emerald-300/30 bg-slide shadow-[0_0_32px_-8px_rgba(52,211,153,0.5)]">
