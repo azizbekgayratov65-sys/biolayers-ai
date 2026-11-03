@@ -10,7 +10,7 @@ import { btnPrimary, btnSecondary, pageShell, textLink } from "./components/ui/s
 export const metadata = {
   title: "BioLayers SI: from papers to living cells",
   description:
-    "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.",
+    "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for cancer research.",
 };
 
 type ChainStep = {
@@ -102,6 +102,27 @@ const partners = [
   },
 ];
 
+const trustedBy = [
+  {
+    label: "Mentors from",
+    names: [
+      "MD Anderson Cancer Center",
+      "Weill Cornell Medicine",
+      "Nationwide Children's Hospital",
+      "The Ohio State University",
+      "Hollings Cancer Center, MUSC",
+    ],
+  },
+  {
+    label: "Partners",
+    names: ["NXT Horizon", "STEMise", "BioMedizone", "Computational Biologists Society at UCLA"],
+  },
+  {
+    label: "Featured by",
+    names: ["HundrED", "AI Business"],
+  },
+];
+
 export default function HomePage() {
   return (
     <div className="relative isolate overflow-hidden">
@@ -123,13 +144,13 @@ export default function HomePage() {
       <section className={`${pageShell} pt-28 sm:pt-32 lg:pt-36`}>
         <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
           <div className="animate-fade-up lg:sticky lg:top-32">
-            <Eyebrow icon={Sparkles}>AI-Driven Computational Oncology</Eyebrow>
+            <Eyebrow icon={Sparkles}>Cancer Research Infrastructure</Eyebrow>
             <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               From papers to <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">living cells</span>
             </h1>
             <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-ink">
               BioLayers SI connects biomedical literature, biological mechanisms, real microscopy,
-              and cellular phenotypes into evidence-grounded maps for computational oncology.
+              and cellular phenotypes into evidence-grounded maps for cancer research.
             </p>
             <p className="mt-4 max-w-[34rem] leading-relaxed text-graphite">
               Every statement carries its source: a PubMed ID, a dataset accession, or a measurement
@@ -157,6 +178,34 @@ export default function HomePage() {
 
           <SpecimenViewer />
         </div>
+      </section>
+
+      {/* Trusted by: only organisations named elsewhere on the site (partners, mentors, press) */}
+      <section className={`${pageShell} mt-20`} aria-labelledby="trusted-heading">
+        <h2
+          id="trusted-heading"
+          className="text-center font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-graphite"
+        >
+          Trusted by researchers and organisations
+        </h2>
+        <div className="mt-6 grid gap-6 border-y border-rule py-8 md:grid-cols-3">
+          {trustedBy.map((group) => (
+            <div key={group.label} className="text-center">
+              <p className="text-xs uppercase tracking-[0.18em] text-graphite">{group.label}</p>
+              <ul className="mt-3 space-y-1.5">
+                {group.names.map((name) => (
+                  <li key={name} className="font-medium text-ink-strong">
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-center text-xs text-graphite">
+          Mentors are affiliated with these institutions as individuals. Listing does not imply
+          institutional endorsement.
+        </p>
       </section>
 
       {/* Flagship case: a real sequence, so it is numbered */}

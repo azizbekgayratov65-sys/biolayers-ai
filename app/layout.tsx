@@ -43,7 +43,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 const description =
-  "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.";
+  "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for cancer research.";
 
 export const metadata: Metadata = {
   title: {
@@ -54,6 +54,7 @@ export const metadata: Metadata = {
   applicationName: "BioLayers SI",
   keywords: [
     "BioLayers SI",
+    "cancer research infrastructure",
     "computational oncology",
     "cancer research",
     "cell atlas",

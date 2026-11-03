@@ -81,7 +81,7 @@ export default function Footer() {
               <div className="flex flex-col">
                 <span className="text-base font-black tracking-[-0.02em] text-white">BioLayers SI</span>
                 <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300/80">
-                  Computational Oncology
+                  Cancer Research Infrastructure
                 </span>
               </div>
             </Link>

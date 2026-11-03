@@ -271,7 +271,7 @@ export default function Navbar() {
                   BioLayers SI
                 </div>
                 <div className="mt-0.5 hidden font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300/80 sm:block">
-                  Computational oncology
+                  Cancer research infrastructure
                 </div>
               </div>
             </Link>
