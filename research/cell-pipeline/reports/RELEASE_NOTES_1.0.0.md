@@ -1,4 +1,4 @@
-# BioLayers AI: AI layer release 1.0.0
+# BioLayers SI: AI layer release 1.0.0
 
 1 October 2026. Research and educational system. Not a clinical diagnostic.
 

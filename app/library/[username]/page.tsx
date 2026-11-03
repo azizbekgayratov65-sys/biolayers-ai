@@ -14,8 +14,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   return {
-    title: `@${username}'s Library — BioLayers AI`,
-    description: `Explore cancer biology mind maps and research literature analyzed by @${username} on BioLayers AI.`,
+    title: `@${username}'s Library — BioLayers SI`,
+    description: `Explore cancer biology mind maps and research literature analyzed by @${username} on BioLayers SI.`,
   };
 }
 

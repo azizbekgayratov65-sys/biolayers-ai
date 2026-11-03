@@ -30,7 +30,7 @@ const report = reportData as ValidationReport;
 export const metadata: Metadata = {
   title: "Validation report",
   description:
-    "Validation report for the BioLayers AI cell pipeline: segmentation, tracking, phenotype rules and literature linking, measured on public benchmarks.",
+    "Validation report for the BioLayers SI cell pipeline: segmentation, tracking, phenotype rules and literature linking, measured on public benchmarks.",
 };
 
 const SOURCE_URL =

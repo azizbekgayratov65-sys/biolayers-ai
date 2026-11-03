@@ -1,5 +1,5 @@
 -- =========================================================
--- BioLayers AI — Platform-wide public stats
+-- BioLayers SI — Platform-wide public stats
 -- Exposes aggregate counts to the marketing/home page.
 --
 -- RLS restricts profiles/papers to their owners, so this

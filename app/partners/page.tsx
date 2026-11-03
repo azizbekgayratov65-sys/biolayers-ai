@@ -7,7 +7,7 @@ import { AmbientGlow, Eyebrow } from "../components/ui/Chrome";
 
 export const metadata: Metadata = {
   title: "Partners",
-  description: "Organisations BioLayers AI works with on research, education and outreach.",
+  description: "Organisations BioLayers SI works with on research, education and outreach.",
 };
 
 type Partner = {
@@ -117,7 +117,7 @@ export default function PartnersPage() {
 
       <p className="mt-6 max-w-3xl text-sm leading-relaxed text-graphite">
         Logos and names are used to identify the organisations we work with. They do not mean an
-        organisation endorses BioLayers AI or its results.
+        organisation endorses BioLayers SI or its results.
       </p>
 
       <section aria-labelledby="join-heading" className="mt-20 rounded-[24px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl px-6 py-10 sm:px-10">
@@ -129,7 +129,7 @@ export default function PartnersPage() {
           us what you study and we will reply within a week.
         </p>
         <a
-          href="mailto:biolayers.ai@gmail.com?subject=Partnership%20with%20BioLayers%20AI"
+          href="mailto:biolayers.ai@gmail.com?subject=Partnership%20with%20BioLayers%20SI"
           className={`${btnSecondary} mt-6`}
         >
           Email biolayers.ai@gmail.com

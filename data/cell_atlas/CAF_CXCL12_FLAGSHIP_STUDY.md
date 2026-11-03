@@ -1,4 +1,4 @@
-# BioLayers AI Flagship Case Study
+# BioLayers SI Flagship Case Study
 # The CAF → CXCL12 → CXCR4 → Tumor Cell Migration Axis
 **Document ID:** BL-FLAGSHIP-CAF-CXCL12-2026  
 **Curator:** BioLayers Data Collector & Bioimage Curator  
@@ -27,7 +27,7 @@ flowchart LR
 
 ## 2. The 5-Layer Vertical Architecture
 
-BioLayers AI connects every step of this biological journey from raw manuscript evidence to calibrated microscopy frames and single-cell trajectories.
+BioLayers SI connects every step of this biological journey from raw manuscript evidence to calibrated microscopy frames and single-cell trajectories.
 
 ### Layer 1: Scientific Literature & Evidence Base
 1. **Cell (2005) — Seminal Discovery:**
@@ -146,4 +146,4 @@ This flagship case study directly backs the **90-second sprint demo script**:
 5. **55–70s:** AI segmentation layer toggles on: StarDist/Cellpose highlights individual activated CAFs and stress fibers.
 6. **70–80s:** Time-lapse series plays: MDA-MB-231 cells stream directionally along the CXCL12 chemokine gradient.
 7. **80–90s:** Return to graph: every arrow shows validated PMID/DOI citations and dataset accessions.
-8. **Final Tagline:** *"From papers to living cells. BioLayers AI makes cancer biology explorable."*
+8. **Final Tagline:** *"From papers to living cells. BioLayers SI makes cancer biology explorable."*

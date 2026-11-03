@@ -9,7 +9,7 @@
 
 In computational oncology and AI-assisted biology, **the greatest risk is not lack of data, but ungrounded extrapolation (hallucination)**. Many AI platforms make claims about molecular mechanisms based merely on co-occurrence in literature or vague visual patterns.
 
-BioLayers AI enforces a strict three-tier evidence classification on every edge and node in the platform:
+BioLayers SI enforces a strict three-tier evidence classification on every edge and node in the platform:
 1. **□ Observed directly in image (`observed_directly_in_image`):**
    - Quantitative measurement derived directly from calibrated pixel/voxel data with verified physical units (µm, µm², µm/min, fluorophore intensity AU, pixel counts).
 2. **▤ Supported by literature (`supported_by_literature`):**

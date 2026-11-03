@@ -1,4 +1,4 @@
--- BioLayers AI — Migration 0008: Cell Atlas & Microscopy Infrastructure
+-- BioLayers SI — Migration 0008: Cell Atlas & Microscopy Infrastructure
 -- Phase 1 Foundation: Cell Atlas Schema, Provenance Metadata, Morphology & Evidence Boundaries
 
 -- 1. Create enum types for biological classifications & evidence boundaries

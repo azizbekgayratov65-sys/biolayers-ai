@@ -1,5 +1,5 @@
 -- =========================================================
--- BioLayers AI — Mind Map Deduplication
+-- BioLayers SI — Mind Map Deduplication
 -- Adds content-addressable storage for mind maps to save space
 -- when multiple users analyze the same paper.
 -- =========================================================

@@ -73,7 +73,7 @@ const steps: JourneyStep[] = [
     title: "Extract Entities & Causal Pathways",
     subtitle: "Encrypted BYOK Gemini 2.5 Flash / Pro",
     description:
-      "BioLayers AI uses your encrypted Google Gemini API key to identify biological entities (genes, proteins, cell types, drugs) and directional causal relationships (activates, inhibits, upregulates).",
+      "BioLayers SI uses your encrypted Google Gemini API key to identify biological entities (genes, proteins, cell types, drugs) and directional causal relationships (activates, inhibits, upregulates).",
     icon: Dna,
     featureList: [
       "BYOK (Bring Your Own Key) encrypted with AES-256-GCM",
@@ -288,7 +288,7 @@ export default function BioJourney() {
           </div>
 
           <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
-            How BioLayers AI{" "}
+            How BioLayers SI{" "}
             <span className="bg-gradient-to-r from-teal-200 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
               works
             </span>
@@ -333,7 +333,7 @@ export default function BioJourney() {
       </div>
 
       <div className="mx-auto mt-6 flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-teal-100/[0.06] pt-4 text-xs text-slate-500">
-        <span>BioLayers AI — 4-Step Verified Workflow</span>
+        <span>BioLayers SI — 4-Step Verified Workflow</span>
         <div className="flex items-center gap-4">
           <Link href="/about" className="hover:text-slate-300">About & Mentorship</Link>
           <span>·</span>

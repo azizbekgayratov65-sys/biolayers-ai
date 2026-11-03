@@ -43,17 +43,17 @@ const plexMono = IBM_Plex_Mono({
 });
 
 const description =
-  "BioLayers AI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.";
+  "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.";
 
 export const metadata: Metadata = {
   title: {
-    default: "BioLayers AI",
-    template: "%s | BioLayers AI",
+    default: "BioLayers SI",
+    template: "%s | BioLayers SI",
   },
   description,
-  applicationName: "BioLayers AI",
+  applicationName: "BioLayers SI",
   keywords: [
-    "BioLayers AI",
+    "BioLayers SI",
     "computational oncology",
     "cancer research",
     "cell atlas",
@@ -62,8 +62,8 @@ export const metadata: Metadata = {
     "biological knowledge graph",
     "PubMed",
   ],
-  creator: "BioLayers AI",
-  publisher: "BioLayers AI",
+  creator: "BioLayers SI",
+  publisher: "BioLayers SI",
   category: "science",
   robots: {
     index: true,
@@ -76,13 +76,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: "BioLayers AI: from papers to living cells",
+    title: "BioLayers SI: from papers to living cells",
     description,
-    siteName: "BioLayers AI",
+    siteName: "BioLayers SI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BioLayers AI: from papers to living cells",
+    title: "BioLayers SI: from papers to living cells",
     description,
   },
 };

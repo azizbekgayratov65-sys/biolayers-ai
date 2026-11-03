@@ -9,7 +9,7 @@ import { AmbientGlow, Eyebrow } from "../components/ui/Chrome";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Who builds BioLayers AI, the physician-scientists who advise it, and how we handle your data.",
+    "Who builds BioLayers SI, the physician-scientists who advise it, and how we handle your data.",
 };
 
 type Person = {
@@ -87,10 +87,10 @@ export default function AboutPage() {
       <header className="mx-auto max-w-3xl text-center animate-fade-up">
         <Eyebrow icon={Microscope}>Leadership &amp; Scientific Mentorship</Eyebrow>
         <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-          About <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">BioLayers AI</span>
+          About <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">BioLayers SI</span>
         </h1>
         <p className="mx-auto mt-5 text-lg leading-relaxed text-ink">
-          BioLayers AI started in Tashkent in 2026. Its founder read more than a hundred cancer
+          BioLayers SI started in Tashkent in 2026. Its founder read more than a hundred cancer
           papers and kept losing track of which mechanism came from which study, so he built the
           tool he was missing: one that keeps every claim tied to its source.
         </p>
@@ -180,7 +180,7 @@ export default function AboutPage() {
           <p className="mt-4 leading-relaxed text-graphite">
             Physician-scientists and computational biologists who review our direction and our
             claims. Their guidance is personal: institutions are named for context and do not
-            endorse BioLayers AI.
+            endorse BioLayers SI.
           </p>
         </div>
 
@@ -266,7 +266,7 @@ export default function AboutPage() {
         </h2>
         <div className="max-w-prose space-y-4 leading-relaxed text-ink lg:col-span-2">
           <p>
-            BioLayers AI is for research and education. It is not a medical device and must not be
+            BioLayers SI is for research and education. It is not a medical device and must not be
             used to diagnose or treat anyone.
           </p>
           <p>

@@ -73,13 +73,13 @@ export default function Footer() {
             <Link
               href="/"
               className="inline-flex min-h-[44px] items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
-              aria-label="BioLayers AI home"
+              aria-label="BioLayers SI home"
             >
               <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px] border border-teal-200/25 bg-teal-300/[0.08] p-1.5 shadow-[0_0_15px_rgba(77,141,255,0.15)]">
                 <Image src="/biolayers-logo.svg" alt="" fill className="object-contain p-1" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-black tracking-[-0.02em] text-white">BioLayers AI</span>
+                <span className="text-base font-black tracking-[-0.02em] text-white">BioLayers SI</span>
                 <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300/80">
                   Computational Oncology
                 </span>
@@ -121,7 +121,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.04] pt-6 sm:flex-row">
-          <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} BioLayers AI, Tashkent</p>
+          <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} BioLayers SI, Tashkent</p>
           <p className="text-center text-[11px] text-slate-400 sm:text-right">
             Gemini keys you add are encrypted with AES-256-GCM.
           </p>

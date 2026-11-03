@@ -69,7 +69,7 @@ export default function PartnersSection() {
           </h2>
 
           <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-slate-300/85 sm:text-sm">
-            BioLayers AI collaborates with leading innovation catalysts and frontier AI
+            BioLayers SI collaborates with leading innovation catalysts and frontier AI
             organizations to advance precision oncology knowledge graphs and verifiable AI architectures.
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function PartnersSection() {
                 Advancing Graph Theory & Zero-Hallucination Biological Reasoning
               </h4>
               <p className="mt-2.5 text-xs leading-relaxed text-slate-300/85 sm:text-sm sm:leading-6">
-                NXT Horizon collaborates with BioLayers AI to explore next-generation
+                NXT Horizon collaborates with BioLayers SI to explore next-generation
                 spectral graph theory, AI safety architectures, and causal reasoning networks —
                 accelerating how computational knowledge graphs extract and verify complex oncology mechanisms.
               </p>
@@ -180,24 +180,24 @@ export default function PartnersSection() {
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
             Trusted By & Partnered With
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-10 sm:gap-16 opacity-75 transition hover:opacity-100">
-            <Link href="https://nxthorizon.org" target="_blank" className="relative h-10 w-32 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/nxthorizon-logo.png" alt="NXT Horizon" fill className="object-contain" />
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+            <Link href="https://nxthorizon.org" target="_blank" className="relative flex h-14 w-36 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/nxthorizon-logo.png" alt="NXT Horizon" fill className="object-contain p-2" />
             </Link>
-            <Link href="https://stemise.org" target="_blank" className="relative h-10 w-32 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/stemise-logo.png" alt="STEMise" fill className="object-contain" />
+            <Link href="https://stemise.org" target="_blank" className="relative flex h-14 w-36 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/stemise-logo.png" alt="STEMise" fill className="object-contain p-2" />
             </Link>
-            <Link href="https://www.biomedizone.org/" target="_blank" className="relative h-12 w-36 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/biomedizone-logo.png" alt="BioMedizone" fill className="object-contain" />
+            <Link href="https://www.biomedizone.org/" target="_blank" className="relative flex h-14 w-40 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/biomedizone-logo.png" alt="BioMedizone" fill className="object-contain p-2.5" />
             </Link>
-            <Link href="https://compbiosocucla.wixsite.com/my-site" target="_blank" className="relative h-10 w-24 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/ucla-logo.svg" alt="UCLA CompBio" fill className="object-contain" />
+            <Link href="https://compbiosocucla.wixsite.com/my-site" target="_blank" className="relative flex h-14 w-32 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/ucla-logo.svg" alt="UCLA CompBio" fill className="object-contain p-2" />
             </Link>
-            <Link href="https://www.osu.edu/" target="_blank" className="relative h-12 w-12 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/osu-logo.svg" alt="Ohio State University" fill className="object-contain" />
+            <Link href="https://www.osu.edu/" target="_blank" className="relative flex h-14 w-28 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/osu-logo.svg" alt="Ohio State University" fill className="object-contain p-3" />
             </Link>
-            <Link href="https://www.nationwidechildrens.org/" target="_blank" className="relative h-10 w-40 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
-              <Image src="/branding/nch-logo.svg" alt="Nationwide Children's Hospital" fill className="object-contain" />
+            <Link href="https://www.nationwidechildrens.org/" target="_blank" className="relative flex h-14 w-48 items-center justify-center overflow-hidden rounded-xl bg-white/95 transition hover:scale-105 hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              <Image src="/branding/nch-logo.svg" alt="Nationwide Children's Hospital" fill className="object-contain p-2.5" />
             </Link>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function PartnersSection() {
           </div>
 
           <a
-            href="mailto:biolayers.ai@gmail.com?subject=Partnership%20Inquiry%20-%20BioLayers%20AI"
+            href="mailto:biolayers.ai@gmail.com?subject=Partnership%20Inquiry%20-%20BioLayers%20SI"
             className="inline-flex items-center gap-1.5 font-bold text-teal-300 hover:text-teal-100"
           >
             <Mail className="h-3.5 w-3.5" />

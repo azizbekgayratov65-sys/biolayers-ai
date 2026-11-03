@@ -1,5 +1,5 @@
 -- =========================================================
--- BioLayers AI — Database linter fixes
+-- BioLayers SI — Database linter fixes
 -- Resolves the Supabase database linter findings:
 --   1. RLS initplan: evaluate auth.uid() once per query
 --      instead of once per row (10 policies).

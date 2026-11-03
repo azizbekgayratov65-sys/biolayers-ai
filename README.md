@@ -1,14 +1,14 @@
-# BioLayers AI
+# BioLayers SI
 
 **AI-Driven Computational Oncology Platform** — Bridging the gap between fragmented biomedical literature and actionable scientific discovery.
 
-BioLayers AI transforms complex cancer research papers and scientific manuscripts into interactive, evidence-grounded mechanistic knowledge graphs, causal signaling networks, and biological exploration workspaces where every node and relationship is anchored to peer-reviewed provenance.
+BioLayers SI transforms complex cancer research papers and scientific manuscripts into interactive, evidence-grounded mechanistic knowledge graphs, causal signaling networks, and biological exploration workspaces where every node and relationship is anchored to peer-reviewed provenance.
 
 ---
 
 ## 🔬 Key Capabilities
 
-- **Paper to Mechanistic Knowledge Graph**: Upload scientific papers (PDF, DOCX) or fetch via PubMed/DOI. BioLayers AI extracts key biological entities, pathways, interventions, and causal interactions into interactive graphs using Google Gemini.
+- **Paper to Mechanistic Knowledge Graph**: Upload scientific papers (PDF, DOCX) or fetch via PubMed/DOI. BioLayers SI extracts key biological entities, pathways, interventions, and causal interactions into interactive graphs using Google Gemini.
 - **Evidence-Grounded Provenance**: Click on any node, edge, or pathway to view the exact citation and verbatim excerpt from the source publication.
 - **Interactive Workspaces**:
   - **Mind Map Workspace (`/mindmap`)**: Dynamic node-link diagrams powered by `@xyflow/react` and Dagre for visualizing cancer signaling pathways, gene-protein interactions, and therapeutic targets.
@@ -132,7 +132,7 @@ biolayers-ai/
 
 ## ⚠️ Disclaimer
 
-BioLayers AI is designed strictly for scientific research, systems biology education, and academic hypothesis generation. It is **not a medical device** and is **not intended for clinical diagnosis, treatment planning, or medical decision-making**. All findings should be independently validated against primary literature and experimental assays.
+BioLayers SI is designed strictly for scientific research, systems biology education, and academic hypothesis generation. It is **not a medical device** and is **not intended for clinical diagnosis, treatment planning, or medical decision-making**. All findings should be independently validated against primary literature and experimental assays.
 
 ---
 

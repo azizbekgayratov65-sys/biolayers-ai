@@ -42,10 +42,10 @@ def build():
                 stab_rows.append(cells)
 
     S = []  # list of (kind, payload): h1/h2/p/ul/table
-    S.append(("h1", "BioLayers AI: Validation Report"))
+    S.append(("h1", "BioLayers SI: Validation Report"))
     S.append(("p", f"Release {RELEASE}, {date.today():%d %B %Y}. Research and educational system. "
                    "**Not a clinical diagnostic.**"))
-    S.append(("p", "BioLayers AI takes a microscopy image or time-lapse, finds and outlines the cells, follows "
+    S.append(("p", "BioLayers SI takes a microscopy image or time-lapse, finds and outlines the cells, follows "
                    "them over time, measures their shape and movement, assigns rule-based phenotype labels, and "
                    "links the observed phenotype to published literature. It uses proven pretrained models; no "
                    "model was trained for this release."))
@@ -180,7 +180,7 @@ th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-alig
 """
     return ("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-            "<title>BioLayers AI Validation Report</title><style>" + css + "</style></head><body><main>\n"
+            "<title>BioLayers SI Validation Report</title><style>" + css + "</style></head><body><main>\n"
             + "\n".join(body) + "\n</main></body></html>\n")
 
 

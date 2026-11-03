@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BioLayers AI Validation Report</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BioLayers SI Validation Report</title><style>
 :root{--bg:#fff;--ink:#1b1f24;--muted:#5b6470;--line:#dde1e6;--soft:#f4f6f8;--accent:#0f4c81}
 @media (prefers-color-scheme:dark){:root{--bg:#14171b;--ink:#e6e9ed;--muted:#9aa4b1;--line:#2c333b;--soft:#1d2228;--accent:#7db7ee}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,Arial,sans-serif}
@@ -9,9 +9,9 @@ p{margin:8px 0}li{margin:6px 0}code{background:var(--soft);padding:1px 5px;borde
 .tw{overflow-x:auto;margin:10px 0}table{border-collapse:collapse;width:100%;font-size:.9rem}
 th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}th{background:var(--soft)}
 </style></head><body><main>
-<h1>BioLayers AI: Validation Report</h1>
+<h1>BioLayers SI: Validation Report</h1>
 <p>Release 1.0.0, 30 September 2026. Research and educational system. <strong>Not a clinical diagnostic.</strong></p>
-<p>BioLayers AI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release.</p>
+<p>BioLayers SI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release.</p>
 <h2>Models and versions</h2>
 <div class="tw"><table><thead><tr><th>Component</th><th>Model</th><th>Version</th><th>Confidence reported</th></tr></thead><tbody><tr><td>segmentation</td><td>Cellpose, pretrained cpsam_v2 weights (zero-shot, no fine-tuning)</td><td>cellpose 4.2.1.1</td><td>per cell: mean Cellpose cell probability inside the mask (uncalibrated, tends to saturate near 0.95-0.97)</td></tr><tr><td>tracking</td><td>BioLayers overlap tracker (Hungarian assignment on mask IoU + gap/flicker clean-up)</td><td>code 73984e8</td><td>per track: mean IoU between the cell&#x27;s masks in consecutive frames</td></tr><tr><td>phenotype rules</td><td>Rule-based phenotype classifier (transparent thresholds, not a learned model)</td><td>rules 0.1.0, code 73984e8</td><td>per label: rule margin, the deciding feature&#x27;s distance from its threshold mapped to 0.5-0.99 (not a probability)</td></tr><tr><td>literature linker</td><td>Curated knowledge base, manual curation (no text mining, no language model)</td><td>knowledge base 0.2.0 (2026-09-30)</td><td>not scored: each link cites the PubMed-verified paper it rests on</td></tr></tbody></table></div>
 <h2>Metrics</h2>

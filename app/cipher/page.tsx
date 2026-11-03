@@ -5,7 +5,7 @@ import CipherWorkspace from "../components/cipher/CipherWorkspace";
 export const metadata: Metadata = {
   title: "Project Cipher: cause-and-effect cancer maps",
   description:
-    "NXT × BioLayers AI. Cancer mechanisms turned into interactive cause-and-effect maps for students, with a peer-reviewed source behind every arrow.",
+    "NXT × BioLayers SI. Cancer mechanisms turned into interactive cause-and-effect maps for students, with a peer-reviewed source behind every arrow.",
 };
 
 export default function CipherPage() {

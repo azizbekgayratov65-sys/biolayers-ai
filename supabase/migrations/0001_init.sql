@@ -1,5 +1,5 @@
 -- =========================================================
--- BioLayers AI — Initial schema
+-- BioLayers SI — Initial schema
 -- Authentication: Supabase Auth (auth.users is managed by Supabase)
 -- =========================================================
 

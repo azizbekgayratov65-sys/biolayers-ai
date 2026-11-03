@@ -249,7 +249,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link
               href="/"
-              aria-label="BioLayers AI home"
+              aria-label="BioLayers SI home"
               className="group flex shrink-0 items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
             >
               <div
@@ -260,7 +260,7 @@ export default function Navbar() {
               >
                 <Image
                   src="/biolayers-logo.svg"
-                  alt="BioLayers AI"
+                  alt="BioLayers SI"
                   fill
                   className="object-contain p-1"
                   priority
@@ -268,7 +268,7 @@ export default function Navbar() {
               </div>
               <div>
                 <div className="text-sm font-black tracking-[-0.02em] text-white">
-                  BioLayers AI
+                  BioLayers SI
                 </div>
                 <div className="mt-0.5 hidden font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-teal-300/80 sm:block">
                   Computational oncology

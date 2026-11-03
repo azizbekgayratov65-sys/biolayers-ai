@@ -8,9 +8,9 @@ import { Eyebrow } from "./components/ui/Chrome";
 import { btnPrimary, btnSecondary, pageShell, textLink } from "./components/ui/styles";
 
 export const metadata = {
-  title: "BioLayers AI: from papers to living cells",
+  title: "BioLayers SI: from papers to living cells",
   description:
-    "BioLayers AI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.",
+    "BioLayers SI connects biomedical literature, biological mechanisms, real microscopy, and cellular phenotypes into evidence-grounded maps for computational oncology.",
 };
 
 type ChainStep = {
@@ -128,7 +128,7 @@ export default function HomePage() {
               From papers to <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-sky-300 bg-clip-text text-transparent">living cells</span>
             </h1>
             <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-ink">
-              BioLayers AI connects biomedical literature, biological mechanisms, real microscopy,
+              BioLayers SI connects biomedical literature, biological mechanisms, real microscopy,
               and cellular phenotypes into evidence-grounded maps for computational oncology.
             </p>
             <p className="mt-4 max-w-[34rem] leading-relaxed text-graphite">
@@ -323,7 +323,7 @@ export default function HomePage() {
               Built with partners
             </h2>
             <p className="mt-5 leading-relaxed text-graphite">
-              BioLayers AI started in Tashkent and is guided by oncologists and computational
+              BioLayers SI started in Tashkent and is guided by oncologists and computational
               biologists. Featured by{" "}
               <a
                 href="https://hundred.org/en/innovations/biolayers-ai"

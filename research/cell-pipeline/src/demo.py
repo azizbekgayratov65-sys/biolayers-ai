@@ -1,5 +1,5 @@
 """
-BioLayers AI demo — one command: microscopy in, annotated cells and linked biology out.
+BioLayers SI demo — one command: microscopy in, annotated cells and linked biology out.
 
     python src/demo.py                         flagship: U373 time-lapse, sequence 02
     python src/demo.py --sequence 01
@@ -193,7 +193,7 @@ def write_overlay_video(frames, tracked, cents, primary, out_path, min_per_frame
                 cv2.putText(view, text, (x, y), font, 0.45, color, 1, cv2.LINE_AA)
         canvas = np.zeros((size[1], size[0], 3), np.uint8)
         canvas[28:28 + view.shape[0]] = view
-        cv2.putText(canvas, f"BioLayers AI   t = {t * min_per_frame / 60:4.1f} h   {len(ids)} cells tracked",
+        cv2.putText(canvas, f"BioLayers SI   t = {t * min_per_frame / 60:4.1f} h   {len(ids)} cells tracked",
                     (8, 19), font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
         x = 8
         for name in ("migrating", "quiescent", "indeterminate", "apoptotic/dead"):
@@ -228,7 +228,7 @@ def run_timelapse(args, kb, out):
                        cell_type=cell_type, caveats=caveats_for("U373", kb))
     dataset.update(pixel_size_um=um, frame_interval_min=mpf, frames=len(paths))
 
-    print(f"BioLayers AI demo: {dataset['name']}")
+    print(f"BioLayers SI demo: {dataset['name']}")
     print(f"{len(paths)} frames, {mpf} min/frame, {um} um/px. {DISCLAIMER}")
 
     step(1, total, "Segmenting cells in every frame (Cellpose, pretrained, zero-shot)")
@@ -288,7 +288,7 @@ def run_timelapse(args, kb, out):
     morph.rename(columns={"cell_id": "track_id"}).drop(columns=["image"]).to_csv(out / "tracks.csv", index=False)
     if flagship:
         draw_flagship(frames[-1], cents, flagship, out / "flagship.png")
-    atlas = dict(title=f"BioLayers AI cell atlas: {name}", generated=str(date.today()), disclaimer=DISCLAIMER,
+    atlas = dict(title=f"BioLayers SI cell atlas: {name}", generated=str(date.today()), disclaimer=DISCLAIMER,
                  dataset=dataset, evidence_levels=LEVEL_TEXT,
                  image=dict(width=int(frames[0].shape[1]), height=int(frames[0].shape[0]),
                             coordinates="x = column, y = row, origin top-left, pixels"),
@@ -332,7 +332,7 @@ def run_image(args, kb, out):
     if not path.exists():
         sys.exit(f"Image not found: {path}")
     img = load_gray(path)
-    print(f"BioLayers AI demo: single image {path.name}  ({img.shape[1]}x{img.shape[0]} px)")
+    print(f"BioLayers SI demo: single image {path.name}  ({img.shape[1]}x{img.shape[0]} px)")
     print(DISCLAIMER)
 
     step(1, total, "Segmenting cells (Cellpose, pretrained, zero-shot)")
@@ -386,7 +386,7 @@ def run_image(args, kb, out):
     cv2.imwrite(str(out / "overlay.png"), cv2.resize(view, None, fx=2, fy=2, interpolation=cv2.INTER_NEAREST)
                 if max(img.shape) < 900 else view)
     feats.to_csv(out / "cells.csv", index=False)
-    doc = dict(title=f"BioLayers AI cells: {path.name}", generated=str(date.today()), disclaimer=DISCLAIMER,
+    doc = dict(title=f"BioLayers SI cells: {path.name}", generated=str(date.today()), disclaimer=DISCLAIMER,
                image=dict(file=path.name, height=int(img.shape[0]), width=int(img.shape[1]),
                           coordinates="x = column, y = row, origin top-left, pixels"),
                overlays=dict(transparent="overlay_transparent.png", mask="mask.png", base="image.png",

@@ -1,4 +1,4 @@
-# BioLayers AI: microscopy AI layer
+# BioLayers SI: microscopy AI layer
 
 Takes a microscopy image or time-lapse and returns segmented cells, tracks,
 per-cell measurements, rule-based phenotype labels, and links from the

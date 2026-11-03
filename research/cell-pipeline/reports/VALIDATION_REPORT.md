@@ -1,8 +1,8 @@
-# BioLayers AI: Validation Report
+# BioLayers SI: Validation Report
 
 Release 1.0.0, 30 September 2026. Research and educational system. **Not a clinical diagnostic.**
 
-BioLayers AI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release.
+BioLayers SI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release.
 
 
 ## Models and versions

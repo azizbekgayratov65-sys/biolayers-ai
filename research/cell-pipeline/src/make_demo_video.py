@@ -46,7 +46,7 @@ F = {k: font(*v) for k, v in dict(h1=(44, True), h2=(27, True), body=(20,), body
 def canvas(active=None):
     im = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(im)
-    d.text((40, 22), "BioLayers AI", font=F["h2"], fill=INK)
+    d.text((40, 22), "BioLayers SI", font=F["h2"], fill=INK)
     x = W - 40
     for i in range(len(STEPS) - 1, -1, -1):
         on = active is not None and i in active
@@ -311,7 +311,7 @@ def scene_limits():
                  "Confidence values are model scores and rule margins, not calibrated probabilities."):
         d.ellipse([44, y + 10, 52, y + 18], fill=ORANGE)
         y = wrap(d, (68, y), text, F["body"], INK, 1120) + 14
-    d.text((40, y + 26), "BioLayers AI  ·  AI layer release 1.0.0", font=F["bodyb"], fill=INK)
+    d.text((40, y + 26), "BioLayers SI  ·  AI layer release 1.0.0", font=F["bodyb"], fill=INK)
     d.text((40, y + 58), "Validation report, code and per-cell outputs are in the repository.", font=F["small"], fill=MUTED)
     return hold(im, 9)
 

@@ -248,7 +248,7 @@ def main():
     draw_flagship(frame, cents, flagship, RESULTS / "phase5_flagship_cell.png")
 
     atlas = dict(
-        title="BioLayers AI cell atlas: U373 migration case study",
+        title="BioLayers SI cell atlas: U373 migration case study",
         generated=str(date.today()),
         disclaimer="Research and educational system. Not a clinical diagnostic.",
         dataset=dict(name="Cell Tracking Challenge PhC-C2DH-U373, training sequences 01 and 02",

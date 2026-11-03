@@ -4,7 +4,7 @@
   "blocks": [
     {
       "type": "h1",
-      "text": "BioLayers AI: Validation Report"
+      "text": "BioLayers SI: Validation Report"
     },
     {
       "type": "p",
@@ -12,7 +12,7 @@
     },
     {
       "type": "p",
-      "text": "BioLayers AI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release."
+      "text": "BioLayers SI takes a microscopy image or time-lapse, finds and outlines the cells, follows them over time, measures their shape and movement, assigns rule-based phenotype labels, and links the observed phenotype to published literature. It uses proven pretrained models; no model was trained for this release."
     },
     {
       "type": "h2",
