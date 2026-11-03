@@ -75,7 +75,7 @@ const team: Member[] = [
   { name: "Bilolbek Yuldoshkhujayev", role: "Software Engineer", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
   { name: "Asliddin Abdurakhimov", role: "Data Analyst & AI/ML Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
   { name: "Orzugul Mukhtorova", role: "Data Analyst", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
-  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer", photo: "/team/muhammad.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
+  { name: "Muhammad Najmiddinov", role: "AI/ML Engineer", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Maksat Babageldiyev", role: "AI/ML Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
   { name: "Mirkomil Nozimkhojiyev", role: "SMM", photo: "/team/mirkomil.jpg", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
 ];
