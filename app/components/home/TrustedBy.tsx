@@ -35,7 +35,7 @@ function Tile({ org }: { org: Org }) {
           width={160}
           height={56}
           loading="eager"
-          className={`w-auto max-w-[11rem] object-contain ${org.zoom ? "max-h-20 scale-[1.6]" : "max-h-14"}`}
+          className={`w-auto max-w-[11rem] object-contain ${org.zoom ? "max-h-16 scale-[1.2]" : "max-h-14"}`}
         />
       ) : (
         <span className="text-center text-sm font-bold leading-tight text-slate-800">{org.name}</span>
@@ -44,7 +44,7 @@ function Tile({ org }: { org: Org }) {
         <span className="-mt-1 text-sm font-semibold leading-none text-white">{org.name}</span>
       )}
       <span
-        className={`font-mono text-[9px] font-bold uppercase tracking-[0.2em] ${
+        className={`relative z-10 font-mono text-[9px] font-bold uppercase tracking-[0.2em] ${
           org.dark ? "text-teal-300" : "text-teal-700"
         }`}
       >
