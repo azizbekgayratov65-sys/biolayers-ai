@@ -69,13 +69,14 @@ type Member = {
   role: string;
   photo: string;
   linkedin: string;
+  cofounder?: boolean;
 };
 
 const team: Member[] = [
-  { name: "Bilolbek Yuldoshkhujayev", role: "Co-Founder & Lead Software Engineer", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Bilolbek Yuldoshkhujayev", role: "Lead Software Engineer", cofounder: true, photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Muhammad Najmiddinov", role: "Machine Learning Engineer", cofounder: true, photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Asliddin Abdurakhimov", role: "Data Science & Machine Learning Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
   { name: "Orzugul Mukhtorova", role: "Data Analytics Specialist", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
-  { name: "Muhammad Najmiddinov", role: "Co-Founder & Machine Learning Engineer", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Maksat Babageldiyev", role: "Machine Learning Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
   { name: "Mirkomil Nozimkhojiyev", role: "Social Media & Community Lead", photo: "/team/mirkomil.jpg", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
 ];
@@ -145,7 +146,9 @@ export default function AboutPage() {
           {team.map((member) => (
             <li
               key={member.name}
-              className="group flex flex-col items-center rounded-[24px] border border-teal-300/20 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 text-center backdrop-blur transition-colors hover:border-emerald-300/50"
+              className={`group flex flex-col items-center rounded-[24px] border bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 text-center backdrop-blur transition-colors hover:border-emerald-300/50 ${
+                member.cofounder ? "border-emerald-300/40" : "border-teal-300/20"
+              }`}
             >
               <div className="relative h-36 w-36 overflow-hidden rounded-full border-2 border-emerald-300/30 bg-slide shadow-[0_0_32px_-8px_rgba(52,211,153,0.5)]">
                 <Image
@@ -157,6 +160,11 @@ export default function AboutPage() {
                 />
               </div>
               <h3 className="mt-5 text-lg font-semibold leading-snug">{member.name}</h3>
+              {member.cofounder && (
+                <span className="mt-2 inline-flex items-center rounded-full border border-emerald-300/40 bg-emerald-300/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-200">
+                  Co-Founder
+                </span>
+              )}
               <p className="mt-1 font-mono text-xs uppercase tracking-wider text-emerald-200/80">{member.role}</p>
               <a
                 href={member.linkedin}
