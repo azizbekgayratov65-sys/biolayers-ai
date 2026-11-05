@@ -82,7 +82,7 @@ const team: Member[] = [
     photo: "/mentorship/founder.png",
     linkedin: "https://www.linkedin.com/in/azizbekgayratov/",
   },
-  { name: "Muhammad Najmiddinov", role: "Growth Manager & Machine Learning Engineer", tier: "cofounder", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
+  { name: "Muhammad Najmiddinov", role: "Growth Manager & Lead Machine Learning Engineer", tier: "cofounder", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Bilolbek Yuldoshkhujayev", role: "Lead Software Engineer", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
   { name: "Asliddin Abdurakhimov", role: "Data Science & Machine Learning Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
   { name: "Orzugul Mukhtorova", role: "Data Analytics Specialist", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
