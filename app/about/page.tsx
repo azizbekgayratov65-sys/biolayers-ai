@@ -82,11 +82,11 @@ const team: Member[] = [
     photo: "/mentorship/founder.png",
     linkedin: "https://www.linkedin.com/in/azizbekgayratov/",
   },
-  { name: "Muhammad Najmiddinov", role: "Growth Manager & Lead Machine Learning Engineer", tier: "cofounder", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
+  { name: "Muhammad Najmiddinov", role: "Growth Manager & Lead ML Engineer", tier: "cofounder", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Bilolbek Yuldoshkhujayev", role: "Lead Software Engineer", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
-  { name: "Asliddin Abdurakhimov", role: "Data Science & Machine Learning Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
+  { name: "Asliddin Abdurakhimov", role: "Data Science & ML Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
   { name: "Orzugul Mukhtorova", role: "Data Analytics Specialist", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
-  { name: "Maksat Babageldiyev", role: "Machine Learning Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
+  { name: "Maksat Babageldiyev", role: "ML Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
   { name: "Mirkomil Nozimkhojiyev", role: "Social Media & Community Lead", photo: "/team/mirkomil.jpg", linkedin: "https://www.linkedin.com/in/mirkomil-nozimkhojiev/" },
 ];
 
