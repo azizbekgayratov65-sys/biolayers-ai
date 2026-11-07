@@ -82,8 +82,8 @@ const team: Member[] = [
     photo: "/mentorship/founder.png",
     linkedin: "https://www.linkedin.com/in/azizbekgayratov/",
   },
-  { name: "Muhammad Najmiddinov", role: "Growth Manager & Lead ML Engineer", tier: "cofounder", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
-  { name: "Bilolbek Yuldoshkhujayev", role: "Lead Software Engineer", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Bilolbek Yuldoshkhujayev", role: "Lead Software Engineer", tier: "cofounder", photo: "/team/bilolbek-portrait.jpg", linkedin: "https://www.linkedin.com/in/bilolbek-yuldoshkhujayev/" },
+  { name: "Muhammad Najmiddinov", role: "Growth Manager & Lead ML Engineer", photo: "/team/muhammad-portrait.jpg", linkedin: "https://www.linkedin.com/in/alamiy/" },
   { name: "Asliddin Abdurakhimov", role: "Data Science & ML Engineer", photo: "/team/asliddin.jpg", linkedin: "https://www.linkedin.com/in/asliddin-abdurakhimov/" },
   { name: "Orzugul Mukhtorova", role: "Data Analytics Specialist", photo: "/team/orzugul.jpg", linkedin: "https://www.linkedin.com/in/orzugul-muxtorova-968373312/" },
   { name: "Maksat Babageldiyev", role: "ML Engineer", photo: "/team/maksat.jpg", linkedin: "https://www.linkedin.com/in/maksat-babageldiyev/" },
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </span>
           </h2>
           <p className="mt-4 leading-relaxed text-graphite">
-            Our founder and co-founders, with the engineers, data analysts and communicators who
+            Our founder and co-founder, with the engineers, data analysts and communicators who
             build alongside them.
           </p>
         </div>
