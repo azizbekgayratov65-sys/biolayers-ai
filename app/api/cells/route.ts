@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { cellsQuerySchema } from "./validation";
+import { checkRateLimit, clientIp } from "../../lib/auth/rate-limit";
 import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
@@ -383,6 +384,14 @@ function mapOlsDocuments(
 }
 
 export async function GET(request: Request) {
+  // Public proxy to the EBI OLS service: cap per-IP volume.
+  if (!checkRateLimit(`cells:${clientIp(request)}`, 60, 60_000).allowed) {
+    return NextResponse.json(
+      { error: "Too many searches. Please wait a minute and try again." },
+      { status: 429 },
+    );
+  }
+
   try {
     const requestUrl = new URL(request.url);
     const queryParams = {

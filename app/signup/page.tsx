@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import AuthShell from "../components/auth/AuthShell";
 import SignUpView from "../components/auth/SignUpView";
+import { safeNextPath } from "../lib/safe-redirect";
 
 export const metadata: Metadata = {
   title: "Create Account",
@@ -14,7 +15,7 @@ export default async function SignUpPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const params = await searchParams;
-  const next = params?.next ?? "/settings";
+  const next = safeNextPath(params?.next);
 
   return (
     <AuthShell

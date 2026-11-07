@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "../../lib/supabase/server";
 import { isDevelopment } from "../../lib/env";
+import { safeNextPath } from "../../lib/safe-redirect";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     new URL(request.url);
 
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/settings";
+  const next = safeNextPath(searchParams.get("next"));
   const type = searchParams.get("type");
 
   if (code) {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import AuthShell from "../components/auth/AuthShell";
 import LoginView from "../components/auth/LoginView";
+import { safeNextPath } from "../lib/safe-redirect";
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -14,7 +15,7 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const next = params?.next ?? "/settings";
+  const next = safeNextPath(params?.next);
   const errorParam = params?.error;
   const error = errorParam
     ? "Sign-in could not be completed. The link may be expired or invalid. Please try again."

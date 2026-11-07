@@ -6,6 +6,7 @@ import {
   getNcbiEmail,
 } from "../../lib/env";
 import { pubmedQuerySchema } from "./validation";
+import { checkRateLimit, clientIp } from "../../lib/auth/rate-limit";
 import { handleValidationError } from "../../lib/validation/schemas";
 
 export const runtime = "nodejs";
@@ -752,6 +753,15 @@ function extractAbstractsFromPubMedXml(
 export async function GET(
   request: Request,
 ) {
+  // Public proxy to NCBI using the server's API key: cap per-IP volume
+  // so anonymous callers cannot exhaust the shared NCBI quota.
+  if (!checkRateLimit(`pubmed:${clientIp(request)}`, 60, 60_000).allowed) {
+    return NextResponse.json(
+      { error: "Too many searches. Please wait a minute and try again." },
+      { status: 429 },
+    );
+  }
+
   try {
     const url =
       new URL(

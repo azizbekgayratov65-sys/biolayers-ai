@@ -16,6 +16,18 @@ type Bucket = {
 
 const buckets = new Map<string, Bucket>();
 
+/*
+  Best-effort client IP for rate-limiting anonymous routes. On Vercel
+  the platform sets x-forwarded-for, so its first entry is the client.
+*/
+export function clientIp(request: Request): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip")?.trim() ||
+    "unknown"
+  );
+}
+
 const MAX_BUCKETS = 20_000;
 
 export function checkRateLimit(

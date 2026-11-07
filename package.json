@@ -23,7 +23,7 @@
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.31.0",
     "mammoth": "^1.12.1",
-    "next": "16.2.12",
+    "next": "16.4.5",
     "openai": "^7.2.0",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.296",
@@ -41,7 +41,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

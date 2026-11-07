@@ -90,8 +90,9 @@ export async function savePaper(
       "[papers] Failed to save paper:",
       error,
     );
-    // Rollback: decrement reference count on failure
-    await supabase.rpc("release_mindmap", { p_mindmap_id: mindmapId });
+    // release_mindmap is not callable by clients (migration 0009), so a
+    // failed insert leaves the shared mind map's reference count one high.
+    // That only delays cleanup of an unused row; it exposes nothing.
     return null;
   }
 
@@ -298,12 +299,16 @@ export async function getPublicUserProfileByUsername(
   avatarUrl: string | null;
   username: string | null;
 } | null> {
+  // Escape LIKE wildcards so "%" or "_" in the URL cannot match (and
+  // enumerate) other users; the match stays case-insensitive.
+  const pattern = username.replace(/[\\%_]/g, (c) => `\\${c}`);
+
   // Use admin client to bypass profiles RLS (which only allows owner SELECT)
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("profiles")
     .select("id, username, full_name, avatar_url")
-    .ilike("username", username)
+    .ilike("username", pattern)
     .maybeSingle();
 
   if (!error && data) {
@@ -319,7 +324,7 @@ export async function getPublicUserProfileByUsername(
   const { data: fallbackData } = await supabase
     .from("profiles")
     .select("id, username, full_name, avatar_url")
-    .ilike("username", username)
+    .ilike("username", pattern)
     .maybeSingle();
 
   if (!fallbackData) {
@@ -467,8 +472,8 @@ export async function getPublicPaperByToken(
     .select(
       "id, file_name, file_type, title, character_count, created_at, mindmap",
     )
-    .eq("published", true)
-    .eq("token", token)
+    .eq("is_public", true)
+    .eq("share_token", token)
     .maybeSingle();
 
   if (error) {
@@ -549,7 +554,7 @@ export async function togglePublishPaper(
 ): Promise<{ ok: boolean; published: boolean; shareToken?: string }> {
   const { data, error } = await supabase
     .from("papers")
-    .select("published, share_token")
+    .select("is_public, share_token")
     .eq("id", paperId)
     .eq("user_id", userId)
     .maybeSingle();
@@ -562,12 +567,16 @@ export async function togglePublishPaper(
     return { ok: false, published: false };
   }
 
-  const current = data?.published ?? false;
-  const shareToken = data?.share_token ?? null;
+  if (!data) {
+    return { ok: false, published: false };
+  }
+
+  const current = data.is_public ?? false;
+  const shareToken = data.share_token ?? null;
 
   const { error: updateError } = await supabase
     .from("papers")
-    .update({ published: !current })
+    .update({ is_public: !current })
     .eq("id", paperId)
     .eq("user_id", userId);
 

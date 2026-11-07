@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { requireUser } from "../../lib/auth/require-user";
-import { getPaper, getPaperForLibrary, getPublicUserProfileByUsername } from "../../lib/papers/store";
+import { getPaper, getPaperForLibrary } from "../../lib/papers/store";
 import {
   sanitizeMindMap,
   type MindMapResponse,
@@ -46,9 +46,7 @@ export default async function SavedMindMapPage({
       notFound();
     }
     paper = publicPaper;
-    // Get author username from userId
-    const profile = await getPublicUserProfileByUsername(supabase, publicPaper.userId);
-    authorUsername = profile?.username ?? null;
+    authorUsername = publicPaper.username;
   } else {
     // Owner viewing their own paper - fetch their profile for author info
     const { data: profile } = await supabase.rpc("get_public_profile", {
