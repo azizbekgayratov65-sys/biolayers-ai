@@ -36,7 +36,7 @@ const CATEGORY_LABELS: Record<NodeCategory, { one: string; many: string }> = {
 const CATEGORY_ORDER: NodeCategory[] = ["trigger", "mechanism", "effect", "therapy"];
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]";
 
 function CitationList({ citations, title = "Sources" }: { citations: Citation[]; title?: string }) {
   if (citations.length === 0) return null;
@@ -240,7 +240,7 @@ export default function CipherWorkspace() {
   };
 
   return (
-    <div className="flex w-full flex-col bg-[#04070a] text-slate-100 lg:h-full lg:max-h-full lg:overflow-hidden">
+    <div className="flex w-full flex-col bg-[#000000] text-slate-100 lg:h-full lg:max-h-full lg:overflow-hidden">
       {/* Header */}
       <header className="border-b border-teal-200/10 bg-[#070c14]/85 px-4 py-3 backdrop-blur-xl sm:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">

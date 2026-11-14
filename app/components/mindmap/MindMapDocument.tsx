@@ -309,7 +309,7 @@ export default function MindMapDocument({
                   focus-visible:ring-2
                   focus-visible:ring-[#8db2ff]
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-[#04070a]
+                  focus-visible:ring-offset-[#000000]
                 "
               >
                 <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" />
@@ -393,7 +393,7 @@ export default function MindMapDocument({
                   focus-visible:ring-2
                   focus-visible:ring-[#8db2ff]
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-[#04070a]
+                  focus-visible:ring-offset-[#000000]
                 "
               >
                 <Download className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
@@ -427,7 +427,7 @@ export default function MindMapDocument({
                   focus-visible:ring-2
                   focus-visible:ring-[#8db2ff]
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-[#04070a]
+                  focus-visible:ring-offset-[#000000]
                 "
               >
                 <FileDown className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
@@ -461,7 +461,7 @@ export default function MindMapDocument({
                   focus-visible:ring-2
                   focus-visible:ring-[#8db2ff]
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-[#04070a]
+                  focus-visible:ring-offset-[#000000]
                 "
               >
                 {copied ? (
@@ -537,7 +537,7 @@ export default function MindMapDocument({
                 focus-visible:ring-2
                 focus-visible:ring-[#8db2ff]
                 focus-visible:ring-offset-2
-                focus-visible:ring-offset-[#04070a]
+                focus-visible:ring-offset-[#000000]
               "
             >
               <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />

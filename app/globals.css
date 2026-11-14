@@ -18,12 +18,12 @@
 :root {
   color-scheme: dark;
 
-  --background: #04070a;
-  --background-deep: #030507;
-  --background-elevated: #070b10;
-  --background-panel: #0a0f14;
-  --background-panel-strong: #0d141b;
-  --background-soft: #10161d;
+  --background: #000000;
+  --background-deep: #000000;
+  --background-elevated: #050505;
+  --background-panel: #070707;
+  --background-panel-strong: #0b0b0b;
+  --background-soft: #101010;
 
   --foreground: #dbe4ea;
   --foreground-strong: #e8edf2;
@@ -304,23 +304,8 @@ body {
   margin: 0;
   overflow-x: hidden;
 
-  background:
-    radial-gradient(
-      circle at 16% -8%,
-      rgba(77, 141, 255, 0.06),
-      transparent 31%
-    ),
-    radial-gradient(
-      circle at 88% 34%,
-      rgba(161, 92, 255, 0.04),
-      transparent 30%
-    ),
-    linear-gradient(
-      145deg,
-      #05080d 0%,
-      #060a10 46%,
-      #04070a 100%
-    );
+  /* Pure black, like a dark-field microscope. */
+  background: #000;
 
   color: var(--foreground);
 
@@ -342,36 +327,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-
-  background-image:
-    linear-gradient(
-      rgba(141, 178, 255, 0.022) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(141, 178, 255, 0.022) 1px,
-      transparent 1px
-    );
-
-  background-size: 96px 96px;
-
-  mask-image:
-    linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.9),
-      rgba(0, 0, 0, 0.18) 72%,
-      transparent
-    );
-
-  opacity: 0.4;
-}
+/* (grid overlay removed: the site background is plain black) */
 
 img,
 svg,

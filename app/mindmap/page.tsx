@@ -399,7 +399,7 @@ export default function MindMapPage() {
 
                 <Link
                   href="/settings#ai"
-                  className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-[12px] border border-amber-300/30 bg-amber-300/[0.12] px-4 py-2 text-xs font-bold text-amber-50 transition hover:border-amber-300/50 hover:bg-amber-300/[0.2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc53d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-[12px] border border-amber-300/30 bg-amber-300/[0.12] px-4 py-2 text-xs font-bold text-amber-50 transition hover:border-amber-300/50 hover:bg-amber-300/[0.2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffc53d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
                 >
                   <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>Open AI Settings</span>

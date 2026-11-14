@@ -11,6 +11,7 @@ import {
   Dna,
   Binary,
   BookOpen,
+  Wind,
 } from "lucide-react";
 import {
   useEffect,
@@ -75,6 +76,14 @@ export type NavItem = {
 };
 
 const toolNavItems: NavItem[] = [
+  {
+    label: "Organ atlas",
+    href: "/organs",
+    path: "/organs",
+    category: "tools",
+    icon: <Wind className="h-4 w-4 text-rose-300" />,
+    description: "Living 3D organs with tumour, vessels and treatment over time",
+  },
   {
     label: "Cell atlas",
     href: "/cells",
@@ -250,7 +259,7 @@ export default function Navbar() {
             <Link
               href="/"
               aria-label="BioLayers SI home"
-              className="group flex shrink-0 items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+              className="group flex shrink-0 items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
             >
               <div
                 className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[13px] border border-teal-200/25 bg-teal-300/[0.06] transition-transform duration-250 group-hover:scale-105"
@@ -322,7 +331,7 @@ export default function Navbar() {
             <div className="hidden shrink-0 items-center gap-3 lg:flex">
               <Link
                 href="/mindmap"
-                className="group relative flex h-10 items-center gap-2 rounded-[13px] border border-emerald-400/40 bg-emerald-500/15 px-4 text-xs font-bold text-emerald-200 shadow-[0_0_20px_rgba(43,255,136,0.18)] transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-500/25 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+                className="group relative flex h-10 items-center gap-2 rounded-[13px] border border-emerald-400/40 bg-emerald-500/15 px-4 text-xs font-bold text-emerald-200 shadow-[0_0_20px_rgba(43,255,136,0.18)] transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-500/25 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
               >
                 <Workflow className="h-3.5 w-3.5 text-emerald-300 transition-transform duration-300 group-hover:rotate-12" />
                 <span>Mind map</span>
@@ -340,7 +349,7 @@ export default function Navbar() {
               aria-expanded={mobileOpen}
               aria-controls="mobile-navigation-dialog"
               onClick={() => setMobileOpen((c) => !c)}
-              className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-[13px] border border-teal-100/[0.12] bg-white/[0.04] text-white/80 transition-colors hover:border-white/[0.2] hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] lg:hidden"
+              className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-[13px] border border-teal-100/[0.12] bg-white/[0.04] text-white/80 transition-colors hover:border-white/[0.2] hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] lg:hidden"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -357,7 +366,7 @@ export default function Navbar() {
         ref={drawerRef}
         inert={!mobileOpen ? true : undefined}
         aria-hidden={!mobileOpen}
-        className={`fixed inset-0 z-[90] overflow-y-auto bg-[#04070a]/96 px-4 pb-10 pt-[88px] backdrop-blur-2xl lg:hidden ${
+        className={`fixed inset-0 z-[90] overflow-y-auto bg-[#000000]/96 px-4 pb-10 pt-[88px] backdrop-blur-2xl lg:hidden ${
           mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         style={{
@@ -390,7 +399,7 @@ export default function Navbar() {
               type="button"
               aria-label="Close navigation menu"
               onClick={handleCloseDrawer}
-              className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-[12px] border border-teal-100/[0.1] bg-white/[0.03] text-slate-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+              className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-[12px] border border-teal-100/[0.1] bg-white/[0.03] text-slate-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
             >
               <X className="h-5 w-5" />
             </button>
@@ -401,7 +410,7 @@ export default function Navbar() {
             <Link
               href="/mindmap"
               onClick={() => setMobileOpen(false)}
-              className="flex min-h-[48px] items-center justify-center gap-2.5 rounded-[14px] border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-bold text-emerald-100 shadow-[0_0_24px_rgba(43,255,136,0.2)] transition-all hover:bg-emerald-500/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+              className="flex min-h-[48px] items-center justify-center gap-2.5 rounded-[14px] border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-bold text-emerald-100 shadow-[0_0_24px_rgba(43,255,136,0.2)] transition-all hover:bg-emerald-500/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
             >
               <Workflow className="h-4 w-4 text-emerald-300" />
               <span>Map a paper</span>
@@ -422,7 +431,7 @@ export default function Navbar() {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   aria-current={active ? "page" : undefined}
-                  className={`flex min-h-[44px] items-center justify-between rounded-[14px] border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] ${
+                  className={`flex min-h-[44px] items-center justify-between rounded-[14px] border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] ${
                     active
                       ? "border-teal-300/30 bg-teal-400/[0.12] text-white"
                       : "border-transparent text-slate-200 hover:border-teal-100/[0.1] hover:bg-white/[0.04] hover:text-white"
@@ -459,7 +468,7 @@ export default function Navbar() {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   aria-current={active ? "page" : undefined}
-                  className={`flex min-h-[44px] items-center justify-between rounded-[14px] border px-4 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] ${
+                  className={`flex min-h-[44px] items-center justify-between rounded-[14px] border px-4 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] ${
                     active
                       ? "border-teal-300/30 bg-teal-400/[0.12] text-white"
                       : "border-transparent text-slate-300 hover:border-teal-100/[0.1] hover:bg-white/[0.04] hover:text-white"
@@ -498,7 +507,7 @@ function DesktopNavItem({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`group relative flex min-h-[38px] items-center rounded-[12px] px-3.5 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] ${
+      className={`group relative flex min-h-[38px] items-center rounded-[12px] px-3.5 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] ${
         active
           ? "text-white"
           : "text-slate-300 hover:bg-white/[0.04] hover:text-white"

@@ -343,7 +343,7 @@ export default function CipherNetworkCanvas({
 
     const { x, y, scale } = transform.current;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#04070a";
+    ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, width, height);
 
     // Faint grid
@@ -691,7 +691,7 @@ export default function CipherNetworkCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#04070a]"
+      className="relative h-full w-full select-none overflow-hidden rounded-2xl border border-teal-200/15 bg-[#000000]"
     >
       <canvas
         ref={canvasRef}

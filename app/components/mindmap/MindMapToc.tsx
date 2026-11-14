@@ -113,7 +113,7 @@ export default function MindMapToc({
                   focus-visible:ring-2
                   focus-visible:ring-[#8db2ff]
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-[#04070a]
+                  focus-visible:ring-offset-[#000000]
                   ${
                     isActive
                       ? "border-emerald-400 bg-emerald-400/[0.09] font-bold text-white shadow-[0_0_12px_rgba(43,255,136,0.12)]"
@@ -173,7 +173,7 @@ export default function MindMapToc({
               focus-visible:ring-2
               focus-visible:ring-[#8db2ff]
               focus-visible:ring-offset-2
-              focus-visible:ring-offset-[#04070a]
+              focus-visible:ring-offset-[#000000]
             "
           >
             <User className="h-4 w-4 shrink-0 text-teal-300" aria-hidden="true" />

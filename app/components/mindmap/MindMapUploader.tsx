@@ -205,7 +205,7 @@ export default function MindMapUploader({
             focus-visible:ring-2
             focus-visible:ring-[#2bff88]
             focus-visible:ring-offset-2
-            focus-visible:ring-offset-[#04070a]
+            focus-visible:ring-offset-[#000000]
             ${
               dragging
                 ? "border-emerald-400 bg-emerald-400/[0.08]"
@@ -364,7 +364,7 @@ export default function MindMapUploader({
                 focus-visible:ring-2
                 focus-visible:ring-[#2bff88]
                 focus-visible:ring-offset-2
-                focus-visible:ring-offset-[#04070a]
+                focus-visible:ring-offset-[#000000]
                 disabled:cursor-wait
                 disabled:opacity-60
               "

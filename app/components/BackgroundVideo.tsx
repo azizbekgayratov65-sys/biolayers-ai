@@ -422,7 +422,7 @@ export default function BackgroundVideo({
               onClick={() => setIsPanelOpen(true)}
               aria-label="Customize Video Backdrop"
               title="Customize Video Backdrop"
-              className="group flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-teal-200/30 bg-[#070c14]/90 text-teal-300 shadow-2xl backdrop-blur-xl transition-all hover:border-teal-200/60 hover:bg-[#0d1624] hover:text-teal-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+              className="group flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-teal-200/30 bg-[#070c14]/90 text-teal-300 shadow-2xl backdrop-blur-xl transition-all hover:border-teal-200/60 hover:bg-[#0d1624] hover:text-teal-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
             >
               <Sliders className="h-4 w-4 transition-transform group-hover:scale-110" />
               <span className="sr-only">Customize Video Backdrop</span>
