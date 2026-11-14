@@ -228,7 +228,7 @@ export default function LungExplorer() {
           <section className={`${panel} relative overflow-hidden lg:col-span-8`} aria-label="3D lung viewer">
             <div
               ref={containerRef}
-              className="relative h-[460px] w-full cursor-grab sm:h-[580px]"
+              className="relative h-[460px] w-full cursor-grab bg-[#03060b] sm:h-[580px]"
               aria-label="Interactive 3D model of the lungs drawn as one point per cell. Drag to rotate, scroll to zoom, hover a point to name the cell, click the tumour or a lymph node for details."
               role="img"
             />
@@ -286,14 +286,36 @@ export default function LungExplorer() {
 
             {/* View controls */}
             <div className="absolute right-3 top-14 flex flex-col gap-1.5 sm:top-3">
-              <button type="button" className={btnQuiet} onClick={() => sceneRef.current?.focusTumor()}>
-                <Crosshair className="h-4 w-4" aria-hidden="true" /> Fly into tumour
+              <button
+                type="button"
+                className={btnQuiet}
+                aria-label="Fly into tumour"
+                title="Fly into tumour"
+                onClick={() => sceneRef.current?.focusTumor()}
+              >
+                <Crosshair className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Fly into tumour</span>
               </button>
-              <button type="button" className={btnQuiet} onClick={() => sceneRef.current?.resetView()}>
-                <RotateCcw className="h-4 w-4" aria-hidden="true" /> Whole organ
+              <button
+                type="button"
+                className={btnQuiet}
+                aria-label="Reset view"
+                title="Reset view"
+                onClick={() => sceneRef.current?.resetView()}
+              >
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Reset view</span>
               </button>
-              <button type="button" className={btnQuiet} aria-pressed={breathing} onClick={toggleBreathing}>
-                <Wind className="h-4 w-4" aria-hidden="true" /> {breathing ? "Breathing" : "Paused"}
+              <button
+                type="button"
+                className={btnQuiet}
+                aria-pressed={breathing}
+                aria-label={breathing ? "Pause breathing" : "Resume breathing"}
+                title={breathing ? "Pause breathing" : "Resume breathing"}
+                onClick={toggleBreathing}
+              >
+                <Wind className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">{breathing ? "Breathing" : "Paused"}</span>
               </button>
             </div>
 

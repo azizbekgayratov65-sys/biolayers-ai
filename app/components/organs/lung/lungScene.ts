@@ -271,8 +271,8 @@ export function buildCells(): Builder {
     airway: 1.05,
     artery: 1.0,
     vein: 1.0,
-    tumorSensitive: 1.3,
-    tumorResistant: 1.3,
+    tumorSensitive: 1.15,
+    tumorResistant: 1.15,
     lymphocyte: 1.3,
     macrophage: 1.55,
   };
@@ -513,8 +513,8 @@ const BASE_ALPHA: Record<CellCategoryId, number> = {
   airway: 0.8,
   artery: 0.75,
   vein: 0.75,
-  tumorSensitive: 0.95,
-  tumorResistant: 0.95,
+  tumorSensitive: 0.6,
+  tumorResistant: 0.75,
   lymphocyte: 0.9,
   macrophage: 0.85,
 };
@@ -534,11 +534,16 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.02, 100);
-  const HOME_POSITION = new THREE.Vector3(0.4, 0.55, 6.4);
   const HOME_TARGET = new THREE.Vector3(0, 0.15, 0);
-  const ATLAS_POSITION = new THREE.Vector3(0, 0.15, 6.8);
   const ATLAS_TARGET = new THREE.Vector3(0, 0.15, 0);
-  camera.position.copy(HOME_POSITION);
+  // Pull the camera back on narrow screens so the whole organ or atlas fits.
+  const fitDistance = (base: number, halfWidth: number) => {
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    return Math.max(base, halfWidth / (tanHalf * Math.max(0.2, camera.aspect)));
+  };
+  const homePosition = () =>
+    new THREE.Vector3(0.4, 0.4, 6.4).normalize().multiplyScalar(fitDistance(6.4, 1.95)).add(HOME_TARGET);
+  const atlasPosition = () => new THREE.Vector3(0, 0, fitDistance(6.8, 2.45)).add(ATLAS_TARGET);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(HOME_TARGET);
@@ -841,6 +846,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     camera.updateProjectionMatrix();
   };
   resize();
+  camera.position.copy(homePosition());
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
 
@@ -946,10 +952,10 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       morphStart = performance.now();
       if (next === "atlas") {
         controls.autoRotate = false;
-        flyTo(ATLAS_POSITION.clone(), ATLAS_TARGET.clone());
+        flyTo(atlasPosition(), ATLAS_TARGET.clone());
       } else {
         controls.autoRotate = !options.reducedMotion;
-        flyTo(HOME_POSITION.clone(), HOME_TARGET.clone());
+        flyTo(homePosition(), HOME_TARGET.clone());
       }
     },
     setTumorState(scale, resistantFraction) {
@@ -971,8 +977,8 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     },
     resetView() {
       controls.autoRotate = !options.reducedMotion && view === "anatomy";
-      if (view === "atlas") flyTo(ATLAS_POSITION.clone(), ATLAS_TARGET.clone());
-      else flyTo(HOME_POSITION.clone(), HOME_TARGET.clone());
+      if (view === "atlas") flyTo(atlasPosition(), ATLAS_TARGET.clone());
+      else flyTo(homePosition(), HOME_TARGET.clone());
     },
     dispose() {
       cancelAnimationFrame(frame);
