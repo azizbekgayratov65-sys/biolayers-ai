@@ -26,19 +26,11 @@ import {
   type ScenarioId,
   type TumorState,
 } from "./lungModel";
-import type { LayerId, LungSceneHandle, PickId } from "./lungScene";
+import type { HoverInfo, LungSceneHandle, PickId, ViewMode } from "./lungScene";
+import { CELL_CATEGORIES, type CellCategoryId } from "./lungCells";
 import { LYMPH_NODES, type LymphNodeInfo } from "./lungNodes";
 
 /* ---------- static content ---------- */
-
-const LAYERS: { id: LayerId; label: string; swatch: string; hint: string }[] = [
-  { id: "parenchyma", label: "Parenchyma", swatch: "bg-teal-300", hint: "Lung tissue and alveolar air spaces" },
-  { id: "airways", label: "Airways", swatch: "bg-emerald-400", hint: "Trachea, bronchi and bronchioles" },
-  { id: "vessels", label: "Vessels", swatch: "bg-rose-400", hint: "Pulmonary arteries (rose) and veins (violet)" },
-  { id: "tumor", label: "Tumour", swatch: "bg-amber-300", hint: "Primary lesion with spiculated margin" },
-  { id: "nodes", label: "Lymph nodes", swatch: "bg-sky-300", hint: "Hilar and mediastinal stations" },
-  { id: "tme", label: "Microenvironment", swatch: "bg-violet-400", hint: "Cancer cells, T cells and macrophages. Fly in to see them." },
-];
 
 const CASE = {
   id: "BL-LUNG-0001",
@@ -57,8 +49,8 @@ const CASE = {
 const PIPELINE: { step: string; title: string; body: string; status: "live" | "next" }[] = [
   {
     step: "01",
-    title: "Organ scene",
-    body: "Procedural lungs, airway and vessel trees, tumour, nodes and microenvironment, rendered live in the browser.",
+    title: "Cell-by-cell organ",
+    body: "About 98,000 points, one per cell, placed along airways, vessels, the tumour and lymph nodes, morphing into a cell atlas.",
     status: "live",
   },
   {
@@ -70,13 +62,13 @@ const PIPELINE: { step: string; title: string; body: string; status: "live" | "n
   {
     step: "03",
     title: "Segmentation",
-    body: "TotalSegmentator (open source) separates lobes, airways and vessels; the meshes replace the procedural ones.",
+    body: "TotalSegmentator (open source) separates lobes, airways and vessels, so the cells fill a real patient's anatomy.",
     status: "next",
   },
   {
     step: "04",
-    title: "Molecular layers",
-    body: "Attach mutation, PD-L1 and pathology data per lesion, then link each lesion to its Cipher pathway map and the papers behind it.",
+    title: "Real single-cell data",
+    body: "Swap the synthetic cell labels for measured ones from the Human Lung Cell Atlas and tumour single-cell studies, linked to Cipher pathways.",
     status: "next",
   },
 ];
@@ -91,20 +83,15 @@ export default function LungExplorer() {
 
   const [ready, setReady] = useState(false);
   const [webglError, setWebglError] = useState(false);
-  const [layers, setLayers] = useState<Record<LayerId, boolean>>({
-    parenchyma: true,
-    airways: true,
-    vessels: true,
-    tumor: true,
-    nodes: true,
-    tme: true,
-  });
+  const [hidden, setHidden] = useState<Partial<Record<CellCategoryId, boolean>>>({});
+  const [counts, setCounts] = useState<Record<CellCategoryId, number> | null>(null);
+  const [view, setView] = useState<ViewMode>("anatomy");
   const [scenario, setScenario] = useState<ScenarioId>("osimertinib");
   const [month, setMonth] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [breathing, setBreathing] = useState(true);
   const [selected, setSelected] = useState<PickId>("tumor");
-  const [hover, setHover] = useState<{ label: string; x: number; y: number } | null>(null);
+  const [hover, setHover] = useState<HoverInfo | null>(null);
 
   const tumor = useMemo(() => tumorStateAt(scenario, month), [scenario, month]);
   const series = useMemo(() => diameterSeries(scenario), [scenario]);
@@ -122,11 +109,13 @@ export default function LungExplorer() {
       .then(({ createLungScene }) => {
         if (disposed) return;
         try {
-          sceneRef.current = createLungScene(container, {
+          const handle = createLungScene(container, {
             reducedMotion,
             onPick: (id) => setSelected(id),
             onHover: (h) => setHover(h),
           });
+          sceneRef.current = handle;
+          setCounts({ ...handle.counts });
           setReady(true);
         } catch (error) {
           console.error("[BioLayers] WebGL scene failed to start", error);
@@ -164,11 +153,27 @@ export default function LungExplorer() {
     return () => window.clearInterval(id);
   }, [isPlaying]);
 
-  const toggleLayer = (id: LayerId) => {
-    const next = !layers[id];
-    setLayers((prev) => ({ ...prev, [id]: next }));
-    sceneRef.current?.setLayerVisible(id, next);
+  const toggleCategory = (id: CellCategoryId) => {
+    const nextHidden = !hidden[id];
+    setHidden((prev) => ({ ...prev, [id]: nextHidden }));
+    sceneRef.current?.setCategoryVisible(id, !nextHidden);
   };
+
+  const switchView = (next: ViewMode) => {
+    setView(next);
+    sceneRef.current?.setView(next);
+  };
+
+  /* Tumour cells flip from sensitive to resistant one by one as resistance grows. */
+  const legendCount = (id: CellCategoryId) => {
+    if (!counts) return null;
+    const tumourTotal = counts.tumorSensitive + counts.tumorResistant;
+    const nResistant = Math.max(0, Math.min(tumourTotal, Math.ceil(tumor.resistantFraction * tumourTotal - 0.5)));
+    if (id === "tumorSensitive") return tumourTotal - nResistant;
+    if (id === "tumorResistant") return nResistant;
+    return counts[id];
+  };
+  const totalCells = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : null;
 
   const toggleBreathing = () => {
     const next = !breathing;
@@ -200,8 +205,9 @@ export default function LungExplorer() {
             A living model of lung cancer
           </h1>
           <p className="mt-4 text-base leading-relaxed text-slate-300">
-            Turn the organ, peel back its layers and fly into the tumour to see the cells around it. Then move
-            through two years of treatment and watch a resistant clone take over.
+            Every point is one cell. Turn the organ, fly into the tumour, then break the lung apart into a cell atlas
+            and watch it flow back together. Move through two years of treatment and see resistant cells take over,
+            one by one.
           </p>
         </div>
 
@@ -211,8 +217,9 @@ export default function LungExplorer() {
         >
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
           <p>
-            Illustrative model built on a synthetic demo case. The anatomy is generated by code and the response
-            curves are a teaching model. This is not patient data and not for clinical use.
+            Illustrative model built on a synthetic demo case. Cells are sampled (a real lung holds hundreds of
+            billions), the anatomy is generated by code and the response curves are a teaching model. Not patient
+            data, not for clinical use.
           </p>
         </div>
 
@@ -222,13 +229,13 @@ export default function LungExplorer() {
             <div
               ref={containerRef}
               className="relative h-[460px] w-full cursor-grab sm:h-[580px]"
-              aria-label="Interactive 3D model of the lungs. Drag to rotate, scroll to zoom, click the tumour or a lymph node for details."
+              aria-label="Interactive 3D model of the lungs drawn as one point per cell. Drag to rotate, scroll to zoom, hover a point to name the cell, click the tumour or a lymph node for details."
               role="img"
             />
 
             {!ready && !webglError && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <span className={monoLabel}>Growing airways…</span>
+                <span className={monoLabel}>Placing cells…</span>
               </div>
             )}
             {webglError && (
@@ -240,34 +247,39 @@ export default function LungExplorer() {
 
             {hover && (
               <div
-                className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-lg border border-white/10 bg-[#04070a]/90 px-2.5 py-1 text-xs font-semibold text-slate-100 shadow-lg"
+                className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[125%] whitespace-nowrap rounded-lg border border-white/10 bg-[#04070a]/90 px-3 py-2 shadow-lg"
                 style={{ left: hover.x, top: hover.y }}
               >
-                {hover.label}
+                <p className="flex items-center gap-2 text-xs font-semibold text-slate-100">
+                  <span className="h-2 w-2 rounded-full" style={{ background: hover.color }} aria-hidden="true" />
+                  {hover.title}
+                </p>
+                <p className="mt-0.5 text-[11px] text-slate-400">{hover.detail}</p>
               </div>
             )}
 
-            {/* Layer chips */}
-            <div className="absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
-              <span className="mr-1 hidden items-center gap-1.5 sm:inline-flex">
-                <Layers className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
-                <span className={monoLabel}>Layers</span>
-              </span>
-              {LAYERS.map((layer) => (
+            {/* View switch */}
+            <div
+              role="group"
+              aria-label="View"
+              className="absolute left-3 top-3 inline-flex rounded-full border border-white/10 bg-[#04070a]/70 p-1 backdrop-blur-xl"
+            >
+              {(
+                [
+                  { id: "anatomy", label: "Anatomy" },
+                  { id: "atlas", label: "Cell atlas" },
+                ] as { id: ViewMode; label: string }[]
+              ).map((v) => (
                 <button
-                  key={layer.id}
+                  key={v.id}
                   type="button"
-                  title={layer.hint}
-                  aria-pressed={layers[layer.id]}
-                  onClick={() => toggleLayer(layer.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-xl transition ${
-                    layers[layer.id]
-                      ? "border-white/20 bg-white/[0.08] text-slate-100"
-                      : "border-white/10 bg-black/30 text-slate-400 line-through"
+                  aria-pressed={view === v.id}
+                  onClick={() => switchView(v.id)}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                    view === v.id ? "bg-emerald-400/20 text-emerald-100" : "text-slate-300 hover:text-white"
                   }`}
                 >
-                  <span className={`h-2 w-2 rounded-full ${layer.swatch} ${layers[layer.id] ? "" : "opacity-30"}`} />
-                  {layer.label}
+                  {v.label}
                 </button>
               ))}
             </div>
@@ -283,6 +295,47 @@ export default function LungExplorer() {
               <button type="button" className={btnQuiet} aria-pressed={breathing} onClick={toggleBreathing}>
                 <Wind className="h-4 w-4" aria-hidden="true" /> {breathing ? "Breathing" : "Paused"}
               </button>
+            </div>
+
+            {/* Legend: one entry per cell category, click to hide or show */}
+            <div className="border-t border-white/[0.06] bg-[#04070a]/60 px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
+                  <span className={monoLabel}>Cells by type · click to hide</span>
+                </span>
+                {totalCells !== null && (
+                  <span className="font-mono text-[11px] text-slate-400">{totalCells.toLocaleString("en-US")} cells</span>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {CELL_CATEGORIES.map((c) => {
+                  const off = Boolean(hidden[c.id]);
+                  const n = legendCount(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.description}
+                      aria-pressed={!off}
+                      onClick={() => toggleCategory(c.id)}
+                      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                        off
+                          ? "border-white/[0.06] bg-transparent text-slate-500 line-through"
+                          : "border-white/15 bg-white/[0.05] text-slate-100 hover:border-white/25"
+                      }`}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ background: c.color, opacity: off ? 0.25 : 1 }}
+                        aria-hidden="true"
+                      />
+                      {c.label}
+                      {n !== null && <span className="font-mono font-normal text-slate-400">{n.toLocaleString("en-US")}</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Timeline */}

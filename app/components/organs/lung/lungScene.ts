@@ -1,34 +1,44 @@
 /*
-  Procedural "living lung" scene in plain three.js.
+  Point-cloud "living lung" in plain three.js.
 
-  Everything here is generated from code: two lungs shaped from deformed
-  spheres, branching airway and vessel trees grown inside them, a lumpy
-  spiculated tumour in the right upper lobe, hilar/mediastinal lymph nodes
-  and a tumour microenvironment that fades in as the camera flies close.
+  Every point is one cell. Cells are placed where they live in the organ:
+  alveolar epithelium filling the lungs, airway epithelium along a branching
+  bronchial tree, endothelium along arteries and veins, a lumpy spiculated
+  tumour in the right upper lobe with immune cells around it, and
+  lymphocytes packed into hilar and mediastinal nodes.
 
-  It is an anatomical illustration, not a segmentation of a real CT. The
-  public data pipeline (LIDC-IDRI + TotalSegmentator) is the next step and
-  will replace the procedural meshes with patient-derived ones.
+  Each cell also has a second home in a "cell atlas" layout, where cells
+  gather into clusters by type. Switching view morphs every point from its
+  anatomical position to its cluster, with a small per-cell delay so the
+  organ appears to flow apart and back together.
+
+  All positions are generated from code. This is an illustration, not a
+  segmentation of a real CT or a real single-cell dataset.
 */
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 
+import { CELL_CATEGORIES, CELL_SUBTYPES, RESISTANT_SUBTYPE_LABEL, type CellCategoryId } from "./lungCells";
 import { LYMPH_NODES } from "./lungNodes";
 
-export type LayerId = "parenchyma" | "airways" | "vessels" | "tumor" | "nodes" | "tme";
+export type ViewMode = "anatomy" | "atlas";
 
 export type PickId = "tumor" | `node:${string}`;
+
+export type HoverInfo = { title: string; detail: string; color: string; x: number; y: number };
 
 export type LungSceneOptions = {
   reducedMotion: boolean;
   onPick: (id: PickId) => void;
-  onHover: (hover: { label: string; x: number; y: number } | null) => void;
+  onHover: (hover: HoverInfo | null) => void;
 };
 
 export type LungSceneHandle = {
-  setLayerVisible: (id: LayerId, visible: boolean) => void;
+  /* Number of cells per category; tumour cells are all counted as sensitive. */
+  counts: Record<CellCategoryId, number>;
+  setCategoryVisible: (id: CellCategoryId, visible: boolean) => void;
+  setView: (view: ViewMode) => void;
   setTumorState: (scale: number, resistantFraction: number) => void;
   setSelected: (id: PickId | null) => void;
   setBreathing: (on: boolean) => void;
@@ -37,30 +47,17 @@ export type LungSceneHandle = {
   dispose: () => void;
 };
 
-/* ---------- small helpers ---------- */
+/* ---------- geometry helpers ---------- */
 
 type Side = "right" | "left";
 
 // Patient's right is on the viewer's left in a frontal view.
 const LUNG_CENTER_X: Record<Side, number> = { right: -0.95, left: 0.95 };
-const TUMOR_POSITION = new THREE.Vector3(-1.05, 0.85, 0.18);
+const TUMOR_CENTER = new THREE.Vector3(-1.05, 0.85, 0.18);
 const TUMOR_BASE_RADIUS = 0.16;
+const BREATH_CENTER = new THREE.Vector3(0, 0.3, 0);
 
-const COLOR = {
-  parenchyma: 0x5eead4,
-  alveoli: 0x7dd3fc,
-  airway: 0x34f5a0,
-  artery: 0xff5c8a,
-  vein: 0xa78bfa,
-  heart: 0xfb7185,
-  tumorSensitive: new THREE.Color(0xffb347),
-  tumorResistant: new THREE.Color(0xff3d6e),
-  nodeSuspicious: 0xffb347,
-  nodeBenign: 0x7dd3fc,
-  cancerCell: 0xffc56b,
-  tCell: 0x4ade80,
-  macrophage: 0xc084fc,
-};
+const CAT = Object.fromEntries(CELL_CATEGORIES.map((c) => [c.id, c.index])) as Record<CellCategoryId, number>;
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -73,9 +70,22 @@ function mulberry32(seed: number) {
   };
 }
 
-function smoothstep(edge0: number, edge1: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
+function gaussian(rng: () => number) {
+  const u = Math.max(1e-9, rng());
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+}
+
+function randomInBall(rng: () => number, out: THREE.Vector3) {
+  do {
+    out.set(rng() * 2 - 1, rng() * 2 - 1, rng() * 2 - 1);
+  } while (out.lengthSq() > 1);
+  return out;
+}
+
+function randomDirection(rng: () => number, out: THREE.Vector3) {
+  randomInBall(rng, out);
+  if (out.lengthSq() < 1e-6) out.set(0, 1, 0);
+  return out.normalize();
 }
 
 function medialFactor(side: Side, y: number) {
@@ -84,7 +94,7 @@ function medialFactor(side: Side, y: number) {
   return 0.6;
 }
 
-/* Map a point on the unit sphere onto the lung surface. */
+/* Map a point on (or inside) the unit sphere onto the lung. */
 function shapeLungVertex(v: THREE.Vector3, side: Side) {
   const n =
     0.035 * Math.sin(3.1 * v.x + 1.7) * Math.sin(2.7 * v.y + 0.4) * Math.sin(3.3 * v.z + 2.1) +
@@ -121,112 +131,6 @@ function insideLung(p: THREE.Vector3, side: Side, margin: number) {
   return x * x + y * y + z * z < margin;
 }
 
-function fresnelMaterial(
-  color: THREE.ColorRepresentation,
-  { base = 0.04, power = 2.4, intensity = 1.0, opacity = 1.0 } = {},
-) {
-  return new THREE.ShaderMaterial({
-    uniforms: {
-      uColor: { value: new THREE.Color(color) },
-      uBase: { value: base },
-      uPower: { value: power },
-      uIntensity: { value: intensity },
-      uOpacity: { value: opacity },
-    },
-    vertexShader: /* glsl */ `
-      varying vec3 vN;
-      varying vec3 vV;
-      void main() {
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vN = normalize(normalMatrix * normal);
-        vV = normalize(-mv.xyz);
-        gl_Position = projectionMatrix * mv;
-      }
-    `,
-    fragmentShader: /* glsl */ `
-      uniform vec3 uColor;
-      uniform float uBase;
-      uniform float uPower;
-      uniform float uIntensity;
-      uniform float uOpacity;
-      varying vec3 vN;
-      varying vec3 vV;
-      void main() {
-        float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), uPower);
-        float a = (uBase + f * uIntensity) * uOpacity;
-        gl_FragColor = vec4(uColor * (0.55 + f * 1.25), clamp(a, 0.0, 1.0));
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-  });
-}
-
-function particleMaterial(color: THREE.ColorRepresentation, size: number, motion: number, opacity: number) {
-  return new THREE.ShaderMaterial({
-    uniforms: {
-      uColor: { value: new THREE.Color(color) },
-      uSize: { value: size },
-      uMotion: { value: motion },
-      uOpacity: { value: opacity },
-      uTime: { value: 0 },
-      uPixelRatio: { value: 1 },
-    },
-    vertexShader: /* glsl */ `
-      attribute float aSeed;
-      uniform float uTime;
-      uniform float uSize;
-      uniform float uMotion;
-      uniform float uPixelRatio;
-      void main() {
-        vec3 p = position + uMotion * vec3(
-          sin(uTime * 0.7 + aSeed * 6.2831),
-          cos(uTime * 0.55 + aSeed * 12.566),
-          sin(uTime * 0.63 + aSeed * 3.1416)
-        );
-        vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        gl_PointSize = uSize * uPixelRatio * (0.75 + 0.5 * fract(aSeed * 7.13)) / max(0.05, -mv.z);
-        gl_Position = projectionMatrix * mv;
-      }
-    `,
-    fragmentShader: /* glsl */ `
-      uniform vec3 uColor;
-      uniform float uOpacity;
-      void main() {
-        vec2 c = gl_PointCoord - 0.5;
-        float d = length(c);
-        if (d > 0.5) discard;
-        float a = smoothstep(0.5, 0.0, d);
-        gl_FragColor = vec4(uColor, a * uOpacity);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  });
-}
-
-function pointsFromPositions(positions: number[], material: THREE.ShaderMaterial, rng: () => number) {
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-  const seeds = new Float32Array(positions.length / 3);
-  for (let i = 0; i < seeds.length; i++) seeds[i] = rng();
-  geometry.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
-  return new THREE.Points(geometry, material);
-}
-
-function cylinderBetween(a: THREE.Vector3, b: THREE.Vector3, r0: number, r1: number) {
-  const length = a.distanceTo(b);
-  const g = new THREE.CylinderGeometry(r1, r0, length, 7, 1, true);
-  g.translate(0, length / 2, 0);
-  const dir = b.clone().sub(a).normalize();
-  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-  g.translate(a.x, a.y, a.z);
-  return g;
-}
-
 type Segment = { a: THREE.Vector3; b: THREE.Vector3; r: number };
 
 function growTree(
@@ -258,7 +162,7 @@ function growTree(
   for (const sign of [1, -1]) {
     const next = dir.clone().applyAxisAngle(axis, sign * (0.3 + rng() * 0.35));
     next.applyAxisAngle(dir, (rng() - 0.5) * 0.9).normalize();
-    // Steer toward an unclaimed point of lung ahead of us so the tree fills the organ.
+    // Steer toward a point of lung ahead of us so the tree fills the organ.
     for (let tries = 0; tries < 14; tries++) {
       probe.copy(next).multiplyScalar(nextLen * (1 + rng() * 2));
       probe.add(new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).multiplyScalar(nextLen * 2));
@@ -271,13 +175,6 @@ function growTree(
     }
     growTree(rng, end, next, nextLen, radius * 0.7, depth + 1, maxDepth, side, out);
   }
-}
-
-function treeGeometry(segments: Segment[]) {
-  const parts = segments.map((s) => cylinderBetween(s.a, s.b, s.r, s.r * 0.82));
-  const merged = mergeGeometries(parts, false);
-  for (const p of parts) p.dispose();
-  return merged ?? new THREE.BufferGeometry();
 }
 
 function lobarTree(
@@ -296,6 +193,332 @@ function lobarTree(
   return segments;
 }
 
+function tumorRadiusAt(dir: THREE.Vector3) {
+  return (
+    1 +
+    0.17 * Math.sin(4.1 * dir.x + 1.3) * Math.sin(3.7 * dir.y + 0.2) * Math.sin(4.4 * dir.z + 2.2) +
+    0.07 * Math.sin(9.3 * dir.x + 0.7) * Math.sin(8.1 * dir.y + 1.9) * Math.sin(8.7 * dir.z + 0.3)
+  );
+}
+
+/* ---------- atlas layout ---------- */
+
+type Cluster = { x: number; y: number; spread: number };
+
+const ATLAS: Record<CellCategoryId, Cluster> = {
+  alveolar: { x: -1.3, y: 0.45, spread: 0.85 },
+  airway: { x: -0.55, y: 1.75, spread: 0.4 },
+  artery: { x: 0.65, y: 1.75, spread: 0.36 },
+  vein: { x: 1.55, y: 1.05, spread: 0.34 },
+  lymphocyte: { x: 1.6, y: -0.25, spread: 0.4 },
+  macrophage: { x: 0.75, y: -1.15, spread: 0.34 },
+  tumorSensitive: { x: -0.65, y: -1.2, spread: 0.45 },
+  tumorResistant: { x: -0.05, y: -1.62, spread: 0.3 },
+};
+
+function atlasPoint(rng: () => number, category: CellCategoryId, subIndex: number, subCount: number, out: THREE.Vector3) {
+  const c = ATLAS[category];
+  let ox = 0;
+  let oy = 0;
+  if (subCount > 1) {
+    const angle = (2 * Math.PI * subIndex) / subCount + CAT[category];
+    ox = Math.cos(angle) * c.spread * 0.42;
+    oy = Math.sin(angle) * c.spread * 0.42;
+  }
+  const s = c.spread * 0.33;
+  out.set(c.x + ox + gaussian(rng) * s, c.y + oy + gaussian(rng) * s + 0.1, gaussian(rng) * 0.22);
+  return out;
+}
+
+/* ---------- point buffer ---------- */
+
+type Builder = {
+  anat: number[];
+  atlas: number[];
+  atlas2: number[];
+  cat: number[];
+  seed: number[];
+  rank: number[];
+  flag: number[];
+  size: number[];
+  subtype: number[];
+  node: number[];
+};
+
+const SUBTYPES_BY_CATEGORY: Record<CellCategoryId, number[]> = Object.fromEntries(
+  CELL_CATEGORIES.map((c) => [c.id, CELL_SUBTYPES.map((s, i) => (s.category === c.id ? i : -1)).filter((i) => i >= 0)]),
+) as Record<CellCategoryId, number[]>;
+
+function pickSubtype(rng: () => number, category: CellCategoryId) {
+  const ids = SUBTYPES_BY_CATEGORY[category];
+  let r = rng();
+  for (let k = 0; k < ids.length; k++) {
+    r -= CELL_SUBTYPES[ids[k]].share;
+    if (r <= 0) return k;
+  }
+  return ids.length - 1;
+}
+
+export function buildCells(): Builder {
+  const b: Builder = { anat: [], atlas: [], atlas2: [], cat: [], seed: [], rank: [], flag: [], size: [], subtype: [], node: [] };
+  const rng = mulberry32(20261114);
+  const tmp = new THREE.Vector3();
+  const at = new THREE.Vector3();
+  const at2 = new THREE.Vector3();
+
+  const SIZE: Record<CellCategoryId, number> = {
+    alveolar: 0.9,
+    airway: 1.05,
+    artery: 1.0,
+    vein: 1.0,
+    tumorSensitive: 1.3,
+    tumorResistant: 1.3,
+    lymphocyte: 1.3,
+    macrophage: 1.55,
+  };
+
+  const add = (p: THREE.Vector3, category: CellCategoryId, opts: { flag?: number; rank?: number; node?: number } = {}) => {
+    const k = pickSubtype(rng, category);
+    const ids = SUBTYPES_BY_CATEGORY[category];
+    atlasPoint(rng, category, k, ids.length, at);
+    if (category === "tumorSensitive") atlasPoint(rng, "tumorResistant", 0, 1, at2);
+    else at2.copy(at);
+    b.anat.push(p.x, p.y, p.z);
+    b.atlas.push(at.x, at.y, at.z);
+    b.atlas2.push(at2.x, at2.y, at2.z);
+    b.cat.push(CAT[category]);
+    b.seed.push(rng());
+    b.rank.push(opts.rank ?? 0);
+    b.flag.push(opts.flag ?? 0);
+    b.size.push(SIZE[category]);
+    b.subtype.push(ids[k]);
+    b.node.push(opts.node ?? -1);
+  };
+
+  /* Alveolar epithelium: dense near the pleural surface, lighter inside. */
+  for (const side of ["right", "left"] as Side[]) {
+    for (let i = 0; i < 15000; i++) {
+      randomDirection(rng, tmp).multiplyScalar(1 - Math.pow(rng(), 3) * 0.1);
+      shapeLungVertex(tmp, side);
+      add(tmp, "alveolar");
+    }
+    let placed = 0;
+    while (placed < 8500) {
+      tmp.set(LUNG_CENTER_X[side] + (rng() - 0.5) * 1.8, (rng() - 0.5) * 2.9, (rng() - 0.5) * 1.9);
+      if (!insideLung(tmp, side, 0.95)) continue;
+      if (tmp.distanceTo(TUMOR_CENTER) < TUMOR_BASE_RADIUS * 1.1) continue;
+      add(tmp, "alveolar");
+      placed++;
+    }
+    // Alveolar macrophages roam the air spaces.
+    placed = 0;
+    while (placed < 700) {
+      tmp.set(LUNG_CENTER_X[side] + (rng() - 0.5) * 1.8, (rng() - 0.5) * 2.9, (rng() - 0.5) * 1.9);
+      if (!insideLung(tmp, side, 0.9)) continue;
+      add(tmp, "macrophage");
+      placed++;
+    }
+  }
+
+  /* Tubes: cells sit on the wall of each airway or vessel segment. */
+  const along = (segments: Segment[], category: CellCategoryId, density: number) => {
+    const dir = new THREE.Vector3();
+    const u = new THREE.Vector3();
+    const w = new THREE.Vector3();
+    for (const s of segments) {
+      dir.copy(s.b).sub(s.a);
+      const len = dir.length();
+      dir.normalize();
+      u.set(dir.y, -dir.x, 0);
+      if (u.lengthSq() < 1e-6) u.set(1, 0, 0);
+      u.normalize();
+      w.copy(dir).cross(u).normalize();
+      const n = Math.max(2, Math.round(len * density * (0.45 + s.r / 0.05)));
+      for (let i = 0; i < n; i++) {
+        const t = rng();
+        const theta = rng() * Math.PI * 2;
+        const r = s.r * (0.82 - 0.18 * t) * (0.75 + 0.25 * rng());
+        tmp.copy(s.a).addScaledVector(dir, t * len);
+        tmp.addScaledVector(u, Math.cos(theta) * r).addScaledVector(w, Math.sin(theta) * r);
+        add(tmp, category);
+      }
+    }
+  };
+
+  const carina = new THREE.Vector3(0, 0.92, 0);
+  const rightHilum = new THREE.Vector3(-0.5, 0.66, 0.0);
+  const leftHilum = new THREE.Vector3(0.55, 0.56, 0.0);
+  along(
+    [
+      { a: new THREE.Vector3(0, 2.05, 0.02), b: carina, r: 0.075 },
+      { a: carina, b: rightHilum, r: 0.06 },
+      { a: carina, b: leftHilum, r: 0.055 },
+      ...lobarTree(101, "right", rightHilum, [[-0.45, 0.85, 0.12], [-0.6, -0.25, 0.65], [-0.3, -0.9, -0.25]], 0.045, 7),
+      ...lobarTree(202, "left", leftHilum, [[0.45, 0.85, 0.12], [0.6, -0.2, 0.6], [0.3, -0.9, -0.25]], 0.043, 7),
+    ],
+    "airway",
+    330,
+  );
+
+  const trunk = new THREE.Vector3(0.12, 0.38, 0.32);
+  const rA = rightHilum.clone().add(new THREE.Vector3(0.02, 0.05, -0.1));
+  const lA = leftHilum.clone().add(new THREE.Vector3(-0.02, 0.07, -0.1));
+  along(
+    [
+      { a: new THREE.Vector3(0.2, -0.1, 0.38), b: trunk, r: 0.07 },
+      { a: trunk, b: rA, r: 0.05 },
+      { a: trunk, b: lA, r: 0.05 },
+      ...lobarTree(303, "right", rA, [[-0.5, 0.8, 0.0], [-0.65, -0.2, 0.55], [-0.35, -0.9, -0.3]], 0.038, 6),
+      ...lobarTree(404, "left", lA, [[0.5, 0.8, 0.0], [0.6, -0.15, 0.5], [0.35, -0.9, -0.3]], 0.036, 6),
+    ],
+    "artery",
+    300,
+  );
+
+  const rV = rightHilum.clone().add(new THREE.Vector3(0.03, -0.18, 0.08));
+  const lV = leftHilum.clone().add(new THREE.Vector3(-0.03, -0.16, 0.08));
+  const atrium = new THREE.Vector3(0.12, -0.12, 0.05);
+  along(
+    [
+      { a: rV, b: atrium, r: 0.04 },
+      { a: lV, b: atrium, r: 0.04 },
+      ...lobarTree(505, "right", rV, [[-0.55, 0.6, 0.25], [-0.6, -0.5, 0.4], [-0.3, -0.95, 0.05]], 0.034, 6),
+      ...lobarTree(606, "left", lV, [[0.55, 0.6, 0.25], [0.6, -0.45, 0.4], [0.3, -0.95, 0.05]], 0.032, 6),
+    ],
+    "vein",
+    300,
+  );
+
+  /* Tumour: positions are stored in tumour radii and scaled on the GPU. */
+  const TUMOR_CELLS = 5200;
+  const ranks = Array.from({ length: TUMOR_CELLS }, (_, i) => (i + 0.5) / TUMOR_CELLS);
+  for (let i = ranks.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
+  }
+  const dir = new THREE.Vector3();
+  const jitter = new THREE.Vector3();
+  for (let i = 0; i < TUMOR_CELLS; i++) {
+    if (i < 600) {
+      // Spiculated margin: cells streaming outward along thin strands.
+      const sr = mulberry32(900 + Math.floor(rng() * 26));
+      randomDirection(sr, dir);
+      const reach = 0.35 + sr() * 0.55;
+      tmp.copy(dir).multiplyScalar(0.9 + rng() * reach);
+      jitter.set(gaussian(rng), gaussian(rng), gaussian(rng)).multiplyScalar(0.025);
+      tmp.add(jitter);
+    } else {
+      randomDirection(rng, dir);
+      const depth = i % 3 === 0 ? 0.92 + rng() * 0.08 : Math.cbrt(rng());
+      tmp.copy(dir).multiplyScalar(tumorRadiusAt(dir) * depth);
+    }
+    add(tmp, "tumorSensitive", { flag: 1, rank: ranks[i] });
+  }
+
+  /* Tumour microenvironment, also in tumour radii. */
+  for (let i = 0; i < 1300; i++) {
+    randomDirection(rng, dir).multiplyScalar(1.05 + Math.pow(rng(), 1.8) * 2.2);
+    add(dir, "lymphocyte", { flag: 1 });
+  }
+  for (let i = 0; i < 800; i++) {
+    randomDirection(rng, dir).multiplyScalar(0.85 + Math.pow(rng(), 1.5) * 1.3);
+    add(dir, "macrophage", { flag: 1 });
+  }
+
+  /* Lymph nodes: tight balls of lymphocytes with a few macrophages. */
+  LYMPH_NODES.forEach((node, index) => {
+    const radius = 0.03 + node.shortAxisMm * 0.0034;
+    const count = 140 + node.shortAxisMm * 32;
+    const centre = new THREE.Vector3(...node.position);
+    for (let i = 0; i < count; i++) {
+      randomInBall(rng, tmp).multiplyScalar(radius).add(centre);
+      add(tmp, i % 9 === 0 ? "macrophage" : "lymphocyte", { node: index });
+    }
+  });
+
+  return b;
+}
+
+/* ---------- shaders ---------- */
+
+const vertexShader = /* glsl */ `
+  attribute vec3 aAtlas;
+  attribute vec3 aAtlas2;
+  attribute float aCat;
+  attribute float aSeed;
+  attribute float aRank;
+  attribute float aFlag;
+  attribute float aSize;
+
+  uniform float uTime;
+  uniform float uMorph;
+  uniform float uScale;
+  uniform float uPixelRatio;
+  uniform float uResist;
+  uniform float uTumorRadius;
+  uniform vec3 uTumorCenter;
+  uniform vec3 uBreath;
+  uniform vec3 uBreathCenter;
+  uniform vec3 uColors[8];
+  uniform float uAlpha[8];
+
+  varying vec3 vColor;
+  varying float vAlpha;
+
+  void main() {
+    vec3 anat = aFlag > 0.5 ? uTumorCenter + position * uTumorRadius : position;
+    anat = uBreathCenter + (anat - uBreathCenter) * uBreath;
+
+    int cat = int(aCat + 0.5);
+    bool resistant = cat == 3 && aRank < uResist;
+    if (resistant) cat = 1;
+    vec3 atlas = resistant ? aAtlas2 : aAtlas;
+
+    float t = clamp(uMorph * 1.6 - aSeed * 0.6, 0.0, 1.0);
+    float e = t * t * (3.0 - 2.0 * t);
+    vec3 p = mix(anat, atlas, e);
+    p += 0.005 * vec3(
+      sin(uTime * 0.9 + aSeed * 40.0),
+      cos(uTime * 0.7 + aSeed * 31.0),
+      sin(uTime * 0.8 + aSeed * 23.0)
+    );
+
+    vColor = uColors[cat];
+    vAlpha = uAlpha[cat];
+
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = clamp(aSize * uScale * uPixelRatio / max(0.05, -mv.z), 1.0, 18.0 * uPixelRatio);
+    if (vAlpha < 0.001) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      gl_PointSize = 0.0;
+    }
+  }
+`;
+
+const fragmentShader = /* glsl */ `
+  varying vec3 vColor;
+  varying float vAlpha;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    float a = smoothstep(0.5, 0.05, d);
+    float core = smoothstep(0.22, 0.0, d);
+    gl_FragColor = vec4(vColor * (0.85 + 0.7 * core), a * vAlpha);
+  }
+`;
+
+const BASE_ALPHA: Record<CellCategoryId, number> = {
+  alveolar: 0.42,
+  airway: 0.8,
+  artery: 0.75,
+  vein: 0.75,
+  tumorSensitive: 0.95,
+  tumorResistant: 0.95,
+  lymphocyte: 0.9,
+  macrophage: 0.85,
+};
+
 /* ---------- scene ---------- */
 
 export function createLungScene(container: HTMLElement, options: LungSceneOptions): LungSceneHandle {
@@ -313,252 +536,129 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   const camera = new THREE.PerspectiveCamera(38, 1, 0.02, 100);
   const HOME_POSITION = new THREE.Vector3(0.4, 0.55, 6.4);
   const HOME_TARGET = new THREE.Vector3(0, 0.15, 0);
+  const ATLAS_POSITION = new THREE.Vector3(0, 0.15, 6.8);
+  const ATLAS_TARGET = new THREE.Vector3(0, 0.15, 0);
   camera.position.copy(HOME_POSITION);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(HOME_TARGET);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.minDistance = 0.45;
+  controls.minDistance = 0.35;
   controls.maxDistance = 11;
   controls.autoRotate = !options.reducedMotion;
   controls.autoRotateSpeed = 0.35;
 
-  scene.add(new THREE.AmbientLight(0xbfe9ff, 0.55));
-  const key = new THREE.DirectionalLight(0xffffff, 1.1);
-  key.position.set(2, 3, 4);
-  scene.add(key);
-  const tumorLight = new THREE.PointLight(0xffb347, 2.2, 1.6, 2);
-  tumorLight.position.copy(TUMOR_POSITION).add(new THREE.Vector3(0.1, 0.1, 0.25));
-  scene.add(tumorLight);
+  /* Build the cells. */
+  const cells = buildCells();
+  const N = cells.cat.length;
+  const anat = new Float32Array(cells.anat);
+  const atlas = new Float32Array(cells.atlas);
+  const atlas2 = new Float32Array(cells.atlas2);
+  const catArr = new Float32Array(cells.cat);
+  const seedArr = new Float32Array(cells.seed);
+  const rankArr = new Float32Array(cells.rank);
+  const flagArr = new Float32Array(cells.flag);
+  const subtypeArr = Uint8Array.from(cells.subtype);
+  const nodeArr = Int8Array.from(cells.node);
 
-  // Everything that breathes lives in one group.
-  const thorax = new THREE.Group();
-  scene.add(thorax);
+  const counts = Object.fromEntries(CELL_CATEGORIES.map((c) => [c.id, 0])) as Record<CellCategoryId, number>;
+  for (let i = 0; i < N; i++) counts[CELL_CATEGORIES[catArr[i]].id]++;
 
-  const layers: Record<LayerId, THREE.Group> = {
-    parenchyma: new THREE.Group(),
-    airways: new THREE.Group(),
-    vessels: new THREE.Group(),
-    tumor: new THREE.Group(),
-    nodes: new THREE.Group(),
-    tme: new THREE.Group(),
-  };
-  const layerVisible: Record<LayerId, boolean> = {
-    parenchyma: true,
-    airways: true,
-    vessels: true,
-    tumor: true,
-    nodes: true,
-    tme: true,
-  };
-  for (const g of Object.values(layers)) thorax.add(g);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(anat, 3));
+  geometry.setAttribute("aAtlas", new THREE.BufferAttribute(atlas, 3));
+  geometry.setAttribute("aAtlas2", new THREE.BufferAttribute(atlas2, 3));
+  geometry.setAttribute("aCat", new THREE.BufferAttribute(catArr, 1));
+  geometry.setAttribute("aSeed", new THREE.BufferAttribute(seedArr, 1));
+  geometry.setAttribute("aRank", new THREE.BufferAttribute(rankArr, 1));
+  geometry.setAttribute("aFlag", new THREE.BufferAttribute(flagArr, 1));
+  geometry.setAttribute("aSize", new THREE.BufferAttribute(new Float32Array(cells.size), 1));
+  // Positions move on the GPU, so give the culling sphere generous bounds.
+  geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0.2, 0), 6);
 
-  const particleMaterials: THREE.ShaderMaterial[] = [];
-
-  /* Parenchyma: glowing shells plus a cloud of alveolar points. */
-  const parenchymaMaterial = fresnelMaterial(COLOR.parenchyma, { base: 0.025, power: 2.2, intensity: 0.9, opacity: 0.85 });
-  const alveoliMaterial = particleMaterial(COLOR.alveoli, 9, 0, 0.32);
-  particleMaterials.push(alveoliMaterial);
-  for (const side of ["right", "left"] as Side[]) {
-    const g = new THREE.SphereGeometry(1, 128, 96);
-    const pos = g.attributes.position as THREE.BufferAttribute;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      shapeLungVertex(v, side);
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    g.computeVertexNormals();
-    layers.parenchyma.add(new THREE.Mesh(g, parenchymaMaterial));
-
-    const rng = mulberry32(side === "right" ? 11 : 23);
-    const pts: number[] = [];
-    const p = new THREE.Vector3();
-    let guard = 0;
-    while (pts.length < 3800 * 3 && guard++ < 60000) {
-      p.set(LUNG_CENTER_X[side] + (rng() - 0.5) * 1.8, (rng() - 0.5) * 2.9, (rng() - 0.5) * 1.9);
-      if (insideLung(p, side, 0.95)) pts.push(p.x, p.y, p.z);
-    }
-    layers.parenchyma.add(pointsFromPositions(pts, alveoliMaterial, rng));
-  }
-
-  // Faint heart silhouette for anatomical context (not a layer).
-  const heartGeometry = new THREE.SphereGeometry(1, 64, 48);
-  {
-    const pos = heartGeometry.attributes.position as THREE.BufferAttribute;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      const taper = 1 - 0.25 * Math.max(0, -v.y);
-      pos.setXYZ(i, v.x * 0.55 * taper, v.y * 0.62, v.z * 0.5 * taper);
-    }
-    heartGeometry.computeVertexNormals();
-  }
-  const heart = new THREE.Mesh(heartGeometry, fresnelMaterial(COLOR.heart, { base: 0.01, intensity: 0.35, opacity: 0.6 }));
-  heart.position.set(0.22, -0.32, 0.22);
-  heart.rotation.z = -0.5;
-  thorax.add(heart);
-
-  /* Airways: trachea, main bronchi and lobar trees. */
-  const airwayMaterial = fresnelMaterial(COLOR.airway, { base: 0.22, power: 1.6, intensity: 0.9, opacity: 0.9 });
-  const carina = new THREE.Vector3(0, 0.92, 0);
-  const rightHilum = new THREE.Vector3(-0.5, 0.66, 0.0);
-  const leftHilum = new THREE.Vector3(0.55, 0.56, 0.0);
-  const airwaySegments: Segment[] = [
-    { a: new THREE.Vector3(0, 2.05, 0.02), b: carina, r: 0.075 },
-    { a: carina, b: rightHilum, r: 0.06 },
-    { a: carina, b: leftHilum, r: 0.055 },
-    ...lobarTree(101, "right", rightHilum, [[-0.45, 0.85, 0.12], [-0.6, -0.25, 0.65], [-0.3, -0.9, -0.25]], 0.045, 7),
-    ...lobarTree(202, "left", leftHilum, [[0.45, 0.85, 0.12], [0.6, -0.2, 0.6], [0.3, -0.9, -0.25]], 0.043, 7),
-  ];
-  layers.airways.add(new THREE.Mesh(treeGeometry(airwaySegments), airwayMaterial));
-
-  /* Vessels: pulmonary arteries (rose) and veins (violet). */
-  const arteryMaterial = fresnelMaterial(COLOR.artery, { base: 0.18, power: 1.6, intensity: 0.8, opacity: 0.75 });
-  const veinMaterial = fresnelMaterial(COLOR.vein, { base: 0.16, power: 1.6, intensity: 0.8, opacity: 0.65 });
-  const trunk = new THREE.Vector3(0.12, 0.38, 0.32);
-  const rA = rightHilum.clone().add(new THREE.Vector3(0.02, 0.05, -0.1));
-  const lA = leftHilum.clone().add(new THREE.Vector3(-0.02, 0.07, -0.1));
-  const arterySegments: Segment[] = [
-    { a: new THREE.Vector3(0.2, -0.1, 0.38), b: trunk, r: 0.07 },
-    { a: trunk, b: rA, r: 0.05 },
-    { a: trunk, b: lA, r: 0.05 },
-    ...lobarTree(303, "right", rA, [[-0.5, 0.8, 0.0], [-0.65, -0.2, 0.55], [-0.35, -0.9, -0.3]], 0.038, 6),
-    ...lobarTree(404, "left", lA, [[0.5, 0.8, 0.0], [0.6, -0.15, 0.5], [0.35, -0.9, -0.3]], 0.036, 6),
-  ];
-  const rV = rightHilum.clone().add(new THREE.Vector3(0.03, -0.18, 0.08));
-  const lV = leftHilum.clone().add(new THREE.Vector3(-0.03, -0.16, 0.08));
-  const atrium = new THREE.Vector3(0.12, -0.12, 0.05);
-  const veinSegments: Segment[] = [
-    { a: rV, b: atrium, r: 0.04 },
-    { a: lV, b: atrium, r: 0.04 },
-    ...lobarTree(505, "right", rV, [[-0.55, 0.6, 0.25], [-0.6, -0.5, 0.4], [-0.3, -0.95, 0.05]], 0.034, 6),
-    ...lobarTree(606, "left", lV, [[0.55, 0.6, 0.25], [0.6, -0.45, 0.4], [0.3, -0.95, 0.05]], 0.032, 6),
-  ];
-  layers.vessels.add(new THREE.Mesh(treeGeometry(arterySegments), arteryMaterial));
-  layers.vessels.add(new THREE.Mesh(treeGeometry(veinSegments), veinMaterial));
-
-  /* Tumour: lumpy core, spiculated margin, glow shell, cancer cells inside. */
-  const tumorGroup = new THREE.Group();
-  tumorGroup.position.copy(TUMOR_POSITION);
-  tumorGroup.scale.setScalar(TUMOR_BASE_RADIUS);
-  layers.tumor.add(tumorGroup);
-
-  let coreGeometry: THREE.BufferGeometry = new THREE.IcosahedronGeometry(1, 5);
-  coreGeometry.deleteAttribute("uv");
-  coreGeometry.deleteAttribute("normal");
-  coreGeometry = mergeVertices(coreGeometry);
-  {
-    const pos = coreGeometry.attributes.position as THREE.BufferAttribute;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      const n =
-        0.17 * Math.sin(4.1 * v.x + 1.3) * Math.sin(3.7 * v.y + 0.2) * Math.sin(4.4 * v.z + 2.2) +
-        0.07 * Math.sin(9.3 * v.x + 0.7) * Math.sin(8.1 * v.y + 1.9) * Math.sin(8.7 * v.z + 0.3) +
-        0.03 * Math.sin(17.0 * v.x) * Math.sin(15.0 * v.z + 1.0);
-      v.multiplyScalar(1 + n);
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    coreGeometry.computeVertexNormals();
-  }
-  const coreMaterial = new THREE.MeshStandardMaterial({
-    color: COLOR.tumorSensitive.clone(),
-    emissive: COLOR.tumorSensitive.clone(),
-    emissiveIntensity: 0.55,
-    roughness: 0.45,
-    metalness: 0.05,
+  const alpha = CELL_CATEGORIES.map((c) => BASE_ALPHA[c.id]);
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+      uTime: { value: 0 },
+      uMorph: { value: 0 },
+      uScale: { value: 15 },
+      uPixelRatio: { value: pixelRatio },
+      uResist: { value: 0 },
+      uTumorRadius: { value: TUMOR_BASE_RADIUS },
+      uTumorCenter: { value: TUMOR_CENTER.clone() },
+      uBreath: { value: new THREE.Vector3(1, 1, 1) },
+      uBreathCenter: { value: BREATH_CENTER.clone() },
+      uColors: { value: CELL_CATEGORIES.map((c) => new THREE.Color(c.color)) },
+      uAlpha: { value: alpha },
+    },
     transparent: true,
-    opacity: 1,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
   });
-  const core = new THREE.Mesh(coreGeometry, coreMaterial);
-  core.userData.pick = "tumor" satisfies PickId;
-  tumorGroup.add(core);
+  const points = new THREE.Points(geometry, material);
+  scene.add(points);
 
-  const shellMaterial = fresnelMaterial(COLOR.tumorSensitive, { base: 0.02, power: 1.8, intensity: 1.3, opacity: 0.9 });
-  const shell = new THREE.Mesh(coreGeometry, shellMaterial);
-  shell.scale.setScalar(1.12);
-  tumorGroup.add(shell);
+  /* Hover marker: one bright ring that follows the hovered cell. */
+  const markerGeometry = new THREE.BufferGeometry();
+  markerGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3), 3));
+  const markerMaterial = new THREE.ShaderMaterial({
+    uniforms: { uSize: { value: 22 * pixelRatio } },
+    vertexShader: /* glsl */ `
+      uniform float uSize;
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = uSize;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float ring = smoothstep(0.5, 0.42, d) * smoothstep(0.3, 0.38, d);
+        if (ring < 0.01) discard;
+        gl_FragColor = vec4(1.0, 1.0, 1.0, ring);
+      }
+    `,
+    transparent: true,
+    depthTest: false,
+  });
+  const marker = new THREE.Points(markerGeometry, markerMaterial);
+  marker.renderOrder = 10;
+  marker.visible = false;
+  marker.frustumCulled = false;
+  scene.add(marker);
 
-  const spiculeRng = mulberry32(77);
-  const spiculeParts: THREE.BufferGeometry[] = [];
-  for (let i = 0; i < 26; i++) {
-    const dir = new THREE.Vector3(spiculeRng() - 0.5, spiculeRng() - 0.5, spiculeRng() - 0.5).normalize();
-    const length = 0.35 + spiculeRng() * 0.55;
-    const g = new THREE.ConeGeometry(0.035 + spiculeRng() * 0.03, length, 6, 1, true);
-    g.translate(0, length / 2 + 0.85, 0);
-    g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-    spiculeParts.push(g);
-  }
-  const spiculeGeometry = mergeGeometries(spiculeParts, false) ?? new THREE.BufferGeometry();
-  for (const p of spiculeParts) p.dispose();
-  const spiculeMaterial = fresnelMaterial(COLOR.tumorSensitive, { base: 0.3, power: 1.4, intensity: 0.8, opacity: 0.8 });
-  tumorGroup.add(new THREE.Mesh(spiculeGeometry, spiculeMaterial));
-
-  const cancerRng = mulberry32(909);
-  const cancerPts: number[] = [];
-  while (cancerPts.length < 1400 * 3) {
-    const x = cancerRng() * 2 - 1;
-    const y = cancerRng() * 2 - 1;
-    const z = cancerRng() * 2 - 1;
-    if (x * x + y * y + z * z < 1) cancerPts.push(x * 1.05, y * 1.05, z * 1.05);
-  }
-  const cancerMaterial = particleMaterial(COLOR.cancerCell, 7, 0.01, 0);
-  particleMaterials.push(cancerMaterial);
-  const cancerCells = pointsFromPositions(cancerPts, cancerMaterial, cancerRng);
-  tumorGroup.add(cancerCells);
-
-  /* Tumour microenvironment: T cells and macrophages around the tumour. */
-  const tmeGroup = new THREE.Group();
-  tmeGroup.position.copy(TUMOR_POSITION);
-  layers.tme.add(tmeGroup);
-  const tmeRng = mulberry32(4242);
-  const shellPoints = (count: number, rMin: number, rMax: number) => {
-    const out: number[] = [];
-    while (out.length < count * 3) {
-      const d = new THREE.Vector3(tmeRng() - 0.5, tmeRng() - 0.5, tmeRng() - 0.5);
-      if (d.lengthSq() < 1e-4) continue;
-      d.normalize().multiplyScalar(rMin + Math.pow(tmeRng(), 0.7) * (rMax - rMin));
-      out.push(d.x, d.y, d.z);
-    }
-    return out;
-  };
-  const tCellMaterial = particleMaterial(COLOR.tCell, 7, 0.025, 0);
-  const macrophageMaterial = particleMaterial(COLOR.macrophage, 10, 0.008, 0);
-  particleMaterials.push(tCellMaterial, macrophageMaterial);
-  tmeGroup.add(pointsFromPositions(shellPoints(520, 0.14, 0.55), tCellMaterial, tmeRng));
-  tmeGroup.add(pointsFromPositions(shellPoints(260, 0.12, 0.4), macrophageMaterial, tmeRng));
-
-  /* Lymph nodes. */
-  const nodeGeometry = new THREE.SphereGeometry(1, 24, 18);
-  const nodeMeshes = new Map<string, THREE.Mesh>();
-  for (const node of LYMPH_NODES) {
-    const suspicious = node.status === "suspicious";
-    const color = suspicious ? COLOR.nodeSuspicious : COLOR.nodeBenign;
-    const material = new THREE.MeshStandardMaterial({
-      color,
-      emissive: color,
-      emissiveIntensity: suspicious ? 0.7 : 0.35,
-      roughness: 0.5,
-    });
-    const mesh = new THREE.Mesh(nodeGeometry, material);
-    mesh.position.set(...node.position);
-    mesh.scale.setScalar(0.02 + node.shortAxisMm * 0.0028);
-    mesh.userData.pick = `node:${node.station}` satisfies PickId;
-    mesh.userData.baseScale = mesh.scale.x;
-    nodeMeshes.set(node.station, mesh);
-    layers.nodes.add(mesh);
-  }
-
-  /* Selection reticle (billboarded ring). */
-  const reticle = new THREE.Mesh(
-    new THREE.RingGeometry(1, 1.06, 64),
-    new THREE.MeshBasicMaterial({ color: 0xe0fdf4, transparent: true, opacity: 0.85, depthTest: false, side: THREE.DoubleSide }),
-  );
-  reticle.renderOrder = 10;
+  /* Selection reticle (billboarded ring) for the tumour or a node. */
+  const reticleMaterial = new THREE.MeshBasicMaterial({
+    color: 0xe0fdf4,
+    transparent: true,
+    opacity: 0.8,
+    depthTest: false,
+    side: THREE.DoubleSide,
+  });
+  const reticleGeometry = new THREE.RingGeometry(1, 1.05, 64);
+  const reticle = new THREE.Mesh(reticleGeometry, reticleMaterial);
+  reticle.renderOrder = 11;
   reticle.visible = false;
   scene.add(reticle);
+
+  /* Direct labels for atlas clusters. */
+  const labelLayer = document.createElement("div");
+  labelLayer.style.cssText = "position:absolute;inset:0;pointer-events:none;overflow:hidden;";
+  container.appendChild(labelLayer);
+  const labels = CELL_CATEGORIES.map((c) => {
+    const el = document.createElement("div");
+    el.style.cssText =
+      "position:absolute;left:0;top:0;white-space:nowrap;font:600 11px/1.2 ui-sans-serif,system-ui,sans-serif;color:#e2e8f0;text-shadow:0 1px 6px #000,0 0 2px #000;opacity:0;display:flex;align-items:center;gap:6px;";
+    const dot = document.createElement("span");
+    dot.style.cssText = `width:8px;height:8px;border-radius:999px;background:${c.color};display:inline-block;`;
+    const text = document.createElement("span");
+    el.append(dot, text);
+    labelLayer.appendChild(el);
+    return { id: c.id, el, text };
+  });
 
   /* ---------- state ---------- */
 
@@ -566,6 +666,12 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   let resistant = 0;
   let selected: PickId | null = null;
   let breathing = !options.reducedMotion;
+  let view: ViewMode = "anatomy";
+  let morph = 0;
+  let morphFrom = 0;
+  let morphTo = 0;
+  let morphStart = 0;
+  const MORPH_MS = options.reducedMotion ? 1 : 2600;
   let fly: {
     fromPos: THREE.Vector3;
     fromTarget: THREE.Vector3;
@@ -574,19 +680,75 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     start: number;
     duration: number;
   } | null = null;
+  const breath = new THREE.Vector3(1, 1, 1);
 
-  const pickables = (): THREE.Object3D[] => {
-    const out: THREE.Object3D[] = [];
-    if (layerVisible.tumor) out.push(core);
-    if (layerVisible.nodes) out.push(...nodeMeshes.values());
+  const tumorRadius = () => TUMOR_BASE_RADIUS * tumorScale;
+
+  const isResistant = (i: number) => catArr[i] === CAT.tumorSensitive && rankArr[i] < resistant;
+  const effectiveCat = (i: number) => (isResistant(i) ? CAT.tumorResistant : catArr[i]);
+
+  const refreshLabels = () => {
+    let nRes = 0;
+    for (let i = 0; i < N; i++) if (isResistant(i)) nRes++;
+    for (const l of labels) {
+      let n = counts[l.id];
+      if (l.id === "tumorSensitive") n -= nRes;
+      if (l.id === "tumorResistant") n = nRes;
+      l.text.textContent = `${CELL_CATEGORIES[CAT[l.id]].label} · ${n.toLocaleString("en-US")}`;
+    }
+  };
+  refreshLabels();
+
+  /* CPU mirror of the vertex shader, for hover, picking and markers. */
+  const cellPosition = (i: number, out: THREE.Vector3) => {
+    const j = i * 3;
+    if (flagArr[i] > 0.5) {
+      const r = tumorRadius();
+      out.set(TUMOR_CENTER.x + anat[j] * r, TUMOR_CENTER.y + anat[j + 1] * r, TUMOR_CENTER.z + anat[j + 2] * r);
+    } else {
+      out.set(anat[j], anat[j + 1], anat[j + 2]);
+    }
+    out.sub(BREATH_CENTER).multiply(breath).add(BREATH_CENTER);
+    const t = Math.min(1, Math.max(0, morph * 1.6 - seedArr[i] * 0.6));
+    const e = t * t * (3 - 2 * t);
+    if (e > 0) {
+      const src = isResistant(i) ? atlas2 : atlas;
+      out.x += (src[j] - out.x) * e;
+      out.y += (src[j + 1] - out.y) * e;
+      out.z += (src[j + 2] - out.z) * e;
+    }
     return out;
   };
 
+  const describe = (i: number): Omit<HoverInfo, "x" | "y"> => {
+    const category = CELL_CATEGORIES[effectiveCat(i)];
+    const title = isResistant(i) ? RESISTANT_SUBTYPE_LABEL : CELL_SUBTYPES[subtypeArr[i]].label;
+    let where: string;
+    if (nodeArr[i] >= 0) {
+      const node = LYMPH_NODES[nodeArr[i]];
+      where = `Lymph node ${node.station} · ${node.name}`;
+    } else if (flagArr[i] > 0.5) {
+      where = catArr[i] === CAT.tumorSensitive ? "Primary tumour, right upper lobe" : "Tumour microenvironment";
+    } else {
+      const j = i * 3;
+      const x = anat[j];
+      const y = anat[j + 1];
+      const z = anat[j + 2];
+      if (Math.abs(x) < 0.3 && y > 0.85) where = "Trachea";
+      else if (x < 0) where = y > 0.45 ? "Right upper lobe" : y > -0.1 && z > 0 ? "Right middle lobe" : "Right lower lobe";
+      else where = y > 0.15 ? "Left upper lobe" : "Left lower lobe";
+    }
+    return { title, detail: `${category.label} · ${where}`, color: category.color };
+  };
+
   const worldPositionOf = (id: PickId) => {
-    const v = new THREE.Vector3();
-    if (id === "tumor") return core.getWorldPosition(v);
-    const mesh = nodeMeshes.get(id.slice(5));
-    return mesh ? mesh.getWorldPosition(v) : v.copy(HOME_TARGET);
+    let p: THREE.Vector3;
+    if (id === "tumor") p = TUMOR_CENTER.clone();
+    else {
+      const node = LYMPH_NODES.find((n) => `node:${n.station}` === id);
+      p = node ? new THREE.Vector3(...node.position) : HOME_TARGET.clone();
+    }
+    return p.sub(BREATH_CENTER).multiply(breath).add(BREATH_CENTER);
   };
 
   const flyTo = (toPos: THREE.Vector3, toTarget: THREE.Vector3) => {
@@ -602,23 +764,33 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
 
   /* ---------- pointer handling ---------- */
 
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
+  let pointerX = 0;
+  let pointerY = 0;
+  let pointerInside = false;
+  let pickDirty = false;
+  let hovered = -1;
   let downX = 0;
   let downY = 0;
+  const proj = new THREE.Vector3();
 
-  const hitTest = (event: PointerEvent) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
-    raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(pickables(), false)[0];
-    return { id: (hit?.object.userData.pick as PickId | undefined) ?? null, rect };
-  };
-
-  const labelFor = (id: PickId) => {
-    if (id === "tumor") return "Primary tumour · right upper lobe";
-    const node = LYMPH_NODES.find((n) => `node:${n.station}` === id);
-    return node ? `Station ${node.station} · ${node.name}` : id;
+  const pickAt = (px: number, py: number) => {
+    const w = renderer.domElement.clientWidth;
+    const h = renderer.domElement.clientHeight;
+    let best = -1;
+    let bestScore = 81; // within 9 px
+    for (let i = 0; i < N; i++) {
+      if (alpha[effectiveCat(i)] < 0.001) continue;
+      cellPosition(i, proj).project(camera);
+      if (proj.z > 1 || proj.z < -1) continue;
+      const dx = ((proj.x + 1) / 2) * w - px;
+      const dy = ((1 - proj.y) / 2) * h - py;
+      const d = dx * dx + dy * dy;
+      if (d < bestScore) {
+        bestScore = d;
+        best = i;
+      }
+    }
+    return best;
   };
 
   const onPointerDown = (event: PointerEvent) => {
@@ -628,16 +800,31 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   };
   const onPointerUp = (event: PointerEvent) => {
     if (Math.hypot(event.clientX - downX, event.clientY - downY) > 5) return;
-    const { id } = hitTest(event);
-    if (id) options.onPick(id);
+    const rect = renderer.domElement.getBoundingClientRect();
+    const i = pickAt(event.clientX - rect.left, event.clientY - rect.top);
+    if (i < 0) return;
+    if (nodeArr[i] >= 0) options.onPick(`node:${LYMPH_NODES[nodeArr[i]].station}`);
+    else if (flagArr[i] > 0.5) options.onPick("tumor");
   };
   const onPointerMove = (event: PointerEvent) => {
-    if (event.buttons !== 0) return;
-    const { id, rect } = hitTest(event);
-    renderer.domElement.style.cursor = id ? "pointer" : "grab";
-    options.onHover(id ? { label: labelFor(id), x: event.clientX - rect.left, y: event.clientY - rect.top } : null);
+    if (event.buttons !== 0) {
+      if (hovered >= 0) {
+        hovered = -1;
+        options.onHover(null);
+      }
+      return;
+    }
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointerX = event.clientX - rect.left;
+    pointerY = event.clientY - rect.top;
+    pointerInside = true;
+    pickDirty = true;
   };
-  const onPointerLeave = () => options.onHover(null);
+  const onPointerLeave = () => {
+    pointerInside = false;
+    hovered = -1;
+    options.onHover(null);
+  };
 
   renderer.domElement.addEventListener("pointerdown", onPointerDown);
   renderer.domElement.addEventListener("pointerup", onPointerUp);
@@ -657,28 +844,33 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
 
-  for (const m of particleMaterials) m.uniforms.uPixelRatio.value = pixelRatio * 60;
-
   const startTime = performance.now();
-  const tumorWorld = new THREE.Vector3();
+  let lastPick = 0;
   let frame = 0;
+  const scratch = new THREE.Vector3();
 
   const tick = () => {
     frame = requestAnimationFrame(tick);
-    const elapsed = (performance.now() - startTime) / 1000;
-    const animTime = options.reducedMotion ? 0 : elapsed;
+    const now = performance.now();
+    const elapsed = (now - startTime) / 1000;
 
-    // Breathing: ~14 breaths per minute.
-    const breath = breathing ? Math.sin((elapsed * Math.PI * 2) / 4.3) : 0;
-    thorax.scale.set(1 + 0.022 * breath, 1 + 0.03 * breath, 1 + 0.022 * breath);
+    const mt = Math.min(1, (now - morphStart) / MORPH_MS);
+    morph = morphFrom + (morphTo - morphFrom) * mt;
+
+    // Breathing: ~14 breaths per minute, fading out in the atlas view.
+    const b = breathing ? Math.sin((elapsed * Math.PI * 2) / 4.3) * (1 - morph) : 0;
+    breath.set(1 + 0.022 * b, 1 + 0.03 * b, 1 + 0.022 * b);
 
     const pulse = options.reducedMotion ? 1 : 1 + 0.018 * Math.sin(elapsed * 2.6);
-    tumorGroup.scale.setScalar(TUMOR_BASE_RADIUS * tumorScale * pulse);
-
-    for (const m of particleMaterials) m.uniforms.uTime.value = animTime;
+    const u = material.uniforms;
+    u.uTime.value = options.reducedMotion ? 0 : elapsed;
+    u.uMorph.value = morph;
+    u.uResist.value = resistant;
+    u.uTumorRadius.value = tumorRadius() * pulse;
+    (u.uBreath.value as THREE.Vector3).copy(breath);
 
     if (fly) {
-      const t = Math.min(1, (performance.now() - fly.start) / fly.duration);
+      const t = Math.min(1, (now - fly.start) / fly.duration);
       const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       camera.position.lerpVectors(fly.fromPos, fly.toPos, e);
       controls.target.lerpVectors(fly.fromTarget, fly.toTarget, e);
@@ -686,24 +878,52 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     }
     controls.update();
 
-    // Multiscale reveal: the closer the camera, the more cellular detail.
-    core.getWorldPosition(tumorWorld);
-    const dist = camera.position.distanceTo(tumorWorld);
-    const closeness = 1 - smoothstep(0.9, 3.0, dist);
-    parenchymaMaterial.uniforms.uOpacity.value = 0.85 * (1 - 0.6 * closeness);
-    alveoliMaterial.uniforms.uOpacity.value = 0.32 * (1 - 0.5 * closeness);
-    coreMaterial.opacity = 1 - 0.72 * closeness;
-    coreMaterial.depthWrite = coreMaterial.opacity > 0.95;
-    cancerMaterial.uniforms.uOpacity.value = 0.95 * closeness;
-    tCellMaterial.uniforms.uOpacity.value = 0.95 * closeness;
-    macrophageMaterial.uniforms.uOpacity.value = 0.85 * closeness;
+    // Hover picking, at most every 50 ms.
+    if (pointerInside && pickDirty && now - lastPick > 50) {
+      pickDirty = false;
+      lastPick = now;
+      const i = pickAt(pointerX, pointerY);
+      if (i !== hovered) {
+        hovered = i;
+        renderer.domElement.style.cursor = i >= 0 && (nodeArr[i] >= 0 || flagArr[i] > 0.5) ? "pointer" : "grab";
+      }
+      options.onHover(i >= 0 ? { ...describe(i), x: pointerX, y: pointerY } : null);
+    }
+    if (hovered >= 0) {
+      cellPosition(hovered, scratch);
+      const attr = markerGeometry.attributes.position as THREE.BufferAttribute;
+      attr.setXYZ(0, scratch.x, scratch.y, scratch.z);
+      attr.needsUpdate = true;
+      marker.visible = true;
+    } else {
+      marker.visible = false;
+    }
 
-    if (selected && reticle.visible) {
-      const p = worldPositionOf(selected);
-      reticle.position.copy(p);
+    // Selection reticle only makes sense in the anatomical view.
+    if (selected && morph < 0.5) {
+      reticle.visible = true;
+      reticle.position.copy(worldPositionOf(selected));
       reticle.quaternion.copy(camera.quaternion);
-      const r = selected === "tumor" ? TUMOR_BASE_RADIUS * tumorScale * 1.9 : 0.08;
+      const r = selected === "tumor" ? tumorRadius() * 2.2 : 0.09;
       reticle.scale.setScalar(r * (1 + 0.04 * Math.sin(elapsed * 3)));
+      reticleMaterial.opacity = 0.8 * (1 - morph * 2);
+    } else {
+      reticle.visible = false;
+    }
+
+    // Atlas labels follow their cluster centres.
+    const labelAlpha = Math.max(0, (morph - 0.6) / 0.4);
+    const w = renderer.domElement.clientWidth;
+    const h = renderer.domElement.clientHeight;
+    for (const l of labels) {
+      const c = ATLAS[l.id];
+      if (labelAlpha <= 0 || alpha[CAT[l.id]] < 0.001) {
+        l.el.style.opacity = "0";
+        continue;
+      }
+      scratch.set(c.x, c.y + 0.1 + c.spread * 0.85, 0).project(camera);
+      l.el.style.opacity = String(labelAlpha);
+      l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px) translate(-50%, -50%)`;
     }
 
     renderer.render(scene, camera);
@@ -712,53 +932,47 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
 
   /* ---------- handle ---------- */
 
-  const applyTumorColor = () => {
-    const c = COLOR.tumorSensitive.clone().lerp(COLOR.tumorResistant, resistant);
-    coreMaterial.color.copy(c);
-    coreMaterial.emissive.copy(c);
-    (shellMaterial.uniforms.uColor.value as THREE.Color).copy(c);
-    (spiculeMaterial.uniforms.uColor.value as THREE.Color).copy(c);
-    tumorLight.color.copy(c);
-  };
-
   return {
-    setLayerVisible(id, visible) {
-      layerVisible[id] = visible;
-      layers[id].visible = visible;
-      if (id === "tumor") tumorLight.visible = visible;
-      if (!visible && selected) {
-        if ((id === "tumor" && selected === "tumor") || (id === "nodes" && selected.startsWith("node:"))) {
-          reticle.visible = false;
-        }
-      } else if (visible && selected) {
-        reticle.visible = true;
+    counts,
+    setCategoryVisible(id, visible) {
+      alpha[CAT[id]] = visible ? BASE_ALPHA[id] : 0;
+      material.uniforms.uAlpha.value = alpha;
+    },
+    setView(next) {
+      if (next === view) return;
+      view = next;
+      morphFrom = morph;
+      morphTo = next === "atlas" ? 1 : 0;
+      morphStart = performance.now();
+      if (next === "atlas") {
+        controls.autoRotate = false;
+        flyTo(ATLAS_POSITION.clone(), ATLAS_TARGET.clone());
+      } else {
+        controls.autoRotate = !options.reducedMotion;
+        flyTo(HOME_POSITION.clone(), HOME_TARGET.clone());
       }
     },
     setTumorState(scale, resistantFraction) {
       tumorScale = scale;
       resistant = Math.min(1, Math.max(0, resistantFraction));
-      applyTumorColor();
+      refreshLabels();
     },
     setSelected(id) {
       selected = id;
-      reticle.visible = id !== null;
-      for (const [station, mesh] of nodeMeshes) {
-        const base = mesh.userData.baseScale as number;
-        mesh.scale.setScalar(id === `node:${station}` ? base * 1.35 : base);
-      }
     },
     setBreathing(on) {
       breathing = on;
     },
     focusTumor() {
       controls.autoRotate = false;
-      const target = core.getWorldPosition(new THREE.Vector3());
-      const offset = new THREE.Vector3(-0.55, 0.22, 1.0).normalize().multiplyScalar(0.75 + tumorScale * 0.35);
+      const target = view === "atlas" ? new THREE.Vector3(ATLAS.tumorSensitive.x, ATLAS.tumorSensitive.y, 0) : worldPositionOf("tumor");
+      const offset = new THREE.Vector3(-0.55, 0.22, 1.0).normalize().multiplyScalar(0.7 + tumorScale * 0.35);
       flyTo(target.clone().add(offset), target);
     },
     resetView() {
-      controls.autoRotate = !options.reducedMotion;
-      flyTo(HOME_POSITION.clone(), HOME_TARGET.clone());
+      controls.autoRotate = !options.reducedMotion && view === "anatomy";
+      if (view === "atlas") flyTo(ATLAS_POSITION.clone(), ATLAS_TARGET.clone());
+      else flyTo(HOME_POSITION.clone(), HOME_TARGET.clone());
     },
     dispose() {
       cancelAnimationFrame(frame);
@@ -768,19 +982,15 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
       controls.dispose();
-      const geometries = new Set<THREE.BufferGeometry>();
-      const materials = new Set<THREE.Material>();
-      scene.traverse((obj) => {
-        const withGeometry = obj as THREE.Mesh | THREE.Points;
-        if (withGeometry.geometry) geometries.add(withGeometry.geometry);
-        const mat = (withGeometry as THREE.Mesh).material;
-        if (Array.isArray(mat)) mat.forEach((m) => materials.add(m));
-        else if (mat) materials.add(mat);
-      });
-      geometries.forEach((g) => g.dispose());
-      materials.forEach((m) => m.dispose());
+      geometry.dispose();
+      material.dispose();
+      markerGeometry.dispose();
+      markerMaterial.dispose();
+      reticleGeometry.dispose();
+      reticleMaterial.dispose();
       renderer.dispose();
       renderer.domElement.remove();
+      labelLayer.remove();
     },
   };
 }
