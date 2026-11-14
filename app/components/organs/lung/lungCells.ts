@@ -2,11 +2,10 @@
   Cell categories for the point-cloud lung. Every point in the scene is one
   cell; its colour says which category it belongs to.
 
-  Colours are the dark-mode categorical palette (8 slots, validated for
-  colour-vision deficiency on adjacent pairs). Because a point cloud puts
-  every pair next to every other, identity never relies on colour alone:
-  the legend names each category with a count, the atlas view labels each
-  cluster directly, and hovering a point names the cell.
+  Colours are a neon spectrum chosen to match the MindCorpus look on a pure
+  black background. Identity never relies on colour alone: the legend names
+  each category with a count, the atlas, ring and grid views label each
+  group directly, and hovering a point names the cell.
 
   Kept free of three.js so UI code can import it without the 3D bundle.
 */
@@ -36,56 +35,56 @@ export const CELL_CATEGORIES: CellCategory[] = [
     id: "alveolar",
     index: 0,
     label: "Alveolar epithelium",
-    color: "#3987e5",
+    color: "#4f7dff",
     description: "Type I cells line the air sacs for gas exchange; type II cells make surfactant and repair them.",
   },
   {
     id: "tumorResistant",
     index: 1,
     label: "Resistant tumour cells",
-    color: "#d95926",
+    color: "#ff2e63",
     description: "Cells that survive the EGFR inhibitor, for example through MET amplification or an EGFR C797S mutation.",
   },
   {
     id: "airway",
     index: 2,
     label: "Airway epithelium",
-    color: "#199e70",
+    color: "#00f5d4",
     description: "Ciliated, club and basal cells lining the trachea and bronchi.",
   },
   {
     id: "tumorSensitive",
     index: 3,
     label: "Tumour cells",
-    color: "#c98500",
+    color: "#ffd60a",
     description: "Adenocarcinoma cells carrying the EGFR exon 19 deletion, still sensitive to the drug.",
   },
   {
     id: "macrophage",
     index: 4,
     label: "Macrophages",
-    color: "#d55181",
+    color: "#ff4ecd",
     description: "Alveolar macrophages in healthy tissue and tumour-associated macrophages around the lesion.",
   },
   {
     id: "lymphocyte",
     index: 5,
     label: "Lymphocytes",
-    color: "#0ca30c",
+    color: "#7cff4f",
     description: "T and B cells in lymph nodes and infiltrating the tumour.",
   },
   {
     id: "vein",
     index: 6,
     label: "Venous endothelium",
-    color: "#9085e9",
+    color: "#9b5cff",
     description: "Cells lining the pulmonary veins that return oxygenated blood to the heart.",
   },
   {
     id: "artery",
     index: 7,
     label: "Arterial endothelium",
-    color: "#e66767",
+    color: "#ff7a1a",
     description: "Cells lining the pulmonary arteries and their smooth muscle wall.",
   },
 ];
@@ -172,3 +171,13 @@ export const FLOW_KEEP: Record<CellCategoryId, number> = {
   artery: 0.4,
   vein: 0.35,
 };
+
+/* Larger groupings used by the ring and grid views. */
+export type Compartment = { id: string; label: string; categories: CellCategoryId[] };
+
+export const COMPARTMENTS: Compartment[] = [
+  { id: "tumour", label: "Tumour", categories: ["tumorSensitive", "tumorResistant"] },
+  { id: "immune", label: "Immune", categories: ["lymphocyte", "macrophage"] },
+  { id: "vessels", label: "Vessels", categories: ["artery", "vein"] },
+  { id: "epithelium", label: "Epithelium", categories: ["airway", "alveolar"] },
+];

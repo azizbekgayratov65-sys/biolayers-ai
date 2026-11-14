@@ -16,29 +16,31 @@ export type CtClassId = "airway" | "parenchyma" | "vessel" | "bone";
 
 export type CtClass = { id: CtClassId; index: number; label: string; color: string; description: string };
 
-// Same dark-mode categorical palette as the cell model (slots 3, 1, 8, 7 → aqua, blue, red, violet).
+// Neon colours to match the cell model; each class also shifts colour with density in the 3D view.
 export const CT_CLASSES: CtClass[] = [
-  { id: "airway", index: 0, label: "Airways", color: "#199e70", description: "Air in the trachea and bronchi, below −960 HU." },
+  { id: "airway", index: 0, label: "Airways", color: "#00f5d4", description: "Air in the trachea and bronchi, below −960 HU." },
   {
     id: "parenchyma",
     index: 1,
     label: "Lung tissue",
-    color: "#3987e5",
+    color: "#4f7dff",
     description: "Aerated lung between −960 and −500 HU.",
   },
   {
     id: "vessel",
     index: 2,
     label: "Vessels & nodules",
-    color: "#e66767",
+    color: "#ff4ecd",
     description: "Denser structures inside the lung field: blood vessels, nodules and tumours.",
   },
-  { id: "bone", index: 3, label: "Bone", color: "#9085e9", description: "Ribs, spine and sternum above 250 HU." },
+  { id: "bone", index: 3, label: "Bone", color: "#9b5cff", description: "Ribs, spine and sternum above 250 HU." },
 ];
 
 export type CtPointCloud = {
   positions: Float32Array;
   classes: Float32Array;
+  /* Density of each point in Hounsfield units, used for its colour. */
+  hu: Float32Array;
   counts: Record<CtClassId, number>;
   /* Half-extents of the cloud in scene units, for framing the camera. */
   extent: [number, number, number];
@@ -186,6 +188,7 @@ export function buildCtPointCloud(volume: {
   const total = CT_CLASSES.reduce((n, c) => n + Math.min(counts[c.id], BUDGET[c.id]), 0) + 1000;
   const positions = new Float32Array(total * 3);
   const classes = new Float32Array(total);
+  const huOut = new Float32Array(total);
   const kept: Record<CtClassId, number> = { airway: 0, parenchyma: 0, vessel: 0, bone: 0 };
 
   let seed = 1234567;
@@ -212,6 +215,7 @@ export function buildCtPointCloud(volume: {
         positions[n * 3 + 1] = py * MM_TO_SCENE;
         positions[n * 3 + 2] = pz * MM_TO_SCENE;
         classes[n] = c;
+        huOut[n] = S[zo + y * w + x];
         kept[CT_CLASSES[c].id]++;
         n++;
       }
@@ -221,6 +225,7 @@ export function buildCtPointCloud(volume: {
   return {
     positions: positions.subarray(0, n * 3),
     classes: classes.subarray(0, n),
+    hu: huOut.subarray(0, n),
     counts: kept,
     extent: [cx * MM_TO_SCENE, cz * MM_TO_SCENE, cy * MM_TO_SCENE],
   };

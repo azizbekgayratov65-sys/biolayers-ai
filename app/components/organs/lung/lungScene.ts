@@ -25,13 +25,14 @@ import {
   DRUGS,
   FLOW_KEEP,
   FLOW_ROUTES,
+  COMPARTMENTS,
   PATHWAYS,
   RESISTANT_SUBTYPE_LABEL,
   type CellCategoryId,
 } from "./lungCells";
 import { LYMPH_NODES } from "./lungNodes";
 
-export type ViewMode = "anatomy" | "atlas" | "flow";
+export type ViewMode = "anatomy" | "atlas" | "flow" | "rings" | "grid";
 
 export type PickId = "tumor" | `node:${string}`;
 
@@ -52,6 +53,10 @@ export type LungSceneHandle = {
   setSelected: (id: PickId | null) => void;
   setBreathing: (on: boolean) => void;
   focusTumor: () => void;
+  /* Turn the camera around its target (radians) — used by hand control. */
+  rotateBy: (dTheta: number, dPhi: number) => void;
+  /* Multiply the camera distance (below 1 zooms in) — used by hand control. */
+  zoomBy: (factor: number) => void;
   resetView: () => void;
   dispose: () => void;
 };
@@ -303,6 +308,78 @@ function atlasPoint(rng: () => number, category: CellCategoryId, subIndex: numbe
   return out;
 }
 
+/* ---------- ring and grid layouts (the MindCorpus "table builder" views) ---------- */
+
+type Rect = { x: number; y: number; w: number; h: number };
+
+/* Squarified treemap: lays weighted items into rect with near-square cells. */
+function squarify(items: { key: string; weight: number }[], rect: Rect): Map<string, Rect> {
+  const out = new Map<string, Rect>();
+  const total = items.reduce((t, i) => t + i.weight, 0);
+  if (total <= 0) return out;
+  const scale = (rect.w * rect.h) / total;
+  let rest = items.map((i) => ({ key: i.key, area: i.weight * scale })).sort((a, b) => b.area - a.area);
+  let r = { ...rect };
+  const worst = (row: { area: number }[], side: number) => {
+    const sum = row.reduce((t, x) => t + x.area, 0);
+    let max = 0;
+    let min = Infinity;
+    for (const x of row) {
+      max = Math.max(max, x.area);
+      min = Math.min(min, x.area);
+    }
+    return Math.max((side * side * max) / (sum * sum), (sum * sum) / (side * side * min));
+  };
+  while (rest.length) {
+    const side = Math.min(r.w, r.h);
+    const row = [rest[0]];
+    let i = 1;
+    while (i < rest.length && worst([...row, rest[i]], side) <= worst(row, side)) row.push(rest[i++]);
+    const sum = row.reduce((t, x) => t + x.area, 0);
+    if (r.w >= r.h) {
+      const cw = sum / r.h;
+      let y = r.y + r.h;
+      for (const it of row) {
+        const hh = it.area / cw;
+        y -= hh;
+        out.set(it.key, { x: r.x, y, w: cw, h: hh });
+      }
+      r = { x: r.x + cw, y: r.y, w: r.w - cw, h: r.h };
+    } else {
+      const rh = sum / r.w;
+      let x = r.x;
+      for (const it of row) {
+        const ww = it.area / rh;
+        out.set(it.key, { x, y: r.y + r.h - rh, w: ww, h: rh });
+        x += ww;
+      }
+      r = { x: r.x, y: r.y, w: r.w, h: r.h - rh };
+    }
+    rest = rest.slice(row.length);
+  }
+  return out;
+}
+
+const inset = (r: Rect, p: number): Rect => ({
+  x: r.x + p,
+  y: r.y + p,
+  w: Math.max(0.002, r.w - 2 * p),
+  h: Math.max(0.002, r.h - 2 * p),
+});
+
+const GRID_RECT: Rect = { x: -2.45, y: -1.5, w: 4.9, h: 3.4 };
+const RING_CENTER = new THREE.Vector3(0, 0.15, 0);
+const RING_BANDS: [number, number][] = [
+  [0.35, 0.78],
+  [0.84, 1.32],
+  [1.38, 1.82],
+];
+
+export type LayoutLabels = {
+  grid: { text: string; color?: string; x: number; y: number; major: boolean }[];
+  rings: { text: string; color: string; angle: number }[];
+};
+
 /* ---------- point buffer ---------- */
 
 type Builder = {
@@ -317,6 +394,9 @@ type Builder = {
   subtype: number[];
   node: number[];
   flow: number[];
+  tree: number[];
+  radial: number[];
+  labels: LayoutLabels;
 };
 
 const SUBTYPES_BY_CATEGORY: Record<CellCategoryId, number[]> = Object.fromEntries(
@@ -346,6 +426,9 @@ export function buildCells(): Builder {
     subtype: [],
     node: [],
     flow: [],
+    tree: [],
+    radial: [],
+    labels: { grid: [], rings: [] },
   };
   const rng = mulberry32(20261114);
   const tmp = new THREE.Vector3();
@@ -525,7 +608,111 @@ export function buildCells(): Builder {
     }
   });
 
+  assignLayouts(b, rng);
   return b;
+}
+
+/* Gives every cell a place in the grid (treemap) and ring (sunburst) views. */
+function assignLayouts(b: Builder, rng: () => number) {
+  const n = b.cat.length;
+  const catCount = new Array<number>(CELL_CATEGORIES.length).fill(0);
+  const subCount = new Map<number, number>();
+  for (let i = 0; i < n; i++) {
+    catCount[b.cat[i]]++;
+    subCount.set(b.subtype[i], (subCount.get(b.subtype[i]) ?? 0) + 1);
+  }
+  const weight = (count: number) => Math.pow(count, 0.62);
+  const present = (id: CellCategoryId) => catCount[CAT[id]] > 0;
+
+  /* Grid: compartment → cell type → subtype rectangles. */
+  const compRects = squarify(
+    COMPARTMENTS.map((c) => ({
+      key: c.id,
+      weight: c.categories.filter(present).reduce((t, id) => t + weight(catCount[CAT[id]]), 0),
+    })).filter((x) => x.weight > 0),
+    GRID_RECT,
+  );
+  const subRects = new Map<number, Rect>();
+  for (const comp of COMPARTMENTS) {
+    const cr = compRects.get(comp.id);
+    if (!cr) continue;
+    const inner = inset(cr, 0.05);
+    b.labels.grid.push({ text: comp.label.toUpperCase(), x: inner.x, y: inner.y + inner.h, major: true });
+    const cats = comp.categories.filter(present);
+    const catRects = squarify(cats.map((id) => ({ key: id, weight: weight(catCount[CAT[id]]) })), {
+      ...inner,
+      h: inner.h - 0.12,
+    });
+    for (const id of cats) {
+      const rect = catRects.get(id);
+      if (!rect) continue;
+      const r = inset(rect, 0.03);
+      const category = CELL_CATEGORIES[CAT[id]];
+      b.labels.grid.push({ text: category.label, color: category.color, x: r.x, y: r.y + r.h, major: false });
+      const subs = SUBTYPES_BY_CATEGORY[id].filter((k) => (subCount.get(k) ?? 0) > 0);
+      const srs = squarify(subs.map((k) => ({ key: String(k), weight: weight(subCount.get(k) ?? 0) })), {
+        ...r,
+        h: r.h - 0.1,
+      });
+      for (const k of subs) {
+        const sr = srs.get(String(k));
+        if (sr) subRects.set(k, inset(sr, 0.012));
+      }
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const r = subRects.get(b.subtype[i]) ?? { x: 0, y: 0, w: 0.1, h: 0.1 };
+    b.tree.push(r.x + rng() * r.w, r.y + rng() * r.h, (rng() - 0.5) * 0.05);
+  }
+
+  /* Rings: inner compartments, middle cell types, outer subtypes. */
+  const order = COMPARTMENTS.flatMap((c) => c.categories.filter(present).map((id) => ({ comp: c.id, id })));
+  const COMP_GAP = 0.07;
+  const CAT_GAP = 0.025;
+  const avail = Math.PI * 2 - COMP_GAP * COMPARTMENTS.length - CAT_GAP * order.length;
+  const totalW = order.reduce((t, o) => t + weight(catCount[CAT[o.id]]), 0);
+  const catArc = new Map<CellCategoryId, [number, number]>();
+  const subArc = new Map<number, [number, number]>();
+  const compArc = new Map<string, [number, number]>();
+  let a = Math.PI / 2;
+  for (const comp of COMPARTMENTS) {
+    const start = a;
+    const cats = order.filter((o) => o.comp === comp.id);
+    if (!cats.length) continue;
+    for (const { id } of cats) {
+      const span = (avail * weight(catCount[CAT[id]])) / totalW;
+      catArc.set(id, [a, a - span]);
+      const subs = SUBTYPES_BY_CATEGORY[id].filter((k) => (subCount.get(k) ?? 0) > 0);
+      const subTotal = subs.reduce((t, k) => t + weight(subCount.get(k) ?? 0), 0);
+      let sa = a;
+      for (const k of subs) {
+        const ss = (span * weight(subCount.get(k) ?? 0)) / subTotal;
+        subArc.set(k, [sa - 0.004, sa - ss + 0.004]);
+        sa -= ss;
+      }
+      const category = CELL_CATEGORIES[CAT[id]];
+      b.labels.rings.push({ text: category.label, color: category.color, angle: a - span / 2 });
+      a -= span + CAT_GAP;
+    }
+    compArc.set(comp.id, [start, a + CAT_GAP]);
+    a -= COMP_GAP;
+  }
+  const compOf = (cat: number) => COMPARTMENTS.find((c) => c.categories.includes(CELL_CATEGORIES[cat].id))!.id;
+  for (let i = 0; i < n; i++) {
+    const u = rng();
+    const level = u < 0.22 ? 0 : u < 0.58 ? 1 : 2;
+    const arc =
+      level === 0
+        ? compArc.get(compOf(b.cat[i]))
+        : level === 1
+          ? catArc.get(CELL_CATEGORIES[b.cat[i]].id)
+          : subArc.get(b.subtype[i]);
+    const [a0, a1] = arc ?? [0, 0.1];
+    const angle = a0 + (a1 - a0) * rng();
+    const [r0, r1] = RING_BANDS[level];
+    const r = Math.sqrt(r0 * r0 + (r1 * r1 - r0 * r0) * rng());
+    b.radial.push(r * Math.cos(angle), r * Math.sin(angle), (rng() - 0.5) * 0.06);
+  }
 }
 
 /* ---------- shaders ---------- */
@@ -539,15 +726,23 @@ const vertexShader = /* glsl */ `
   attribute float aFlag;
   attribute float aSize;
   attribute vec4 aFlow;
+  attribute vec3 aTree;
+  attribute vec3 aRadial;
 
   uniform float uTime;
+  uniform float uMorph;
   uniform float uFlowMix;
+  uniform float uRings;
+  uniform float uGrid;
+  uniform float uRingSpin;
+  uniform vec3 uRingCenter;
+  uniform vec3 uHeart;
   uniform vec3 uFlowX;
   uniform float uCellY[8];
   uniform float uPathY[6];
   uniform float uDrugY[5];
   uniform float uFlowKeep[8];
-  uniform float uMorph;
+  uniform float uWander[8];
   uniform float uScale;
   uniform float uPixelRatio;
   uniform float uResist;
@@ -560,6 +755,12 @@ const vertexShader = /* glsl */ `
 
   varying vec3 vColor;
   varying float vAlpha;
+  varying float vBoost;
+
+  float stag(float w) {
+    float t = clamp(w * 1.6 - aSeed * 0.6, 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+  }
 
   vec3 flowPos(int cat, float path, float drug, float seed) {
     // Independent hashes so lane, depth and speed don't line up into stripes.
@@ -585,37 +786,56 @@ const vertexShader = /* glsl */ `
   }
 
   void main() {
-    vec3 anat = aFlag > 0.5 ? uTumorCenter + position * uTumorRadius : position;
-    anat = uBreathCenter + (anat - uBreathCenter) * uBreath;
+    vec3 body = aFlag > 0.5 ? uTumorCenter + position * uTumorRadius : position;
+    vec3 anat = uBreathCenter + (body - uBreathCenter) * uBreath;
 
     int cat = int(aCat + 0.5);
     bool resistant = cat == 3 && aRank < uResist;
     if (resistant) cat = 1;
-    vec3 atlas = resistant ? aAtlas2 : aAtlas;
 
-    float t = clamp(uMorph * 1.6 - aSeed * 0.6, 0.0, 1.0);
-    float e = t * t * (3.0 - 2.0 * t);
-    vec3 p = mix(anat, atlas, e);
-
-    float tf = clamp(uFlowMix * 1.6 - aSeed * 0.6, 0.0, 1.0);
-    float ef = tf * tf * (3.0 - 2.0 * tf);
-    if (ef > 0.0) {
-      vec3 fp = resistant ? flowPos(cat, aFlow.z, aFlow.w, aSeed) : flowPos(cat, aFlow.x, aFlow.y, aSeed);
-      p = mix(p, fp, ef);
+    // Blend every layout by its staggered weight; anatomy takes what is left.
+    float eA = stag(uMorph);
+    float eF = stag(uFlowMix);
+    float eR = stag(uRings);
+    float eG = stag(uGrid);
+    float a = clamp(1.0 - eA - eF - eR - eG, 0.0, 1.0);
+    vec3 p = anat * a + (resistant ? aAtlas2 : aAtlas) * eA + aTree * eG;
+    if (eF > 0.0) {
+      p += eF * (resistant ? flowPos(cat, aFlow.z, aFlow.w, aSeed) : flowPos(cat, aFlow.x, aFlow.y, aSeed));
     }
-    p += 0.005 * vec3(
-      sin(uTime * 0.9 + aSeed * 40.0),
-      cos(uTime * 0.7 + aSeed * 31.0),
-      sin(uTime * 0.8 + aSeed * 23.0)
+    if (eR > 0.0) {
+      float c = cos(uRingSpin);
+      float s = sin(uRingSpin);
+      p += eR * (vec3(c * aRadial.x - s * aRadial.y, s * aRadial.x + c * aRadial.y, aRadial.z) + uRingCenter);
+    }
+    p /= max(1e-4, a + eA + eF + eR + eG);
+
+    // Life: every cell wanders a little; immune cells crawl the most.
+    float fr = 0.6 + 0.9 * fract(aSeed * 17.0);
+    p += uWander[cat] * vec3(
+      sin(uTime * fr + aSeed * 40.0),
+      cos(uTime * fr * 0.83 + aSeed * 31.0),
+      sin(uTime * fr * 0.71 + aSeed * 23.0)
     );
+
+    // Pulses: blood leaves the heart through arteries and returns through veins,
+    // air waves run down the airways with each breath, cells sparkle.
+    float boost = 0.0;
+    if (cat == 7) boost = pow(0.5 + 0.5 * sin(length(body - uHeart) * 9.0 - uTime * 5.0), 8.0) * 1.8;
+    else if (cat == 6) boost = pow(0.5 + 0.5 * sin(length(body - uHeart) * 7.0 + uTime * 3.2), 8.0) * 1.3;
+    else if (cat == 2) boost = pow(0.5 + 0.5 * sin((2.2 - body.y) * 4.0 - uTime * 1.46), 6.0) * 1.4;
+    float sparkle = pow(0.5 + 0.5 * sin(uTime * (1.2 + 2.8 * fract(aSeed * 41.0)) + aSeed * 100.0), 12.0);
+    boost += sparkle * (cat == 0 ? 1.4 : 0.9);
+    if (cat == 3 || cat == 1) boost += 0.35 * (0.5 + 0.5 * sin(uTime * 2.6 + aSeed * 6.0));
+    vBoost = boost;
 
     vColor = uColors[cat];
     float keep = fract(aSeed * 3.17) < uFlowKeep[cat] ? 1.0 : 0.0;
-    vAlpha = uAlpha[cat] * mix(1.0, keep, ef);
+    vAlpha = uAlpha[cat] * mix(1.0, keep, eF);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = clamp(aSize * uScale * uPixelRatio / max(0.05, -mv.z), 1.0, 18.0 * uPixelRatio);
+    gl_PointSize = clamp(aSize * (1.0 + 0.35 * boost) * uScale * uPixelRatio / max(0.05, -mv.z), 1.0, 20.0 * uPixelRatio);
     if (vAlpha < 0.001) {
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       gl_PointSize = 0.0;
@@ -626,14 +846,28 @@ const vertexShader = /* glsl */ `
 const fragmentShader = /* glsl */ `
   varying vec3 vColor;
   varying float vAlpha;
+  varying float vBoost;
   void main() {
     float d = length(gl_PointCoord - 0.5);
     if (d > 0.5) discard;
     float a = smoothstep(0.5, 0.05, d);
     float core = smoothstep(0.22, 0.0, d);
-    gl_FragColor = vec4(vColor * (0.85 + 0.7 * core), a * vAlpha);
+    vec3 c = vColor * (0.85 + 0.7 * core) * (1.0 + 0.8 * vBoost) + vec3(core * 0.25 * vBoost);
+    gl_FragColor = vec4(c, a * vAlpha * (1.0 + 0.6 * vBoost));
   }
 `;
+
+const WANDER: Record<CellCategoryId, number> = {
+  alveolar: 0.008,
+  tumorResistant: 0.012,
+  airway: 0.004,
+  tumorSensitive: 0.012,
+  macrophage: 0.03,
+  lymphocyte: 0.035,
+  vein: 0.004,
+  artery: 0.004,
+};
+const HEART = new THREE.Vector3(0.15, -0.25, 0.2);
 
 const BASE_ALPHA: Record<CellCategoryId, number> = {
   alveolar: 0.42,
@@ -672,6 +906,15 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     new THREE.Vector3(0.4, 0.4, 6.4).normalize().multiplyScalar(fitDistance(6.4, 1.95)).add(HOME_TARGET);
   const atlasPosition = () => new THREE.Vector3(0, 0, fitDistance(6.8, 2.45)).add(ATLAS_TARGET);
   const flowPosition = () => new THREE.Vector3(0, 0, fitDistance(7.2, 3.3)).add(ATLAS_TARGET);
+  const ringsPosition = () => new THREE.Vector3(0, 0, fitDistance(6.6, 2.75)).add(ATLAS_TARGET);
+  const gridPosition = () => new THREE.Vector3(0, 0.05, fitDistance(6.8, 2.6)).add(ATLAS_TARGET);
+  const viewCamera = (v: ViewMode): [THREE.Vector3, THREE.Vector3] => {
+    if (v === "atlas") return [atlasPosition(), ATLAS_TARGET.clone()];
+    if (v === "flow") return [flowPosition(), ATLAS_TARGET.clone()];
+    if (v === "rings") return [ringsPosition(), ATLAS_TARGET.clone()];
+    if (v === "grid") return [gridPosition(), ATLAS_TARGET.clone().add(new THREE.Vector3(0, 0.05, 0))];
+    return [homePosition(), HOME_TARGET.clone()];
+  };
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(HOME_TARGET);
@@ -695,6 +938,8 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   const subtypeArr = Uint8Array.from(cells.subtype);
   const nodeArr = Int8Array.from(cells.node);
   const flowArr = new Float32Array(cells.flow);
+  const treeArr = new Float32Array(cells.tree);
+  const radialArr = new Float32Array(cells.radial);
 
   const counts = Object.fromEntries(CELL_CATEGORIES.map((c) => [c.id, 0])) as Record<CellCategoryId, number>;
   for (let i = 0; i < N; i++) counts[CELL_CATEGORIES[catArr[i]].id]++;
@@ -709,6 +954,8 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   geometry.setAttribute("aFlag", new THREE.BufferAttribute(flagArr, 1));
   geometry.setAttribute("aSize", new THREE.BufferAttribute(new Float32Array(cells.size), 1));
   geometry.setAttribute("aFlow", new THREE.BufferAttribute(flowArr, 4));
+  geometry.setAttribute("aTree", new THREE.BufferAttribute(treeArr, 3));
+  geometry.setAttribute("aRadial", new THREE.BufferAttribute(radialArr, 3));
   // Positions move on the GPU, so give the culling sphere generous bounds.
   geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0.2, 0), 6);
 
@@ -734,6 +981,12 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       uPathY: { value: FLOW_PATH_Y },
       uDrugY: { value: FLOW_DRUG_Y },
       uFlowKeep: { value: CELL_CATEGORIES.map((c) => FLOW_KEEP[c.id]) },
+      uWander: { value: CELL_CATEGORIES.map((c) => WANDER[c.id]) },
+      uRings: { value: 0 },
+      uGrid: { value: 0 },
+      uRingSpin: { value: 0 },
+      uRingCenter: { value: RING_CENTER.clone() },
+      uHeart: { value: HEART.clone() },
     },
     transparent: true,
     depthWrite: false,
@@ -835,6 +1088,28 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   PATHWAYS.forEach((p, k) => makeFlowLabel(p.label, FLOW_X.path, FLOW_PATH_Y[k] + 0.17, "center", undefined, k === 0 ? "Pathway" : undefined));
   DRUGS.forEach((d, k) => makeFlowLabel(d.label, FLOW_X.drug + 0.08, FLOW_DRUG_Y[k], "left", undefined, k === 0 ? "Drug" : undefined));
 
+  /* Labels for the grid (top-left of each block) and ring (outside each arc) views. */
+  const makeLabel = (text: string, color: string | undefined, major: boolean) => {
+    const el = document.createElement("div");
+    el.style.cssText = `position:absolute;left:0;top:0;white-space:nowrap;opacity:0;display:flex;align-items:center;gap:5px;text-shadow:0 1px 6px #000,0 0 2px #000;${
+      major
+        ? "font:600 9px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:#94a3b8;"
+        : "font:600 10.5px/1.2 ui-sans-serif,system-ui,sans-serif;color:#f1f5f9;"
+    }`;
+    if (color) {
+      const dot = document.createElement("span");
+      dot.style.cssText = `width:7px;height:7px;border-radius:999px;background:${color};display:inline-block;flex:none;`;
+      el.appendChild(dot);
+    }
+    const t = document.createElement("span");
+    t.textContent = text;
+    el.appendChild(t);
+    labelLayer.appendChild(el);
+    return el;
+  };
+  const gridLabels = cells.labels.grid.map((l) => ({ ...l, el: makeLabel(l.text, l.color, l.major) }));
+  const ringLabels = cells.labels.rings.map((l) => ({ ...l, el: makeLabel(l.text, l.color, false) }));
+
   /* ---------- state ---------- */
 
   let tumorScale = 1;
@@ -846,6 +1121,9 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   type Blend = { value: number; from: number; to: number; start: number };
   const atlasBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
   const flowBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
+  const ringsBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
+  const gridBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
+  let ringSpin = 0;
   const MORPH_MS = options.reducedMotion ? 1 : 2600;
   const startBlend = (blend: Blend, to: number) => {
     blend.from = blend.value;
@@ -899,19 +1177,32 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       const t = Math.min(1, Math.max(0, v * 1.6 - seedArr[i] * 0.6));
       return t * t * (3 - 2 * t);
     };
-    const e = stagger(atlasBlend.value);
-    if (e > 0) {
-      const src = isResistant(i) ? atlas2 : atlas;
-      out.x += (src[j] - out.x) * e;
-      out.y += (src[j + 1] - out.y) * e;
-      out.z += (src[j + 2] - out.z) * e;
-    }
-    const ef = stagger(flowBlend.value);
-    if (ef > 0) {
+    const eA = stagger(atlasBlend.value);
+    const eF = stagger(flowBlend.value);
+    const eR = stagger(ringsBlend.value);
+    const eG = stagger(gridBlend.value);
+    if (eA + eF + eR + eG <= 0) return out;
+    const a = Math.min(1, Math.max(0, 1 - eA - eF - eR - eG));
+    const src = isResistant(i) ? atlas2 : atlas;
+    let x = out.x * a + src[j] * eA + treeArr[j] * eG;
+    let y = out.y * a + src[j + 1] * eA + treeArr[j + 1] * eG;
+    let z = out.z * a + src[j + 2] * eA + treeArr[j + 2] * eG;
+    if (eF > 0) {
       const [path, drug] = flowRoute(i);
       flowPoint(effectiveCat(i), path, drug, seedArr[i], animTime, flowScratch);
-      out.lerp(flowScratch, ef);
+      x += flowScratch.x * eF;
+      y += flowScratch.y * eF;
+      z += flowScratch.z * eF;
     }
+    if (eR > 0) {
+      const c = Math.cos(ringSpin);
+      const s = Math.sin(ringSpin);
+      x += (c * radialArr[j] - s * radialArr[j + 1] + RING_CENTER.x) * eR;
+      y += (s * radialArr[j] + c * radialArr[j + 1] + RING_CENTER.y) * eR;
+      z += (radialArr[j + 2] + RING_CENTER.z) * eR;
+    }
+    const total = Math.max(1e-4, a + eA + eF + eR + eG);
+    out.set(x / total, y / total, z / total);
     return out;
   };
 
@@ -1067,8 +1358,11 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
 
     stepBlend(atlasBlend, now);
     stepBlend(flowBlend, now);
-    const away = Math.max(atlasBlend.value, flowBlend.value);
+    stepBlend(ringsBlend, now);
+    stepBlend(gridBlend, now);
+    const away = Math.max(atlasBlend.value, flowBlend.value, ringsBlend.value, gridBlend.value);
     animTime = options.reducedMotion ? 0 : elapsed;
+    ringSpin = animTime * 0.04;
 
     // Breathing: ~14 breaths per minute, fading out away from the anatomy view.
     const b = breathing ? Math.sin((elapsed * Math.PI * 2) / 4.3) * (1 - away) : 0;
@@ -1079,6 +1373,9 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     u.uTime.value = animTime;
     u.uMorph.value = atlasBlend.value;
     u.uFlowMix.value = flowBlend.value;
+    u.uRings.value = ringsBlend.value;
+    u.uGrid.value = gridBlend.value;
+    u.uRingSpin.value = ringSpin;
     u.uResist.value = resistant;
     u.uTumorRadius.value = tumorRadius() * pulse;
     (u.uBreath.value as THREE.Vector3).copy(breath);
@@ -1126,7 +1423,8 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     }
 
     // Atlas labels follow their cluster centres.
-    const labelAlpha = Math.max(0, (atlasBlend.value - 0.6) / 0.4) * (1 - flowBlend.value);
+    const labelAlpha =
+      Math.max(0, (atlasBlend.value - 0.6) / 0.4) * (1 - Math.max(flowBlend.value, ringsBlend.value, gridBlend.value));
     const w = renderer.domElement.clientWidth;
     const h = renderer.domElement.clientHeight;
     for (const l of labels) {
@@ -1152,6 +1450,29 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px) translate(${shift}, -50%)`;
     }
 
+    const gridAlpha = Math.max(0, (gridBlend.value - 0.6) / 0.4);
+    for (const l of gridLabels) {
+      if (gridAlpha <= 0) {
+        l.el.style.opacity = "0";
+        continue;
+      }
+      scratch.set(l.x + 0.02, l.y - 0.02, 0).project(camera);
+      l.el.style.opacity = String(gridAlpha);
+      l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px)`;
+    }
+    const ringAlpha = Math.max(0, (ringsBlend.value - 0.6) / 0.4);
+    for (const l of ringLabels) {
+      if (ringAlpha <= 0) {
+        l.el.style.opacity = "0";
+        continue;
+      }
+      const ang = l.angle + ringSpin;
+      scratch.set(RING_CENTER.x + Math.cos(ang) * 1.95, RING_CENTER.y + Math.sin(ang) * 1.95, 0).project(camera);
+      const shift = Math.cos(ang) >= 0 ? "0%" : "-100%";
+      l.el.style.opacity = String(ringAlpha);
+      l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px) translate(${shift}, -50%)`;
+    }
+
     renderer.render(scene, camera);
   };
   tick();
@@ -1168,18 +1489,12 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       if (next === view) return;
       view = next;
       controls.autoRotate = next === "anatomy" && !options.reducedMotion;
-      if (next === "anatomy") {
-        startBlend(atlasBlend, 0);
-        startBlend(flowBlend, 0);
-        flyTo(homePosition(), HOME_TARGET.clone());
-      } else if (next === "atlas") {
-        startBlend(atlasBlend, 1);
-        startBlend(flowBlend, 0);
-        flyTo(atlasPosition(), ATLAS_TARGET.clone());
-      } else {
-        startBlend(flowBlend, 1);
-        flyTo(flowPosition(), ATLAS_TARGET.clone());
-      }
+      startBlend(atlasBlend, next === "atlas" ? 1 : 0);
+      startBlend(flowBlend, next === "flow" ? 1 : 0);
+      startBlend(ringsBlend, next === "rings" ? 1 : 0);
+      startBlend(gridBlend, next === "grid" ? 1 : 0);
+      const [pos, target] = viewCamera(next);
+      flyTo(pos, target);
     },
     setTumorState(scale, resistantFraction) {
       tumorScale = scale;
@@ -1197,15 +1512,31 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       let target: THREE.Vector3;
       if (view === "atlas") target = new THREE.Vector3(ATLAS.tumorSensitive.x, ATLAS.tumorSensitive.y + 0.1, 0);
       else if (view === "flow") target = new THREE.Vector3(FLOW_X.cell, FLOW_CELL_Y[CAT.tumorSensitive], 0);
+      else if (view !== "anatomy") target = ATLAS_TARGET.clone();
       else target = worldPositionOf("tumor");
       const offset = new THREE.Vector3(-0.55, 0.22, 1.0).normalize().multiplyScalar(0.7 + tumorScale * 0.35);
       flyTo(target.clone().add(offset), target);
     },
     resetView() {
       controls.autoRotate = !options.reducedMotion && view === "anatomy";
-      if (view === "atlas") flyTo(atlasPosition(), ATLAS_TARGET.clone());
-      else if (view === "flow") flyTo(flowPosition(), ATLAS_TARGET.clone());
-      else flyTo(homePosition(), HOME_TARGET.clone());
+      const [pos, target] = viewCamera(view);
+      flyTo(pos, target);
+    },
+    rotateBy(dTheta, dPhi) {
+      controls.autoRotate = false;
+      fly = null;
+      const offset = camera.position.clone().sub(controls.target);
+      const sph = new THREE.Spherical().setFromVector3(offset);
+      sph.theta -= dTheta;
+      sph.phi = Math.min(Math.PI - 0.05, Math.max(0.05, sph.phi - dPhi));
+      offset.setFromSpherical(sph);
+      camera.position.copy(controls.target).add(offset);
+    },
+    zoomBy(factor) {
+      const offset = camera.position.clone().sub(controls.target);
+      const len = Math.min(controls.maxDistance, Math.max(controls.minDistance, offset.length() * factor));
+      offset.setLength(len);
+      camera.position.copy(controls.target).add(offset);
     },
     dispose() {
       cancelAnimationFrame(frame);

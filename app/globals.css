@@ -1273,3 +1273,25 @@ canvas {
     animation: none !important;
   }
 }
+
+/* =========================================================
+   HOLOGRAPHIC HUD (organ viewers)
+   ========================================================= */
+
+@keyframes hud-scan {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes hud-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.hud-scan { animation: hud-scan 6s linear infinite; }
+.hud-spin { animation: hud-spin 60s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-scan, .hud-spin { animation: none; }
+}

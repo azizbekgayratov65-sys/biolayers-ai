@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 
 import { Eyebrow } from "../../ui/Chrome";
+import HandControl from "../hud/HandControl";
+import HudOverlay from "../hud/HudOverlay";
 import { btnQuiet, btnSecondary, insetPanel, monoLabel, pageShell, panel, sectionLabel, textLink } from "../../ui/styles";
 import {
   BASELINE_DIAMETER_MM,
@@ -148,6 +150,9 @@ export default function LungExplorer() {
   };
   const totalCells = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : null;
 
+  const handRotate = useCallback((dx: number, dy: number) => sceneRef.current?.rotateBy(dx, dy), []);
+  const handZoom = useCallback((f: number) => sceneRef.current?.zoomBy(f), []);
+
   const toggleBreathing = () => {
     const next = !breathing;
     setBreathing(next);
@@ -197,12 +202,23 @@ export default function LungExplorer() {
         <div className="mt-6 grid gap-6 lg:grid-cols-12">
           {/* Viewer */}
           <section className={`${panel} relative overflow-hidden lg:col-span-8`} aria-label="3D lung viewer">
+            <div className="relative">
             <div
-              ref={containerRef}
-              className="relative h-[460px] w-full cursor-grab bg-[#03060b] sm:h-[580px]"
-              aria-label="Interactive 3D model of the lungs drawn as one point per cell. Drag to rotate, scroll to zoom, hover a point to name the cell, click the tumour or a lymph node for details."
-              role="img"
-            />
+                ref={containerRef}
+                className="relative h-[460px] w-full cursor-grab bg-[#03060b] sm:h-[580px]"
+                aria-label="Interactive 3D model of the lungs drawn as one point per cell. Drag to rotate, scroll to zoom, hover a point to name the cell, click the tumour or a lymph node for details."
+                role="img"
+              />
+              <HudOverlay
+                lines={[
+                  "BIOLAYERS // ORGAN ATLAS",
+                  `LUNG · NSCLC · ${view.toUpperCase()}`,
+                  totalCells !== null ? `CELLS ${totalCells.toLocaleString("en-US")}` : "CELLS …",
+                ]}
+                footer={[`T+${month.toFixed(1)} MO`, `RESIST ${(tumor.resistantFraction * 100).toFixed(0)}%`]}
+              />
+              <HandControl onRotate={handRotate} onZoom={handZoom} className="absolute bottom-3 right-3" />
+            </div>
 
             {!ready && !webglError && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -233,13 +249,15 @@ export default function LungExplorer() {
             <div
               role="group"
               aria-label="View"
-              className="absolute left-3 top-3 inline-flex rounded-full border border-white/10 bg-[#000000]/70 p-1 backdrop-blur-xl"
+              className="absolute left-3 top-3 z-10 inline-flex max-w-[calc(100%-4.5rem)] flex-wrap rounded-[18px] border border-white/10 bg-[#000000]/70 p-1 backdrop-blur-xl"
             >
               {(
                 [
                   { id: "anatomy", label: "Anatomy" },
                   { id: "atlas", label: "Cell atlas" },
                   { id: "flow", label: "Flows" },
+                  { id: "rings", label: "Rings" },
+                  { id: "grid", label: "Grid" },
                 ] as { id: ViewMode; label: string }[]
               ).map((v) => (
                 <button
@@ -258,7 +276,7 @@ export default function LungExplorer() {
 
             {/* View controls */}
             <div className="absolute right-3 top-14 flex flex-col gap-1.5 sm:top-3">
-              {view !== "flow" && (
+              {(view === "anatomy" || view === "atlas") && (
               <button
                 type="button"
                 className={btnQuiet}
@@ -278,7 +296,7 @@ export default function LungExplorer() {
                 onClick={() => sceneRef.current?.resetView()}
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                <span className={view === "flow" ? "sr-only" : "hidden sm:inline"}>Reset view</span>
+                <span className={view !== "anatomy" ? "sr-only" : "hidden sm:inline"}>Reset view</span>
               </button>
               {view === "anatomy" && (
               <button

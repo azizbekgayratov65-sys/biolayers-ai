@@ -16,6 +16,8 @@ import {
 } from "./idc";
 import { CT_CLASSES, buildCtPointCloud, type CtClassId } from "./ctPoints";
 import type { CtSceneHandle } from "./ctScene";
+import HandControl from "../../hud/HandControl";
+import HudOverlay from "../../hud/HudOverlay";
 
 type Plane = "axial" | "coronal" | "sagittal";
 type Status = "searching" | "loading" | "building" | "ready" | "notfound" | "error";
@@ -389,6 +391,15 @@ export default function CtArchive() {
               className="h-[440px] w-full sm:h-[560px]"
               role="img"
               aria-label="Rotating point cloud of the chest CT. Drag to rotate, scroll to zoom."
+            />
+            <HudOverlay
+              lines={["BIOLAYERS // CT ARCHIVE", info ? info.patientId : "NO CASE", info ? `${info.slices} SLICES` : ""].filter(Boolean)}
+              footer={[`AXIAL ${slice.axial + 1}`, windowId.toUpperCase()]}
+            />
+            <HandControl
+              onRotate={(dx, dy) => sceneRef.current?.rotateBy(dx, dy)}
+              onZoom={(f) => sceneRef.current?.zoomBy(f)}
+              className="absolute bottom-3 right-3"
             />
             {busy && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

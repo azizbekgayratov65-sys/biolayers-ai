@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Organ viewers may use the webcam for hand-gesture control (only after the person turns it on).
+        source: "/organs/:path*",
+        headers: [{ key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), browsing-topics=()" }],
+      },
+      {
         source: "/:all*(svg|jpg|png|webp|avif|ico|woff2|woff)",
         headers: [
           {

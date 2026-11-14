@@ -16,6 +16,7 @@ import "./globals.css";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ParticleField from "./components/ParticleField";
 
 const spectral = Spectral({
   variable: "--font-spectral",
@@ -168,6 +169,8 @@ export default function RootLayout({
         </a>
 
         <Navbar />
+
+        <ParticleField />
 
         <main
           id="main-content"

@@ -17,10 +17,14 @@ export type CtSceneHandle = {
   setSlice: (fraction: number) => void;
   setCut: (on: boolean) => void;
   resetView: () => void;
+  /* Turn the camera around its target (radians) — used by hand control. */
+  rotateBy: (dTheta: number, dPhi: number) => void;
+  /* Multiply the camera distance (below 1 zooms in) — used by hand control. */
+  zoomBy: (factor: number) => void;
   dispose: () => void;
 };
 
-const BASE_ALPHA: Record<CtClassId, number> = { airway: 0.85, parenchyma: 0.28, vessel: 0.8, bone: 0.55 };
+const BASE_ALPHA: Record<CtClassId, number> = { airway: 0.85, parenchyma: 0.3, vessel: 0.75, bone: 0.5 };
 const SIZE: Record<CtClassId, number> = { airway: 1.1, parenchyma: 0.85, vessel: 1.05, bone: 1.0 };
 
 export function createCtScene(container: HTMLElement, reducedMotion: boolean): CtSceneHandle {
@@ -47,36 +51,71 @@ export function createCtScene(container: HTMLElement, reducedMotion: boolean): C
   const alpha = CT_CLASSES.map((c) => BASE_ALPHA[c.id]);
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uColors: { value: CT_CLASSES.map((c) => new THREE.Color(c.color)) },
       uAlpha: { value: alpha },
       uSizes: { value: CT_CLASSES.map((c) => SIZE[c.id]) },
       uScale: { value: 13 },
       uPixelRatio: { value: pixelRatio },
       uTime: { value: 0 },
+      uBreath: { value: 0 },
+      uHeart: { value: new THREE.Vector3() },
+      uTop: { value: 1 },
       uCutY: { value: 0 },
       uCut: { value: 0 },
     },
     vertexShader: /* glsl */ `
       attribute float aClass;
-      uniform vec3 uColors[4];
+      attribute float aHu;
       uniform float uAlpha[4];
       uniform float uSizes[4];
       uniform float uScale;
       uniform float uPixelRatio;
       uniform float uTime;
+      uniform float uBreath;
+      uniform vec3 uHeart;
+      uniform float uTop;
       uniform float uCutY;
       uniform float uCut;
       varying vec3 vColor;
       varying float vAlpha;
+      varying float vBoost;
+
+      vec3 ramp3(vec3 a, vec3 b, vec3 c, float t) {
+        return t < 0.5 ? mix(a, b, t * 2.0) : mix(b, c, t * 2.0 - 1.0);
+      }
+
       void main() {
         int c = int(aClass + 0.5);
-        vColor = uColors[c];
-        float twinkle = 0.85 + 0.15 * sin(uTime * 1.7 + position.x * 40.0 + position.y * 31.0 + position.z * 23.0);
-        vAlpha = uAlpha[c] * twinkle;
+        float seed = fract(sin(dot(position, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+
+        // Neon colour by class, shifted by density.
+        if (c == 0) {
+          vColor = mix(vec3(0.0, 0.96, 0.83), vec3(0.49, 1.0, 0.31), clamp((aHu + 1024.0) / 64.0, 0.0, 1.0));
+        } else if (c == 1) {
+          vColor = mix(vec3(0.19, 0.36, 1.0), vec3(0.0, 0.9, 1.0), clamp((aHu + 960.0) / 460.0, 0.0, 1.0));
+        } else if (c == 2) {
+          vColor = ramp3(vec3(1.0, 0.18, 0.6), vec3(1.0, 0.48, 0.1), vec3(1.0, 0.84, 0.04), clamp((aHu + 500.0) / 700.0, 0.0, 1.0));
+        } else {
+          vColor = mix(vec3(0.61, 0.36, 1.0), vec3(0.93, 0.88, 1.0), clamp((aHu - 250.0) / 900.0, 0.0, 1.0));
+        }
+
+        // Breathing: the lungs swell, the skeleton barely moves.
+        float swell = c == 3 ? 0.006 : 0.028;
+        vec3 p = position * vec3(1.0 + swell * uBreath, 1.0 + swell * 1.2 * uBreath, 1.0 + swell * uBreath);
+        float fr = 0.6 + 0.9 * seed;
+        p += (c == 3 ? 0.0015 : 0.004) * vec3(sin(uTime * fr + seed * 40.0), cos(uTime * fr * 0.8 + seed * 31.0), sin(uTime * fr * 0.7 + seed * 23.0));
+
+        // Pulses: blood waves from the heart through the vessels, air waves down the airways, sparkle in the tissue.
+        float boost = 0.0;
+        if (c == 2) boost = pow(0.5 + 0.5 * sin(length(position - uHeart) * 10.0 - uTime * 5.0), 8.0) * 1.6;
+        else if (c == 0) boost = pow(0.5 + 0.5 * sin((uTop - position.y) * 5.0 - uTime * 1.46), 6.0) * 1.4;
+        boost += pow(0.5 + 0.5 * sin(uTime * (1.2 + 2.8 * fract(seed * 41.0)) + seed * 100.0), 12.0) * (c == 1 ? 1.4 : 0.7);
+        vBoost = boost;
+
+        vAlpha = uAlpha[c];
         if (uCut > 0.5 && position.y > uCutY) vAlpha = 0.0;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mv;
-        gl_PointSize = clamp(uSizes[c] * uScale * uPixelRatio / max(0.05, -mv.z), 1.0, 16.0 * uPixelRatio);
+        gl_PointSize = clamp(uSizes[c] * (1.0 + 0.3 * boost) * uScale * uPixelRatio / max(0.05, -mv.z), 1.0, 18.0 * uPixelRatio);
         if (vAlpha < 0.001) {
           gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
           gl_PointSize = 0.0;
@@ -86,12 +125,14 @@ export function createCtScene(container: HTMLElement, reducedMotion: boolean): C
     fragmentShader: /* glsl */ `
       varying vec3 vColor;
       varying float vAlpha;
+      varying float vBoost;
       void main() {
         float d = length(gl_PointCoord - 0.5);
         if (d > 0.5) discard;
         float a = smoothstep(0.5, 0.05, d);
         float core = smoothstep(0.22, 0.0, d);
-        gl_FragColor = vec4(vColor * (0.85 + 0.7 * core), a * vAlpha);
+        vec3 c = vColor * (0.85 + 0.7 * core) * (1.0 + 0.8 * vBoost) + vec3(core * 0.25 * vBoost);
+        gl_FragColor = vec4(c, a * vAlpha * (1.0 + 0.6 * vBoost));
       }
     `,
     transparent: true,
@@ -156,7 +197,9 @@ export function createCtScene(container: HTMLElement, reducedMotion: boolean): C
   let frame = 0;
   const tick = () => {
     frame = requestAnimationFrame(tick);
-    material.uniforms.uTime.value = reducedMotion ? 0 : (performance.now() - start) / 1000;
+    const t = reducedMotion ? 0 : (performance.now() - start) / 1000;
+    material.uniforms.uTime.value = t;
+    material.uniforms.uBreath.value = reducedMotion ? 0 : Math.sin((t * Math.PI * 2) / 4.3);
     controls.update();
     renderer.render(scene, camera);
   };
@@ -168,8 +211,12 @@ export function createCtScene(container: HTMLElement, reducedMotion: boolean): C
       geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.BufferAttribute(cloud.positions, 3));
       geometry.setAttribute("aClass", new THREE.BufferAttribute(cloud.classes, 1));
+      geometry.setAttribute("aHu", new THREE.BufferAttribute(cloud.hu, 1));
       points.geometry = geometry;
       extent = cloud.extent;
+      // Heart sits in front of the spine, a little below the middle of the chest.
+      (material.uniforms.uHeart.value as THREE.Vector3).set(0.05 * extent[0], -0.15 * extent[1], 0.15 * extent[2]);
+      material.uniforms.uTop.value = extent[1];
       plane.visible = true;
       applySlice();
       controls.target.set(0, 0, 0);
@@ -191,6 +238,21 @@ export function createCtScene(container: HTMLElement, reducedMotion: boolean): C
       controls.target.set(0, 0, 0);
       camera.position.copy(homePosition());
       controls.autoRotate = !reducedMotion;
+    },
+    rotateBy(dTheta, dPhi) {
+      controls.autoRotate = false;
+      const offset = camera.position.clone().sub(controls.target);
+      const sph = new THREE.Spherical().setFromVector3(offset);
+      sph.theta -= dTheta;
+      sph.phi = Math.min(Math.PI - 0.05, Math.max(0.05, sph.phi - dPhi));
+      offset.setFromSpherical(sph);
+      camera.position.copy(controls.target).add(offset);
+    },
+    zoomBy(factor) {
+      const offset = camera.position.clone().sub(controls.target);
+      const len = Math.min(controls.maxDistance, Math.max(controls.minDistance, offset.length() * factor));
+      offset.setLength(len);
+      camera.position.copy(controls.target).add(offset);
     },
     dispose() {
       cancelAnimationFrame(frame);
