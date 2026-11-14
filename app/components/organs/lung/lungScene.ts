@@ -259,10 +259,10 @@ function fract(x: number) {
 
 /* Same maths as flowPos() in the vertex shader. */
 function flowPoint(cat: number, path: number, drug: number, seed: number, time: number, out: THREE.Vector3) {
-  const speed = 0.05 * (0.7 + 0.6 * fract(seed * 13.7));
+  const speed = 0.05 * (0.7 + 0.6 * fract(Math.sin(seed * 39.425 + 1.7) * 23421.631));
   const t = fract(seed * 7.31 + time * speed);
-  const lane = (fract(seed * 91.7) - 0.5) * 2;
-  const lane2 = (fract(seed * 53.3) - 0.5) * 2;
+  const lane = (fract(Math.sin(seed * 78.233) * 43758.5453) - 0.5) * 2;
+  const lane2 = (fract(Math.sin(seed * 12.9898 + 4.1) * 43758.5453) - 0.5) * 2;
   const ease = (v: number) => v * v * (3 - 2 * v);
   let x: number;
   let y: number;
@@ -562,10 +562,11 @@ const vertexShader = /* glsl */ `
   varying float vAlpha;
 
   vec3 flowPos(int cat, float path, float drug, float seed) {
-    float speed = 0.05 * (0.7 + 0.6 * fract(seed * 13.7));
+    // Independent hashes so lane, depth and speed don't line up into stripes.
+    float speed = 0.05 * (0.7 + 0.6 * fract(sin(seed * 39.425 + 1.7) * 23421.631));
     float t = fract(seed * 7.31 + uTime * speed);
-    float lane = (fract(seed * 91.7) - 0.5) * 2.0;
-    float lane2 = (fract(seed * 53.3) - 0.5) * 2.0;
+    float lane = (fract(sin(seed * 78.233) * 43758.5453) - 0.5) * 2.0;
+    float lane2 = (fract(sin(seed * 12.9898 + 4.1) * 43758.5453) - 0.5) * 2.0;
     float y0 = uCellY[cat];
     float y1 = uPathY[int(path + 0.5)];
     float y2 = uDrugY[int(drug + 0.5)];

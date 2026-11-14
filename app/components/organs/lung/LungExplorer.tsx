@@ -258,6 +258,7 @@ export default function LungExplorer() {
 
             {/* View controls */}
             <div className="absolute right-3 top-14 flex flex-col gap-1.5 sm:top-3">
+              {view !== "flow" && (
               <button
                 type="button"
                 className={btnQuiet}
@@ -268,6 +269,7 @@ export default function LungExplorer() {
                 <Crosshair className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Fly into tumour</span>
               </button>
+              )}
               <button
                 type="button"
                 className={btnQuiet}
@@ -276,8 +278,9 @@ export default function LungExplorer() {
                 onClick={() => sceneRef.current?.resetView()}
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Reset view</span>
+                <span className={view === "flow" ? "sr-only" : "hidden sm:inline"}>Reset view</span>
               </button>
+              {view === "anatomy" && (
               <button
                 type="button"
                 className={btnQuiet}
@@ -289,6 +292,7 @@ export default function LungExplorer() {
                 <Wind className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">{breathing ? "Breathing" : "Paused"}</span>
               </button>
+              )}
             </div>
 
             {/* Legend: one entry per cell category, click to hide or show */}
