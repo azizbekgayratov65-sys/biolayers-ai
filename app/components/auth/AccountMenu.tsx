@@ -190,7 +190,7 @@ export function AccountMenu({
         <div className="grid grid-cols-2 gap-2.5">
           <Link
             href="/login"
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-white/[0.12] bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-white/80 transition hover:border-white/[0.22] hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-white/[0.12] bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-white/80 transition hover:border-white/[0.22] hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
           >
             <LogIn className="h-4 w-4" />
             <span>Sign in</span>
@@ -198,7 +198,7 @@ export function AccountMenu({
 
           <Link
             href="/signup"
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-400/[0.1] px-4 py-2.5 text-xs font-bold text-teal-100 shadow-[0_0_15px_rgba(77,141,255,0.12)] transition hover:border-teal-200/40 hover:bg-teal-400/[0.18] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-teal-200/25 bg-teal-400/[0.1] px-4 py-2.5 text-xs font-bold text-teal-100 shadow-[0_0_15px_rgba(77,141,255,0.12)] transition hover:border-teal-200/40 hover:bg-teal-400/[0.18] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
           >
             <UserPlus className="h-4 w-4" />
             <span>Create account</span>
@@ -211,7 +211,7 @@ export function AccountMenu({
       <div className="hidden items-center gap-2 lg:flex">
         <Link
           href="/login"
-          className="flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.09] bg-white/[0.03] px-4 text-xs font-semibold text-slate-200 transition hover:border-white/[0.2] hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+          className="flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.09] bg-white/[0.03] px-4 text-xs font-semibold text-slate-200 transition hover:border-white/[0.2] hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
         >
           <LogIn className="h-3.5 w-3.5" />
           <span>Sign in</span>
@@ -219,7 +219,7 @@ export function AccountMenu({
 
         <Link
           href="/signup"
-          className="group flex h-10 items-center gap-2 rounded-[13px] border border-teal-200/25 bg-teal-300/[0.08] px-4 text-xs font-bold text-teal-100 transition hover:border-teal-200/40 hover:bg-teal-300/[0.16] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+          className="group flex h-10 items-center gap-2 rounded-[13px] border border-teal-200/25 bg-teal-300/[0.08] px-4 text-xs font-bold text-teal-100 transition hover:border-teal-200/40 hover:bg-teal-300/[0.16] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
         >
           <UserPlus className="h-3.5 w-3.5" />
           <span>Create account</span>
@@ -263,7 +263,7 @@ export function AccountMenu({
         <div className="mt-2 space-y-1">
           <Link
             href="/settings"
-            className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+            className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
           >
             <Settings className="h-4 w-4 text-teal-300/80" />
             <span>Account settings</span>
@@ -271,7 +271,7 @@ export function AccountMenu({
 
           <Link
             href="/settings#ai"
-            className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+            className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
           >
             <KeyRound className="h-4 w-4 text-teal-300/80" />
             <span>Gemini API key</span>
@@ -281,7 +281,7 @@ export function AccountMenu({
             type="button"
             onClick={() => void signOut()}
             disabled={signingOut}
-            className="flex min-h-[44px] w-full items-center gap-3 rounded-[12px] border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2.5 text-xs font-semibold text-rose-300 transition hover:border-rose-500/35 hover:bg-rose-500/[0.12] hover:text-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] disabled:opacity-60"
+            className="flex min-h-[44px] w-full items-center gap-3 rounded-[12px] border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2.5 text-xs font-semibold text-rose-300 transition hover:border-rose-500/35 hover:bg-rose-500/[0.12] hover:text-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] disabled:opacity-60"
           >
             {signingOut ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -305,7 +305,7 @@ export function AccountMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Account menu for ${displayName}`}
-        className="group flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.1] bg-white/[0.03] py-1 pl-1 pr-3 transition hover:border-white/[0.2] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+        className="group flex h-10 items-center gap-2 rounded-[13px] border border-white/[0.1] bg-white/[0.03] py-1 pl-1 pr-3 transition hover:border-white/[0.2] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
       >
         {user.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -387,7 +387,7 @@ export function AccountMenu({
                 type="button"
                 onClick={() => void signOut()}
                 disabled={signingOut}
-                className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a] disabled:opacity-60"
+                className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000] disabled:opacity-60"
               >
                 {signingOut ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -417,7 +417,7 @@ function MenuItem({
     <Link
       href={href}
       role="menuitem"
-      className="flex min-h-[40px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+      className="flex min-h-[40px] items-center gap-3 rounded-[12px] px-3 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
     >
       <span className="text-teal-300/70">{icon}</span>
       <span>{label}</span>

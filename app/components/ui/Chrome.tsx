@@ -1,20 +1,9 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
-/* Soft dark-field glow behind a page section. Purely decorative. */
+/* Decorative glow removed: the site is plain black. Kept as a no-op so pages need no edits. */
 export function AmbientGlow() {
-  return (
-    <>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-20 h-[550px] w-[950px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/[0.045] blur-[170px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-10 top-1/2 -z-20 h-[450px] w-[450px] rounded-full bg-sky-400/[0.035] blur-[150px]"
-      />
-    </>
-  );
+  return null;
 }
 
 /* Small glowing pill above a page title. */

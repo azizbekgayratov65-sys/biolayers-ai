@@ -4,7 +4,7 @@
 */
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]";
 
 export const btnPrimary = `inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-emerald-400/50 bg-emerald-400/15 px-6 py-3 text-sm font-bold text-emerald-100 shadow-[0_0_30px_rgba(43,255,136,0.22)] backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white hover:shadow-[0_0_45px_rgba(43,255,136,0.38)] active:scale-[0.98] disabled:opacity-60 ${focusRing}`;
 
@@ -14,8 +14,7 @@ export const btnQuiet = `inline-flex min-h-[40px] items-center justify-center ga
 
 export const textLink = `font-semibold text-teal-300 transition-colors hover:text-teal-100 ${focusRing} rounded-sm`;
 
-export const panel =
-  "rounded-[24px] border border-teal-200/20 bg-gradient-to-b from-[#0a121d]/90 via-[#070c14]/85 to-[#04080e]/95 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl";
+export const panel = "rounded-[20px] border border-white/[0.09] bg-black";
 
 export const insetPanel = "rounded-[14px] border border-white/[0.06] bg-white/[0.02]";
 

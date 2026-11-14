@@ -19,10 +19,19 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-import { CELL_CATEGORIES, CELL_SUBTYPES, RESISTANT_SUBTYPE_LABEL, type CellCategoryId } from "./lungCells";
+import {
+  CELL_CATEGORIES,
+  CELL_SUBTYPES,
+  DRUGS,
+  FLOW_KEEP,
+  FLOW_ROUTES,
+  PATHWAYS,
+  RESISTANT_SUBTYPE_LABEL,
+  type CellCategoryId,
+} from "./lungCells";
 import { LYMPH_NODES } from "./lungNodes";
 
-export type ViewMode = "anatomy" | "atlas";
+export type ViewMode = "anatomy" | "atlas" | "flow";
 
 export type PickId = "tumor" | `node:${string}`;
 
@@ -216,6 +225,70 @@ const ATLAS: Record<CellCategoryId, Cluster> = {
   tumorResistant: { x: -0.05, y: -1.62, spread: 0.3 },
 };
 
+/* ---------- flow layout: cell type → pathway → drug ---------- */
+
+const FLOW_X = { cell: -1.9, path: 0, drug: 1.9 };
+const FLOW_TOP = 1.75;
+const FLOW_SPAN = 3.2;
+// Cell types top to bottom, ordered to keep the ribbons from crossing more than they must.
+const FLOW_CELL_ORDER: CellCategoryId[] = [
+  "tumorSensitive",
+  "tumorResistant",
+  "lymphocyte",
+  "macrophage",
+  "artery",
+  "vein",
+  "airway",
+  "alveolar",
+];
+const evenly = (n: number) => Array.from({ length: n }, (_, k) => FLOW_TOP - (n === 1 ? 0 : (k * FLOW_SPAN) / (n - 1)));
+const FLOW_CELL_Y: number[] = (() => {
+  const ys = evenly(FLOW_CELL_ORDER.length);
+  const out = new Array<number>(CELL_CATEGORIES.length).fill(0);
+  FLOW_CELL_ORDER.forEach((id, k) => {
+    out[CELL_CATEGORIES.find((c) => c.id === id)!.index] = ys[k];
+  });
+  return out;
+})();
+const FLOW_PATH_Y = evenly(PATHWAYS.length);
+const FLOW_DRUG_Y = evenly(DRUGS.length);
+
+function fract(x: number) {
+  return x - Math.floor(x);
+}
+
+/* Same maths as flowPos() in the vertex shader. */
+function flowPoint(cat: number, path: number, drug: number, seed: number, time: number, out: THREE.Vector3) {
+  const speed = 0.05 * (0.7 + 0.6 * fract(seed * 13.7));
+  const t = fract(seed * 7.31 + time * speed);
+  const lane = (fract(seed * 91.7) - 0.5) * 2;
+  const lane2 = (fract(seed * 53.3) - 0.5) * 2;
+  const ease = (v: number) => v * v * (3 - 2 * v);
+  let x: number;
+  let y: number;
+  if (t < 0.5) {
+    const k = t * 2;
+    x = FLOW_X.cell + (FLOW_X.path - FLOW_X.cell) * k;
+    y = FLOW_CELL_Y[cat] + (FLOW_PATH_Y[path] - FLOW_CELL_Y[cat]) * ease(k);
+  } else {
+    const k = t * 2 - 1;
+    x = FLOW_X.path + (FLOW_X.drug - FLOW_X.path) * k;
+    y = FLOW_PATH_Y[path] + (FLOW_DRUG_Y[drug] - FLOW_PATH_Y[path]) * ease(k);
+  }
+  return out.set(x, y + lane * 0.09, lane2 * 0.08);
+}
+
+function pickRoute(rng: () => number, category: CellCategoryId): [number, number] {
+  const routes = FLOW_ROUTES[category];
+  let r = rng();
+  for (const [path, drug, weight] of routes) {
+    r -= weight;
+    if (r <= 0) return [path, drug];
+  }
+  const last = routes[routes.length - 1];
+  return [last[0], last[1]];
+}
+
 function atlasPoint(rng: () => number, category: CellCategoryId, subIndex: number, subCount: number, out: THREE.Vector3) {
   const c = ATLAS[category];
   let ox = 0;
@@ -243,6 +316,7 @@ type Builder = {
   size: number[];
   subtype: number[];
   node: number[];
+  flow: number[];
 };
 
 const SUBTYPES_BY_CATEGORY: Record<CellCategoryId, number[]> = Object.fromEntries(
@@ -260,7 +334,19 @@ function pickSubtype(rng: () => number, category: CellCategoryId) {
 }
 
 export function buildCells(): Builder {
-  const b: Builder = { anat: [], atlas: [], atlas2: [], cat: [], seed: [], rank: [], flag: [], size: [], subtype: [], node: [] };
+  const b: Builder = {
+    anat: [],
+    atlas: [],
+    atlas2: [],
+    cat: [],
+    seed: [],
+    rank: [],
+    flag: [],
+    size: [],
+    subtype: [],
+    node: [],
+    flow: [],
+  };
   const rng = mulberry32(20261114);
   const tmp = new THREE.Vector3();
   const at = new THREE.Vector3();
@@ -293,6 +379,9 @@ export function buildCells(): Builder {
     b.size.push(SIZE[category]);
     b.subtype.push(ids[k]);
     b.node.push(opts.node ?? -1);
+    const [path, drug] = pickRoute(rng, category);
+    const [path2, drug2] = category === "tumorSensitive" ? pickRoute(rng, "tumorResistant") : [path, drug];
+    b.flow.push(path, drug, path2, drug2);
   };
 
   /* Alveolar epithelium: dense near the pleural surface, lighter inside. */
@@ -449,8 +538,15 @@ const vertexShader = /* glsl */ `
   attribute float aRank;
   attribute float aFlag;
   attribute float aSize;
+  attribute vec4 aFlow;
 
   uniform float uTime;
+  uniform float uFlowMix;
+  uniform vec3 uFlowX;
+  uniform float uCellY[8];
+  uniform float uPathY[6];
+  uniform float uDrugY[5];
+  uniform float uFlowKeep[8];
   uniform float uMorph;
   uniform float uScale;
   uniform float uPixelRatio;
@@ -465,6 +561,28 @@ const vertexShader = /* glsl */ `
   varying vec3 vColor;
   varying float vAlpha;
 
+  vec3 flowPos(int cat, float path, float drug, float seed) {
+    float speed = 0.05 * (0.7 + 0.6 * fract(seed * 13.7));
+    float t = fract(seed * 7.31 + uTime * speed);
+    float lane = (fract(seed * 91.7) - 0.5) * 2.0;
+    float lane2 = (fract(seed * 53.3) - 0.5) * 2.0;
+    float y0 = uCellY[cat];
+    float y1 = uPathY[int(path + 0.5)];
+    float y2 = uDrugY[int(drug + 0.5)];
+    float x;
+    float y;
+    if (t < 0.5) {
+      float k = t * 2.0;
+      x = mix(uFlowX.x, uFlowX.y, k);
+      y = mix(y0, y1, k * k * (3.0 - 2.0 * k));
+    } else {
+      float k = t * 2.0 - 1.0;
+      x = mix(uFlowX.y, uFlowX.z, k);
+      y = mix(y1, y2, k * k * (3.0 - 2.0 * k));
+    }
+    return vec3(x, y + lane * 0.09, lane2 * 0.08);
+  }
+
   void main() {
     vec3 anat = aFlag > 0.5 ? uTumorCenter + position * uTumorRadius : position;
     anat = uBreathCenter + (anat - uBreathCenter) * uBreath;
@@ -477,6 +595,13 @@ const vertexShader = /* glsl */ `
     float t = clamp(uMorph * 1.6 - aSeed * 0.6, 0.0, 1.0);
     float e = t * t * (3.0 - 2.0 * t);
     vec3 p = mix(anat, atlas, e);
+
+    float tf = clamp(uFlowMix * 1.6 - aSeed * 0.6, 0.0, 1.0);
+    float ef = tf * tf * (3.0 - 2.0 * tf);
+    if (ef > 0.0) {
+      vec3 fp = resistant ? flowPos(cat, aFlow.z, aFlow.w, aSeed) : flowPos(cat, aFlow.x, aFlow.y, aSeed);
+      p = mix(p, fp, ef);
+    }
     p += 0.005 * vec3(
       sin(uTime * 0.9 + aSeed * 40.0),
       cos(uTime * 0.7 + aSeed * 31.0),
@@ -484,7 +609,8 @@ const vertexShader = /* glsl */ `
     );
 
     vColor = uColors[cat];
-    vAlpha = uAlpha[cat];
+    float keep = fract(aSeed * 3.17) < uFlowKeep[cat] ? 1.0 : 0.0;
+    vAlpha = uAlpha[cat] * mix(1.0, keep, ef);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -544,6 +670,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   const homePosition = () =>
     new THREE.Vector3(0.4, 0.4, 6.4).normalize().multiplyScalar(fitDistance(6.4, 1.95)).add(HOME_TARGET);
   const atlasPosition = () => new THREE.Vector3(0, 0, fitDistance(6.8, 2.45)).add(ATLAS_TARGET);
+  const flowPosition = () => new THREE.Vector3(0, 0, fitDistance(7.2, 3.3)).add(ATLAS_TARGET);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(HOME_TARGET);
@@ -566,6 +693,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   const flagArr = new Float32Array(cells.flag);
   const subtypeArr = Uint8Array.from(cells.subtype);
   const nodeArr = Int8Array.from(cells.node);
+  const flowArr = new Float32Array(cells.flow);
 
   const counts = Object.fromEntries(CELL_CATEGORIES.map((c) => [c.id, 0])) as Record<CellCategoryId, number>;
   for (let i = 0; i < N; i++) counts[CELL_CATEGORIES[catArr[i]].id]++;
@@ -579,6 +707,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   geometry.setAttribute("aRank", new THREE.BufferAttribute(rankArr, 1));
   geometry.setAttribute("aFlag", new THREE.BufferAttribute(flagArr, 1));
   geometry.setAttribute("aSize", new THREE.BufferAttribute(new Float32Array(cells.size), 1));
+  geometry.setAttribute("aFlow", new THREE.BufferAttribute(flowArr, 4));
   // Positions move on the GPU, so give the culling sphere generous bounds.
   geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0.2, 0), 6);
 
@@ -598,6 +727,12 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       uBreathCenter: { value: BREATH_CENTER.clone() },
       uColors: { value: CELL_CATEGORIES.map((c) => new THREE.Color(c.color)) },
       uAlpha: { value: alpha },
+      uFlowMix: { value: 0 },
+      uFlowX: { value: new THREE.Vector3(FLOW_X.cell, FLOW_X.path, FLOW_X.drug) },
+      uCellY: { value: FLOW_CELL_Y },
+      uPathY: { value: FLOW_PATH_Y },
+      uDrugY: { value: FLOW_DRUG_Y },
+      uFlowKeep: { value: CELL_CATEGORIES.map((c) => FLOW_KEEP[c.id]) },
     },
     transparent: true,
     depthWrite: false,
@@ -665,6 +800,40 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     return { id: c.id, el, text };
   });
 
+  /* Labels for the flow view: cell types on the left, pathways in the middle, drugs on the right. */
+  type FlowLabel = { el: HTMLDivElement; x: number; y: number; align: "left" | "center" | "right" };
+  const flowLabels: FlowLabel[] = [];
+  const makeFlowLabel = (text: string, x: number, y: number, align: FlowLabel["align"], color?: string, sub?: string) => {
+    const el = document.createElement("div");
+    el.style.cssText =
+      "position:absolute;left:0;top:0;white-space:nowrap;font:600 11px/1.25 ui-sans-serif,system-ui,sans-serif;color:#f1f5f9;text-shadow:0 1px 6px #000,0 0 2px #000;opacity:0;display:flex;align-items:center;gap:6px;";
+    if (color) {
+      const dot = document.createElement("span");
+      dot.style.cssText = `width:8px;height:8px;border-radius:999px;background:${color};display:inline-block;flex:none;`;
+      el.appendChild(dot);
+    }
+    const body = document.createElement("span");
+    body.textContent = text;
+    if (sub) {
+      const small = document.createElement("span");
+      small.textContent = sub;
+      small.style.cssText = "display:block;font:500 9px/1.2 ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;";
+      const wrap = document.createElement("span");
+      wrap.append(small, body);
+      el.appendChild(wrap);
+    } else {
+      el.appendChild(body);
+    }
+    labelLayer.appendChild(el);
+    flowLabels.push({ el, x, y, align });
+  };
+  FLOW_CELL_ORDER.forEach((id) => {
+    const c = CELL_CATEGORIES.find((cat) => cat.id === id)!;
+    makeFlowLabel(c.label, FLOW_X.cell - 0.08, FLOW_CELL_Y[c.index], "right", c.color);
+  });
+  PATHWAYS.forEach((p, k) => makeFlowLabel(p.label, FLOW_X.path, FLOW_PATH_Y[k] + 0.17, "center", undefined, k === 0 ? "Pathway" : undefined));
+  DRUGS.forEach((d, k) => makeFlowLabel(d.label, FLOW_X.drug + 0.08, FLOW_DRUG_Y[k], "left", undefined, k === 0 ? "Drug" : undefined));
+
   /* ---------- state ---------- */
 
   let tumorScale = 1;
@@ -672,11 +841,21 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   let selected: PickId | null = null;
   let breathing = !options.reducedMotion;
   let view: ViewMode = "anatomy";
-  let morph = 0;
-  let morphFrom = 0;
-  let morphTo = 0;
-  let morphStart = 0;
+  // Two blend weights: anatomy↔atlas and (anything)↔flow.
+  type Blend = { value: number; from: number; to: number; start: number };
+  const atlasBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
+  const flowBlend: Blend = { value: 0, from: 0, to: 0, start: 0 };
   const MORPH_MS = options.reducedMotion ? 1 : 2600;
+  const startBlend = (blend: Blend, to: number) => {
+    blend.from = blend.value;
+    blend.to = to;
+    blend.start = performance.now();
+  };
+  const stepBlend = (blend: Blend, now: number) => {
+    const t = Math.min(1, (now - blend.start) / MORPH_MS);
+    blend.value = blend.from + (blend.to - blend.from) * t;
+  };
+  let animTime = 0;
   let fly: {
     fromPos: THREE.Vector3;
     fromTarget: THREE.Vector3;
@@ -705,6 +884,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
   refreshLabels();
 
   /* CPU mirror of the vertex shader, for hover, picking and markers. */
+  const flowScratch = new THREE.Vector3();
   const cellPosition = (i: number, out: THREE.Vector3) => {
     const j = i * 3;
     if (flagArr[i] > 0.5) {
@@ -714,15 +894,35 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       out.set(anat[j], anat[j + 1], anat[j + 2]);
     }
     out.sub(BREATH_CENTER).multiply(breath).add(BREATH_CENTER);
-    const t = Math.min(1, Math.max(0, morph * 1.6 - seedArr[i] * 0.6));
-    const e = t * t * (3 - 2 * t);
+    const stagger = (v: number) => {
+      const t = Math.min(1, Math.max(0, v * 1.6 - seedArr[i] * 0.6));
+      return t * t * (3 - 2 * t);
+    };
+    const e = stagger(atlasBlend.value);
     if (e > 0) {
       const src = isResistant(i) ? atlas2 : atlas;
       out.x += (src[j] - out.x) * e;
       out.y += (src[j + 1] - out.y) * e;
       out.z += (src[j + 2] - out.z) * e;
     }
+    const ef = stagger(flowBlend.value);
+    if (ef > 0) {
+      const [path, drug] = flowRoute(i);
+      flowPoint(effectiveCat(i), path, drug, seedArr[i], animTime, flowScratch);
+      out.lerp(flowScratch, ef);
+    }
     return out;
+  };
+
+  const flowRoute = (i: number): [number, number] =>
+    isResistant(i) ? [flowArr[i * 4 + 2], flowArr[i * 4 + 3]] : [flowArr[i * 4], flowArr[i * 4 + 1]];
+
+  /* Is the cell drawn at all right now (hidden type, or thinned out in the flow view)? */
+  const isDrawn = (i: number) => {
+    const cat = effectiveCat(i);
+    if (alpha[cat] < 0.001) return false;
+    if (flowBlend.value > 0.5 && fract(seedArr[i] * 3.17) >= FLOW_KEEP[CELL_CATEGORIES[cat].id]) return false;
+    return true;
   };
 
   const describe = (i: number): Omit<HoverInfo, "x" | "y"> => {
@@ -742,6 +942,10 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       if (Math.abs(x) < 0.3 && y > 0.85) where = "Trachea";
       else if (x < 0) where = y > 0.45 ? "Right upper lobe" : y > -0.1 && z > 0 ? "Right middle lobe" : "Right lower lobe";
       else where = y > 0.15 ? "Left upper lobe" : "Left lower lobe";
+    }
+    if (flowBlend.value > 0.5) {
+      const [path, drug] = flowRoute(i);
+      return { title, detail: `${PATHWAYS[path].label} → ${DRUGS[drug].label} · ${where}`, color: category.color };
     }
     return { title, detail: `${category.label} · ${where}`, color: category.color };
   };
@@ -784,7 +988,7 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     let best = -1;
     let bestScore = 81; // within 9 px
     for (let i = 0; i < N; i++) {
-      if (alpha[effectiveCat(i)] < 0.001) continue;
+      if (!isDrawn(i)) continue;
       cellPosition(i, proj).project(camera);
       if (proj.z > 1 || proj.z < -1) continue;
       const dx = ((proj.x + 1) / 2) * w - px;
@@ -860,17 +1064,20 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     const now = performance.now();
     const elapsed = (now - startTime) / 1000;
 
-    const mt = Math.min(1, (now - morphStart) / MORPH_MS);
-    morph = morphFrom + (morphTo - morphFrom) * mt;
+    stepBlend(atlasBlend, now);
+    stepBlend(flowBlend, now);
+    const away = Math.max(atlasBlend.value, flowBlend.value);
+    animTime = options.reducedMotion ? 0 : elapsed;
 
-    // Breathing: ~14 breaths per minute, fading out in the atlas view.
-    const b = breathing ? Math.sin((elapsed * Math.PI * 2) / 4.3) * (1 - morph) : 0;
+    // Breathing: ~14 breaths per minute, fading out away from the anatomy view.
+    const b = breathing ? Math.sin((elapsed * Math.PI * 2) / 4.3) * (1 - away) : 0;
     breath.set(1 + 0.022 * b, 1 + 0.03 * b, 1 + 0.022 * b);
 
     const pulse = options.reducedMotion ? 1 : 1 + 0.018 * Math.sin(elapsed * 2.6);
     const u = material.uniforms;
-    u.uTime.value = options.reducedMotion ? 0 : elapsed;
-    u.uMorph.value = morph;
+    u.uTime.value = animTime;
+    u.uMorph.value = atlasBlend.value;
+    u.uFlowMix.value = flowBlend.value;
     u.uResist.value = resistant;
     u.uTumorRadius.value = tumorRadius() * pulse;
     (u.uBreath.value as THREE.Vector3).copy(breath);
@@ -906,19 +1113,19 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     }
 
     // Selection reticle only makes sense in the anatomical view.
-    if (selected && morph < 0.5) {
+    if (selected && away < 0.5) {
       reticle.visible = true;
       reticle.position.copy(worldPositionOf(selected));
       reticle.quaternion.copy(camera.quaternion);
       const r = selected === "tumor" ? tumorRadius() * 2.2 : 0.09;
       reticle.scale.setScalar(r * (1 + 0.04 * Math.sin(elapsed * 3)));
-      reticleMaterial.opacity = 0.8 * (1 - morph * 2);
+      reticleMaterial.opacity = 0.8 * (1 - away * 2);
     } else {
       reticle.visible = false;
     }
 
     // Atlas labels follow their cluster centres.
-    const labelAlpha = Math.max(0, (morph - 0.6) / 0.4);
+    const labelAlpha = Math.max(0, (atlasBlend.value - 0.6) / 0.4) * (1 - flowBlend.value);
     const w = renderer.domElement.clientWidth;
     const h = renderer.domElement.clientHeight;
     for (const l of labels) {
@@ -930,6 +1137,18 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
       scratch.set(c.x, c.y + 0.1 + c.spread * 0.85, 0).project(camera);
       l.el.style.opacity = String(labelAlpha);
       l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px) translate(-50%, -50%)`;
+    }
+
+    const flowAlpha = Math.max(0, (flowBlend.value - 0.6) / 0.4);
+    for (const l of flowLabels) {
+      if (flowAlpha <= 0) {
+        l.el.style.opacity = "0";
+        continue;
+      }
+      scratch.set(l.x, l.y, 0).project(camera);
+      const shift = l.align === "right" ? "-100%" : l.align === "center" ? "-50%" : "0%";
+      l.el.style.opacity = String(flowAlpha);
+      l.el.style.transform = `translate(${((scratch.x + 1) / 2) * w}px, ${((1 - scratch.y) / 2) * h}px) translate(${shift}, -50%)`;
     }
 
     renderer.render(scene, camera);
@@ -947,15 +1166,18 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     setView(next) {
       if (next === view) return;
       view = next;
-      morphFrom = morph;
-      morphTo = next === "atlas" ? 1 : 0;
-      morphStart = performance.now();
-      if (next === "atlas") {
-        controls.autoRotate = false;
+      controls.autoRotate = next === "anatomy" && !options.reducedMotion;
+      if (next === "anatomy") {
+        startBlend(atlasBlend, 0);
+        startBlend(flowBlend, 0);
+        flyTo(homePosition(), HOME_TARGET.clone());
+      } else if (next === "atlas") {
+        startBlend(atlasBlend, 1);
+        startBlend(flowBlend, 0);
         flyTo(atlasPosition(), ATLAS_TARGET.clone());
       } else {
-        controls.autoRotate = !options.reducedMotion;
-        flyTo(homePosition(), HOME_TARGET.clone());
+        startBlend(flowBlend, 1);
+        flyTo(flowPosition(), ATLAS_TARGET.clone());
       }
     },
     setTumorState(scale, resistantFraction) {
@@ -971,13 +1193,17 @@ export function createLungScene(container: HTMLElement, options: LungSceneOption
     },
     focusTumor() {
       controls.autoRotate = false;
-      const target = view === "atlas" ? new THREE.Vector3(ATLAS.tumorSensitive.x, ATLAS.tumorSensitive.y, 0) : worldPositionOf("tumor");
+      let target: THREE.Vector3;
+      if (view === "atlas") target = new THREE.Vector3(ATLAS.tumorSensitive.x, ATLAS.tumorSensitive.y + 0.1, 0);
+      else if (view === "flow") target = new THREE.Vector3(FLOW_X.cell, FLOW_CELL_Y[CAT.tumorSensitive], 0);
+      else target = worldPositionOf("tumor");
       const offset = new THREE.Vector3(-0.55, 0.22, 1.0).normalize().multiplyScalar(0.7 + tumorScale * 0.35);
       flyTo(target.clone().add(offset), target);
     },
     resetView() {
       controls.autoRotate = !options.reducedMotion && view === "anatomy";
       if (view === "atlas") flyTo(atlasPosition(), ATLAS_TARGET.clone());
+      else if (view === "flow") flyTo(flowPosition(), ATLAS_TARGET.clone());
       else flyTo(homePosition(), HOME_TARGET.clone());
     },
     dispose() {

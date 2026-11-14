@@ -116,3 +116,59 @@ export const CELL_SUBTYPES: CellSubtype[] = [
 ];
 
 export const RESISTANT_SUBTYPE_LABEL = "Resistant tumour cell · e.g. MET amplification";
+
+/* ---------- Flows: cell type → signalling pathway → drug ---------- */
+
+export type FlowNode = { label: string; note: string };
+
+export const PATHWAYS: FlowNode[] = [
+  { label: "EGFR → RAS/MAPK", note: "The mutant EGFR drives growth through the RAS–RAF–MEK–ERK cascade." },
+  { label: "PI3K → AKT → mTOR", note: "Survival signalling downstream of EGFR and MET." },
+  { label: "MET bypass", note: "MET amplification lets resistant cells grow without EGFR." },
+  { label: "PD-1 / PD-L1 checkpoint", note: "Tumour and myeloid cells use PD-L1 to switch off T cells." },
+  { label: "VEGF angiogenesis", note: "Tumour-associated macrophages and endothelium build new vessels." },
+  { label: "EGFR in healthy epithelium", note: "Normal lung and airway cells also use EGFR, the source of side effects." },
+];
+
+export const DRUGS: FlowNode[] = [
+  { label: "Osimertinib", note: "Third-generation EGFR inhibitor, standard first-line for EGFR-mutant NSCLC." },
+  { label: "Amivantamab", note: "Bispecific antibody against EGFR and MET." },
+  { label: "MET inhibitors", note: "Savolitinib, capmatinib or tepotinib, used against MET-driven resistance." },
+  { label: "Pembrolizumab", note: "Anti-PD-1 immune checkpoint inhibitor." },
+  { label: "Anti-VEGF", note: "Bevacizumab or ramucirumab, which block new vessel growth." },
+];
+
+/* [pathway, drug, weight] routes for each cell type. Illustrative, not a treatment guide. */
+export const FLOW_ROUTES: Record<CellCategoryId, [number, number, number][]> = {
+  alveolar: [[5, 0, 1]],
+  airway: [[5, 0, 1]],
+  tumorSensitive: [
+    [0, 0, 0.55],
+    [1, 0, 0.25],
+    [0, 1, 0.2],
+  ],
+  tumorResistant: [
+    [2, 2, 0.5],
+    [2, 1, 0.3],
+    [1, 0, 0.2],
+  ],
+  lymphocyte: [[3, 3, 1]],
+  macrophage: [
+    [3, 3, 0.6],
+    [4, 4, 0.4],
+  ],
+  artery: [[4, 4, 1]],
+  vein: [[4, 4, 1]],
+};
+
+/* Share of each cell type drawn in the flow view, so 47k alveolar cells don't drown the rest. */
+export const FLOW_KEEP: Record<CellCategoryId, number> = {
+  alveolar: 0.12,
+  airway: 0.35,
+  tumorSensitive: 1,
+  tumorResistant: 1,
+  lymphocyte: 1,
+  macrophage: 1,
+  artery: 0.4,
+  vein: 0.35,
+};

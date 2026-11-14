@@ -54,13 +54,13 @@ const columns: { title: string; links: FooterLink[] }[] = [
 ];
 
 const linkClass =
-  "group flex min-h-[40px] items-center gap-1.5 text-xs text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]";
+  "group flex min-h-[40px] items-center gap-1.5 text-xs text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]";
 
 export default function Footer() {
   return (
     <footer
       aria-label="Site footer"
-      className="relative z-10 border-t border-teal-200/10 bg-[#04070a]/95 text-slate-300 backdrop-blur-xl"
+      className="relative z-10 border-t border-teal-200/10 bg-[#000000]/95 text-slate-300 backdrop-blur-xl"
     >
       <div
         aria-hidden="true"
@@ -72,7 +72,7 @@ export default function Footer() {
           <div className="space-y-4 lg:col-span-2">
             <Link
               href="/"
-              className="inline-flex min-h-[44px] items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#04070a]"
+              className="inline-flex min-h-[44px] items-center gap-3 rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8db2ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]"
               aria-label="BioLayers SI home"
             >
               <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px] border border-teal-200/25 bg-teal-300/[0.08] p-1.5 shadow-[0_0_15px_rgba(77,141,255,0.15)]">

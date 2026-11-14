@@ -43,7 +43,7 @@ export default function PartnersSection() {
     <section
       id="partners"
       aria-label="Partners and Alliances"
-      className="relative isolate overflow-hidden bg-[#04070a] px-6 py-24 sm:px-10 sm:py-28 lg:px-16"
+      className="relative isolate overflow-hidden bg-[#000000] px-6 py-24 sm:px-10 sm:py-28 lg:px-16"
     >
       {/* Ambient background glows */}
       <div

@@ -16,7 +16,6 @@ import "./globals.css";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import BackgroundVideo from "./components/BackgroundVideo";
 
 const spectral = Spectral({
   variable: "--font-spectral",
@@ -90,7 +89,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "dark",
-  themeColor: "#04070a",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
 };
@@ -109,7 +108,7 @@ export default function RootLayout({
         ${instrument.variable}
         ${plexMono.variable}
         h-full
-        bg-[#04070a]
+        bg-black
         antialiased
       `}
       suppressHydrationWarning
@@ -162,15 +161,13 @@ export default function RootLayout({
             focus-visible:ring-2
             focus-visible:ring-[#8db2ff]
             focus-visible:ring-offset-2
-            focus-visible:ring-offset-[#04070a]
+            focus-visible:ring-offset-[#000000]
           "
         >
           Skip to content
         </a>
 
         <Navbar />
-
-        <BackgroundVideo />
 
         <main
           id="main-content"
