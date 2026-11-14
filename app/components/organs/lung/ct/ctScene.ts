@@ -20,7 +20,7 @@ export type CtSceneHandle = {
   dispose: () => void;
 };
 
-const BASE_ALPHA: Record<CtClassId, number> = { airway: 0.85, parenchyma: 0.28, vessel: 0.8, bone: 0.35 };
+const BASE_ALPHA: Record<CtClassId, number> = { airway: 0.85, parenchyma: 0.28, vessel: 0.8, bone: 0.55 };
 const SIZE: Record<CtClassId, number> = { airway: 1.1, parenchyma: 0.85, vessel: 1.05, bone: 1.0 };
 
 export function createCtScene(container: HTMLElement, reducedMotion: boolean): CtSceneHandle {

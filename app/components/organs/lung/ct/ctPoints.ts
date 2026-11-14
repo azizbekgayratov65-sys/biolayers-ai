@@ -99,12 +99,15 @@ export function buildCtPointCloud(volume: {
 
   const outside = new Uint8Array(w * h);
   const counts: Record<CtClassId, number> = { airway: 0, parenchyma: 0, vessel: 0, bone: 0 };
+  const plane = w * h;
+  const S = new Int16Array(plane * D); // half-resolution HU
+  const internal = new Uint8Array(plane * D); // air inside the body
 
+  // Pass 1: downsample and find air inside the body, slice by slice.
   for (let z = 0; z < D; z++) {
     const base = z * W * H;
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
-        // Average the f×f block.
         let sum = 0;
         for (let dy = 0; dy < f; dy++) for (let dx = 0; dx < f; dx++) sum += hu[base + (y * f + dy) * W + x * f + dx];
         const v = sum / (f * f);
@@ -112,14 +115,57 @@ export function buildCtPointCloud(volume: {
         air[y * w + x] = v < -400 ? 1 : 0;
       }
     }
-    // Outside air: reachable from the border through air.
     flood((i) => air[i] === 1, outside);
-    // Lung field: not reachable from the border without crossing internal air.
-    flood((i) => !(air[i] === 1 && outside[i] === 0), reach);
+    const zo = z * plane;
+    for (let i = 0; i < plane; i++) {
+      S[zo + i] = sample[i];
+      internal[zo + i] = air[i] === 1 && outside[i] === 0 ? 1 : 0;
+    }
+  }
 
-    const zo = z * w * h;
-    for (let i = 0; i < w * h; i++) {
-      const v = sample[i];
+  // Pass 2: 3D connected components of internal air. The lungs and airways are
+  // the big ones; bowel and stomach gas form small separate pockets and are dropped.
+  const label = new Int32Array(plane * D);
+  const sizes: number[] = [0];
+  const queue = new Int32Array(plane * D);
+  for (let start = 0; start < internal.length; start++) {
+    if (!internal[start] || label[start]) continue;
+    const id = sizes.length;
+    let head = 0;
+    let tail = 0;
+    queue[tail++] = start;
+    label[start] = id;
+    while (head < tail) {
+      const i = queue[head++];
+      const x = i % w;
+      const y = Math.floor(i / w) % h;
+      const n0 = x > 0 ? i - 1 : -1;
+      const n1 = x < w - 1 ? i + 1 : -1;
+      const n2 = y > 0 ? i - w : -1;
+      const n3 = y < h - 1 ? i + w : -1;
+      const n4 = i >= plane ? i - plane : -1;
+      const n5 = i < plane * (D - 1) ? i + plane : -1;
+      for (const j of [n0, n1, n2, n3, n4, n5]) {
+        if (j >= 0 && internal[j] && !label[j]) {
+          label[j] = id;
+          queue[tail++] = j;
+        }
+      }
+    }
+    sizes.push(tail);
+  }
+  const largest = sizes.reduce((m, n) => (n > m ? n : m), 1);
+  const keepComponent = sizes.map((n) => n >= largest * 0.1);
+
+  // Pass 3: lung field and classes per slice.
+  const lungAir = new Uint8Array(plane);
+  for (let z = 0; z < D; z++) {
+    const zo = z * plane;
+    for (let i = 0; i < plane; i++) lungAir[i] = internal[zo + i] && keepComponent[label[zo + i]] ? 1 : 0;
+    // Lung field: not reachable from the border without crossing lung air.
+    flood((i) => lungAir[i] === 0, reach);
+    for (let i = 0; i < plane; i++) {
+      const v = S[zo + i];
       let c = -1;
       if (!reach[i]) {
         if (v < -960) c = 0;
