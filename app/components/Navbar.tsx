@@ -11,6 +11,7 @@ import {
   Dna,
   Binary,
   BookOpen,
+  Wind,
 } from "lucide-react";
 import {
   useEffect,
@@ -75,6 +76,14 @@ export type NavItem = {
 };
 
 const toolNavItems: NavItem[] = [
+  {
+    label: "Organ atlas",
+    href: "/organs",
+    path: "/organs",
+    category: "tools",
+    icon: <Wind className="h-4 w-4 text-rose-300" />,
+    description: "Living 3D organs with tumour, vessels and treatment over time",
+  },
   {
     label: "Cell atlas",
     href: "/cells",

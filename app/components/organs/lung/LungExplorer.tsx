@@ -1,0 +1,601 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Crosshair,
+  ExternalLink,
+  Info,
+  Layers,
+  Pause,
+  Play,
+  RotateCcw,
+  Wind,
+} from "lucide-react";
+
+import { AmbientGlow, Eyebrow } from "../../ui/Chrome";
+import { btnQuiet, btnSecondary, insetPanel, monoLabel, pageShell, panel, sectionLabel, textLink } from "../../ui/styles";
+import {
+  BASELINE_DIAMETER_MM,
+  MAX_MONTH,
+  SCENARIOS,
+  diameterSeries,
+  progressionMonth,
+  tumorStateAt,
+  type ScenarioId,
+  type TumorState,
+} from "./lungModel";
+import type { LayerId, LungSceneHandle, PickId } from "./lungScene";
+import { LYMPH_NODES, type LymphNodeInfo } from "./lungNodes";
+
+/* ---------- static content ---------- */
+
+const LAYERS: { id: LayerId; label: string; swatch: string; hint: string }[] = [
+  { id: "parenchyma", label: "Parenchyma", swatch: "bg-teal-300", hint: "Lung tissue and alveolar air spaces" },
+  { id: "airways", label: "Airways", swatch: "bg-emerald-400", hint: "Trachea, bronchi and bronchioles" },
+  { id: "vessels", label: "Vessels", swatch: "bg-rose-400", hint: "Pulmonary arteries (rose) and veins (violet)" },
+  { id: "tumor", label: "Tumour", swatch: "bg-amber-300", hint: "Primary lesion with spiculated margin" },
+  { id: "nodes", label: "Lymph nodes", swatch: "bg-sky-300", hint: "Hilar and mediastinal stations" },
+  { id: "tme", label: "Microenvironment", swatch: "bg-violet-400", hint: "Cancer cells, T cells and macrophages. Fly in to see them." },
+];
+
+const CASE = {
+  id: "BL-LUNG-0001",
+  summary: "62-year-old never-smoker, lung adenocarcinoma",
+  stage: "cT1c N1 M1b · stage IVA (AJCC 8th)",
+  primary: "Right upper lobe, spiculated solid nodule",
+  metastasis: "Single left adrenal metastasis (outside this view)",
+  biomarkers: [
+    { label: "EGFR", value: "Exon 19 deletion", tone: "text-amber-200" },
+    { label: "ALK", value: "Negative", tone: "text-slate-300" },
+    { label: "KRAS", value: "Wild type", tone: "text-slate-300" },
+    { label: "PD-L1 TPS", value: "5%", tone: "text-slate-300" },
+  ],
+};
+
+const PIPELINE: { step: string; title: string; body: string; status: "live" | "next" }[] = [
+  {
+    step: "01",
+    title: "Organ scene",
+    body: "Procedural lungs, airway and vessel trees, tumour, nodes and microenvironment, rendered live in the browser.",
+    status: "live",
+  },
+  {
+    step: "02",
+    title: "Real CT",
+    body: "Load chest CT from the public LIDC-IDRI collection on The Cancer Imaging Archive, which includes radiologist-annotated nodules.",
+    status: "next",
+  },
+  {
+    step: "03",
+    title: "Segmentation",
+    body: "TotalSegmentator (open source) separates lobes, airways and vessels; the meshes replace the procedural ones.",
+    status: "next",
+  },
+  {
+    step: "04",
+    title: "Molecular layers",
+    body: "Attach mutation, PD-L1 and pathology data per lesion, then link each lesion to its Cipher pathway map and the papers behind it.",
+    status: "next",
+  },
+];
+
+const PUBMED_QUERY = "https://pubmed.ncbi.nlm.nih.gov/?term=osimertinib+resistance+EGFR+exon+19+deletion";
+
+/* ---------- component ---------- */
+
+export default function LungExplorer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<LungSceneHandle | null>(null);
+
+  const [ready, setReady] = useState(false);
+  const [webglError, setWebglError] = useState(false);
+  const [layers, setLayers] = useState<Record<LayerId, boolean>>({
+    parenchyma: true,
+    airways: true,
+    vessels: true,
+    tumor: true,
+    nodes: true,
+    tme: true,
+  });
+  const [scenario, setScenario] = useState<ScenarioId>("osimertinib");
+  const [month, setMonth] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [breathing, setBreathing] = useState(true);
+  const [selected, setSelected] = useState<PickId>("tumor");
+  const [hover, setHover] = useState<{ label: string; x: number; y: number } | null>(null);
+
+  const tumor = useMemo(() => tumorStateAt(scenario, month), [scenario, month]);
+  const series = useMemo(() => diameterSeries(scenario), [scenario]);
+  const pdMonth = useMemo(() => progressionMonth(scenario), [scenario]);
+  const scenarioInfo = SCENARIOS.find((s) => s.id === scenario) ?? SCENARIOS[0];
+
+  /* Mount the three.js scene once. */
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let disposed = false;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    import("./lungScene")
+      .then(({ createLungScene }) => {
+        if (disposed) return;
+        try {
+          sceneRef.current = createLungScene(container, {
+            reducedMotion,
+            onPick: (id) => setSelected(id),
+            onHover: (h) => setHover(h),
+          });
+          setReady(true);
+        } catch (error) {
+          console.error("[BioLayers] WebGL scene failed to start", error);
+          setWebglError(true);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("[BioLayers] Could not load the lung scene", error);
+        setWebglError(true);
+      });
+
+    return () => {
+      disposed = true;
+      sceneRef.current?.dispose();
+      sceneRef.current = null;
+    };
+  }, []);
+
+  /* Keep the scene in step with React state. */
+  useEffect(() => {
+    sceneRef.current?.setTumorState(tumor.diameterMm / BASELINE_DIAMETER_MM, tumor.resistantFraction);
+  }, [ready, tumor]);
+
+  useEffect(() => {
+    sceneRef.current?.setSelected(selected);
+  }, [ready, selected]);
+
+  /* Timeline playback. Playback stops by itself at the last month. */
+  const isPlaying = playing && month < MAX_MONTH;
+  useEffect(() => {
+    if (!isPlaying) return;
+    const id = window.setInterval(() => {
+      setMonth((m) => Math.min(MAX_MONTH, Math.round((m + 0.25) * 100) / 100));
+    }, 110);
+    return () => window.clearInterval(id);
+  }, [isPlaying]);
+
+  const toggleLayer = (id: LayerId) => {
+    const next = !layers[id];
+    setLayers((prev) => ({ ...prev, [id]: next }));
+    sceneRef.current?.setLayerVisible(id, next);
+  };
+
+  const toggleBreathing = () => {
+    const next = !breathing;
+    setBreathing(next);
+    sceneRef.current?.setBreathing(next);
+  };
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      setPlaying(false);
+      return;
+    }
+    if (month >= MAX_MONTH) setMonth(0);
+    setPlaying(true);
+  };
+
+  const selectedNode: LymphNodeInfo | undefined = selected.startsWith("node:")
+    ? LYMPH_NODES.find((n) => `node:${n.station}` === selected)
+    : undefined;
+
+  return (
+    <div className="relative overflow-hidden">
+      <AmbientGlow />
+      <div className={`${pageShell} pt-28 pb-24 sm:pt-32`}>
+        {/* Header */}
+        <div className="max-w-3xl">
+          <Eyebrow icon={Wind}>Organ atlas · Lung</Eyebrow>
+          <h1 className="mt-5 font-serif text-4xl leading-tight text-white sm:text-5xl">
+            A living model of lung cancer
+          </h1>
+          <p className="mt-4 text-base leading-relaxed text-slate-300">
+            Turn the organ, peel back its layers and fly into the tumour to see the cells around it. Then move
+            through two years of treatment and watch a resistant clone take over.
+          </p>
+        </div>
+
+        <div
+          role="note"
+          className="mt-6 flex items-start gap-3 rounded-[14px] border border-amber-300/25 bg-amber-300/[0.06] px-4 py-3 text-sm text-amber-100/90"
+        >
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
+          <p>
+            Illustrative model built on a synthetic demo case. The anatomy is generated by code and the response
+            curves are a teaching model. This is not patient data and not for clinical use.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-12">
+          {/* Viewer */}
+          <section className={`${panel} relative overflow-hidden lg:col-span-8`} aria-label="3D lung viewer">
+            <div
+              ref={containerRef}
+              className="relative h-[460px] w-full cursor-grab sm:h-[580px]"
+              aria-label="Interactive 3D model of the lungs. Drag to rotate, scroll to zoom, click the tumour or a lymph node for details."
+              role="img"
+            />
+
+            {!ready && !webglError && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <span className={monoLabel}>Growing airways…</span>
+              </div>
+            )}
+            {webglError && (
+              <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-300">
+                This browser could not start WebGL, so the 3D model cannot be shown. Try a recent Chrome, Edge,
+                Firefox or Safari with hardware acceleration on.
+              </div>
+            )}
+
+            {hover && (
+              <div
+                className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-lg border border-white/10 bg-[#04070a]/90 px-2.5 py-1 text-xs font-semibold text-slate-100 shadow-lg"
+                style={{ left: hover.x, top: hover.y }}
+              >
+                {hover.label}
+              </div>
+            )}
+
+            {/* Layer chips */}
+            <div className="absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
+              <span className="mr-1 hidden items-center gap-1.5 sm:inline-flex">
+                <Layers className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
+                <span className={monoLabel}>Layers</span>
+              </span>
+              {LAYERS.map((layer) => (
+                <button
+                  key={layer.id}
+                  type="button"
+                  title={layer.hint}
+                  aria-pressed={layers[layer.id]}
+                  onClick={() => toggleLayer(layer.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-xl transition ${
+                    layers[layer.id]
+                      ? "border-white/20 bg-white/[0.08] text-slate-100"
+                      : "border-white/10 bg-black/30 text-slate-400 line-through"
+                  }`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${layer.swatch} ${layers[layer.id] ? "" : "opacity-30"}`} />
+                  {layer.label}
+                </button>
+              ))}
+            </div>
+
+            {/* View controls */}
+            <div className="absolute right-3 top-14 flex flex-col gap-1.5 sm:top-3">
+              <button type="button" className={btnQuiet} onClick={() => sceneRef.current?.focusTumor()}>
+                <Crosshair className="h-4 w-4" aria-hidden="true" /> Fly into tumour
+              </button>
+              <button type="button" className={btnQuiet} onClick={() => sceneRef.current?.resetView()}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" /> Whole organ
+              </button>
+              <button type="button" className={btnQuiet} aria-pressed={breathing} onClick={toggleBreathing}>
+                <Wind className="h-4 w-4" aria-hidden="true" /> {breathing ? "Breathing" : "Paused"}
+              </button>
+            </div>
+
+            {/* Timeline */}
+            <div className="border-t border-white/[0.06] bg-[#04070a]/60 px-4 py-4 backdrop-blur-xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={monoLabel}>Scenario</span>
+                {SCENARIOS.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    aria-pressed={scenario === s.id}
+                    onClick={() => setScenario(s.id)}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      scenario === s.id
+                        ? "border-emerald-300/60 bg-emerald-400/15 text-emerald-100"
+                        : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? "Pause timeline" : "Play timeline"}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-300/50 bg-emerald-400/15 text-emerald-100 transition hover:bg-emerald-400/25"
+                >
+                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </button>
+                <label className="flex flex-1 items-center gap-3">
+                  <span className="sr-only">Months since start of treatment</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={MAX_MONTH}
+                    step={0.25}
+                    value={month}
+                    onChange={(e) => {
+                      setPlaying(false);
+                      setMonth(Number(e.target.value));
+                    }}
+                    className="h-1.5 w-full cursor-pointer accent-emerald-400"
+                  />
+                </label>
+                <span className="w-24 shrink-0 text-right font-mono text-sm text-slate-200">
+                  Month {month.toFixed(month % 1 === 0 ? 0 : 1)}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Side panel */}
+          <aside className="flex flex-col gap-4 lg:col-span-4">
+            <TumorPanel tumor={tumor} scenarioDescription={scenarioInfo.description} pdMonth={pdMonth} />
+            <div className={`${panel} p-5`}>
+              <p className={sectionLabel}>Growth curve</p>
+              <DiameterChart series={series} month={month} pdMonth={pdMonth} />
+            </div>
+            {selectedNode ? (
+              <NodePanel node={selectedNode} onBack={() => setSelected("tumor")} />
+            ) : (
+              <CasePanel />
+            )}
+          </aside>
+        </div>
+
+        {/* Pipeline */}
+        <section className="mt-16">
+          <p className={sectionLabel}>From CT scan to living model</p>
+          <h2 className="mt-3 font-serif text-3xl text-white">Where this goes next</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PIPELINE.map((p) => (
+              <div key={p.step} className={`${panel} p-5`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs text-slate-400">{p.step}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                      p.status === "live" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/[0.06] text-slate-400"
+                    }`}
+                  >
+                    {p.status === "live" ? "Live" : "Next"}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-base font-semibold text-white">{p.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{p.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- panels ---------- */
+
+function TumorPanel({
+  tumor,
+  scenarioDescription,
+  pdMonth,
+}: {
+  tumor: TumorState;
+  scenarioDescription: string;
+  pdMonth: number | null;
+}) {
+  const recistTone =
+    tumor.recist === "Progressive disease"
+      ? "border-rose-400/40 bg-rose-400/10 text-rose-100"
+      : tumor.recist === "Partial response"
+        ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100"
+        : "border-white/15 bg-white/[0.05] text-slate-200";
+  const change = tumor.changeFromBaselinePct;
+
+  return (
+    <div className={`${panel} p-5`}>
+      <p className={sectionLabel}>Primary tumour</p>
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-4xl font-semibold text-white">
+            {tumor.diameterMm.toFixed(1)}
+            <span className="ml-1 text-base text-slate-400">mm</span>
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            {change === 0 ? "Baseline diameter" : `${change > 0 ? "+" : ""}${change.toFixed(0)}% from baseline`}
+          </p>
+        </div>
+        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${recistTone}`}>{tumor.recist}</span>
+      </div>
+
+      <div className="mt-4">
+        <div className="flex justify-between text-xs text-slate-400">
+          <span>Drug-resistant share of tumour</span>
+          <span className="font-mono text-slate-200">{(tumor.resistantFraction * 100).toFixed(0)}%</span>
+        </div>
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-rose-500"
+            style={{ width: `${Math.max(2, tumor.resistantFraction * 100)}%` }}
+          />
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm leading-relaxed text-slate-400">{scenarioDescription}</p>
+      {pdMonth !== null && (
+        <p className="mt-2 text-xs text-slate-500">Simplified RECIST reading turns progressive at month {pdMonth}.</p>
+      )}
+    </div>
+  );
+}
+
+function CasePanel() {
+  return (
+    <div className={`${panel} p-5`}>
+      <div className="flex items-center justify-between">
+        <p className={sectionLabel}>Demo case</p>
+        <span className="font-mono text-[10px] text-slate-500">{CASE.id} · synthetic</span>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-white">{CASE.summary}</p>
+      <dl className="mt-3 space-y-2 text-sm">
+        <div>
+          <dt className="text-xs text-slate-500">Stage</dt>
+          <dd className="text-slate-200">{CASE.stage}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-500">Primary</dt>
+          <dd className="text-slate-200">{CASE.primary}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-500">Metastasis</dt>
+          <dd className="text-slate-200">{CASE.metastasis}</dd>
+        </div>
+      </dl>
+      <div className={`${insetPanel} mt-4 grid grid-cols-2 gap-3 p-3`}>
+        {CASE.biomarkers.map((b) => (
+          <div key={b.label}>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{b.label}</p>
+            <p className={`text-sm font-semibold ${b.tone}`}>{b.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-col gap-2">
+        <Link href="/cipher" className={btnSecondary}>
+          EGFR pathway in Cipher <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+        <a href={PUBMED_QUERY} target="_blank" rel="noopener noreferrer" className={`${textLink} inline-flex items-center gap-1.5 text-sm`}>
+          Papers on osimertinib resistance <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function NodePanel({ node, onBack }: { node: LymphNodeInfo; onBack: () => void }) {
+  const suspicious = node.status === "suspicious";
+  return (
+    <div className={`${panel} p-5`}>
+      <p className={sectionLabel}>Lymph node · station {node.station}</p>
+      <p className="mt-3 text-lg font-semibold text-white">{node.name}</p>
+      <dl className="mt-3 space-y-2 text-sm">
+        <div>
+          <dt className="text-xs text-slate-500">Short axis</dt>
+          <dd className="font-mono text-slate-200">{node.shortAxisMm} mm</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-500">Reading</dt>
+          <dd className={suspicious ? "text-amber-200" : "text-slate-200"}>
+            {suspicious
+              ? "Enlarged (10 mm or more on short axis). Counts as N1 disease in this case."
+              : "Not enlarged."}
+          </dd>
+        </div>
+      </dl>
+      <button type="button" onClick={onBack} className={`${btnQuiet} mt-4 w-full`}>
+        Back to the case
+      </button>
+    </div>
+  );
+}
+
+/* ---------- chart ---------- */
+
+function DiameterChart({
+  series,
+  month,
+  pdMonth,
+}: {
+  series: { month: number; mm: number }[];
+  month: number;
+  pdMonth: number | null;
+}) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const W = 300;
+  const H = 140;
+  const pad = { l: 30, r: 8, t: 10, b: 22 };
+  const maxMm = Math.max(40, ...series.map((p) => p.mm));
+  const yMax = Math.ceil(maxMm / 10) * 10;
+  const x = (m: number) => pad.l + (m / MAX_MONTH) * (W - pad.l - pad.r);
+  const y = (mm: number) => pad.t + (1 - mm / yMax) * (H - pad.t - pad.b);
+  const path = series.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.month).toFixed(1)},${y(p.mm).toFixed(1)}`).join(" ");
+  const ticks = [0, yMax / 2, yMax];
+  const current = series.reduce((best, p) => (Math.abs(p.month - month) < Math.abs(best.month - month) ? p : best), series[0]);
+  const hovered = hoverIndex !== null ? series[hoverIndex] : null;
+
+  return (
+    <div className="relative mt-3">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        role="img"
+        aria-label="Tumour diameter in millimetres over 24 months for the selected scenario"
+        onMouseLeave={() => setHoverIndex(null)}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const px = ((e.clientX - rect.left) / rect.width) * W;
+          const m = ((px - pad.l) / (W - pad.l - pad.r)) * MAX_MONTH;
+          const idx = Math.round(Math.min(MAX_MONTH, Math.max(0, m)) / 0.5);
+          setHoverIndex(Math.min(series.length - 1, Math.max(0, idx)));
+        }}
+      >
+        {ticks.map((t) => (
+          <g key={t}>
+            <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="rgba(255,255,255,0.06)" />
+            <text x={pad.l - 6} y={y(t) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[9px]">
+              {t}
+            </text>
+          </g>
+        ))}
+        {[0, 6, 12, 18, 24].map((m) => (
+          <text key={m} x={x(m)} y={H - 6} textAnchor="middle" className="fill-slate-500 font-mono text-[9px]">
+            {m}
+          </text>
+        ))}
+        <line
+          x1={pad.l}
+          x2={W - pad.r}
+          y1={y(BASELINE_DIAMETER_MM)}
+          y2={y(BASELINE_DIAMETER_MM)}
+          stroke="rgba(148,163,184,0.35)"
+          strokeDasharray="3 3"
+        />
+        {pdMonth !== null && (
+          <line x1={x(pdMonth)} x2={x(pdMonth)} y1={pad.t} y2={H - pad.b} stroke="rgba(251,113,133,0.45)" strokeDasharray="2 3" />
+        )}
+        <path d={path} fill="none" stroke="#5eead4" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(current.month)} cy={y(current.mm)} r={4.5} fill="#5eead4" stroke="#04070a" strokeWidth={2} />
+        {hovered && (
+          <>
+            <line x1={x(hovered.month)} x2={x(hovered.month)} y1={pad.t} y2={H - pad.b} stroke="rgba(255,255,255,0.25)" />
+            <circle cx={x(hovered.month)} cy={y(hovered.mm)} r={4} fill="#e2e8f0" stroke="#04070a" strokeWidth={2} />
+          </>
+        )}
+      </svg>
+      {hovered && (
+        <div
+          className="pointer-events-none absolute top-0 -translate-x-1/2 rounded-md border border-white/10 bg-[#04070a]/95 px-2 py-1 font-mono text-[11px] text-slate-100"
+          style={{ left: `${(x(hovered.month) / W) * 100}%` }}
+        >
+          Month {hovered.month} · {hovered.mm.toFixed(1)} mm
+        </div>
+      )}
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
+        <span>Diameter, mm · months on x-axis</span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-0 w-4 border-t border-dashed border-slate-400/60" /> Baseline
+        </span>
+        {pdMonth !== null && (
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-0 w-4 border-t border-dashed border-rose-400/70" /> Progression
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
